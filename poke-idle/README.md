@@ -86,6 +86,14 @@ En la pestaña Gacha, bajo la incubadora: eliges un Pokémon **principal** (da l
 - **Shiny**: si alguno de los dos tiene la versión shiny, la probabilidad se duplica (y el huevo ya da +50 %).
 - Al eclosionar suma una copia y polvo como cualquier repetido, y una ventana compara tus genes con los de la cría para que elijas con cuáles te quedas.
 
+## App instalable (PWA) y avisos
+
+- **Instalar**: el navegador ofrece «Instalar app» (hay un enlace en la pantalla de inicio y otro en Ajustes). En iPhone: Compartir → Añadir a pantalla de inicio. Se abre a pantalla completa con su icono (`assets/pwa/`, generados con `tools/make_icons.py`).
+- **Sin conexión**: un service worker (`sw.js`) guarda el código y los datos (red primero, para recibir las novedades al instante, y copia guardada si no hay red) y los sprites de Pokémon según los vas viendo (caché primero, hasta 1 500). El primer arranque necesita conexión; después se puede jugar sin ella. La partida siempre se guarda en el propio navegador.
+- **Avisos** (Ajustes → Aplicación): al ocultar la pestaña o la app, el juego calcula cuándo eclosionará el próximo huevo y cuándo se llenará el límite offline y programa un aviso. Funcionan mientras el navegador mantenga la página viva en segundo plano; con la app totalmente cerrada no se pueden enviar sin un servidor de notificaciones push (no hay ninguno).
+- **Actualizar**: el service worker se renueva solo al cambiar `sw.js`; para forzar una limpieza basta con subir el número de `VERSION`. Hay que añadir cualquier archivo nuevo a la lista `SHELL`.
+- Solo funciona desde `https://` o `localhost` (no desde `file://`).
+
 ## Equipos guardados
 
 El botón **Equipos** de la pestaña Equipo guarda hasta 4 equipos con nombre y los carga con un toque (uno para farmear, otro para el evento o la Torre…). Se guardan las especies, así que sobreviven a evoluciones y a la Liga; si el equipo tiene más Pokémon que huecos, se cargan los primeros.

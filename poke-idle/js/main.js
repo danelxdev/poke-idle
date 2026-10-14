@@ -7,6 +7,7 @@
   Core.load();
   let pendingOffline = Core.S.started ? Core.offline() : null;
   UI.bind();
+  PWA.init();
   Arena.init($('#cv'), () => {
     const c = $('.cur.coins');
     c.classList.remove('pulse'); void c.offsetWidth; c.classList.add('pulse');
@@ -126,8 +127,8 @@
   // ---- guardado ----
   setInterval(() => { if (!hidden && Core.S.started) Core.save(); }, 5000);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { hidden = true; if (Core.S.started) Core.save(); }
-    else { hidden = false; last = performance.now(); if (Core.S.started && $('#scr-game').classList.contains('active')) welcome(); }
+    if (document.hidden) { hidden = true; if (Core.S.started) Core.save(); PWA.schedule(); }
+    else { hidden = false; PWA.clear(); last = performance.now(); if (Core.S.started && $('#scr-game').classList.contains('active')) welcome(); }
   });
   window.addEventListener('pagehide', () => { if (Core.S.started) Core.save(); });
 

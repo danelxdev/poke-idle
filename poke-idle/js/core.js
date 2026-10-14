@@ -56,7 +56,7 @@ const Core = (() => {
       stats: { kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, eventTiers: 0, bred: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, freePulls: 0, streak: 0, itemsFound: 0 },
       bossFails: {}, retryT: 0, pity: 0, pityE: 0, bannerLost: 0, freeDay: '', autoAcc: 0, inv: [], uid: 1, tutDone: false, last: Date.now(),
       daily: { day: '', streak: 0, claimed: true, quests: [] }, weekly: { week: -1, quests: [] }, ach: {},
-      buyMul: 1, settings: { music: 0.35, sfx: 0.6, nums: true, shake: true, bigNums: true, autoBoss: true },
+      buyMul: 1, settings: { music: 0.35, sfx: 0.6, nums: true, shake: true, bigNums: true, autoBoss: true, notify: false },
     };
   }
   function load() {
@@ -873,13 +873,26 @@ const Core = (() => {
   }
 
   // ---------------- tiempo fuera ----------------
+  const offlineCapSecs = () => (8 + 2 * S.shop.offline) * 3600;
+  function offlineKps() {
+    if (!S.team.length) return 0;
+    const s = isBoss(S.stage) ? S.stage - 1 : S.stage, ttk = enemyHp(s) / Math.max(1e-9, teamDps()) + 0.45;
+    return (1 / ttk) * (0.5 + 0.05 * S.shop.offline);
+  }
+  // segundos (sin conexión) hasta que eclosione el próximo huevo de una incubadora
+  function nextEggEta() {
+    const kps = offlineKps() * (evBonus('eggs') ? 2 : 1);
+    if (!kps) return null;
+    let best = null;
+    for (let i = 0; i < Math.min(S.inc, S.eggs.length); i++) { const e = S.eggs[i]; if (eggReady(e)) continue; const t = (eggNeed(e) - e.p) / kps; if (best === null || t < best) best = t; }
+    return best;
+  }
   function offline() {
     const secs = Math.min((8 + 2 * S.shop.offline) * 3600, (Date.now() - (S.last || Date.now())) / 1000);
     S.last = Date.now();
     if (secs < 60 || !S.team.length) return null;
     const s = isBoss(S.stage) ? S.stage - 1 : S.stage;
-    const ttk = enemyHp(s) / Math.max(1e-9, teamDps()) + 0.45;
-    const kills = Math.floor(secs / ttk * (0.5 + 0.05 * S.shop.offline));
+    const kills = Math.floor(secs * offlineKps());
     const coins = kills * killCoins(s);
     S.coins += coins; S.stats.coinsTotal += coins;
     eggProgress(kills);
@@ -909,7 +922,7 @@ const Core = (() => {
     natOf, natVal, ivSum, ivPct, ivGrade, ivBonus, trainIv, rerollNat, setNat, breedCost, breedOk, breedExpect, breed, applyGenes,
     eggNeed, eggReady, eggsReady, giveEgg, hatch, moveEgg, buyEgg, incCost, buyInc,
     typeEff, routeFoes, matchupAvg, bestTeam, strongTypes, setTeamList, savePreset, loadPreset, renamePreset,
-    refreshEvent, eventDaysLeft, eventFeat, eventPool, evBonus, towerUnlocked, towerSpec, eventSpec, chalReady, towerStarts, towerReward, startTower, startEvent, abortChal, claimEventTask, eventFreePull,
+    offlineCapSecs, nextEggEta, refreshEvent, eventDaysLeft, eventFeat, eventPool, evBonus, towerUnlocked, towerSpec, eventSpec, chalReady, towerStarts, towerReward, startTower, startEvent, abortChal, claimEventTask, eventFreePull,
     get ev() { return curEv; }, get chal() { return chal; }, inChal: () => !!chal,
   };
 })();

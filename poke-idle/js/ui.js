@@ -889,6 +889,8 @@ const UI = (() => {
     openModal(`<div class="set"><h2>${ico('gear', 32)} Ajustes</h2>
       <div class="sset"><h4>Sonido</h4>${slider('music', 'Música', 'sound')}${slider('sfx', 'Efectos', 'ticket')}</div>
       <div class="sset"><h4>Combate</h4>${tog('nums', 'Números de daño', 'Muestra el daño y las monedas sobre el enemigo')}${tog('bigNums', 'Números grandes', 'Más tamaño para verlos mejor')}${tog('shake', 'Temblor de pantalla', 'En críticos y jefes')}${tog('autoBoss', 'Reintentar jefes solo', 'Vuelve a retar al jefe cuando tu equipo tenga fuerza para vencerlo')}</div>
+      <div class="sset"><h4>Aplicación</h4>${PWA.standalone() ? '<p class="hint" style="margin:0 0 6px">Estás usando la app instalada.</p>' : PWA.canInstall() ? '<div class="row" style="margin:0 0 6px"><button class="btn primary" id="s-inst">Instalar la app</button></div>' : '<p class="hint" style="margin:0 0 6px">Puedes instalarla desde el menú del navegador («Instalar app»). En iPhone: Compartir → Añadir a pantalla de inicio.</p>'}
+        <div class="setrow"><span class="sl"><b>Avisos</b><small id="ntf-sub"></small></span><button class="tog" id="s-notif"><i></i></button></div></div>
       <div class="sset"><h4>Partida</h4><div class="row" style="margin:0"><button class="btn" id="s-exp">Exportar</button><button class="btn" id="s-imp">Importar</button><button class="btn danger" id="s-wipe">Borrar</button></div>
         <p class="hint" style="margin:8px 0 0">Tu partida se guarda sola en este navegador. Exporta un código para llevarla a otro dispositivo.</p></div>
       <div class="sset kofi-box"><h4>Apoya el proyecto</h4><p class="hint" style="margin:0 0 8px">PokéIdle es gratis y lo hace una sola persona. Si te gusta, puedes invitarme a un café.</p><a class="kofi" href="${KOFI_URL}" target="_blank" rel="noopener noreferrer">${ico('cup', 24)} Apoyar en Ko-fi</a></div>
@@ -901,6 +903,14 @@ const UI = (() => {
       sl.onpointerup = () => { sl.onpointermove = null; if (k === 'sfx') Audio8.play('coin'); Core.save(); };
     });
     $$('.tog').forEach(t => t.onclick = () => { st[t.dataset.k] = !st[t.dataset.k]; t.classList.toggle('on', st[t.dataset.k]); Audio8.play('click'); Core.save(); applySettings(); });
+    const paintNtf = () => {
+      const p = PWA.perm(), on = PWA.notifOn();
+      $('#s-notif').classList.toggle('on', on);
+      $('#ntf-sub').textContent = p === 'unsupported' ? 'Tu navegador no admite avisos' : p === 'denied' ? 'Bloqueados en el navegador' : 'Huevo listo y límite offline, con la app abierta en segundo plano';
+    };
+    paintNtf();
+    $('#s-notif').onclick = async () => { if (PWA.notifOn()) { st.notify = false; } else await PWA.enableNotify(); Audio8.play('click'); Core.save(); paintNtf(); };
+    if ($('#s-inst')) $('#s-inst').onclick = async () => { await PWA.install(); settings(); };
     $('#s-ok').onclick = () => { Core.save(); closeModal(); };
     $('#s-tut').onclick = () => { closeModal(); setTab('team'); tutStart(true); };
     $('#s-exp').onclick = () => {
