@@ -219,12 +219,59 @@ const UI = (() => {
       toast(r.cut ? 'Equipo cargado (solo caben ' + S().slots + ')' : 'Equipo cargado');
     });
   }
+  let brA = '', brB = '', brNat = 'a';
+  function nurseryHtml() {
+    const s = S();
+    if (brA && !s.mons[brA]) brA = '';
+    if (brB && !s.mons[brB]) brB = '';
+    const slot = (k, w, label) => {
+      const m = k && s.mons[k];
+      return `<button class="nsl ${m ? 'has' : ''}" data-act="breedpick" data-v="${w}">${m ? `<img src="${por(m.dex, m.shiny)}"><b>${DEX[m.dex].name}</b><small>${Math.round(Core.ivPct(m) * 100)}% IV · ${Core.natOf(m).name}</small>` : `<span class="plus">+</span><b>${label}</b>`}</button>`;
+    };
+    const ok = brA && brB && brA !== brB;
+    let h = `<h3>Guardería</h3><p class="hint">Dos Pokémon dejan un huevo con IVs heredados. El principal da la especie.</p><div class="nursery">${slot(brA, 'a', 'Principal')}<span class="heart">♥</span>${slot(brB, 'b', 'Pareja')}</div>`;
+    if (ok) {
+      const cost = Core.breedCost(brA, brB), full = s.eggs.length >= EGG_CAP, t = BREED_EGG[Math.max(Core.RAR[s.mons[brA].dex], Core.RAR[s.mons[brB].dex])];
+      h += `<div class="nfx"><div>Huevo: <b style="color:${EGGS[t].color}">${EGGS[t].name}</b> (${fmt(EGGS[t].need)} victorias)</div>
+        <div>IVs esperados de la cría: <b>≈ ${Math.round(Core.breedExpect(brA, brB) * 100)}%</b></div>
+        <div class="seg"><button data-act="breednat" data-v="a" class="${brNat === 'a' ? 'on' : ''}">Naturaleza: ${Core.natOf(s.mons[brA]).name}</button><button data-act="breednat" data-v="b" class="${brNat === 'b' ? 'on' : ''}">Naturaleza: ${Core.natOf(s.mons[brB]).name}</button></div>
+        <button class="btn primary buy" data-act="breed" data-cost="${cost}" data-cur="dust" ${full ? 'data-off="1"' : ''}><span>Criar</span><small>${ico('dust', 12)}${fmt(cost)}</small></button>${full ? '<small class="hint">Tienes el máximo de huevos</small>' : ''}</div>`;
+    }
+    return h;
+  }
+  function breedPickModal(which) {
+    openModal(`<h2>${which === 'a' ? 'Pokémon principal' : 'Pareja'}</h2>
+      <div class="pickbar"><input class="search" id="pk-q" placeholder="Buscar por nombre…" value="${pickQ.replace(/"/g, '')}" autocomplete="off"><button class="dd" id="pk-sort">${PICK_SORTS.find(x => x[0] === pickSort)[1]}<i></i></button></div>
+      <div class="pickwrap" id="pk-list">${pickList()}</div><div class="row"><button class="btn" id="pk-x">Cerrar</button></div>`);
+    $('#modal-box').classList.add('wide');
+    pickSlot = -1;
+    $('#pk-x').onclick = closeModal;
+    $('#pk-q').oninput = e => { pickQ = e.target.value; $('#pk-list').innerHTML = pickList(); };
+    $('#pk-sort').onclick = e => openDD(e.currentTarget, PICK_SORTS, pickSort, v => { pickSort = v; breedPickModal(which); });
+    $('#pk-list').onclick = e => {
+      const b = e.target.closest('.pk'); if (!b) return;
+      if (which === 'a') brA = b.dataset.k; else brB = b.dataset.k;
+      Audio8.play('swap'); closeModal(); sig = ''; refresh(true);
+    };
+  }
+  function genesModal(r) {
+    const m = S().mons[r.base], g = r.genes;
+    const line = (k, n) => `<div class="ivrow"><span>${IV_NAMES[k]}</span><b>${m.iv[k]}</b><span class="arrow">→</span><b style="color:${g.iv[k] > m.iv[k] ? '#7ff0a0' : g.iv[k] < m.iv[k] ? '#ff8c9a' : 'inherit'}">${g.iv[k]}</b></div>`;
+    const pct = iv => Math.round((iv.d + iv.s + iv.c) / (3 * IV_MAX) * 100);
+    const better = pct(g.iv) > pct(m.iv);
+    openModal(`<h2>Genes de la cría</h2><p class="hint">${DEX[m.dex].name} ya tenía copia: la cría sumó una copia y polvo. ¿Con qué genes te quedas?</p>
+      <div class="genes cmp"><div class="genehead"><span>Naturaleza</span><span>${Core.natOf(m).name} → <b>${NATURES[g.nat].name}</b></span></div>
+      ${['d', 's', 'c'].map(k => line(k)).join('')}<div class="genehead"><span>Potencial</span><b>${pct(m.iv)}% → ${pct(g.iv)}%</b></div></div>
+      <div class="row"><button class="btn ${better ? '' : 'primary'}" id="g-keep">Mantener los míos</button><button class="btn ${better ? 'primary' : ''}" id="g-take">Quedarme con los de la cría</button></div>`);
+    $('#g-keep').onclick = closeModal;
+    $('#g-take').onclick = () => { Core.applyGenes(String(r.base), g); Audio8.play('levelup'); Core.save(); closeModal(); refresh(true); };
+  }
   function incubatorHtml() {
     const s = S();
     let h = `<h3>Incubadora <small style="color:var(--dim)">${s.eggs.length}/${EGG_CAP} huevos</small></h3><div class="incubator">`;
     const eggRow = (e, i, active) => {
       const d = EGGS[e.t], ready = Core.eggReady(e);
-      return `<div class="eggrow ${ready ? 'ready' : ''}" style="--ec:${d.color}"><span class="eico">${ico('egg' + e.t, 40)}</span><div class="info"><b>${d.name}</b>
+      return `<div class="eggrow ${ready ? 'ready' : ''}" style="--ec:${d.color}"><span class="eico">${ico('egg' + e.t, 40)}</span><div class="info"><b>${d.name}${e.bred ? ' · ' + DEX[e.bred.base].name : ''}</b>
         ${active ? `<div class="bar egg" data-egg="${i}"><i></i><span></span></div>` : '<small>En espera: no avanza hasta que tenga incubadora</small>'}</div>
         ${ready ? `<button class="btn primary" data-act="hatch" data-v="${i}">¡Eclosionar!</button>` : active ? '' : `<button class="btn small" data-act="eggfront" data-v="${i}">Incubar</button>`}</div>`;
     };
@@ -299,12 +346,12 @@ const UI = (() => {
       },
     },
     gacha: {
-      sig: () => { const s = S(); return JSON.stringify([s.pity, s.pityE, s.bannerLost, Core.ticketPrice('poke'), Core.featuredEpic(), Core.featuredLegend(), Core.unlockedGens(), Core.freePullReady(), s.tk, Math.floor(s.dust / 10), s.eggs.map(e => [e.t, Core.eggReady(e)]), s.inc, Core.incCost()]); },
+      sig: () => { const s = S(); return JSON.stringify([s.pity, s.pityE, s.bannerLost, Core.ticketPrice('poke'), Core.featuredEpic(), Core.featuredLegend(), Core.unlockedGens(), Core.freePullReady(), s.tk, Math.floor(s.dust / 10), s.eggs.map(e => [e.t, Core.eggReady(e), e.bred ? e.bred.base : 0]), s.inc, Core.incCost(), brA, brB, brNat]); },
       html() {
         const s = S(), fe = Core.featuredEpic(), fl = Core.featuredLegend();
         let h = '<div class="tkgrid">' + Object.entries(TICKETS).map(([t, k]) => `<div class="tkbox" style="--tc:${k.color}">${ico(k.icon, 36)}<b>${s.tk[t]}</b><small>${k.name}</small>
           <button class="btn small primary" data-act="buytk" data-v="${t}" data-n="1" data-cost="${Core.ticketPrice(t)}" data-cur="${k.cur}">+1 ${ico(k.cur === 'gems' ? 'gem' : 'coin', 10)} ${fmt(Core.ticketPrice(t))}</button></div>`).join('') + '</div>';
-        h += incubatorHtml();
+        h += incubatorHtml() + nurseryHtml();
         if (Core.freePullReady()) h += `<div class="feat free"><span>${ico('tkPoke', 48)}</span><div><b>¡Tirada diaria gratis!</b><small>Una Poké Ball gratis cada día, sin ticket</small></div><button class="btn primary" data-act="freepull">Abrir</button></div>`;
         const feat = (d, tag) => `<div class="feat"><span class="tagx">${tag}</span><img src="${por(d)}"><div><b>${DEX[d].name}</b><small>${RARITY[Core.RAR[d]].name}</small><br>${typeTags(d)}</div></div>`;
         h += `<h3>Destacados de la Bola Destacada</h3>` + feat(fl, 'LEGENDARIO · SEMANA') + feat(fe, 'ÉPICO · 3 DÍAS');
@@ -459,7 +506,10 @@ const UI = (() => {
       case 'evtask': { const t = EVENT_TASKS[+v]; if (Core.claimEventTask(+v)) { Audio8.play('ticket'); toast('¡Recompensa! ' + rewText(t.rew)); } break; }
       case 'evfree': { const r = Core.eventFreePull(); if (r) { Core.save(); playReveal(r, BALLS.event.icon, TICKETS.super.icon, BALLS.event.name); return; } break; }
       case 'towerdd': openDD(el, Core.towerStarts().map(c => [c, 'Piso ' + c + (c === 1 ? '' : ' (guardián superado)')]), towerStart, val => { towerStart = +val; sig = ''; refresh(true); }); return;
-      case 'hatch': { const r = Core.hatch(+v); if (r) { Core.save(); playReveal([r], 'egg' + r.egg, 'egg' + r.egg, EGGS[r.egg].name); return; } break; }
+      case 'breedpick': breedPickModal(v); return;
+      case 'breednat': brNat = v; break;
+      case 'breed': { const e = Core.breed(brA, brB, brNat); if (e) { Audio8.play('item'); toast('¡Huevo en camino!'); brA = brB = ''; } else Audio8.play('error'); break; }
+      case 'hatch': { const r = Core.hatch(+v); if (r) { Core.save(); playReveal([r], 'egg' + r.egg, 'egg' + r.egg, EGGS[r.egg].name, r.genes ? () => genesModal(r) : null); return; } break; }
       case 'eggfront': Core.moveEgg(+v); Audio8.play('swap'); break;
       case 'buyegg': if (Core.buyEgg(+v)) Audio8.play('item'); else Audio8.play('error'); break;
       case 'buyinc': if (Core.buyInc()) { Audio8.play('levelup'); toast('¡Nueva incubadora!'); } else Audio8.play('error'); break;
@@ -646,7 +696,7 @@ const UI = (() => {
     Core.save();
     playReveal(res, BALLS[id].icon, TICKETS[free ? 'poke' : BALLS[id].ticket].icon, BALLS[id].name);
   }
-  function playReveal(res, ballIcon, tkIcon, title) {
+  function playReveal(res, ballIcon, tkIcon, title, onClose) {
     const n = res.length;
     autoFill();
     Core.save();
@@ -677,6 +727,7 @@ const UI = (() => {
           ${n === 1 ? '<canvas class="pv" id="pv" width="128" height="128"></canvas>' : `<img src="${por(r.base, r.shiny)}">`}
           <b>${DEX[r.base].name}</b><small>${RARITY[r.rar].name}</small>
           <span class="dup nat">${Core.natOf({ nat: r.nat }).name} · IV ${Math.round(Core.ivPct(m) * 100)}% · <span class="gr" style="background:${r.grade[2]}">${r.grade[1]}</span></span>
+          ${r.genes ? '<span class="dup" style="color:#ffd6f2">Cría: genes nuevos de ' + Math.round((r.genes.iv.d + r.genes.iv.s + r.genes.iv.c) / (3 * IV_MAX) * 100) + '% IV</span>' : ''}
           ${r.ivUp ? `<span class="dup" style="color:#7ff0a0">¡IVs mejorados! ${Math.round(r.ivUp.from * 100)}% → ${Math.round(r.ivUp.to * 100)}%</span>` : ''}
           ${r.isNew ? '' : `<span class="dup">+1 copia (${m.copies}/${m.stars < 5 ? STAR_COPIES[m.stars] : '★5'}) · +${r.dust} ${ico('dust', 12)}</span>`}
           ${r.newShiny && !r.isNew ? '<span class="dup" style="color:#fff3a8">¡Versión shiny desbloqueada!</span>' : ''}
@@ -689,7 +740,7 @@ const UI = (() => {
       if (n === 1) { pvT = 0; pvMon = { dex: res[0].dex, shiny: res[0].shiny }; Sprites.preload(res[0].dex, res[0].shiny); } else pvMon = null;
       if (best >= 5) { const st = $('#stage'); }
     }
-    function close() { pvMon = null; fx.classList.add('hidden'); fx.className = 'gacha-fx hidden'; Core.setPaused(false); refresh(true); }
+    function close() { pvMon = null; fx.classList.add('hidden'); fx.className = 'gacha-fx hidden'; Core.setPaused(false); refresh(true); if (onClose) onClose(); }
     fx.classList.remove('hidden');
   }
   // sprite animado en la tarjeta de una tirada única

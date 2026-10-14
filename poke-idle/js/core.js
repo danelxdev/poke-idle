@@ -53,7 +53,7 @@ const Core = (() => {
       medals: 0, mp: 0, badges: {}, bossFirst: {},
       sk: { rage: 0, gold: 0, lure: 0 },        // instante (tiempo jugado) en el que está lista cada habilidad
       skOn: { rage: 0, gold: 0, lure: 0 },      // instante en el que termina cada habilidad
-      stats: { kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, eventTiers: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, freePulls: 0, streak: 0, itemsFound: 0 },
+      stats: { kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, eventTiers: 0, bred: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, freePulls: 0, streak: 0, itemsFound: 0 },
       bossFails: {}, retryT: 0, pity: 0, pityE: 0, bannerLost: 0, freeDay: '', autoAcc: 0, inv: [], uid: 1, tutDone: false, last: Date.now(),
       daily: { day: '', streak: 0, claimed: true, quests: [] }, weekly: { week: -1, quests: [] }, ach: {},
       buyMul: 1, settings: { music: 0.35, sfx: 0.6, nums: true, shake: true, bigNums: true, autoBoss: true },
@@ -456,15 +456,15 @@ const Core = (() => {
   }
 
   // ---------------- Pokémon ----------------
-  function addMon(base, shiny, floor) {
+  function addMon(base, shiny, floor, bred) {
     let m = S.mons[base], isNew = false, dust = 0, newShiny = false, ivUp = null;
     const rar = RAR[base];
     floor = floor || 0;
-    if (!m) { m = S.mons[base] = { dex: base, lvl: 1 + 2 * S.shop.lvl, stars: 0, copies: 0, shiny: !!shiny, shinyOwned: !!shiny, nat: Math.floor(rnd() * NATURES.length), iv: rollIv(floor) }; isNew = true; }
+    if (!m) { m = S.mons[base] = { dex: base, lvl: 1 + 2 * S.shop.lvl, stars: 0, copies: 0, shiny: !!shiny, shinyOwned: !!shiny, nat: bred ? bred.nat : Math.floor(rnd() * NATURES.length), iv: bred ? Object.assign({}, bred.iv) : rollIv(floor) }; isNew = true; }
     else {
       m.copies++;
-      const cand = rollIv(floor);                           // cada copia repetida tira unos IVs nuevos y te quedas con los mejores
-      if (cand.d + cand.s + cand.c > ivSum(m)) { ivUp = { from: ivPct(m), to: (cand.d + cand.s + cand.c) / (3 * IV_MAX) }; m.iv = cand; S.stats.ivUps++; }
+      const cand = bred ? null : rollIv(floor);             // cada copia repetida tira unos IVs nuevos y te quedas con los mejores
+      if (cand && cand.d + cand.s + cand.c > ivSum(m)) { ivUp = { from: ivPct(m), to: (cand.d + cand.s + cand.c) / (3 * IV_MAX) }; m.iv = cand; S.stats.ivUps++; }
       dust = Math.round(DUST_GAIN[rar] * (1 + 0.1 * S.up.alch + 0.15 * S.shop.dust) * (shiny ? 2 : 1) * (evBonus('dust') ? 2 : 1));
       S.dust += dust; S.stats.dust += dust;
       if (shiny && !m.shinyOwned) { m.shinyOwned = true; m.shiny = true; newShiny = true; }
@@ -657,12 +657,42 @@ const Core = (() => {
     if (!e || !eggReady(e)) return null;
     S.eggs.splice(i, 1);
     const d = EGGS[e.t];
+    S.stats.hatched++;
+    if (e.bred) {
+      const b = e.bred, res = addMon(b.base, rnd() < shinyRate() * EGG_SHINY * (b.shiny ? 2 : 1), 0, b);
+      res.egg = e.t; res.genes = { iv: b.iv, nat: b.nat };
+      return res;
+    }
     const dex = pickFrom({}, rollRarity(d.rates));
     const res = addMon(dex, rnd() < shinyRate() * EGG_SHINY, d.floor);
-    S.stats.hatched++;
     res.egg = e.t;
     return res;
   }
+  // ---- guardería ----
+  const breedRar = (a, b) => Math.max(RAR[S.mons[a].dex], RAR[S.mons[b].dex]);
+  const breedCost = (a, b) => BREED_COST[breedRar(a, b)];
+  function breedOk(a, b) { return !!(a && b && a !== b && S.mons[a] && S.mons[b] && S.eggs.length < EGG_CAP && S.dust >= breedCost(a, b)); }
+  // IVs esperados de la cría (porcentaje medio)
+  function breedExpect(a, b) {
+    const A = S.mons[a].iv, B = S.mons[b].iv;
+    return ['d', 's', 'c'].reduce((x, k) => x + Math.min(IV_MAX, BREED_HI * Math.max(A[k], B[k]) + (1 - BREED_HI) * Math.min(A[k], B[k]) + BREED_BONUS / 2), 0) / (3 * IV_MAX);
+  }
+  function breed(a, b, natFrom) {
+    if (!breedOk(a, b)) return null;
+    const A = S.mons[a], B = S.mons[b], iv = {};
+    for (const k of ['d', 's', 'c']) {
+      const hi = Math.max(A.iv[k], B.iv[k]), lo = Math.min(A.iv[k], B.iv[k]);
+      iv[k] = Math.min(IV_MAX, (rnd() < BREED_HI ? hi : lo) + Math.floor(rnd() * (BREED_BONUS + 1)));
+    }
+    S.dust -= breedCost(a, b);
+    const e = giveEgg(BREED_EGG[breedRar(a, b)]);
+    if (!e) return null;
+    e.bred = { base: +a, iv, nat: natFrom === 'b' ? B.nat : A.nat, shiny: !!(A.shinyOwned || B.shinyOwned) };
+    S.stats.bred++;
+    return e;
+  }
+  // el huevo criado ya sumó copia y polvo; los genes nuevos solo se aplican si el jugador quiere
+  function applyGenes(key, genes) { const m = S.mons[key]; if (!m) return false; m.iv = Object.assign({}, genes.iv); m.nat = genes.nat; return true; }
   function moveEgg(i) { if (S.eggs[i] && i > 0) S.eggs.unshift(S.eggs.splice(i, 1)[0]); }
   function buyEgg(t) {
     const c = EGGS[t].gems;
@@ -876,7 +906,7 @@ const Core = (() => {
     featured, featuredEpic, featuredLegend, ballAvailable, ticketCost, ticketPrice, buyTicket, dustTicket, giveTickets, pull, freePull, freePullReady, toggleShiny, moveOf, tierOf, unsetTeam, setPaused, itemOf, itemVal, itemDmg, equip, unequip, recycleItem, recycleSpare, buyItem, synergies, synMult, teamItemSum,
     checkDaily, dailyReward, claimDaily, questProg, claimQuest, achStat, claimAch, pendingRewards, legendsOwned,
     prestige, offline, start,
-    natOf, natVal, ivSum, ivPct, ivGrade, ivBonus, trainIv, rerollNat, setNat,
+    natOf, natVal, ivSum, ivPct, ivGrade, ivBonus, trainIv, rerollNat, setNat, breedCost, breedOk, breedExpect, breed, applyGenes,
     eggNeed, eggReady, eggsReady, giveEgg, hatch, moveEgg, buyEgg, incCost, buyInc,
     typeEff, routeFoes, matchupAvg, bestTeam, strongTypes, setTeamList, savePreset, loadPreset, renamePreset,
     refreshEvent, eventDaysLeft, eventFeat, eventPool, evBonus, towerUnlocked, towerSpec, eventSpec, chalReady, towerStarts, towerReward, startTower, startEvent, abortChal, claimEventTask, eventFreePull,

@@ -77,6 +77,15 @@ Se desbloquea al llegar a la etapa 10. Los retos sustituyen al combate normal (u
 
 Con la simulación de equilibrio: en el techo de cada etapa un jugador supera sin problema hasta el piso ~14 y el jefe fácil/normal del evento; los pisos con regla, el jefe difícil y el extremo exigen preparar el equipo (tipos, objetos y mejoras).
 
+## Crianza (Guardería)
+
+En la pestaña Gacha, bajo la incubadora: eliges un Pokémon **principal** (da la especie) y una **pareja**, y pagas polvo estelar (30 / 60 / 120 / 300 / 700 según la rareza más alta de la pareja). Obtienes un huevo del tipo que corresponde a esa rareza (común hasta rareza 2, raro, épico o legendario), que tarda las mismas victorias que un huevo normal.
+
+- **IVs de la cría**: cada IV hereda el mejor de los dos padres con un 70 % (el peor con un 30 %) más un bonus aleatorio de 0 a 2. Repetir generaciones tiende a los IVs perfectos.
+- **Naturaleza**: eliges si hereda la del principal o la de la pareja.
+- **Shiny**: si alguno de los dos tiene la versión shiny, la probabilidad se duplica (y el huevo ya da +50 %).
+- Al eclosionar suma una copia y polvo como cualquier repetido, y una ventana compara tus genes con los de la cría para que elijas con cuáles te quedas.
+
 ## Equipos guardados
 
 El botón **Equipos** de la pestaña Equipo guarda hasta 4 equipos con nombre y los carga con un toque (uno para farmear, otro para el evento o la Torre…). Se guardan las especies, así que sobreviven a evoluciones y a la Liga; si el equipo tiene más Pokémon que huecos, se cargan los primeros.

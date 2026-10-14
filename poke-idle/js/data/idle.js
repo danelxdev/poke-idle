@@ -341,6 +341,7 @@ const ACH_DEFS = [
   ['ivUps', 'Mejores genes', 'up', [[1, 15], [25, 60], [100, 150]], n => 'Mejora los IVs de tus Pokémon ' + n + ' veces con copias repetidas'],
   ['tower', 'Escalador', 'crown', [[5, 25], [10, 50], [20, 100], [30, 150], [50, 300], [75, 500], [100, 800]], n => 'Llega al piso ' + n + ' de la Torre'],
   ['eventTiers', 'Cazador de eventos', 'trophy', [[1, 30], [10, 100], [40, 300], [100, 700]], n => 'Vence ' + n + ' veces al jefe de un evento'],
+  ['bred', 'Guardería', 'egg2', [[1, 20], [10, 60], [50, 150], [200, 400]], n => 'Cría ' + n + ' huevos en la guardería'],
   ['slots', 'Equipo completo', 'friends', [[3, 20], [6, 100]], n => 'Abre ' + n + ' huecos de equipo'],
 ];
 // Colecciones por tipo
@@ -489,3 +490,9 @@ const TOWER_RULES = [
   { id: 'fast', name: 'Contrarreloj', desc: 'La mitad de tiempo, pero un 45% menos de vida', hp: 0.55, time: 0.5 },
   { id: 'armor', name: 'Armadura', desc: '+60% de vida y +40% de tiempo', hp: 1.6, time: 1.4 },
 ];
+
+// ---------------- crianza ----------------
+// Dos Pokémon (el principal da la especie) dejan un huevo con IVs heredados. El huevo es del tipo que corresponde a la rareza más alta de la pareja.
+const BREED_COST = [0, 30, 60, 120, 300, 700];            // polvo estelar según la rareza más alta
+const BREED_EGG = [0, 0, 0, 1, 2, 3];                      // tipo de huevo (EGGS) según esa rareza
+const BREED_HI = 0.7, BREED_BONUS = 2;                     // probabilidad de heredar el mejor IV de los dos, y bonus aleatorio 0..2
