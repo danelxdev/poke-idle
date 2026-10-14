@@ -18,7 +18,7 @@
 <section id="scr-title" class="screen active">
   <div class="title-wrap">
     <h1 class="logo">Poké<span>Idle</span></h1>
-    <p class="tag">Tu equipo combate solo. Tú lo haces imparable.</p>
+    <p class="tag">Kanto, Johto y Hoenn: 386 Pokémon, 46 rutas y un gacha enorme</p>
     <div id="parade" class="parade"></div>
     <button class="btn big primary" id="btn-start">Jugar</button>
     <p class="fine">Proyecto de fan sin ánimo de lucro · Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Pokémon © Nintendo/Creatures/GAME FREAK · <a href="CREDITS.md" target="_blank">Créditos</a></p>
@@ -28,7 +28,7 @@
 <section id="scr-starter" class="screen">
   <div class="panel center-panel">
     <h2>Elige a tu primer Pokémon</h2>
-    <p class="sub">Combatirá solo mientras tú le subes de nivel. Los demás los conseguirás en las Poké Balls.</p>
+    <p class="sub">Combatirá solo mientras tú le subes de nivel. Los demás los conseguirás en las Poké Balls y capturándolos por las rutas.</p>
     <div id="starters" class="starter-grid"></div>
   </div>
 </section>
@@ -38,12 +38,14 @@
     <div class="logo tiny">Poké<span>Idle</span></div>
     <div class="cur coins" title="Monedas"><span id="i-coin"></span><b id="coins">0</b><small id="cps"></small></div>
     <div class="cur gems" title="Gemas"><span id="i-gem"></span><b id="gems">0</b></div>
+    <div class="cur dust" title="Polvo estelar: canjéalo por Pokémon en la Pokédex"><span id="i-dust"></span><b id="dust">0</b></div>
     <button class="icobtn" id="btn-settings" title="Ajustes"></button>
   </header>
   <main class="layout">
     <div class="arena-wrap">
       <div class="arena" id="arena">
         <canvas id="cv"></canvas>
+        <button class="mapbtn" id="btn-map" title="Mapa"></button>
         <div class="a-top">
           <button class="st-arrow" id="st-prev">‹</button>
           <div class="st-mid"><b id="route-name"></b><span id="stage-label"></span><div class="pips" id="pips"></div></div>
@@ -51,6 +53,7 @@
         </div>
         <div class="enemy-box" id="enemy-box"><b id="enemy-name"></b><div class="bar hp"><i id="enemy-hp"></i><span id="enemy-hptxt"></span></div><div class="bar timer hidden" id="boss-timer"><i id="boss-t"></i></div></div>
         <button class="btn primary boss-btn hidden" id="btn-boss">¡Reta al jefe!</button>
+        <div class="skills" id="skills"></div>
         <div class="dps" id="dps"></div>
         <div class="tap-hint" id="tap-hint">¡Toca para atacar!</div>
       </div>

@@ -176,7 +176,8 @@ const Arena = (() => {
   }
 
   function drawEnemy(e, dying) {
-    const sc = e.boss ? 2 : 1;
+    const an0 = Core.DEX[e.dex].anim, hh = (an0.idle || an0.walk).h;
+    const sc = e.boss ? Math.min(BOSS_TIER[e.tier].scale, Math.max(0.8, 76 / hh)) : Math.min(1, Math.max(0.6, 62 / hh));
     const slide = enemyIn > 0 ? enemyIn / 0.45 : 0;
     const x = EX + slide * 90, y = EY;
     shadow(x, y + 1, 8 * sc);
@@ -184,6 +185,7 @@ const Arena = (() => {
     if (dying) { alpha = Math.max(0, enemyDie.t / 0.5); an = 'hurt'; at = 0.1; }
     else if (an !== 'idle' && an !== 'walk' && at > Sprites.animLen(e.dex, an)) { an = 'idle'; at = t; }
     else if (an === 'walk' && slide === 0) { an = 'idle'; at = t; }
+    if (e.boss && e.tier >= 3) { ctx.globalAlpha = 0.16 + 0.08 * Math.sin(t * 3); ctx.fillStyle = e.tier >= 5 ? '#ff5f6d' : e.tier === 4 ? '#c47bff' : '#ffd23f'; ctx.beginPath(); ctx.ellipse(x, y - 4, 26 * sc / 2, 12 * sc / 2, 0, 0, 6.3); ctx.fill(); ctx.globalAlpha = 1; }
     if (e.golden) { ctx.globalAlpha = 0.3 + 0.15 * Math.sin(t * 6); ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.arc(x, y - 12, 18, 0, 6.3); ctx.fill(); ctx.globalAlpha = 1; }
     Sprites.draw(ctx, e.dex, !!e.golden, an, Math.PI, at, x, y - (dying ? (1 - alpha) * 8 : 0), sc, { alpha, flash: enemyFlash > 0 && !dying });
   }

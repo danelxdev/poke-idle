@@ -32,11 +32,16 @@
   });
   Core.on('bossWin', e => {
     const r = ROUTES[Core.route(e.stage) % ROUTES.length];
-    Audio8.play('win');
-    UI.banner('¡Has vencido a ' + r.boss.who + '!', e.stage <= 80 ? 'Medalla de gimnasio: +5% de daño' : r.boss.title + ' derrotado', '#ffd23f');
+    Audio8.play(e.tier >= 4 ? 'legend' : 'win');
+    UI.banner('¡Has vencido a ' + r.boss.who + '!', e.tier === 1 ? 'Medalla de gimnasio: +3% de daño' : r.boss.title + ' derrotado', '#ffd23f');
   });
   Core.on('bossFail', () => { Audio8.play('death'); UI.banner('¡El jefe era demasiado fuerte!', 'Sube de nivel a tu equipo y vuelve a intentarlo', '#ff5050'); });
-  Core.on('stage', s => { Audio8.music(Core.isBoss(s) ? 'boss' : 'battle'); if (Core.isBoss(s)) { const r = Core.routeData(s); UI.banner(r.boss.who + ' te desafía', r.boss.title + ' · 30 segundos para vencerle', '#ff8040'); } });
+  Core.on('stage', s => {
+    Audio8.music(Core.isBoss(s) ? 'boss' : 'battle');
+    const r = Core.routeData(s);
+    if (Core.isBoss(s)) UI.banner(r.boss.who + ' te desafía', r.boss.title + ' · ' + Core.bossTime(s) + ' segundos para vencerle', '#ff8040');
+    else if (s % 10 === 1) UI.banner(r.name, REGIONS[Core.regionOf(s)].name + (Core.loopOf(s) ? ' · ciclo +' + Core.loopOf(s) : ''), '#9fe0ff');
+  });
   Core.on('spawn', e => { if (e.boss) Audio8.play('boss'); });
   Core.on('hit', h => { const n = performance.now(); if (n - lastHitSfx > 70) { lastHitSfx = n; Audio8.play('hit'); } });
 

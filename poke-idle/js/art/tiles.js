@@ -70,6 +70,22 @@ const Tiles = (() => {
       leaf: '#5a4a6a', trunk: '#3a2f45', flowers: ['#9a8ad0', '#5fe0c0', '#c9cfdc'], grass: '#5a5470', rock: '#6a6680' },
     { name: 'Cueva Celeste', floor: '#363a5e', wall: '#2a2a58', liquid: 'lava', liq: '#7b5cff', foam: '#c9a6ff', prop: 'crystal',
       leaf: '#b39cff', trunk: '#2a2a5a', flowers: ['#7b5cff', '#ffd23f', '#ffffff'], grass: '#5a5a9a', rock: '#5a5a8a' },
+    { name: 'Desierto', floor: '#c9a867', wall: '#a07a48', liquid: 'water', liq: '#3ba6a0', foam: '#c8f4e8', prop: 'tomb',
+      leaf: '#7a9a3a', trunk: '#8a6a3a', flowers: ['#ff9a5a', '#ffe38a', '#e8785a'], grass: '#a8a050', rock: '#a08a68', dirt: '#b08a50' },
+    { name: 'Nieve', floor: '#dce8f4', wall: '#7a98c0', liquid: 'water', liq: '#6aa8e0', foam: '#ffffff', prop: 'crystal',
+      leaf: '#d8f4ff', trunk: '#8aa8c8', flowers: ['#ffffff', '#b8e0ff', '#ffc8e8'], grass: '#b8d0e0', rock: '#9ab0c8', dirt: '#c0d0e0' },
+    { name: 'Playa', floor: '#e4d29a', wall: '#6a8a9a', liquid: 'water', liq: '#2fb0e0', foam: '#f4ffff', prop: 'tree',
+      leaf: '#3aa84a', trunk: '#8a5a32', flowers: ['#ff7a9a', '#ffe14d', '#ffffff'], grass: '#7ab050', rock: '#9a9a8a', dirt: '#d0b878' },
+    { name: 'Selva', floor: '#2f6a3a', wall: '#2a4a2e', liquid: 'poison', liq: '#4a8a4a', foam: '#b8f0a0', prop: 'tree',
+      leaf: '#2a8a3a', trunk: '#4a3220', flowers: ['#ff5a8a', '#ffd23f', '#a8f0ff'], grass: '#3a9a3a', rock: '#5a6a58', dirt: '#5a4a2a' },
+    { name: 'Volcán', floor: '#4a3a3a', wall: '#2e2226', liquid: 'lava', liq: '#ff6a1f', foam: '#ffd070', prop: 'crystal',
+      leaf: '#ff8a3a', trunk: '#3a2a2a', flowers: ['#ff5a2a', '#ffb22e', '#ffe08a'], grass: '#6a4a3a', rock: '#6a5a58', dirt: '#3a2a28' },
+    { name: 'Cielo', floor: '#9ab8e8', wall: '#5a78b8', liquid: 'water', liq: '#7ab8ff', foam: '#ffffff', prop: 'crystal',
+      leaf: '#ffffff', trunk: '#8aa8d8', flowers: ['#ffffff', '#ffe38a', '#ffb8e0'], grass: '#8ac8e0', rock: '#a8b8d8', dirt: '#b0c4e4' },
+    { name: 'Pradera', floor: '#6fb858', wall: '#4a7a3a', liquid: 'water', liq: '#4a9ae0', foam: '#d8f4ff', prop: 'tree',
+      leaf: '#4aaa3a', trunk: '#6a4a2a', flowers: ['#ff9ac0', '#ffe14d', '#ffffff'], grass: '#5ab848', rock: '#8a9088', dirt: '#a08a52' },
+    { name: 'Ciudad', floor: '#6a6e7c', wall: '#3a3e50', liquid: 'spark', liq: '#4a7ae0', foam: '#b8d8ff', prop: 'pylon',
+      leaf: '#8ab8ff', trunk: '#5a6070', flowers: ['#ffd23f', '#7fd0ff', '#ffffff'], grass: '#7a8a70', rock: '#8a92a0' },
   ];
   function makeBiome(th) {
     const f = th.floor, w = th.wall, L = th.liq, D = th.dirt || shade(f, -0.16);

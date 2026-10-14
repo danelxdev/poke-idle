@@ -159,3 +159,238 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #149 Dragonite: AlexGroeger, CHUNSOFT, Deeshura, Emboarger, Prismatic, SethY
 - #150 Mewtwo: Anonymous, CHUNSOFT, Cloudy, El_Pangoro_Parse, JFain, Noo, baronessfaron
 - #151 Mew: Anonymous, CHUNSOFT, Emboarger, G〜, JFain, baronessfaron
+- #152 Chikorita: CHUNSOFT, Moo, Morei, baronessfaron, lokatts
+- #153 Bayleef: CHUNSOFT, C_Pariah, Emmuffin, silverfox88
+- #154 Meganium: 0palite, CHUNSOFT, Deeshura
+- #155 Cyndaquil: CHUNSOFT, Moo, Morei, lokatts
+- #156 Quilava: CHUNSOFT, C_Pariah, JFain, Morei, lokatts
+- #157 Typhlosion: 0palite, CHUNSOFT, Emmuffin, shimx, ◥θ┴θ◤
+- #158 Totodile: CHUNSOFT, Moo, Morei
+- #159 Croconaw: Audino, CHUNSOFT, C_Pariah, Morei
+- #160 Feraligatr: Audino, CHUNSOFT, Morei, Noo, Tacocoa
+- #161 Sentret: CHUNSOFT, Deleca7755, Emmuffin, Lovi, Neat_Neato
+- #162 Furret: Anonymous, CHUNSOFT, Neat_Neato, RelicCipher, Tacocoa
+- #163 Hoothoot: CHUNSOFT, JFain, Lovi, Noo
+- #164 Noctowl: CHUNSOFT, Emmuffin, G〜, Lovi, Magu, Noo, Pencil
+- #165 Ledyba: CHUNSOFT, JFain, Morei, Pokejavi., Tacocoa
+- #166 Ledian: CHUNSOFT, JFain, Morei, Tacocoa
+- #167 Spinarak: CHUNSOFT, Emmuffin, JFain
+- #168 Ariados: CHUNSOFT, G〜, Prismatic
+- #169 Crobat: <ElGian>, CHUNSOFT, Chi, Emmuffin
+- #170 Chinchou: Anonymous, CHUNSOFT, JFain, Noo, Prismatic
+- #171 Lanturn: <@!571847167489343507>, Anonymous, CHUNSOFT, JFain, Prismatic
+- #172 Pichu: CHUNSOFT, C_Pariah, Lovi, Spikey-Valentine
+- #173 Cleffa: Anonymous, CHUNSOFT, Deleca7755, JFain, baronessfaron
+- #174 Igglybuff: Anonymous, CHUNSOFT, Gust
+- #175 Togepi: CHUNSOFT, JFain, RaoKurai, ShyStarryRain, baronessfaron
+- #176 Togetic: CHUNSOFT, Emmuffin, RaoKurai
+- #177 Natu: CHUNSOFT, El_Pangoro_Parse, Hanbei, JFain, Lovi, Morei
+- #178 Xatu: CHUNSOFT, Lovi, Morei, Top_Kec
+- #179 Mareep: Anonymous, CHUNSOFT, Emmuffin, Felis-Licht, Morei, silverfox88
+- #180 Flaaffy: <@!436940337865293834>, Anonymous, CHUNSOFT, Emmuffin, Morei
+- #181 Ampharos: Anonymous, CHUNSOFT, Emmuffin, Noo, Soulja
+- #182 Bellossom: CHUNSOFT, Morei, Tacocoa, gromchurch
+- #183 Marill: CHUNSOFT, Fearless-Quit, JFain, Jarleypeño, Morei, Tacocoa
+- #184 Azumarill: CHUNSOFT, Emmuffin, Lovi, Noo, ShyStarryRain
+- #185 Sudowoodo: <@!589906152708505648>, CHUNSOFT, Morei, Noo, Prismatic
+- #186 Politoed: CHUNSOFT, Caitemis, Emmuffin, Tacocoa
+- #187 Hoppip: CHUNSOFT, JFain, Morei, Prismatic, Reppamon, bwappi
+- #188 Skiploom: Anonymous, CHUNSOFT, Emmuffin, Morei
+- #189 Jumpluff: Anonymous, CHUNSOFT, Deleca7755, Emmuffin
+- #190 Aipom: CHUNSOFT, JFain, Lovi, Morei, Noo, Prismatic, baronessfaron
+- #191 Sunkern: CHUNSOFT, Emboarger, MeepTheMareep02, Tacocoa, Top_Kec
+- #192 Sunflora: CHUNSOFT, Gust, Tacocoa
+- #193 Yanma: CHUNSOFT, JFain, Moo, Noo
+- #194 Wooper: Anon, Anonymous, CHUNSOFT, Caitemis, Emboarger, Emmuffin, Prismatic, ShyStarryRain, Uni
+- #195 Quagsire: Anonymous, CHUNSOFT, Emmuffin
+- #196 Espeon: 0palite, CHUNSOFT, Lovi, Morei, Noo, baronessfaron
+- #197 Umbreon: CHUNSOFT, Emmuffin, Prismatic
+- #198 Murkrow: CHUNSOFT, Caitemis, Emmuffin, Morei, Scizivire, Smalusion, baronessfaron
+- #199 Slowking: CHUNSOFT, Emmuffin, Lovi, Moo
+- #200 Misdreavus: CHUNSOFT, Emboarger, Emmuffin, Morei, RoyalRust
+- #201 Unown: CHUNSOFT, Emmuffin, Magu, Tacocoa
+- #202 Wobbuffet: CHUNSOFT, Gust, Morei, Noo, Tacocoa, Tainted#3886
+- #203 Girafarig: CHUNSOFT, Deeshura, Emmuffin, JFain, Morei, Prismatic
+- #204 Pineco: CHUNSOFT, JFain, Tacocoa
+- #205 Forretress: CHUNSOFT, G〜, Tacocoa
+- #206 Dunsparce: CHUNSOFT, Caitemis, G〜, Hanbei, JustAGunk, Morei
+- #207 Gligar: CHUNSOFT, JFain, Lovi, NeroIntruder, Prismatic
+- #208 Steelix: CHUNSOFT, Lovi
+- #209 Snubbull: CHUNSOFT, Chi, Emmuffin, Gust, Morei
+- #210 Granbull: CHUNSOFT, Chi
+- #211 Qwilfish: CHUNSOFT, Prismatic, SilverDeoxys563, brookriver
+- #212 Scizor: Anonymous, CHUNSOFT, Emboarger, Pokejavi.
+- #213 Shuckle: Anonymous, CHUNSOFT, Emmuffin, Noo
+- #214 Heracross: Anonymous, CHUNSOFT, JFain, Morei, Prismatic
+- #215 Sneasel: CHUNSOFT, Emboarger, Grimlin, JFain, Lovi, Morei, cosmosully
+- #216 Teddiursa: CHUNSOFT, El_Pangoro_Parse, Emmuffin, Gust, PhillipsYoung
+- #217 Ursaring: CHUNSOFT, El_Pangoro_Parse, G〜, Morei, PhillipsYoung, Tainted#3886
+- #218 Slugma: CHUNSOFT, Chi, JFain, Morei, Prismatic, ShyStarryRain
+- #219 Magcargo: CHUNSOFT, JFain, Lovi, Morei, Prismatic
+- #220 Swinub: CHUNSOFT, Caitemis, JFain, Morei, Tacocoa
+- #221 Piloswine: CHUNSOFT, Emmuffin, Scizivire
+- #222 Corsola: <@!195280695009083392>, CHUNSOFT, Emmuffin, Fearless-Quit, Morei, Noo, Tacocoa
+- #223 Remoraid: Avery, CHUNSOFT, Caitemis, JFain, Morei
+- #224 Octillery: CHUNSOFT, Emmuffin, Morei, Top_Kec
+- #225 Delibird: CHUNSOFT, C_Pariah, FlowerSnek, G〜, Lovi, Morei
+- #226 Mantine: CHUNSOFT, Emmuffin, Prismatic
+- #227 Skarmory: Anonymous, CHUNSOFT, Morei, Noo
+- #228 Houndour: Anonymous, CHUNSOFT, Gust, JFain, Morei, ShyStarryRain
+- #229 Houndoom: <@!967585139485999154>, CHUNSOFT, Emmuffin, Morei
+- #230 Kingdra: CHUNSOFT, Chi, Emmuffin, Tacocoa
+- #231 Phanpy: CHUNSOFT, Prismatic, ShyStarryRain
+- #232 Donphan: CHUNSOFT, Emboarger, Emmuffin, G〜, Lovi
+- #233 Porygon2: Blanca, CHUNSOFT, Moo, bwappi
+- #234 Stantler: CHUNSOFT, Emmuffin, G〜
+- #235 Smeargle: Anonymous, CHUNSOFT, Emmuffin, Fearless-Quit, Tacocoa
+- #236 Tyrogue: CHUNSOFT, Caitemis, Emmuffin, PhillipsYoung, Prismatic
+- #237 Hitmontop: CHUNSOFT, Noo, Prismatic
+- #238 Smoochum: CHUNSOFT, Gust, Lovi, Morei, baronessfaron
+- #239 Elekid: Angels-Snack, CHUNSOFT, G〜, Morei
+- #240 Magby: CHUNSOFT, El_Pangoro_Parse, Emboarger, JFain, Lovi
+- #241 Miltank: CHUNSOFT, Emboarger, Lovi, Vex
+- #242 Blissey: CHUNSOFT, JFain, Lovi, Morei
+- #243 Raikou: CHUNSOFT, Chi, Emmuffin, programmedsleepstate
+- #244 Entei: CHUNSOFT, Emmuffin, G〜, Top_Kec
+- #245 Suicune: CHUNSOFT, Emmuffin, Lovi
+- #246 Larvitar: CHUNSOFT, Emmuffin, JFain, Lovi
+- #247 Pupitar: CHUNSOFT, Lovi, Tacocoa
+- #248 Tyranitar: CHUNSOFT, Deeshura, Ichor, Lovi, Prismatic
+- #249 Lugia: Audino, CHUNSOFT, G〜
+- #250 Ho-Oh: CHUNSOFT, CamusZekeSirius, Deeshura, El_Pangoro_Parse, Morei
+- #251 Celebi: CHUNSOFT, Emmuffin, Morei, Smalusion, leafia_barrett
+- #252 Treecko: CHUNSOFT, Morei, RaoKurai, YoukaiMinori
+- #253 Grovyle: CHUNSOFT, Deeshura, JFain, Morei, SuperFabbioGuy, YoukaiMinori, baronessfaron, silverfox88
+- #254 Sceptile: 0palite, CHUNSOFT, Deeshura, Emmuffin, Lovi, baronessfaron
+- #255 Torchic: CHUNSOFT, Moo, Morei
+- #256 Combusken: Blanky, CHUNSOFT, JFain, JustAGunk, Moo, Morei
+- #257 Blaziken: CHUNSOFT, Noo, baronessfaron
+- #258 Mudkip: Anonymous, CHUNSOFT, Moo, Morei
+- #259 Marshtomp: Anonymous, CHUNSOFT, C_Pariah
+- #260 Swampert: Anonymous, CHUNSOFT, Emmuffin
+- #261 Poochyena: Anonymous, CHUNSOFT, Emmuffin, Morei, Smalusion
+- #262 Mightyena: Anonymous, CHUNSOFT, Emboarger, Gust, KCN015, Morei, deltaflare
+- #263 Zigzagoon: CHUNSOFT, Caitemis, DasK, Emmuffin, G〜, Reppamon
+- #264 Linoone: CHUNSOFT, Emmuffin
+- #265 Wurmple: Anonymous, Avery, CHUNSOFT, Novie
+- #266 Silcoon: CHUNSOFT, FlowerSnek, Magu, Tacocoa
+- #267 Beautifly: Anonymous, CHUNSOFT, Caitemis, Morei
+- #268 Cascoon: CHUNSOFT, Tacocoa
+- #269 Dustox: Anonymous, CHUNSOFT, Caitemis, Cloudy
+- #270 Lotad: CHUNSOFT, G〜, Morei, smartini
+- #271 Lombre: CHUNSOFT, Gust, Morei, baronessfaron
+- #272 Ludicolo: CHUNSOFT, Morei
+- #273 Seedot: <@!589906152708505648>, CHUNSOFT, Caitemis, Moo, Morei
+- #274 Nuzleaf: CHUNSOFT, Emmuffin, JFain
+- #275 Shiftry: CHUNSOFT, Gust, Moo, Morei, Tainted#3886
+- #276 Taillow: CHUNSOFT, Morei, Top_Kec
+- #277 Swellow: CHUNSOFT, Caitemis, Emmuffin, Morei
+- #278 Wingull: CHUNSOFT, Tacocoa, snarbs
+- #279 Pelipper: CHUNSOFT, Caitemis, Morei, baronessfaron
+- #280 Ralts: CHUNSOFT, JFain, Moo, Morei, NeroIntruder, baronessfaron
+- #281 Kirlia: CHUNSOFT, JFain, Morei, PhillipsYoung
+- #282 Gardevoir: CHUNSOFT, Emmuffin, Morei
+- #283 Surskit: CHUNSOFT, Fearless-Quit, JFain, Moo, Morei
+- #284 Masquerain: CHUNSOFT, Emmuffin, Moo, baronessfaron
+- #285 Shroomish: CHUNSOFT, Moo, Tacocoa, drawsstuff
+- #286 Breloom: CHUNSOFT, Emmuffin, G〜, Noo
+- #287 Slakoth: CHUNSOFT, Caitemis, Moo
+- #288 Vigoroth: CHUNSOFT, Moo
+- #289 Slaking: CHUNSOFT, Caitemis, Moo
+- #290 Nincada: CHUNSOFT, Caitemis, El_Pangoro_Parse, Emmuffin
+- #291 Ninjask: CHUNSOFT, El_Pangoro_Parse, baronessfaron
+- #292 Shedinja: CHUNSOFT, El_Pangoro_Parse, Novie
+- #293 Whismur: Blanky, CHUNSOFT, Moo
+- #294 Loudred: CHUNSOFT, Gust, Moo, Morei
+- #295 Exploud: CHUNSOFT, Moo
+- #296 Makuhita: CHUNSOFT, Emmuffin, Morei, anomalocaris, baronessfaron
+- #297 Hariyama: CHUNSOFT, Moo
+- #298 Azurill: CHUNSOFT, Fable, Morei, ShyStarryRain
+- #299 Nosepass: CHUNSOFT, JFain, Moo
+- #300 Skitty: CHUNSOFT, Moo, Morei, lokatts
+- #301 Delcatty: Anonymous, CHUNSOFT, Ginnie, Noo, baronessfaron
+- #302 Sableye: CHUNSOFT, Morei, PhillipsYoung
+- #303 Mawile: CHUNSOFT, Emmuffin, baronessfaron
+- #304 Aron: <@!299261889169588246>, <@!589906152708505648>, CHUNSOFT, Emboarger, Morei, Reppamon
+- #305 Lairon: CHUNSOFT, Emmuffin, Magu, Morei, baronessfaron
+- #306 Aggron: CHUNSOFT, Emmuffin, Morei, baronessfaron
+- #307 Meditite: Anonymous, CHUNSOFT
+- #308 Medicham: CHUNSOFT, Gust, Morei
+- #309 Electrike: CHUNSOFT, Caitemis, JFain, PixlHoopa, Tacocoa, baronessfaron
+- #310 Manectric: CHUNSOFT, Caitemis, Gust, Hemlock
+- #311 Plusle: CHUNSOFT, C_Pariah, Emmuffin, Morei, baronessfaron
+- #312 Minun: CHUNSOFT, C_Pariah, El_Pangoro_Parse, Morei, baronessfaron
+- #313 Volbeat: CHUNSOFT, G〜, JFain, NOLASMOR, Reppamon
+- #314 Illumise: CHUNSOFT, Emmuffin, JFain
+- #315 Roselia: CHUNSOFT, G〜, JFain, RaoKurai
+- #316 Gulpin: CHUNSOFT, Emmuffin
+- #317 Swalot: CHUNSOFT, Caitemis, Emmuffin, Morei
+- #318 Carvanha: CHUNSOFT, Lovi, Prismatic, baronessfaron
+- #319 Sharpedo: CHUNSOFT, Emmuffin, Lovi, baronessfaron
+- #320 Wailmer: CHUNSOFT, Caitemis, Morei, Noo, Prismatic
+- #321 Wailord: CHUNSOFT, FalafelPorpoise, G〜
+- #322 Numel: CHUNSOFT, Emmuffin
+- #323 Camerupt: CHUNSOFT, Emmuffin, JFain, Noo, Prismatic
+- #324 Torkoal: CHUNSOFT, Gust, G〜, Reppamon
+- #325 Spoink: CHUNSOFT, Emmuffin, Prismatic
+- #326 Grumpig: CHUNSOFT, JFain, Morei, Prismatic
+- #327 Spinda: CHUNSOFT, El_Pangoro_Parse, Gust, JFain, Morei
+- #328 Trapinch: CHUNSOFT, Caitemis, El_Pangoro_Parse, Emmuffin, JFain
+- #329 Vibrava: CHUNSOFT, El_Pangoro_Parse, Frostdrop1, Noo
+- #330 Flygon: CHUNSOFT, Deeshura, Top_Kec
+- #331 Cacnea: CHUNSOFT, Emboarger, NOLASMOR
+- #332 Cacturne: CHUNSOFT, Emmuffin, Noo, baronessfaron
+- #333 Swablu: CHUNSOFT, Emmuffin
+- #334 Altaria: CHUNSOFT, Emmuffin, Prismatic, TawnySoup, gromchurch
+- #335 Zangoose: CHUNSOFT, El_Pangoro_Parse, Emmuffin, KCN015, Noo
+- #336 Seviper: CHUNSOFT, Emmuffin, Tainted#3886
+- #337 Lunatone: CHUNSOFT, Chesyon, El_Pangoro_Parse, Okami
+- #338 Solrock: CHUNSOFT, El_Pangoro_Parse
+- #339 Barboach: CHUNSOFT, Emmuffin, Tacocoa, chikorene
+- #340 Whiscash: CHUNSOFT, Emmuffin, baronessfaron, bwappi
+- #341 Corphish: CHUNSOFT, Caitemis, Gust, Morei
+- #342 Crawdaunt: 0palite, CHUNSOFT, Moo, Top_Kec
+- #343 Baltoy: <SKREE>, CHUNSOFT, Caitemis, JustAGunk, lumiscosity
+- #344 Claydol: CHUNSOFT, Emmuffin, Lovi
+- #345 Lileep: Anonymous, Aviivix, CHUNSOFT, NOLASMOR, silverfox88
+- #346 Cradily: Anonymous, CHUNSOFT, JFain, Prismatic, baronessfaron
+- #347 Anorith: CHUNSOFT, Frostdrop1, Moo, Noo
+- #348 Armaldo: CHUNSOFT, Morei, Noo
+- #349 Feebas: <@!828520880299966525>, CHUNSOFT, Chi, Morei
+- #350 Milotic: CHUNSOFT, Chi, Emmuffin
+- #351 Castform: CHUNSOFT, JFain, ShyStarryRain, bwappi
+- #352 Kecleon: CHUNSOFT, El_Pangoro_Parse, G〜, Top_Kec
+- #353 Shuppet: Anonymous, CHUNSOFT, Caitemis, Pokejavi., baronessfaron
+- #354 Banette: Anonymous, CHUNSOFT, baronessfaron
+- #355 Duskull: CHUNSOFT, Emmuffin, JFain, baronessfaron
+- #356 Dusclops: CHUNSOFT, Cloudy, G〜, baronessfaron
+- #357 Tropius: CHUNSOFT, Emmuffin
+- #358 Chimecho: CHUNSOFT, Chi, baronessfaron, chime, lokatts, silverfox88
+- #359 Absol: CHUNSOFT, Deeshura, Emmuffin, Lovi, Noo, Top_Kec, baronessfaron
+- #360 Wynaut: CHUNSOFT, Emmuffin, Tacocoa, baronessfaron
+- #361 Snorunt: CHUNSOFT, Caitemis, Emmuffin, JFain, Morei, Tacocoa
+- #362 Glalie: CHUNSOFT, JFain, Tacocoa
+- #363 Spheal: CHUNSOFT, Chi, Emmuffin, JFain, Tacocoa
+- #364 Sealeo: CHUNSOFT, Emmuffin
+- #365 Walrein: CHUNSOFT, Chi, Emmuffin
+- #366 Clamperl: CHUNSOFT, Lovi, Magu, baronessfaron
+- #367 Huntail: CHUNSOFT, Emmuffin, Prismatic
+- #368 Gorebyss: CHUNSOFT, Emmuffin, Tacocoa
+- #369 Relicanth: Anonymous, CHUNSOFT, Emmuffin, Prismatic
+- #370 Luvdisc: CHUNSOFT, Chi, FlowerSnek
+- #371 Bagon: CHUNSOFT, C_Pariah, JFain, Morei, Pokejavi.
+- #372 Shelgon: CHUNSOFT, Tacocoa
+- #373 Salamence: CHUNSOFT, Emmuffin
+- #374 Beldum: <@!589906152708505648>, Audino, CHUNSOFT, Moo, Morei, ShyStarryRain
+- #375 Metang: <ElGian>, Audino, CHUNSOFT, JFain, Moo
+- #376 Metagross: Audino, CHUNSOFT, Emmuffin, Moo, Noo
+- #377 Regirock: CHUNSOFT, CamusZekeSirius, Chi
+- #378 Regice: CHUNSOFT, CamusZekeSirius, Emmuffin, Tacocoa
+- #379 Registeel: Audino, CHUNSOFT, CamusZekeSirius, Emmuffin, Reppamon
+- #380 Latias: CHUNSOFT, Emmuffin, Sharpen
+- #381 Latios: CHUNSOFT, Emmuffin, Moo, Reppamon
+- #382 Kyogre: Audino, CHUNSOFT, CamusZekeSirius, Top_Kec, lokatts
+- #383 Groudon: Audino, CHUNSOFT, Top_Kec, lokatts
+- #384 Rayquaza: Audino, CHUNSOFT, CamusZekeSirius, Top_Kec, lokatts
+- #385 Jirachi: CHUNSOFT, Chi, Emmuffin, Grimlin, Noo
+- #386 Deoxys: <@!523152081805115403>, CHUNSOFT, Chi, Morei, Noo, Sonikku_A
