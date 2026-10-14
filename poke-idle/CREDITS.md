@@ -108,8 +108,25 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #098 Krabby: <@!967585139485999154>, CHUNSOFT, G〜, Tacocoa
 - #099 Kingler: CHUNSOFT, Tacocoa, baronessfaron
 - #100 Voltorb: CHUNSOFT, Emboarger, Emmuffin, JFain, Noo, Tacocoa
+- #1000 Gholdengo: Deeshura, Emmuffin, G〜, baronessfaron
+- #1004 Chi-Yu: DeltaL, Emmuffin, baronessfaron, pi3.14
+- #1005 Bramaluna: Emmuffin, FerMrack, G〜, Magu, Soulja, distress, pi3.14
+- #1006 Ferropaladín: Emmuffin, baronessfaron
+- #1007 Koraidon: Emmuffin, baronessfaron
+- #1009 Ondulagua: Emmuffin, G〜, Soulja, baronessfaron
 - #101 Electrode: CHUNSOFT, G〜, Noo, PhillipsYoung, Tacocoa
+- #1010 Ferroverdor: Emmuffin, pi3.14
+- #1011 Dipplin: Emmuffin, Gust, Soulja
+- #1012 Poltchageist: Emmuffin, Shadowcrafts
+- #1013 Sinistcha: Emmuffin, Shadowcrafts
+- #1015 Munkidori: Emmuffin, JFain, Pokejavi., Rustnuttie
+- #1016 Fezandipiti: Emmuffin
+- #1017 Ogerpon: ShyStarryRain, baronessfaron, ◥θ┴θ◤
+- #1018 Archaludon: Emmuffin, Soulja
+- #1019 Hydrapple: Emmuffin, GenarftheUnfunny, Soulja
 - #102 Exeggcute: CHUNSOFT, Noo, Prismatic, Tacocoa
+- #1024 Terapagos: Cloudy, Emmuffin, G〜
+- #1025 Pecharunt: Emmuffin, G〜
 - #103 Exeggutor: Audino, CHUNSOFT, Noo, bwappi
 - #104 Cubone: CHUNSOFT, Emmuffin, Felis-Licht, Sceptile
 - #105 Marowak: CHUNSOFT, El_Pangoro_Parse, Emmuffin
@@ -394,3 +411,571 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #384 Rayquaza: Audino, CHUNSOFT, CamusZekeSirius, Top_Kec, lokatts
 - #385 Jirachi: CHUNSOFT, Chi, Emmuffin, Grimlin, Noo
 - #386 Deoxys: <@!523152081805115403>, CHUNSOFT, Chi, Morei, Noo, Sonikku_A
+- #387 Turtwig: CHUNSOFT, Chi
+- #388 Grotle: Anonymous, CHUNSOFT, Caitemis, Chi, Emboarger, Morei
+- #389 Torterra: Anonymous, CHUNSOFT, JFain, Morei
+- #390 Chimchar: CHUNSOFT, Emmuffin, Lovi
+- #391 Monferno: CHUNSOFT, Emmuffin, Lovi, baronessfaron
+- #392 Infernape: CHUNSOFT, Caitemis, Emmuffin, Lovi
+- #393 Piplup: CHUNSOFT, Lovi
+- #394 Prinplup: CHUNSOFT, Emmuffin, Lovi
+- #395 Empoleon: 0palite, CHUNSOFT, Lovi, Noo
+- #396 Starly: CHUNSOFT, CamusZekeSirius, Emboarger, Emmuffin, JFain, Lovi
+- #397 Staravia: CHUNSOFT, CamusZekeSirius, Emmuffin, Lovi
+- #398 Staraptor: Audino, CHUNSOFT, G〜, Morei, ShyStarryRain
+- #399 Bidoof: CHUNSOFT, Emmuffin, Gust, Scizivire
+- #400 Bibarel: CHUNSOFT, G〜, Lovi, Scizivire
+- #401 Kricketot: CHUNSOFT, Lovi
+- #402 Kricketune: CHUNSOFT, JFain, Lovi, Morei
+- #403 Shinx: CHUNSOFT, Reppamon
+- #404 Luxio: CHUNSOFT, C_Pariah, Caitemis, Reppamon
+- #405 Luxray: CHUNSOFT, Emmuffin, G〜, Reppamon, Soulja
+- #406 Budew: <@!237814999634935808>, CHUNSOFT, Deeshura, Morei, RaoKurai, Uni
+- #407 Roserade: <@!195280695009083392>, CHUNSOFT, Emmuffin, G〜, JFain, RaoKurai, ShyStarryRain, baronessfaron
+- #408 Cranidos: CHUNSOFT, JFain, Lovi, ShyStarryRain
+- #409 Rampardos: CHUNSOFT, G〜, Lovi, NikolaP, Noo
+- #410 Shieldon: A_Lettuce, Anonymous, CHUNSOFT, Tacocoa
+- #411 Bastiodon: CHUNSOFT, Morei, baronessfaron
+- #412 Burmy: CHUNSOFT, Caitemis, Lovi, snarbs
+- #413 Wormadam: CHUNSOFT, JFain, Lovi, Morei
+- #414 Mothim: Audino, CHUNSOFT, FlowerSnek, Lovi
+- #415 Combee: CHUNSOFT, Lovi, Morei, Tacocoa
+- #416 Vespiquen: CHUNSOFT, Emmuffin, baronessfaron
+- #417 Pachirisu: CHUNSOFT, JFain, Lovi, Prismatic, baronessfaron, bwappi
+- #418 Buizel: CHUNSOFT, C_Pariah, Lovi, Morei, Reimu\_needs\_$$$
+- #419 Floatzel: CHUNSOFT, Caitemis, Lovi
+- #420 Cherubi: <@!173876028593274880>, CHUNSOFT, Lovi, baronessfaron
+- #421 Cherrim: Anonymous, CHUNSOFT, Emmuffin, Lovi, baronessfaron
+- #422 Shellos: CHUNSOFT, Lovi, chikorene
+- #423 Gastrodon: CHUNSOFT, Emmuffin, Lovi
+- #424 Ambipom: CHUNSOFT, JFain, Lovi, Noo, Scizivire
+- #425 Drifloon: CHUNSOFT, Deleca7755, Fearless-Quit, Prismatic, Scizivire
+- #426 Drifblim: CHUNSOFT, NOLASMOR, Prismatic, Scizivire
+- #427 Buneary: <@!589906152708505648>, CHUNSOFT, Gust, JFain, Lovi, ShyStarryRain
+- #428 Lopunny: CHUNSOFT, JFain, Lovi, Morei
+- #429 Mismagius: CHUNSOFT, Emmuffin, Lovi, baronessfaron
+- #430 Honchkrow: CHUNSOFT, Caitemis, Scizivire, baronessfaron
+- #431 Glameow: CHUNSOFT, JFain, Lovi, Noo, ShyStarryRain, baronessfaron
+- #432 Purugly: CHUNSOFT, Emmuffin, Lovi
+- #433 Chingling: Anonymous, CHUNSOFT, Emmuffin, anomalocaris, chime
+- #434 Stunky: Anonymous, CHUNSOFT, C_Pariah, Caitemis, JFain, Jarleypeño, Noo
+- #435 Skuntank: Audino, CHUNSOFT, Gayschlatt, G〜
+- #436 Bronzor: CHUNSOFT, Lovi, chime
+- #437 Bronzong: CHUNSOFT, Lovi, ShyStarryRain
+- #438 Bonsly: CHUNSOFT, Caitemis, Emmuffin, Lovi
+- #439 Mime Jr.: CHUNSOFT, Emmuffin, G〜, JFain
+- #440 Happiny: CHUNSOFT, JFain, Lovi, Mojo
+- #441 Chatot: CHUNSOFT, Caitemis, Emmuffin, Gust, JFain, Tacocoa
+- #442 Spiritomb: Anonymous, CHUNSOFT, baronessfaron
+- #443 Gible: CHUNSOFT, G〜, JFain, Lovi, Morei
+- #444 Gabite: CHUNSOFT, Lovi, dmDash
+- #445 Garchomp: CHUNSOFT, G〜, Prismatic, Top_Kec, ◥θ┴θ◤
+- #446 Munchlax: CHUNSOFT, El_Pangoro_Parse, Lovi
+- #447 Riolu: Anonymous, CHUNSOFT, Emboarger, Fearless-Quit
+- #448 Lucario: CHUNSOFT, Deeshura, Emmuffin, G〜
+- #449 Hippopotas: CHUNSOFT, Emmuffin, Lovi
+- #450 Hippowdon: CHUNSOFT, Lovi, baronessfaron
+- #451 Skorupi: CHUNSOFT, Cloudy, Emmuffin, Morei, Sunny
+- #452 Drapion: CHUNSOFT, Morei
+- #453 Croagunk: CHUNSOFT, Caitemis, Emmuffin, Gust, Morei, Noo
+- #454 Toxicroak: CHUNSOFT, Emmuffin, Moo, baronessfaron
+- #455 Carnivine: CHUNSOFT, Emboarger, JFain, Lovi
+- #456 Finneon: Anonymous, CHUNSOFT, JFain, Morei, ShyStarryRain
+- #457 Lumineon: CHUNSOFT, Emboarger, Emmuffin, Prismatic
+- #458 Mantyke: Anonymous, CHUNSOFT, Gust, Lovi
+- #459 Snover: CHUNSOFT, Jarleypeño, Lovi, Morei, Scizivire
+- #460 Abomasnow: CHUNSOFT, Prismatic, Scizivire, SingingMudkip
+- #461 Weavile: CHUNSOFT, Emmuffin, PhillipsYoung, ShyStarryRain, baronessfaron
+- #462 Magnezone: Audino, CHUNSOFT, Magu, Tacocoa, baronessfaron
+- #463 Lickilicky: CHUNSOFT, Emmuffin, Noo
+- #464 Rhyperior: CHUNSOFT, El_Pangoro_Parse, Emmuffin, G〜
+- #465 Tangrowth: CHUNSOFT, Emmuffin, Tacocoa
+- #466 Electivire: CHUNSOFT, Emboarger, JustAGunk, Prismatic, Scizivire
+- #467 Magmortar: CHUNSOFT, G〜, Lovi
+- #468 Togekiss: <@!436940337865293834>, CHUNSOFT, Noo, RaoKurai
+- #469 Yanmega: CHUNSOFT, Reppamon, Top_Kec
+- #470 Leafeon: <@!195280695009083392>, CHUNSOFT, Emmuffin, baronessfaron
+- #471 Glaceon: <@!195280695009083392>, CHUNSOFT, JFain, PhillipsYoung, baronessfaron
+- #472 Gliscor: CHUNSOFT, Emmuffin, G〜
+- #473 Mamoswine: CHUNSOFT, Emmuffin, G〜
+- #474 Porygon-Z: CHUNSOFT, Caitemis, Fable, G〜, Prismatic
+- #475 Gallade: Anonymous, CHUNSOFT, Morei, baronessfaron
+- #476 Probopass: Anonymous, CHUNSOFT, G〜
+- #477 Dusknoir: CHUNSOFT, Caitemis, Emmuffin, G〜
+- #478 Froslass: Anonymous, CHUNSOFT, Emmuffin, baronessfaron
+- #479 Rotom: Anonymous, Audino, CHUNSOFT, Orange
+- #480 Uxie: Anonymous, CHUNSOFT, Tacocoa, baronessfaron, bwappi
+- #481 Mesprit: Anonymous, CHUNSOFT, baronessfaron, bwappi
+- #482 Azelf: Anonymous, CHUNSOFT, Morei, baronessfaron
+- #483 Dialga: Anonymous, CHUNSOFT, G〜
+- #484 Palkia: CHUNSOFT, Emboarger, Morei, baronessfaron
+- #485 Heatran: Anonymous, CHUNSOFT, G〜
+- #486 Regigigas: CHUNSOFT, Emmuffin, Morei, baronessfaron
+- #487 Giratina: CHUNSOFT, El_Pangoro_Parse, Emmuffin, G〜
+- #488 Cresselia: CHUNSOFT, El_Pangoro_Parse, Emmuffin, baronessfaron
+- #489 Phione: Anonymous, CHUNSOFT, Emmuffin
+- #490 Manaphy: CHUNSOFT, Emmuffin, JFain
+- #491 Darkrai: CHUNSOFT, Chi, Emboarger, Prismatic, baronessfaron
+- #492 Shaymin: Audino, CHUNSOFT, Emmuffin, JFain, Mojo, Noo, Tacocoa
+- #493 Arceus: JFain, baronessfaron
+- #494 Victini: MonochromeKirby, baronessfaron
+- #495 Snivy: Emmuffin, G〜, NeroIntruder
+- #496 Servine: Deeshura, Emboarger, NeroIntruder, ShyStarryRain
+- #497 Serperior: Caitemis, Emmuffin, NeroIntruder
+- #498 Tepig: 3P1C, Emboarger, Emmuffin, NeroIntruder, NikolaP, Noivern
+- #499 Pignite: Emboarger, Gust, Morei, NeroIntruder, baronessfaron
+- #500 Emboar: Emboarger, G〜, Magu, NeroIntruder
+- #501 Oshawott: Emmuffin, ◥θ┴θ◤
+- #502 Dewott: Caitemis, JFain, LegendaryPhoenix, baronessfaron
+- #503 Samurott: Emmuffin, Top_Kec
+- #504 Patrat: Caitemis, Pink_no_tori, ShyStarryRain, baronessfaron, ◥θ┴θ◤
+- #505 Watchog: Morei, baronessfaron, ◥θ┴θ◤
+- #506 Lillipup: Morei, baronessfaron, bwappi
+- #507 Herdier: Caitemis, LightBlueBlaze, baronessfaron
+- #508 Stoutland: Caitemis, Emmuffin, JFain, Top_Kec
+- #509 Purrloin: Morei, ShyStarryRain, baronessfaron
+- #510 Liepard: Caitemis, Emmuffin, LightBlueBlaze, ShyStarryRain, baronessfaron
+- #511 Pansage: Pokejavi., Top_Kec, baronessfaron
+- #512 Simisage: Emmuffin, G〜, baronessfaron
+- #513 Pansear: <@!315528859921678336>, AllPatchedUp, Emmuffin, baronessfaron
+- #515 Panpour: Emmuffin, Pokejavi., baronessfaron
+- #517 Munna: Caitemis, ShyStarryRain, baronessfaron, chime, mucrush
+- #518 Musharna: Caitemis, ShyStarryRain, baronessfaron
+- #519 Pidove: Caitemis, TawnySoup, powercristal
+- #521 Unfezant: Gust, Top_Kec
+- #524 Roggenrola: Caitemis, Gust, powercristal
+- #525 Boldore: Emmuffin, Soulja
+- #526 Gigalith: Emmuffin, G〜, Soulja
+- #527 Woobat: Caitemis, Emmuffin, NeroIntruder, ShyStarryRain
+- #528 Swoobat: Caitemis, Emmuffin, NeroIntruder, mucrush
+- #529 Drilbur: Gust, Top_Kec, baronessfaron
+- #530 Excadrill: Emmuffin, ShyStarryRain, Skycloud383, Soulja, baronessfaron
+- #531 Audino: Caitemis, Emmuffin, baronessfaron
+- #532 Timburr: G〜, JustAGunk, Katach314
+- #533 Gurdurr: Emmuffin, G〜, Inv3rse, Katach314, Soulja
+- #534 Conkeldurr: Emmuffin, Gust, Inv3rse, Soulja, mucrush
+- #535 Tympole: G〜, JFain, JustAGunk, Morei
+- #536 Palpitoad: G〜, JFain, JustAGunk, electronvolt, mucrush
+- #537 Seismitoad: G〜, JustAGunk, Magu, Soulja
+- #539 Sawk: Emmuffin, G〜, mucrush
+- #540 Sewaddle: Caitemis, Emboarger, Emmuffin
+- #541 Swadloon: Emmuffin, ShyStarryRain, baronessfaron
+- #542 Leavanny: Caitemis, Emmuffin, G〜, baronessfaron
+- #543 Venipede: Emmuffin, JFain, Soulja, baronessfaron, pi3.14
+- #544 Whirlipede: G〜, Soulja
+- #545 Scolipede: Emmuffin, G〜, baronessfaron
+- #546 Cottonee: Emmuffin
+- #547 Whimsicott: Caitemis, JFain, Waffluffe, baronessfaron
+- #548 Petilil: Emmuffin
+- #549 Lilligant: Emmuffin, G〜, baronessfaron, powercristal
+- #550 Basculin: Emmuffin, G〜, Pink_no_tori
+- #551 Sandile: Caitemis, Emmuffin, Morei, Noivern, baronessfaron
+- #552 Krokorok: Emmuffin, Soulja
+- #553 Krookodile: Emmuffin, G〜, Soulja, baronessfaron
+- #554 Darumaka: Emmuffin, Pink_no_tori, ShyStarryRain, baronessfaron
+- #555 Darmanitan: G〜, Michael12, Soulja
+- #556 Maractus: Caitemis, JFain, baronessfaron
+- #557 Dwebble: Emmuffin, Leif, Pink_no_tori
+- #559 Scraggy: G〜, Noo, ShyStarryRain, Soulja
+- #560 Scrafty: Emmuffin, Morei, NeroIntruder, baronessfaron
+- #561 Sigilyph: G〜, ShyStarryRain, Soulja, baronessfaron
+- #562 Yamask: Emmuffin, Michael12, ShyStarryRain, baronessfaron
+- #563 Cofagrigus: Pink_no_tori, Top_Kec, baronessfaron
+- #566 Archen: Caitemis, Emmuffin, Soulja, ◥θ┴θ◤
+- #567 Archeops: ShyStarryRain, Top_Kec
+- #568 Trubbish: Caitemis, Noo, cyboy_bit, powercristal
+- #569 Garbodor: Emmuffin, G〜, baronessfaron
+- #570 Zorua: Emmuffin, MilesFarber, baronessfaron
+- #571 Zoroark: 0palite, Deeshura, G〜, Morei, baronessfaron
+- #572 Minccino: NeonCityRain, Noo, Waffluffe, baronessfaron, mucrush, powercristal
+- #573 Cinccino: Emmuffin, baronessfaron
+- #574 Gothita: Morei, ShyStarryRain, baronessfaron
+- #575 Gothorita: Caitemis, Morei, ShyStarryRain, baronessfaron
+- #576 Gothitelle: ShyStarryRain, baronessfaron
+- #577 Solosis: Emmuffin, NOLASMOR, Uni, silverfox88, ◥θ┴θ◤
+- #578 Duosion: Caitemis, Emmuffin, Magu, baronessfaron, powercristal, ◥θ┴θ◤
+- #579 Reuniclus: Emmuffin
+- #580 Ducklett: Emboarger, Emmuffin, Noo, baronessfaron
+- #581 Swanna: G〜, Katach314, baronessfaron
+- #582 Vanillite: Emmuffin, NOLASMOR, baronessfaron
+- #583 Vanillish: Emboarger, Emmuffin, JFain, ShyStarryRain, mucrush
+- #584 Vanilluxe: G〜, Keldaan, baronessfaron
+- #585 Deerling: Emmuffin, baronessfaron
+- #586 Sawsbuck: Morei, Richelieu, baronessfaron
+- #587 Emolga: Emmuffin, Noo, baronessfaron
+- #588 Karrablast: Caitemis, Pink_no_tori, Pokejavi., mucrush
+- #589 Escavalier: JFain, Top_Kec, baronessfaron
+- #590 Foongus: Gust, JFain, ShyStarryRain
+- #593 Jellicent: Emmuffin, G〜, Soulja
+- #594 Alomomola: Emmuffin, Gust, Inv3rse, Soulja, baronessfaron
+- #595 Joltik: JFain, Top_Kec, baronessfaron, ◥θ┴θ◤
+- #596 Galvantula: Caitemis, Gust, JFain
+- #597 Ferroseed: Emmuffin, G〜
+- #598 Ferrothorn: G〜, Shitpost_Sunkern, Top_Kec
+- #599 Klink: Emmuffin, baronessfaron, stressparticles
+- #600 Klang: Emmuffin, baronessfaron
+- #601 Klinklang: Emmuffin, baronessfaron
+- #602 Tynamo: Emmuffin, baronessfaron, mosscoated
+- #603 Eelektrik: Emmuffin, Gust, Soulja, powercristal
+- #604 Eelektross: CeleryGuy, Emmuffin, Gust, Soulja
+- #605 Elgyem: Chesyon, Limomon, Noo, Soulja, baronessfaron
+- #606 Beheeyem: G〜, Noo, Shitpost_Sunkern, Soulja
+- #607 Litwick: Emmuffin
+- #608 Lampent: Emmuffin, ShyStarryRain, baronessfaron
+- #609 Chandelure: Caitemis, Emmuffin, baronessfaron
+- #610 Axew: FrivolousAqua, G〜, baronessfaron
+- #611 Fraxure: Deeshura, Top_Kec
+- #612 Haxorus: Deeshura, Emmuffin, Pink_no_tori, Soulja, baronessfaron
+- #613 Cubchoo: Emboarger, G〜, Morei, ShyStarryRain
+- #614 Beartic: Emmuffin, Gust, Morei, baronessfaron
+- #615 Cryogonal: G〜, baronessfaron
+- #617 Accelgor: Emmuffin, Johanne2, Top_Kec, baronessfaron
+- #619 Mienfoo: Fresco, JFain, Noo
+- #620 Mienshao: Caitemis, Morei, Vendily, baronessfaron
+- #621 Druddigon: Deeshura, baronessfaron
+- #622 Golett: G〜, Morei, Soulja, baronessfaron
+- #623 Golurk: JuanmaSG, Soulja, baronessfaron
+- #624 Pawniard: Caitemis, Ichor, Noivern, baronessfaron
+- #625 Bisharp: Emmuffin
+- #627 Rufflet: Emmuffin, Ichor, ShyStarryRain, baronessfaron, ◥θ┴θ◤
+- #628 Braviary: Caitemis, Noo
+- #629 Vullaby: Emmuffin, baronessfaron
+- #630 Mandibuzz: Caitemis, Emmuffin, powercristal
+- #631 Heatmor: G〜, Magu, baronessfaron
+- #632 Durant: Caitemis, Gust, baronessfaron
+- #633 Deino: Caitemis, Emboarger, Jhony-Rex, Uni, mucrush
+- #634 Zweilous: Emmuffin, Hemlock, Pink_no_tori, baronessfaron
+- #635 Hydreigon: Deeshura, JustAGunk, Morei, Top_Kec, baronessfaron
+- #636 Larvesta: baronessfaron
+- #637 Volcarona: Deeshura, G〜, Soulja, pi3.14, powercristal
+- #638 Cobalion: Caitemis, Deeshura, Noo, powercristal
+- #639 Terrakion: Emmuffin, G〜, Noo
+- #640 Virizion: Deeshura, baronessfaron
+- #641 Tornadus: G〜, Top_Kec
+- #642 Thundurus: G〜, Top_Kec
+- #643 Reshiram: Emmuffin, Top_Kec
+- #644 Zekrom: CamusZekeSirius, Top_Kec, baronessfaron
+- #645 Landorus: G〜, Top_Kec
+- #646 Kyurem: Emmuffin, Noo
+- #647 Keldeo: <@!557599571170033664>, Dasawkem, Fingernails, Ichor, Morei, baronessfaron
+- #648 Meloetta: Ariakyu, Deleca7755, Morei, SkeleSpider, baronessfaron
+- #649 Genesect: Emboarger, chime
+- #650 Chespin: Emmuffin, G〜, Noo, Waffluffe, ◥θ┴θ◤
+- #651 Quilladin: Caitemis, Emmuffin, JustAGunk, Soulja, baronessfaron, ◥θ┴θ◤
+- #652 Chesnaught: Emmuffin, Soulja
+- #653 Fennekin: Emmuffin, G〜, Smalusion
+- #654 Braixen: Emmuffin, baronessfaron
+- #655 Delphox: Emmuffin, Jhony-Rex
+- #656 Froakie: Emmuffin, baronessfaron, ◥θ┴θ◤
+- #657 Frogadier: Caitemis, JustAGunk, NOLASMOR, baronessfaron, ◥θ┴θ◤
+- #658 Greninja: Emmuffin, Jhony-Rex, Soulja
+- #659 Bunnelby: baronessfaron, pi3.14, ◥θ┴θ◤
+- #660 Diggersby: Aviivix, Emmuffin, Morei, Soulja, pi3.14
+- #661 Fletchling: Axcel, Emmuffin, ◥θ┴θ◤
+- #662 Fletchinder: Chesyon, Emmuffin, Soulja
+- #663 Talonflame: Emmuffin, G〜, Michael12, Soulja
+- #664 Scatterbug: Emmuffin, G〜, Morei, Riodise, baronessfaron
+- #665 Spewpa: Emmuffin, baronessfaron
+- #666 Vivillon: Emmuffin
+- #667 Litleo: Caitemis, G〜
+- #669 Flabébé: Morei, baronessfaron
+- #670 Floette: Morei, baronessfaron
+- #671 Florges: Emmuffin, Morei, baronessfaron
+- #672 Skiddo: Emmuffin, TawnySoup, baronessfaron
+- #673 Gogoat: Emmuffin, G〜, JFain
+- #674 Pancham: Emmuffin, G〜, baronessfaron
+- #675 Pangoro: Emmuffin, Soulja, baronessfaron
+- #676 Furfrou: Aviivix, NeonCityRain, ShyStarryRain, baronessfaron, deltaflare, ◥θ┴θ◤
+- #677 Espurr: NeroIntruder, Noo, baronessfaron
+- #678 Meowstic: Emmuffin, NeroIntruder
+- #679 Honedge: Emmuffin, G〜
+- #680 Doublade: Emmuffin, Morei, baronessfaron
+- #681 Aegislash: Emmuffin, Top_Kec, baronessfaron
+- #682 Spritzee: Caitemis, baronessfaron
+- #684 Swirlix: baronessfaron, mixy:3, ◥θ┴θ◤
+- #685 Slurpuff: Morei, baronessfaron, mixy:3
+- #686 Inkay: Aviivix, Emmuffin, NOLASMOR, baronessfaron, ◥θ┴θ◤
+- #687 Malamar: Emmuffin, JFain, Soulja, baronessfaron, pi3.14, ◥θ┴θ◤
+- #688 Binacle: Soulja, baronessfaron, ◥θ┴θ◤
+- #689 Barbaracle: Emmuffin, G〜, Soulja, baronessfaron
+- #690 Skrelp: ShyStarryRain, Top_Kec, baronessfaron, brookriver, ◥θ┴θ◤
+- #691 Dragalge: ShyStarryRain, baronessfaron, ◥θ┴θ◤
+- #692 Clauncher: Caitemis, G〜, Jhony-Rex, baronessfaron
+- #693 Clawitzer: Morei, Pink_no_tori, baronessfaron
+- #694 Helioptile: Emmuffin, Leif, Noo
+- #695 Heliolisk: Emmuffin
+- #696 Tyrunt: Emmuffin, NeroIntruder, Tainted#3886, baronessfaron
+- #697 Tyrantrum: Jhony-Rex, NeroIntruder, Soulja, Xrit63, baronessfaron
+- #698 Amaura: Emmuffin
+- #699 Aurorus: Emmuffin
+- #700 Sylveon: <@!727245570191786085>, Emmuffin, Mond, NeonCityRain, baronessfaron
+- #701 Hawlucha: Emmuffin, Soulja
+- #702 Dedenne: Emmuffin, Inv3rse, Top_Kec, baronessfaron, rhys
+- #703 Carbink: Caitemis, Emmuffin, Luca, ShyStarryRain, baronessfaron
+- #704 Goomy: Emmuffin, RacieB
+- #705 Sliggoo: Caitemis, Emmuffin, NeroIntruder, baronessfaron
+- #706 Goodra: Emmuffin, baronessfaron, ◥θ┴θ◤
+- #707 Klefki: Caitemis, Emmuffin, baronessfaron, ◥θ┴θ◤
+- #708 Phantump: <@!218959749276893184>, Caitemis, Emmuffin, ShyStarryRain, baronessfaron
+- #709 Trevenant: Chesyon, baronessfaron, ◥θ┴θ◤
+- #710 Pumpkaboo: Emboarger, G〜, baronessfaron, ◥θ┴θ◤
+- #711 Gourgeist: Emmuffin, JFain, Soulja, baronessfaron
+- #712 Bergmite: <ElGian>, Caitemis, Noivern, baronessfaron
+- #713 Avalugg: Emmuffin, Noivern, baronessfaron
+- #714 Noibat: Azifel, Caitemis, G〜, JFain, Noivern, Noo, baronessfaron
+- #715 Noivern: G〜, Noivern, Soulja, TawnySoup, Top_Kec
+- #716 Xerneas: ShyStarryRain, baronessfaron, ◥θ┴θ◤
+- #717 Yveltal: Deleca7755, Top_Kec
+- #718 Zygarde: Deeshura, DeltaL, Emmuffin, Noo, Soulja, baronessfaron
+- #719 Diancie: Emmuffin, baronessfaron
+- #720 Hoopa: Morei, programmedsleepstate
+- #721 Volcanion: Dejais, ShyStarryRain, Top_Kec
+- #722 Rowlet: Emmuffin, Reimu\_needs\_$$$, XModxGodX
+- #723 Dartrix: JustAGunk, Reimu\_needs\_$$$, XModxGodX, baronessfaron, ◥θ┴θ◤
+- #724 Decidueye: Audino, Emmuffin, Reimu\_needs\_$$$, Top_Kec, baronessfaron, ◥θ┴θ◤
+- #725 Litten: Emboarger, Emmuffin, Top_Kec
+- #726 Torracat: G〜, Kawaiitron, baronessfaron, ◥θ┴θ◤
+- #727 Incineroar: Caitemis, G〜, JustAGunk, ShyStarryRain, avalancheman, baronessfaron, mixy:3
+- #728 Popplio: Emmuffin, Fable, JFain, Waffluffe, ◥θ┴θ◤
+- #729 Brionne: Emboarger, ShyStarryRain, Top_Kec, baronessfaron, ◥θ┴θ◤
+- #730 Primarina: <@!225139021079117824>, JFain, baronessfaron, ◥θ┴θ◤
+- #731 Pikipek: Aviivix, Dasawkem, Emmuffin, FlowerSnek, Morei, NOLASMOR
+- #734 Yungoos: Emmuffin, baronessfaron
+- #736 Grubbin: Emmuffin, JFain, ShyStarryRain, Soulja
+- #737 Charjabug: Deeshura, Emmuffin, Soulja
+- #738 Vikavolt: G〜, ShyStarryRain, Soulja, baronessfaron
+- #739 Crabrawler: Emmuffin, G〜, Soulja
+- #740 Crabominable: Chesyon, Emmuffin, Soulja, baronessfaron
+- #741 Oricorio: Emmuffin, Top_Kec, baronessfaron
+- #742 Cutiefly: Caitemis, Emmuffin, Mitsubachi, NOLASMOR, baronessfaron, silverfox88
+- #743 Ribombee: Emboarger, Emmuffin, baronessfaron
+- #744 Rockruff: Emmuffin, ShyStarryRain, baronessfaron
+- #745 Lycanroc: Emmuffin, JFain, baronessfaron
+- #746 Wishiwashi: baronessfaron, chime
+- #747 Mareanie: Aviivix, Caitemis, ShyStarryRain, baronessfaron
+- #748 Toxapex: Emmuffin, G〜, baronessfaron
+- #749 Mudbray: Caitemis, Ichor, ShyStarryRain, bwappi
+- #750 Mudsdale: <SKREE>, bwappi
+- #751 Dewpider: Emmuffin, Keldaan, Soulja
+- #752 Araquanid: Emmuffin, Keldaan, Soulja
+- #753 Fomantis: Aviivix, Emmuffin
+- #754 Lurantis: Emmuffin, ShyStarryRain, baronessfaron
+- #755 Morelull: Caitemis, Emmuffin, baronessfaron
+- #757 Salandit: Caitemis, Emmuffin, ShyStarryRain, Soulja, baronessfaron
+- #758 Salazzle: Axcel, Emmuffin, Soulja, baronessfaron
+- #759 Stufful: G〜, JFain, ShyStarryRain, baronessfaron
+- #760 Bewear: Caitemis, Emmuffin, baronessfaron
+- #761 Bounsweet: Caitemis, NOLASMOR, baronessfaron, ◥θ┴θ◤
+- #762 Steenee: Caitemis, G〜, JFain, Morei, ShyStarryRain
+- #763 Tsareena: JFain, baronessfaron, ◥θ┴θ◤
+- #764 Comfey: Emmuffin, G〜, baronessfaron
+- #766 Passimian: Emmuffin, G〜, baronessfaron
+- #767 Wimpod: Emmuffin, ShyStarryRain, Soulja
+- #768 Golisopod: Deleca7755, Emmuffin, G〜, Michael12, Soulja
+- #769 Sandygast: Emmuffin, JFain
+- #770 Palossand: Emmuffin, baronessfaron
+- #771 Pyukumuku: Emmuffin, G〜, Soulja
+- #772 Código Cero: Emmuffin, Top_Kec, baronessfaron
+- #773 Silvally: Emmuffin, Top_Kec
+- #774 Minior: Emmuffin, Top_Kec, baronessfaron
+- #775 Komala: Caitemis, Emmuffin, Top_Kec
+- #776 Turtonator: Emmuffin, Noo, TawnySoup
+- #777 Togedemaru: Emmuffin
+- #778 Mimikyu: Emmuffin, ShyStarryRain, baronessfaron
+- #779 Bruxish: baronessfaron
+- #780 Drampa: Emmuffin, Soulja, baronessfaron
+- #781 Dhelmise: Emmuffin, JuanmaSG, baronessfaron
+- #782 Jangmo-o: Emmuffin, ShyStarryRain, Soulja, Top_Kec, baronessfaron
+- #783 Hakamo-o: G〜, Top_Kec
+- #784 Kommo-o: Emmuffin, Soulja, Top_Kec
+- #785 Tapu Koko: Emboarger, ShyStarryRain, baronessfaron
+- #786 Tapu Lele: Caitemis, Emboarger, baronessfaron
+- #787 Tapu Bulu: G〜, JFain, ShyStarryRain, baronessfaron
+- #788 Tapu Fini: JFain, ShyStarryRain, baronessfaron
+- #789 Cosmog: Emboarger, G〜, Noo, XxWindpawxX, Yari
+- #790 Cosmoem: Emboarger, Ichor, baronessfaron, ◥θ┴θ◤
+- #791 Solgaleo: 0palite, Caitemis, Emboarger, G〜, nataniel-sama
+- #792 Lunala: Deeshura, baronessfaron
+- #793 Nihilego: 3Monika4, Emboarger, Emmuffin, Noivern, gromchurch
+- #794 Buzzwole: Emmuffin, Soulja, Top_Kec
+- #795 Pheromosa: Emmuffin, Morei, baronessfaron
+- #796 Xurkitree: Emmuffin, Top_Kec
+- #797 Celesteela: ShyStarryRain, Top_Kec, baronessfaron
+- #798 Kartana: Caitemis, Emboarger, JFain, Soulja, Top_Kec
+- #799 Guzzlord: 3Monika4, Emboarger, Top_Kec
+- #800 Necrozma: 0palite, Deeshura, Emboarger, Jhony-Rex, Noo, Top_Kec, baronessfaron
+- #801 Magearna: Caitemis, baronessfaron
+- #802 Marshadow: Caitemis, Dejais, Top_Kec
+- #803 Poipole: Emboarger, G〜, XxWindpawxX
+- #804 Naganadel: Caitemis, Emboarger, Top_Kec
+- #805 Stakataka: Caitemis, Emboarger, Top_Kec
+- #806 Blacephalon: Caitemis, Emboarger, Top_Kec
+- #807 Zeraora: Caitemis, Emmuffin, Top_Kec
+- #808 Meltan: FlowerSnek, G〜
+- #809 Melmetal: DeltaL, Emmuffin, G〜, Jhony-Rex, Soulja
+- #810 Grookey: G〜, JFain, JustAGunk, bwappi
+- #811 Thwackey: Emmuffin, JustAGunk, baronessfaron
+- #812 Rillaboom: Emmuffin, G〜, JustAGunk, baronessfaron
+- #813 Scorbunny: Caitemis, Emmuffin, NeroIntruder
+- #814 Raboot: Emmuffin, NeroIntruder
+- #815 Cinderace: Emmuffin, NeroIntruder, ShyStarryRain
+- #816 Sobble: Emmuffin, G〜, JFain, ShyStarryRain, baronessfaron
+- #817 Drizzile: Emmuffin, JFain, baronessfaron
+- #818 Inteleon: Emmuffin, TawnySoup
+- #819 Skwovet: Caitemis, Emmuffin, G〜, Jhony-Rex, Soulja
+- #820 Greedent: G〜, Jhony-Rex, Soulja
+- #821 Rookidee: Caitemis, Cloudy, G〜, Michael12, Soulja
+- #822 Corvisquire: Emmuffin
+- #823 Corviknight: Emmuffin, EzerArt, G〜, Soulja, nataniel-sama
+- #824 Blipbug: Emmuffin, Soulja
+- #825 Dottler: Emmuffin, Soulja
+- #826 Orbeetle: Emmuffin, Jhony-Rex, Soulja, baronessfaron
+- #827 Nickit: Top_Kec
+- #828 Thievul: Caitemis, Emmuffin, Smalusion
+- #829 Gossifleur: Emmuffin, baronessfaron
+- #830 Eldegoss: Emmuffin, EzerArt, Soulja, Top_Kec
+- #831 Wooloo: Emboarger, Emmuffin, JFain
+- #832 Dubwool: Emmuffin, G〜, Top_Kec
+- #833 Chewtle: Caitemis, Emmuffin, EzerArt, Soulja, nataniel-sama
+- #834 Drednaw: Emmuffin, EzerArt, Soulja, nataniel-sama
+- #835 Yamper: Emmuffin, RelicCipher, baronessfaron
+- #836 Boltund: Emmuffin, Gust, Top_Kec
+- #840 Applin: Emmuffin
+- #841 Flapple: Caitemis, Emboarger, Emmuffin, EzerArt, HopeBurnsBright2008, JFain, Shitpost_Sunkern
+- #842 Appletun: Emmuffin
+- #843 Silicobra: Emmuffin, G〜, Jelly, NeonCityRain, NikolaP, ShyStarryRain, Soulja
+- #844 Sandaconda: Cloudy, Emmuffin, Soulja, baronessfaron
+- #845 Cramorant: Emmuffin, G〜, Top_Kec
+- #846 Arrokuda: Caitemis, Emmuffin, Jhony-Rex, Noo
+- #847 Barraskewda: Emmuffin, Soulja, baronessfaron
+- #848 Toxel: Emmuffin, EzerArt, Keldaan, baronessfaron
+- #849 Toxtricity: Chesyon, Emmuffin, baronessfaron
+- #850 Sizzlipede: Emmuffin, Soulja
+- #851 Centiskorch: Emmuffin, ShyStarryRain, Soulja, baronessfaron
+- #852 Clobbopus: Emmuffin, Uni
+- #853 Grapploct: Soulja, baronessfaron
+- #854 Sinistea: EzerArt, G〜, Morei, ShyStarryRain, Vendily, baronessfaron
+- #855 Polteageist: Emmuffin, EzerArt, JFain
+- #856 Hatenna: Emboarger, Emmuffin, EzerArt, Waffluffe, baronessfaron
+- #857 Hattrem: Caitemis, baronessfaron
+- #858 Hatterene: ShyStarryRain, baronessfaron
+- #859 Impidimp: Emmuffin, baronessfaron, lokatts
+- #860 Morgrem: Emmuffin, JFain, Soulja, baronessfaron
+- #861 Grimmsnarl: G〜, ShyStarryRain, baronessfaron
+- #862 Obstagoon: Emmuffin, baronessfaron
+- #863 Perrserker: Emmuffin, Johanne2, baronessfaron, ◥θ┴θ◤
+- #864 Cursola: Emmuffin, JFain, ShyStarryRain
+- #865 Sirfetch’d: Caitemis, ShyStarryRain, baronessfaron
+- #867 Runerigus: Emmuffin, ShyStarryRain, Soulja, Top_Kec, baronessfaron, ◥θ┴θ◤
+- #868 Milcery: Emmuffin, Riodise, mixy:3
+- #869 Alcremie: Emmuffin
+- #871 Pincurchin: Emmuffin, Michael12, Shadowcrafts
+- #872 Snom: Emboarger, G〜, JFain, Jelly, ◥θ┴θ◤
+- #873 Frosmoth: Caitemis, Emmuffin, Jhony-Rex
+- #874 Stonjourner: Emmuffin, baronessfaron
+- #875 Eiscue: Caitemis, Emmuffin, baronessfaron, ◥θ┴θ◤
+- #876 Indeedee: Emmuffin, JFain, ShyStarryRain
+- #877 Morpeko: Emmuffin, Morei, Uni
+- #879 Copperajah: Emboarger, Emmuffin, EzerArt, nataniel-sama
+- #880 Dracozolt: Emmuffin, Soulja
+- #881 Arctozolt: Emmuffin, Soulja
+- #882 Dracovish: Emmuffin, JFain, baronessfaron
+- #883 Arctovish: Emmuffin, Soulja
+- #884 Duraludon: Caitemis, Emboarger, EzerArt, G〜, Soulja
+- #885 Dreepy: Caitemis, Deeshura, G〜, Jhony-Rex, NOLASMOR, Top_Kec
+- #886 Drakloak: Caitemis, Emmuffin, Jhony-Rex
+- #887 Dragapult: Emmuffin
+- #888 Zacian: Emmuffin, G〜, Soulja, baronessfaron
+- #889 Zamazenta: DeltaL, FerMrack, G〜
+- #890 Eternatus: Emmuffin, Soulja
+- #891 Kubfu: JustAGunk, Top_Kec
+- #892 Urshifu: Deeshura, Emmuffin, baronessfaron
+- #894 Regieleki: Caitemis, CamusZekeSirius, EzerArt, Ichor, baronessfaron
+- #895 Regidrago: CamusZekeSirius, EzerArt, Ichor, ShyStarryRain, baronessfaron
+- #896 Glastrier: JFain, baronessfaron
+- #897 Spectrier: Emboarger, Emmuffin, ShyStarryRain, baronessfaron
+- #898 Calyrex: DeltaL, Emmuffin, EzerArt, FerMrack, G〜, ◥θ┴θ◤
+- #899 Wyrdeer: Emmuffin, G〜, VOID
+- #900 Kleavor: Emmuffin, G〜, Soulja
+- #901 Ursaluna: Emmuffin, G〜, baronessfaron
+- #902 Basculegion: Emboarger, Emmuffin, G〜, Soulja
+- #903 Sneasler: Emmuffin, ShyStarryRain, Soulja, baronessfaron
+- #904 Overqwil: G〜, JFain, Novie, ShyStarryRain
+- #905 Enamorus: G〜, baronessfaron
+- #906 Sprigatito: Emmuffin, baronessfaron
+- #907 Floragato: Emmuffin, G〜, JustAGunk, Soulja, ◥θ┴θ◤
+- #908 Meowscarada: LazerBlitz, distress
+- #909 Fuecoco: Caitemis, G〜, JFain
+- #910 Crocalor: Emmuffin, G〜, JustAGunk, Soulja, pi3.14, ◥θ┴θ◤
+- #911 Skeledirge: Emmuffin, Soulja, pi3.14, ◥θ┴θ◤
+- #912 Quaxly: Caitemis, Emmuffin, JFain, NickOnimura, ShyStarryRain
+- #913 Quaxwell: Emmuffin, JustAGunk, lokatts, ◥θ┴θ◤
+- #914 Quaquaval: Top_Kec
+- #915 Lechonk: Emboarger, Emmuffin, NikolaP, ShyStarryRain
+- #916 Oinkologne: DavKriz, Emmuffin
+- #917 Tarountula: Emmuffin, G〜
+- #918 Spidops: Emmuffin, G〜, baronessfaron
+- #919 Nymble: Axcel, JFain, ShyStarryRain, baronessfaron
+- #920 Lokix: G〜, Soulja, lokatts
+- #921 Pawmi: Emmuffin, G〜, JFain, ShyStarryRain
+- #922 Pawmo: G〜, ShyStarryRain, ◥θ┴θ◤
+- #923 Pawmot: Emmuffin, ShyStarryRain, baronessfaron
+- #924 Tandemaus: G〜, baronessfaron
+- #925 Maushold: Emmuffin, G〜, ShyStarryRain, baronessfaron
+- #926 Fidough: Emmuffin
+- #927 Dachsbun: Emmuffin, baronessfaron
+- #928 Smoliv: Ajifer, Emmuffin
+- #930 Arboliva: Emmuffin, G〜, JFain, jelEmerald, pi3.14
+- #932 Nacli: DavKriz, Emmuffin, baronessfaron
+- #933 Naclstack: G〜, Soulja
+- #934 Garganacl: Emmuffin, G〜, baronessfaron
+- #935 Charcadet: Emmuffin
+- #936 Armarouge: Emmuffin, G〜, Soulja
+- #937 Ceruledge: baronessfaron, ◥θ┴θ◤
+- #938 Tadbulb: Emmuffin, Inv3rse, Soulja, ◥θ┴θ◤
+- #939 Bellibolt: G〜
+- #940 Wattrel: Aviivix, DavKriz, G〜, JustAGunk, ShyStarryRain, Soulja
+- #941 Kilowattrel: DavKriz, G〜, Soulja
+- #946 Bramblin: Emmuffin, Johanne2
+- #948 Toedscool: <SKREE>, Gelius, Okami, pi3.14
+- #951 Capsakid: Emmuffin, G〜, Soulja, pi3.14
+- #952 Scovillain: G〜, Soulja, baronessfaron, pi3.14
+- #953 Rellor: Emmuffin, G〜, Johanne2, Noivern
+- #955 Flittle: Emmuffin
+- #957 Tinkatink: Emmuffin, JFain, ShyStarryRain
+- #958 Tinkatuff: Emmuffin, JFain, ShyStarryRain, baronessfaron
+- #959 Tinkaton: Emmuffin
+- #960 Wiglett: Emmuffin, Limomon
+- #961 Wugtrio: Emmuffin, baronessfaron
+- #963 Finizen: Emmuffin, ShyStarryRain, baronessfaron, ◥θ┴θ◤
+- #964 Palafin: Emmuffin, ShyStarryRain, baronessfaron, ◥θ┴θ◤
+- #965 Varoom: Emmuffin, G〜, Soulja
+- #966 Revavroom: Emmuffin, G〜, Soulja
+- #967 Cyclizar: Emmuffin, G〜, Top_Kec, baronessfaron, lokatts
+- #968 Orthworm: DavKriz, Emmuffin, Soulja, TawnySoup, baronessfaron
+- #969 Glimmet: Deeshura, G〜
+- #970 Glimmora: G〜
+- #971 Greavard: <@!727245570191786085>, Emmuffin, baronessfaron, pi3.14
+- #972 Houndstone: Emmuffin, baronessfaron
+- #974 Cetoddle: DeltaL, Emmuffin, pi3.14
+- #975 Cetitan: DeltaL, Emmuffin, Pokejavi., Soulja, pi3.14
+- #976 Veluza: FlowerSnek, G〜
+- #977 Dondozo: Emmuffin, G〜, Soulja, baronessfaron
+- #978 Tatsugiri: Emmuffin
+- #979 Annihilape: <ElGian>, ShyStarryRain, Top_Kec, baronessfaron
+- #980 Clodsire: Emmuffin, Katach314, Shitpost_Sunkern
+- #981 Farigiraf: Emmuffin, Top_Kec, baronessfaron
+- #982 Dudunsparce: Emmuffin, baronessfaron, pi3.14
+- #983 Kingambit: G〜, Top_Kec
+- #984 Colmilargo: G〜, Soulja, TawnySoup
+- #985 Colagrito: Emmuffin, G〜, baronessfaron
+- #987 Melenaleteo: JuanmaSG, ShyStarryRain, baronessfaron
+- #988 Reptalada: Emmuffin, ShyStarryRain, Soulja, baronessfaron
+- #989 Pelarena: Emmuffin, G〜, Soulja
+- #991 Ferrosaco: G〜, JFain, ShyStarryRain, baronessfaron, ◥θ┴θ◤
+- #992 Ferropalmas: G〜, Soulja, pi3.14
+- #994 Ferropolilla: Emmuffin, G〜, Soulja, baronessfaron, pi3.14
+- #995 Ferropúas: G〜, Soulja
+- #996 Frigibax: Emmuffin, G〜, Inv3rse, Soulja, pi3.14
+- #997 Arctibax: Emmuffin, Soulja, pi3.14, ◥θ┴θ◤
+- #998 Baxcalibur: G〜, Soulja, pi3.14

@@ -19,8 +19,8 @@ const Core = (() => {
   const BASES = POKEDEX.filter(p => baseOf(p.dex) === p.dex).map(p => p.dex);
   // POOLG[generación][rareza] = Pokémon base que se pueden conseguir en el gacha
   const POOLG = {};
-  for (const g of [1, 2, 3]) POOLG[g] = [null, [], [], [], [], []];
-  for (const d of BASES) POOLG[DEX[d].gen][RAR[d]].push(d);
+  for (const g of [1, 2, 3, 4, 5, 6, 7, 8, 9]) POOLG[g] = [null, [], [], [], [], []];
+  for (const d of BASES) if (POOLG[DEX[d].gen]) POOLG[DEX[d].gen][RAR[d]].push(d);
 
   // ---------------- utilidades ----------------
   const SUF = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
@@ -48,13 +48,13 @@ const Core = (() => {
     return {
       v: 1, started: false, coins: 0, gems: 50, dust: 0, stage: 1, maxStage: 1, kills: 0, auto: true,
       team: [], slots: 1, mons: {}, seen: {},
-      up: { tap: 0, train: 0, coin: 0, crit: 0, critdmg: 0, speed: 0, catch: 0, golden: 0, bosstime: 0 },
-      shop: { dmg: 0, coins: 0, lvl: 0, slots: 0, offline: 0, catch: 0, shiny: 0, gems: 0 },
+      up: { tap: 0, train: 0, coin: 0, crit: 0, critdmg: 0, speed: 0, catch: 0, golden: 0, bosstime: 0, type: 0, boss: 0, autotap: 0, alch: 0 },
+      shop: { dmg: 0, coins: 0, lvl: 0, slots: 0, offline: 0, catch: 0, shiny: 0, gems: 0, skill: 0, dust: 0, tapd: 0, critb: 0, disc: 0, bt: 0 },
       medals: 0, mp: 0, badges: {}, bossFirst: {},
       sk: { rage: 0, gold: 0, lure: 0 },        // instante (tiempo jugado) en el que está lista cada habilidad
       skOn: { rage: 0, gold: 0, lure: 0 },      // instante en el que termina cada habilidad
-      stats: { kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0 },
-      pity: 0, pityE: 0, bannerLost: 0, freeDay: '', last: Date.now(),
+      stats: { kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, freePulls: 0, streak: 0 },
+      pity: 0, pityE: 0, bannerLost: 0, freeDay: '', autoAcc: 0, last: Date.now(),
       daily: { day: '', streak: 0, claimed: true, quests: [] }, weekly: { week: -1, quests: [] }, ach: {},
       buyMul: 1, settings: { music: 0.35, sfx: 0.6, nums: true },
     };
@@ -93,7 +93,7 @@ const Core = (() => {
   const loopOf = s => Math.floor(route(s) / ROUTES.length);
   const isBoss = s => s % 10 === 0;
   const bossTier = s => BOSS_TIER[routeData(s).boss.tier];
-  const bossTime = s => bossTier(s).time + 3 * S.up.bosstime;
+  const bossTime = s => bossTier(s).time + 3 * S.up.bosstime + 2 * S.shop.bt;
   const enemyHp = s => Math.round(K.hpB * Math.pow(K.hpG, s - 1) + K.hpL * s) * (isBoss(s) ? bossTier(s).hp : 1);
   const skillOn = id => S.skOn[id] > S.stats.time;
   const medalMult = () => 1 + 0.03 * S.medals;
@@ -114,15 +114,16 @@ const Core = (() => {
       for (const t of defTypes) { const f = TYPE_CHART[at] && TYPE_CHART[at][t]; if (f !== undefined) e *= f; }
       best = Math.max(best, e);
     }
-    return Math.min(2.5, Math.max(0.5, best));
+    const b = Math.min(2.5, Math.max(0.5, best));
+    return b >= 2 ? b * (1 + 0.04 * S.up.type) : b;
   }
   const levelCost = (m, l) => Math.ceil(6 * RAR_COST[RAR[m.dex]] * Math.pow(K.lvlG, l - 1));
   function levelCostN(m, n) { let c = 0; for (let i = 0; i < n; i++) c += levelCost(m, m.lvl + i); return c; }
   function maxAffordable(m) { let n = 0, c = 0; while (n < 1000) { const k = levelCost(m, m.lvl + n); if (c + k > S.coins) break; c += k; n++; } return { n, c }; }
   const upCost = id => Math.ceil(UPGRADES[id].base * Math.pow(UPGRADES[id].mul, S.up[id]));
   const shopCost = id => Math.ceil(LEAGUE_SHOP[id].base * Math.pow(LEAGUE_SHOP[id].mul, S.shop[id]));
-  const pokeBallPrice = () => Math.ceil(30 * Math.pow(1.2, Math.min(S.stats.maxStage, 140) - 1) * Math.pow(1.05, Math.max(0, S.stats.maxStage - 140)));
-  const critChance = () => 0.03 + 0.02 * S.up.crit;
+  const pokeBallPrice = () => Math.ceil((1 - 0.04 * S.shop.disc) * 30 * Math.pow(1.2, Math.min(S.stats.maxStage, 140) - 1) * Math.pow(1.05, Math.max(0, S.stats.maxStage - 140)));
+  const critChance = () => 0.03 + 0.02 * S.up.crit + 0.01 * S.shop.critb;
   const critMult = () => 3 + 0.25 * S.up.critdmg;
   const catchChance = () => (0.015 + 0.005 * S.up.catch + 0.004 * S.shop.catch) * (skillOn('lure') ? 6 : 1);
   const goldenChance = () => 1 / 120 + 0.002 * S.up.golden;
@@ -132,11 +133,12 @@ const Core = (() => {
     for (const k of S.team) { const m = S.mons[k]; d += monDmg(m) / monRate(m) * (defTypes ? eff(m.dex, defTypes) : 1); }
     return d * (1 + critChance() * (critMult() - 1));
   }
-  const tapDmg = () => 1 + 3 * S.up.tap + teamDps() * (0.15 + 0.01 * S.up.tap);
+  const bossBonus = e => (e && e.boss ? 1 + 0.04 * S.up.boss : 1);
+  const tapDmg = () => (1 + 3 * S.up.tap + teamDps() * (0.15 + 0.01 * S.up.tap)) * (1 + 0.1 * S.shop.tapd);
   const medalFor = ms => ms < 60 ? 0 : Math.max(1, Math.floor(Math.pow((ms - 45) / 12, 1.4)));
   const medalGain = () => medalFor(S.maxStage);
   const genUnlocked = g => g <= 1 || S.stats.maxStage > REGIONS[g - 1].first * 10;
-  const unlockedGens = () => [1, 2, 3].filter(genUnlocked);
+  const unlockedGens = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(genUnlocked);
 
   // ---------------- combate ----------------
   const F = { enemy: null, timers: [], hits: [], respawn: 0, bossT: 0 };
@@ -172,6 +174,7 @@ const Core = (() => {
     const e = F.enemy;
     if (!e || e.hp <= 0) return;
     e.hp -= dmg;
+    if (crit) S.stats.crits++;
     emit('hit', { dmg, crit, src });
     if (e.hp <= 0) kill();
   }
@@ -180,6 +183,7 @@ const Core = (() => {
     const coins = killCoins(s) * (e.golden ? 5 : 1);
     S.coins += coins; S.stats.coinsTotal += coins; S.stats.kills++;
     let gems = e.golden ? 3 : 0;
+    if (e.golden) S.stats.goldens++;
     if (e.boss) {
       S.stats.bosses++;
       const t = BOSS_TIER[e.tier];
@@ -218,12 +222,12 @@ const Core = (() => {
   }
   function fightBoss() { if (!isBoss(S.stage) && S.kills >= 10) { S.auto = true; advance(true); } }
 
-  function tap() {
+  function tap(auto) {
     const e = F.enemy;
     if (!e || e.hp <= 0) return null;
-    S.stats.taps++;
+    if (!auto) S.stats.taps++;
     const crit = rnd() < critChance();
-    const dmg = tapDmg() * (crit ? critMult() : 1);
+    const dmg = tapDmg() * (crit ? critMult() : 1) * bossBonus(e);
     deal(dmg, crit, -1);
     return { dmg, crit };
   }
@@ -231,6 +235,7 @@ const Core = (() => {
   function tick(dt) {
     if (!S || !S.started) return;
     S.stats.time += dt;
+    if (S.up.autotap) { S.autoAcc += dt * 0.5 * S.up.autotap; while (S.autoAcc >= 1) { S.autoAcc -= 1; if (F.enemy) tap(true); } }
     if (!F.enemy) { F.respawn -= dt; if (F.respawn <= 0) spawn(); return; }
     const e = F.enemy;
     if (e.boss) { F.bossT -= dt; if (F.bossT <= 0 && e.hp > 0) { bossFail(); return; } }
@@ -242,7 +247,7 @@ const Core = (() => {
         F.timers[i] += monRate(m);
         const crit = rnd() < critChance();
         const ef = eff(m.dex, e.types);
-        const dmg = monDmg(m) * ef * (crit ? critMult() : 1) * (0.9 + rnd() * 0.2);
+        const dmg = monDmg(m) * ef * (crit ? critMult() : 1) * (0.9 + rnd() * 0.2) * bossBonus(e);
         F.hits.push({ t: 0.22, dmg, crit, slot: i, eff: ef });
         emit('fire', { slot: i, dex: m.dex, delay: 0.22 });
       }
@@ -259,7 +264,7 @@ const Core = (() => {
   function useSkill(id) {
     const k = SKILLS[id];
     if (!k || !skillReady(id)) return false;
-    S.skOn[id] = S.stats.time + k.dur; S.sk[id] = S.stats.time + k.cd; S.stats.skills++;
+    S.skOn[id] = S.stats.time + k.dur + 2 * S.shop.skill; S.sk[id] = S.stats.time + k.cd * (1 - 0.04 * S.shop.skill); S.stats.skills++;
     emit('skill', id);
     return true;
   }
@@ -271,7 +276,7 @@ const Core = (() => {
     if (!m) { m = S.mons[base] = { dex: base, lvl: 1 + 3 * S.shop.lvl, stars: 0, copies: 0, shiny: !!shiny }; isNew = true; }
     else {
       m.copies++;
-      dust = DUST_GAIN[rar];
+      dust = Math.round(DUST_GAIN[rar] * (1 + 0.1 * S.up.alch + 0.15 * S.shop.dust));
       S.dust += dust; S.stats.dust += dust;
       if (shiny && !m.shiny) m.shiny = true;
     }
@@ -397,13 +402,13 @@ const Core = (() => {
     return out;
   }
   const freePullReady = () => S.freeDay !== today();
-  function freePull() { if (!freePullReady()) return null; S.freeDay = today(); return pull('poke', 1, true); }
+  function freePull() { if (!freePullReady()) return null; S.freeDay = today(); S.stats.freePulls++; return pull('poke', 1, true); }
   function dustCost(base) { return DUST_COST[RAR[base]]; }
   function dustBuy(base) {
     if (S.mons[base] || !genUnlocked(DEX[base].gen) || baseOf(base) !== base) return null;
     const c = dustCost(base);
     if (S.dust < c) return null;
-    S.dust -= c;
+    S.dust -= c; S.stats.dustBuys++;
     return addMon(base, false);
   }
 
@@ -427,6 +432,7 @@ const Core = (() => {
       const y = prev.getFullYear() + '-' + (prev.getMonth() + 1) + '-' + prev.getDate();
       S.daily.streak = S.daily.day === y ? S.daily.streak + 1 : 1;
       S.daily.day = d; S.daily.claimed = false;
+      S.stats.streak = Math.max(S.stats.streak, S.daily.streak);
       S.daily.quests = makeQuests(QUEST_POOL, 4);
       changed = true;
     }
@@ -443,7 +449,20 @@ const Core = (() => {
     const g = Math.round(q.reward * gemMult()); S.gems += g; return g;
   }
   const legendsOwned = () => Object.values(S.mons).filter(m => RAR[m.dex] === 5).length;
-  function achStat(a) { return a.stat === 'dex' ? dexCount() : a.stat === 'legends' ? legendsOwned() : S.stats[a.stat] || 0; }
+  function achStat(a) {
+    const st = a.stat;
+    if (st === 'dex') return dexCount();
+    if (st === 'legends') return legendsOwned();
+    if (st === 'stars5') return Object.values(S.mons).filter(m => m.stars >= 5).length;
+    if (st === 'maxLvl') return Object.values(S.mons).reduce((x, m) => Math.max(x, m.lvl), 0);
+    if (st === 'upMax') return Object.keys(UPGRADES).filter(k => S.up[k] >= UPGRADES[k].max).length;
+    if (st === 'shopLvl') return Object.values(S.shop).reduce((x, n) => x + n, 0);
+    if (st === 'regions') return unlockedGens().length;
+    if (st === 'slots') return S.slots;
+    if (st.startsWith('type:')) { const t = st.slice(5); return Object.values(S.mons).filter(m => DEX[m.dex].types.includes(t)).length; }
+    if (st.startsWith('regionDex:')) { const g = +st.slice(10); return Object.keys(S.seen).filter(d => DEX[d] && DEX[d].gen === g).length; }
+    return S.stats[st] || 0;
+  }
   function claimAch(id) { const a = ACHIEVEMENTS.find(x => x.id === id); if (!a || S.ach[id] || achStat(a) < a.goal) return 0; S.ach[id] = 1; S.gems += a.reward; return a.reward; }
   function pendingRewards() {
     let n = S.daily.quests.filter(q => !q.claimed && questProg(q) >= q.goal).length;

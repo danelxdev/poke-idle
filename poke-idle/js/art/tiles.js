@@ -86,6 +86,12 @@ const Tiles = (() => {
       leaf: '#4aaa3a', trunk: '#6a4a2a', flowers: ['#ff9ac0', '#ffe14d', '#ffffff'], grass: '#5ab848', rock: '#8a9088', dirt: '#a08a52' },
     { name: 'Ciudad', floor: '#6a6e7c', wall: '#3a3e50', liquid: 'spark', liq: '#4a7ae0', foam: '#b8d8ff', prop: 'pylon',
       leaf: '#8ab8ff', trunk: '#5a6070', flowers: ['#ffd23f', '#7fd0ff', '#ffffff'], grass: '#7a8a70', rock: '#8a92a0' },
+    { name: 'Otoño', floor: '#9a7a4a', wall: '#6a4a2e', liquid: 'water', liq: '#4a8ab8', foam: '#e0f0ff', prop: 'tree',
+      leaf: '#d8742a', trunk: '#5a3a22', flowers: ['#ffb02e', '#ff6a3a', '#ffe08a'], grass: '#a8883a', rock: '#8a7a6a', dirt: '#8a6a3a' },
+    { name: 'Tropical', floor: '#e8d890', wall: '#4a8a6a', liquid: 'water', liq: '#20c8d8', foam: '#ffffff', prop: 'tree',
+      leaf: '#2aa84a', trunk: '#8a5a32', flowers: ['#ff5a9a', '#ffe14d', '#ff9a3a'], grass: '#58b048', rock: '#a8a090', dirt: '#d8c078' },
+    { name: 'Páramo', floor: '#5a7a58', wall: '#4a5a4a', liquid: 'water', liq: '#4a7a9a', foam: '#d0e8f0', prop: 'tomb',
+      leaf: '#6a8a5a', trunk: '#4a4a3a', flowers: ['#c8a0ff', '#ffe0a0', '#ffffff'], grass: '#4a8a4a', rock: '#7a8078', dirt: '#6a6a4a' },
   ];
   function makeBiome(th) {
     const f = th.floor, w = th.wall, L = th.liq, D = th.dirt || shade(f, -0.16);

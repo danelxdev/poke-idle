@@ -151,15 +151,25 @@ const UI = (() => {
         const feat = (d, tag) => `<div class="feat"><span class="tagx">${tag}</span><img src="${por(d)}"><div><b>${DEX[d].name}</b><small>${RARITY[Core.RAR[d]].name}</small><br>${typeTags(d)}</div></div>`;
         h += `<h3>Destacados de la Bola Destacada</h3>` + feat(fl, 'LEGENDARIO · SEMANA') + feat(fe, 'ÉPICO · 3 DÍAS');
         h += `<div class="pity">Épico garantizado en <b>${Math.max(0, PITY_EPIC - s.pityE)}</b> tiradas · Legendario en <b>${Math.max(0, PITY - s.pity)}</b> (solo con gemas)${s.bannerLost ? '<br><b style="color:#ffd23f">¡El próximo legendario de la Bola Destacada será el destacado!</b>' : ''}<div class="bar"><i style="width:${s.pity / PITY * 100}%"></i></div></div>`;
-        for (const [id, b] of Object.entries(BALLS)) {
+        const ballCard = ([id, b]) => {
           const cur = b.cur;
-          if (!Core.ballAvailable(id)) { h += `<div class="ball-card locked"><span class="bi">${ico(b.icon, 48)}</span><b>${b.name}</b><p>Llega a ${REGIONS[b.gen - 1].name} para desbloquearla.</p></div>`; continue; }
-          h += `<div class="ball-card"><span class="bi">${ico(b.icon, 48)}</span><b>${b.name}</b><p>${b.desc}</p>
+          return `<div class="ball-card"><span class="bi">${ico(b.icon, 48)}</span><b>${b.name}</b><p>${b.desc}</p>
             <div class="rates">${b.rates.map((r, k) => r ? `<span style="color:${RARITY[k].color}">${RARITY[k].name} ${r}%</span>` : '').join('')}</div>
             <div class="btns">
               <button class="btn primary" data-act="pull" data-v="${id}" data-n="1" data-cost="${Core.ballPrice(id, 1)}" data-cur="${cur}">x1 ${ico(cur === 'gems' ? 'gem' : 'coin', 12)} ${fmt(Core.ballPrice(id, 1))}</button>
               <button class="btn primary" data-act="pull" data-v="${id}" data-n="10" data-cost="${Core.ballPrice(id, 10)}" data-cur="${cur}">x10 ${ico(cur === 'gems' ? 'gem' : 'coin', 12)} ${fmt(Core.ballPrice(id, 10))}</button>
             </div></div>`;
+        };
+        const entries = Object.entries(BALLS);
+        h += entries.filter(([, b]) => !b.region && Core.ballAvailable(entries.find(e => e[1] === b)[0])).filter(([id]) => id !== 'master').map(ballCard).join('');
+        h += entries.filter(([id]) => id === 'master').map(ballCard).join('');
+        h += '<h3>Bolas regionales</h3><p class="hint">Solo Pokémon de la región. Se abren al llegar a ella.</p>';
+        let locked = 0;
+        for (const [id, b] of entries.filter(([, b]) => b.region)) {
+          if (!Core.ballAvailable(id)) { if (!locked++) h += `<div class="ball-row locked"><span>${ico(b.icon, 24)}</span><b>${b.name}</b><small>Llega a ${REGIONS[b.gen - 1].name} (etapa ${REGIONS[b.gen - 1].first * 10 + 1})</small></div>`; continue; }
+          h += `<div class="ball-row"><span>${ico(b.icon, 24)}</span><b>${b.name}</b>
+            <button class="btn small primary" data-act="pull" data-v="${id}" data-n="1" data-cost="${Core.ballPrice(id, 1)}" data-cur="gems">x1 ${ico('gem', 10)} ${fmt(Core.ballPrice(id, 1))}</button>
+            <button class="btn small primary" data-act="pull" data-v="${id}" data-n="10" data-cost="${Core.ballPrice(id, 10)}" data-cur="gems">x10 ${ico('gem', 10)} ${fmt(Core.ballPrice(id, 10))}</button></div>`;
         }
         h += `<p class="hint">x10 cuesta como 9 y garantiza un Pokémon raro o mejor. Las copias repetidas suben estrellas (★ multiplica el daño) y dan <b>polvo estelar</b> (${ico('dust', 14)} ${fmt(s.dust)}): con él puedes canjear en la Pokédex el Pokémon que quieras. Las regiones nuevas se abren al llegar a ellas. 1 de cada 150 sale shiny (+50% de daño).</p>`;
         return h;
@@ -170,11 +180,11 @@ const UI = (() => {
       html() {
         const s = S();
         const n = Core.dexCount();
-        const filters = [['all', 'Todos'], ['mine', 'Míos'], ['1', 'Kanto'], ['2', 'Johto'], ['3', 'Hoenn']];
+        const filters = [['all', 'Todos'], ['mine', 'Solo los míos']].concat(REGIONS.filter(r => r.gen).map(r => [String(r.gen), r.name]));
         let h = `<div class="dexhead"><span>Registrados <b style="color:#fff">${n}/${POKEDEX.length}</b> · +${n}% de daño · ${ico('dust', 14)} ${fmt(s.dust)}</span></div>
-          <div class="seg">${filters.map(([v, l]) => `<button data-act="dexf" data-v="${v}" class="${dexFilter === v ? 'on' : ''}">${l}</button>`).join('')}</div><div class="dexgrid">`;
+          <div class="seg"><select class="sel" data-act="dexsel">${filters.map(([v, l]) => `<option value="${v}" ${dexFilter === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div><div class="dexgrid">`;
         for (const p of POKEDEX) {
-          if (dexFilter === '1' || dexFilter === '2' || dexFilter === '3') { if (p.gen !== +dexFilter) continue; }
+          if (/^[1-9]$/.test(dexFilter)) { if (p.gen !== +dexFilter) continue; }
           const base = String(Core.baseOf(p.dex)), own = s.mons[base], seen = s.seen[p.dex];
           const cur = own && own.dex === p.dex, locked = !Core.genUnlocked(p.gen);
           if (dexFilter === 'mine' && !(own && seen)) continue;
@@ -353,19 +363,20 @@ const UI = (() => {
     $('#d-yes').onclick = () => { const r = Core.dustBuy(d); closeModal(); if (r) { Audio8.play(r.rar >= 4 ? 'rare' : 'friend'); autoFill(); banner('¡' + DEX[d].name + ' se une a tu colección!', 'Canjeado con polvo estelar', RARITY[r.rar].color); Core.save(); refresh(true); } };
   }
 
+  let mapReg = -1;
   function mapModal() {
     const s = S(), L = Core.loopOf(s.stage), cur = Core.routeIdx(s.stage);
-    let h = `<h2>Mapa del mundo</h2><p class="hint">Toca una ruta para farmear en ella. Usa «Avanzar etapa» para seguir.${L ? ' Ciclo +' + L : ''}</p><div class="maplist">`;
-    REGIONS.forEach((reg, ri0) => {
-      const end = ri0 + 1 < REGIONS.length ? REGIONS[ri0 + 1].first : ROUTES.length;
-      h += `<h3>${reg.name}</h3>`;
-      for (let ri = reg.first; ri < end; ri++) {
-        const r = ROUTES[ri], base = (L * ROUTES.length + ri) * 10 + 1, open = base <= s.maxStage, done = s.bossFirst[base + 9];
-        h += `<button class="maprow ${ri === cur ? 'cur' : ''}" data-go="${Math.min(base + 8, s.maxStage)}" ${open ? '' : 'disabled'}><b>${r.name}</b><small>${open ? 'Etapas ' + base + '–' + (base + 9) : 'Bloqueada'}</small><span class="mb"><img src="${por(r.boss.dex)}" class="px">${done ? '✓ ' : ''}${r.boss.who}</span></button>`;
-      }
-    });
+    if (mapReg < 0) mapReg = Core.regionOf(s.stage);
+    const reg = REGIONS[mapReg], end = mapReg + 1 < REGIONS.length ? REGIONS[mapReg + 1].first : ROUTES.length;
+    let h = `<h2>Mapa del mundo</h2><p class="hint">Toca una ruta para farmear en ella. Usa «Avanzar etapa» para seguir.${L ? ' Ciclo +' + L : ''}</p>
+      <div class="seg wrap">${REGIONS.map((r, i) => `<button data-reg="${i}" class="${i === mapReg ? 'on' : ''}" ${(L * ROUTES.length + r.first) * 10 + 1 > s.maxStage ? 'disabled' : ''}>${r.name}</button>`).join('')}</div><div class="maplist">`;
+    for (let ri = reg.first; ri < end; ri++) {
+      const r = ROUTES[ri], base = (L * ROUTES.length + ri) * 10 + 1, open = base <= s.maxStage, done = s.bossFirst[base + 9];
+      h += `<button class="maprow ${ri === cur ? 'cur' : ''}" data-go="${Math.min(base + 8, s.maxStage)}" ${open ? '' : 'disabled'}><b>${r.name}</b><small>${open ? 'Etapas ' + base + '–' + (base + 9) : 'Bloqueada'}</small><span class="mb"><img src="${por(r.boss.dex)}" class="px">${done ? '✓ ' : ''}${r.boss.who}</span></button>`;
+    }
     openModal(h + '</div><div class="row"><button class="btn" id="map-x">Cerrar</button></div>');
     $('#map-x').onclick = closeModal;
+    $$('[data-reg]').forEach(b => b.onclick = () => { mapReg = +b.dataset.reg; mapModal(); });
     $$('.maprow').forEach(b => b.onclick = () => { if (b.disabled) return; Core.goStage(+b.dataset.go); S().auto = false; Audio8.play('select'); closeModal(); });
   }
 
@@ -414,6 +425,7 @@ const UI = (() => {
   function toast(html) { const t = $('#toast'); t.innerHTML = html; t.classList.remove('hidden'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('hidden'), 2000); }
 
   function bind() {
+    $('#tab-body').addEventListener('change', e => { const el = e.target.closest('[data-act="dexsel"]'); if (el) { dexFilter = el.value; sig = ''; refresh(true); } });
     $('#tab-body').addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && !el.disabled) act(el); });
     $$('#tabs button').forEach(b => b.onclick = () => { Audio8.play('click'); setTab(b.dataset.tab); });
     $$('[data-ico]').forEach(s => s.innerHTML = ico(s.dataset.ico, 24));
@@ -426,7 +438,7 @@ const UI = (() => {
     $('#st-next').onclick = () => { Core.goStage(S().stage + 1); };
     $('#btn-boss').onclick = () => { Core.fightBoss(); };
     $('#btn-map').innerHTML = ico('boot', 24);
-    $('#btn-map').onclick = mapModal;
+    $('#btn-map').onclick = () => { mapReg = -1; mapModal(); };
     $('#i-dust').innerHTML = ico('dust', 24);
     $('#skills').innerHTML = Object.entries(SKILLS).map(([id, k]) => `<button class="skill" id="sk-${id}" data-sk="${id}" title="${k.name}: ${k.desc}">${ico(k.icon, 24)}<i></i><small></small></button>`).join('');
     $$('#skills .skill').forEach(b => b.onclick = e => { e.stopPropagation(); if (Core.useSkill(b.dataset.sk)) { Audio8.play(b.dataset.sk === 'rage' ? 'charge' : 'ticket'); banner(SKILLS[b.dataset.sk].name + '!', SKILLS[b.dataset.sk].desc, '#ff8040'); } });
