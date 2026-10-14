@@ -20,6 +20,7 @@ const UI = (() => {
   // ---------------- pantallas iniciales ----------------
   function title() {
     show('scr-title');
+    const k = $('#kofi-title'); if (k) { k.href = KOFI_URL; k.innerHTML = ico('cup', 24) + ' Apoyar en Ko-fi'; }
     const ids = [25, 4, 249, 384, 7, 133, 258, 149, 382, 155, 150, 252];
     $('#parade').innerHTML = ids.map(d => `<img class="px" src="${por(d)}" alt="">`).join('');
   }
@@ -98,6 +99,12 @@ const UI = (() => {
   const costBtn = (cost, label, act, extra = '', cur = 'coins') =>
     `<button class="btn primary buy" data-act="${act}" data-cost="${cost}" data-cur="${cur}" ${extra}><span>${label}</span><small>${ico(cur === 'gems' ? 'gem' : 'coin', 12)}${fmt(cost)}</small></button>`;
 
+  const itemName = it => HELD[it.id].name + (it.id === 'orbe' ? ' de ' + TYPE_NAMES[it.type] : '');
+  const itemDesc = it => HELD[it.id].desc(Core.itemVal(it), it);
+  function itemChip(k, m) {
+    const it = Core.itemOf(m);
+    return `<button class="itemchip ${it ? 'has' : ''}" data-act="item" data-v="${k}" ${it ? `style="--rc:${ITEM_RAR[it.rar].color}"` : ''} title="${it ? itemName(it) + ': ' + itemDesc(it) : 'Equipar un objeto'}">${it ? ico(HELD[it.id].icon, 24) : '+'}</button>`;
+  }
   function buyN(m) {
     const bm = S().buyMul;
     if (bm === 'max') { const r = Core.maxAffordable(m); return r.n ? r : { n: 1, c: Core.levelCost(m, m.lvl) }; }
@@ -106,10 +113,10 @@ const UI = (() => {
 
   const TABS = {
     team: {
-      sig: () => { const s = S(); return JSON.stringify([s.team.map(k => [k, s.mons[k].lvl, s.mons[k].dex, s.mons[k].stars, s.mons[k].shiny]), s.slots, s.buyMul, s.buyMul === 'max' ? Math.floor(Math.log(s.coins + 1) * 3) : 0, s.medals, s.up.train, Core.dexCount(), s.badges]); },
+      sig: () => { const s = S(); return JSON.stringify([s.team.map(k => [k, s.mons[k].lvl, s.mons[k].dex, s.mons[k].stars, s.mons[k].shiny, s.mons[k].item]), s.inv.length, s.slots, s.buyMul, s.buyMul === 'max' ? Math.floor(Math.log(s.coins + 1) * 3) : 0, s.medals, s.up.train, Core.dexCount(), s.badges]); },
       html() {
         const s = S();
-        let h = `<div class="seg">${[1, 10, 25, 'max'].map(v => `<button data-act="mul" data-v="${v}" class="${s.buyMul === v ? 'on' : ''}">${v === 'max' ? 'Máx' : 'x' + v}</button>`).join('')}</div>`;
+        let h = `<div class="teamhead"><div class="seg">${[1, 10, 25, 'max'].map(v => `<button data-act="mul" data-v="${v}" class="${s.buyMul === v ? 'on' : ''}">${v === 'max' ? 'Máx' : 'x' + v}</button>`).join('')}</div><button class="btn small" data-act="bag">Mochila · ${s.inv.length}</button></div>`;
         for (let i = 0; i < 6; i++) {
           const k = s.team[i];
           if (i >= s.slots) {
@@ -128,8 +135,12 @@ const UI = (() => {
             ${starsHtml(m.stars)} ${typeTags(m.dex)}
             <small class="mv"><i style="background:${TYPE_COLORS[mv.type]}"></i>${mv.name} · ${fmt(Core.monDmg(m) / Core.monRate(m))} daño/s</small>
             <small class="evo">${evo ? evo + ' · ' : ''}${next}</small></div>
-            <div class="acts">${costBtn(b.c, 'Subir +' + b.n, 'lvl', `data-v="${k}"`)}<button class="btn small" data-act="pick" data-v="${i}">Cambiar</button></div></div>`;
+            <div class="acts">${costBtn(b.c, 'Subir +' + b.n, 'lvl', `data-v="${k}"`)}<div class="rowbtns">${itemChip(k, m)}<button class="btn small" data-act="pick" data-v="${i}">Cambiar</button></div></div></div>`;
         }
+        const sy = Core.synergies();
+        h += '<h3>Sinergias de equipo</h3>';
+        h += sy.list.length ? sy.list.map(x => `<div class="syn on"><b>${x.name}</b><small>${x.txt}</small></div>`).join('') : '<p class="hint">Aún no tienes ninguna activa.</p>';
+        h += '<p class="hint">Mismo tipo: 2 Pokémon +8%, 3 +20%, 4 +35%, 5 +55%, 6 +80% de daño a los de ese tipo. Diversidad: 4 tipos distintos +15%, 6 +30%. Legendarios: 2 +20%, 4 +50%. Shinies: 2 +10% monedas, 4 +25%. Veterano: todos con ★3 o más +25%.</p>';
         h += `<p class="hint">Consejo: los Pokémon hacen x2 de daño cuando su tipo es eficaz contra el enemigo. Cada 25 niveles su daño se duplica y cada cierto nivel aprenden un ataque más potente.</p>`;
         return h;
       },
@@ -287,6 +298,8 @@ const UI = (() => {
       case 'up': if (Core.buyUp(v)) Audio8.play('levelup'); break;
       case 'tab': setTab(v); return;
       case 'pick': pickModal(+v); return;
+      case 'item': itemModal(v); return;
+      case 'bag': bagModal(); return;
       case 'pull': doPull(v, +el.dataset.n); break;
       case 'freepull': doPull('poke', 1, true); break;
       case 'buytk': if (Core.buyTicket(v, +el.dataset.n)) Audio8.play('item'); else Audio8.play('error'); break;
@@ -350,6 +363,115 @@ const UI = (() => {
       const b = e.target.closest('.pk'); if (!b) return;
       Core.setTeam(slot, b.dataset.k); Audio8.play('swap'); Core.save(); closeModal(); refresh(true);
     };
+  }
+
+  // ---------------- objetos ----------------
+  const itemCard = (it, extra = '') => `<button class="it" data-u="${it.u}" style="--rc:${ITEM_RAR[it.rar].color}">${ico(HELD[it.id].icon, 36)}<span><b>${itemName(it)}</b><small>${ITEM_RAR[it.rar].name} · ${itemDesc(it)}</small></span>${extra}</button>`;
+  function holderOf(u) { const s = S(); const k = Object.keys(s.mons).find(k => s.mons[k].item === u); return k ? s.mons[k] : null; }
+  function itemModal(key) {
+    const s = S(), m = s.mons[key], cur = Core.itemOf(m);
+    const list = s.inv.slice().sort((a, b) => b.rar - a.rar || a.id.localeCompare(b.id));
+    openModal(`<h2>Objeto de ${DEX[m.dex].name}</h2>
+      ${cur ? `<div class="curitem">${itemCard(cur, '<em>Equipado</em>')}</div>` : '<p class="hint">No lleva ningún objeto.</p>'}
+      <div class="pickwrap itemlist2" id="it-list">${list.length ? list.map(it => { const h = holderOf(it.u); return itemCard(it, h && h !== m ? `<em>Lo lleva ${DEX[h.dex].name}</em>` : ''); }).join('') : '<p class="hint">Aún no tienes objetos. Los sueltan los jefes y, con suerte, los Pokémon salvajes.</p>'}</div>
+      <div class="row">${cur ? '<button class="btn danger" id="it-rm">Quitar objeto</button>' : ''}<button class="btn" id="it-x">Cerrar</button></div>`);
+    $('#modal-box').classList.add('wide');
+    $('#it-x').onclick = closeModal;
+    if ($('#it-rm')) $('#it-rm').onclick = () => { Core.unequip(key); Audio8.play('swap'); Core.save(); closeModal(); refresh(true); };
+    $('#it-list').onclick = e => { const b = e.target.closest('.it'); if (!b) return; Core.equip(key, +b.dataset.u); Audio8.play('item'); Core.save(); closeModal(); refresh(true); };
+  }
+  function bagModal() {
+    const s = S(), list = s.inv.slice().sort((a, b) => b.rar - a.rar || a.id.localeCompare(b.id));
+    openModal(`<h2>Mochila · ${list.length} objetos</h2>
+      <div class="row" style="margin:0 0 8px"><button class="btn small" id="bag-spare">Reciclar comunes sin usar</button><button class="btn small primary" id="bag-buy" ${s.dust >= ITEM_DUST_COST ? '' : 'disabled'}>Objeto al azar ${ico('dust', 12)} ${ITEM_DUST_COST}</button></div>
+      <p class="hint" style="margin:0 0 6px">Polvo estelar: ${ico('dust', 14)} ${fmt(s.dust)} · Toca un objeto para reciclarlo.</p>
+      <div class="pickwrap itemlist2" id="bag-list">${list.length ? list.map(it => { const h = holderOf(it.u); return itemCard(it, `<em>${h ? 'Lo lleva ' + DEX[h.dex].name : '+' + ITEM_RAR[it.rar].dust + ' polvo'}</em>`); }).join('') : '<p class="hint">Aún no tienes objetos. Los sueltan los jefes y, con suerte, los Pokémon salvajes.</p>'}</div>
+      <div class="row"><button class="btn" id="bag-x">Cerrar</button></div>`);
+    $('#modal-box').classList.add('wide');
+    $('#bag-x').onclick = closeModal;
+    $('#bag-spare').onclick = () => { const r = Core.recycleSpare(); Audio8.play(r.n ? 'ticket' : 'error'); if (r.n) toast(`Reciclados ${r.n} objetos: +${r.d} polvo`); Core.save(); bagModal(); refresh(true); };
+    $('#bag-buy').onclick = () => { const it = Core.buyItem(); if (it) { Audio8.play('item'); banner('¡' + itemName(it) + '!', ITEM_RAR[it.rar].name + ' · ' + itemDesc(it), ITEM_RAR[it.rar].color); Core.save(); bagModal(); refresh(true); } };
+    $('#bag-list').onclick = e => {
+      const b = e.target.closest('.it'); if (!b) return;
+      const it = s.inv.find(i => i.u === +b.dataset.u); if (!it) return;
+      const h = holderOf(it.u);
+      if (h) { toast('Lo lleva ' + DEX[h.dex].name + ': quítaselo primero'); return; }
+      const d = Core.recycleItem(it.u); Audio8.play('ticket'); toast('+' + d + ' polvo'); Core.save(); bagModal(); refresh(true);
+    };
+  }
+
+  // ---------------- tutorial inicial ----------------
+  const TUT = [
+    { sel: '#arena', text: 'Tu Pokémon combate solo contra los Pokémon salvajes de cada ruta. ¡Toca a los enemigos para hacer daño extra!', wait: () => S().stats.taps >= 3, hint: 'Toca al enemigo 3 veces' },
+    { sel: '.cur.coins', text: 'Cada Pokémon derrotado te da monedas. Mira cómo sube el contador.', next: 1 },
+    { sel: '.a-top', text: 'Cada 10 victorias pasas de etapa. En la décima hay un jefe con tiempo limitado: si no lo vences, vuelves a la etapa anterior.', next: 1 },
+    { tab: 'team', sel: '[data-act="lvl"]', text: 'Gasta tus monedas en subir de nivel a tu Pokémon. Aprenderá ataques más potentes y evolucionará. ¡Sube un nivel!', wait: () => S().stats.levels >= 1, hint: 'Pulsa «Subir»', pre: () => { if (S().coins < 12) S().coins = 12; } },
+    { sel: '#tabs [data-tab="gacha"]', text: 'Los Pokémon solo se consiguen en el gacha. Abre la pestaña.', wait: () => tab === 'gacha', hint: 'Toca «Gacha»' },
+    { sel: '[data-act="pull"][data-v="poke"][data-n="1"]', text: 'Las bolas se abren con tickets. Tienes Tickets Poké de regalo. ¡Abre una Poké Ball!', wait: () => S().stats.pulls >= 1 && $('#gacha-fx').classList.contains('hidden'), hint: 'Pulsa «Abrir x1»' },
+    { sel: '.tkgrid', text: 'Aquí ves tus tickets. Caen de los jefes, los Pokémon derrotados, las misiones y los logros, y también puedes comprarlos con monedas o gemas.', next: 1 },
+    { tab: 'team', sel: '[data-act="pick"]', text: 'Cuando tengas más Pokémon, cámbialos desde aquí. Abre más huecos para que combatan varios a la vez.', next: 1 },
+    { sel: '.itemchip', text: 'Cada Pokémon puede llevar un objeto. Los jefes los sueltan y están en la Mochila.', next: 1 },
+    { sel: '#skills', text: 'Tres habilidades activas: Furia (más daño), Fiebre del Oro (más monedas) y Lluvia de Tickets. Úsalas cuando estén listas.', next: 1 },
+    { sel: '#tabs [data-tab="quests"]', text: 'Las misiones diarias y semanales, los logros y la recompensa diaria te dan gemas y tickets. ¡Entra cada día!', next: 1 },
+    { sel: '#tabs [data-tab="league"]', text: 'Al llegar a la etapa 60 podrás entrar en la Liga: reinicias el viaje a cambio de bonus permanentes y una tienda de mejoras.', next: 1 },
+    { text: '¡Listo! Ahora te toca a ti: llega lo más lejos que puedas, colecciona los 971 Pokémon y completa la Pokédex. Puedes repetir este tutorial desde Ajustes.', next: 1, last: 1 },
+  ];
+  let tutI = -1, tutRaf = 0, tutEl = null;
+  function tutStart(force) {
+    if (!force && S().tutDone) return;
+    tutEnd(true);
+    tutEl = document.createElement('div'); tutEl.id = 'tut'; tutEl.className = 'tut';
+    tutEl.innerHTML = '<i class="tb"></i><i class="tb"></i><i class="tb"></i><i class="tb"></i><div class="th"></div><div class="tc"><small class="tp"></small><p></p><em class="tw"></em><div class="tbtn"><button class="btn small" id="tut-skip">Saltar tutorial</button><button class="btn primary small" id="tut-next">Siguiente</button></div></div>';
+    document.body.appendChild(tutEl);
+    $('#tut-skip').onclick = () => tutEnd();
+    $('#tut-next').onclick = () => { Audio8.play('click'); tutNext(); };
+    tutI = -1; tutNext();
+    cancelAnimationFrame(tutRaf);
+    const loop = () => { if (!tutEl) return; tutLayout(); tutRaf = requestAnimationFrame(loop); };
+    loop();
+  }
+  function tutNext() {
+    tutI++;
+    while (tutI < TUT.length && TUT[tutI].sel && !TUT[tutI].tab && !document.querySelector(TUT[tutI].sel) && !TUT[tutI].wait) tutI++;
+    if (tutI >= TUT.length) return tutEnd();
+    const st = TUT[tutI];
+    if (st.tab && tab !== st.tab) setTab(st.tab);
+    if (st.pre) st.pre();
+    if (st.sel && !document.querySelector(st.sel)) { setTimeout(() => { if (tutEl && TUT[tutI] === st && !document.querySelector(st.sel)) tutNext(); }, 400); }
+    tutEl.querySelector('p').textContent = st.text;
+    tutEl.querySelector('.tp').textContent = 'Paso ' + (tutI + 1) + ' de ' + TUT.length;
+    tutEl.querySelector('.tw').textContent = st.hint || '';
+    $('#tut-next').style.display = st.wait ? 'none' : '';
+    $('#tut-next').textContent = st.last ? '¡A jugar!' : 'Siguiente';
+    $('#tut-skip').style.display = st.last ? 'none' : '';
+    tutEl._wait = st.wait || null;
+  }
+  function tutLayout() {
+    const st = TUT[tutI]; if (!st || !tutEl) return;
+    if (tutEl._wait && tutEl._wait()) { tutEl._wait = null; setTimeout(() => { if (tutEl) tutNext(); }, 350); }
+    const W = innerWidth, H = innerHeight, tb = tutEl.querySelectorAll('.tb'), th = tutEl.querySelector('.th'), tc = tutEl.querySelector('.tc');
+    const el = st.sel && document.querySelector(st.sel);
+    if (el && tutEl._sc !== tutI) { tutEl._sc = tutI; try { el.scrollIntoView({ block: 'center', behavior: 'instant' }); } catch (e) { el.scrollIntoView(); } }
+    let r = el && el.getBoundingClientRect();
+    if (el && (!r.width || !r.height)) r = null;
+    if (r) {
+      const pad = 6, x = Math.max(0, r.left - pad), y = Math.max(0, r.top - pad), w = Math.min(W - x, r.width + pad * 2), h = Math.min(H - y, r.height + pad * 2);
+      th.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;display:block`;
+      const rects = [[0, 0, W, y], [0, y + h, W, H - y - h], [0, y, x, h], [x + w, y, W - x - w, h]];
+      tb.forEach((b, i) => { const q = rects[i]; b.style.cssText = `left:${q[0]}px;top:${q[1]}px;width:${Math.max(0, q[2])}px;height:${Math.max(0, q[3])}px`; });
+      const cw = Math.min(330, W - 24), below = H - (y + h) > 190 || y < 190;
+      tc.style.cssText = `width:${cw}px;left:${Math.max(12, Math.min(W - cw - 12, x + w / 2 - cw / 2))}px;${below ? `top:${Math.min(H - 170, y + h + 12)}px` : `top:${Math.max(8, y - 12 - tc.offsetHeight)}px`}`;
+    } else {
+      th.style.display = 'none';
+      tb.forEach((b, i) => { b.style.cssText = i === 0 ? `left:0;top:0;width:${W}px;height:${H}px` : 'display:none'; });
+      const cw = Math.min(380, W - 24);
+      tc.style.cssText = `width:${cw}px;left:${(W - cw) / 2}px;top:${Math.max(20, H / 2 - tc.offsetHeight / 2)}px`;
+    }
+  }
+  function tutEnd(silent) {
+    cancelAnimationFrame(tutRaf);
+    if (tutEl) { tutEl.remove(); tutEl = null; }
+    if (!silent && S() && !S().tutDone) { S().tutDone = true; Core.save(); }
   }
 
   // ---------------- gacha ----------------
@@ -532,7 +654,8 @@ const UI = (() => {
       <div class="sset"><h4>Combate</h4>${tog('nums', 'Números de daño', 'Muestra el daño y las monedas sobre el enemigo')}${tog('bigNums', 'Números grandes', 'Más tamaño para verlos mejor')}${tog('shake', 'Temblor de pantalla', 'En críticos y jefes')}</div>
       <div class="sset"><h4>Partida</h4><div class="row" style="margin:0"><button class="btn" id="s-exp">Exportar</button><button class="btn" id="s-imp">Importar</button><button class="btn danger" id="s-wipe">Borrar</button></div>
         <p class="hint" style="margin:8px 0 0">Tu partida se guarda sola en este navegador. Exporta un código para llevarla a otro dispositivo.</p></div>
-      <div class="row"><button class="btn big primary" id="s-ok">Listo</button></div>
+      <div class="sset kofi-box"><h4>Apoya el proyecto</h4><p class="hint" style="margin:0 0 8px">PokéIdle es gratis y lo hace una sola persona. Si te gusta, puedes invitarme a un café.</p><a class="kofi" href="${KOFI_URL}" target="_blank" rel="noopener noreferrer">${ico('cup', 24)} Apoyar en Ko-fi</a></div>
+      <div class="row"><button class="btn" id="s-tut">Ver el tutorial</button><button class="btn big primary" id="s-ok">Listo</button></div>
       <p class="fine">Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Escenarios e iconos adaptados de pokesurvivor (MIT) · Pokémon © Nintendo/Creatures/GAME FREAK</p></div>`);
     $$('.slider').forEach(sl => {
       const k = sl.dataset.k, trk = sl.querySelector('.trk');
@@ -542,6 +665,7 @@ const UI = (() => {
     });
     $$('.tog').forEach(t => t.onclick = () => { st[t.dataset.k] = !st[t.dataset.k]; t.classList.toggle('on', st[t.dataset.k]); Audio8.play('click'); Core.save(); applySettings(); });
     $('#s-ok').onclick = () => { Core.save(); closeModal(); };
+    $('#s-tut').onclick = () => { closeModal(); setTab('team'); tutStart(true); };
     $('#s-exp').onclick = () => {
       const code = btoa(unescape(encodeURIComponent(JSON.stringify(S()))));
       if (navigator.clipboard) navigator.clipboard.writeText(code).catch(() => {});
@@ -602,5 +726,5 @@ const UI = (() => {
     $$('#skills .skill').forEach(b => b.onclick = e => { e.stopPropagation(); if (Core.useSkill(b.dataset.sk)) { Audio8.play(b.dataset.sk === 'rage' ? 'charge' : 'ticket'); banner(SKILLS[b.dataset.sk].name + '!', SKILLS[b.dataset.sk].desc, '#ff8040'); } });
   }
 
-  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, autoFill, monModal, mapModal };
+  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, tutStart, autoFill, monModal, mapModal };
 })();

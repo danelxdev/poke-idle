@@ -104,42 +104,125 @@ const Audio8 = (() => {
     }
   }
 
-  // ---- Música: secuenciador simple de 16 pasos ----
-  const N = n => 440 * Math.pow(2, (n - 69) / 12);
-  const TRACKS = {
-    menu: { bpm: 112, bass: [45, 0, 45, 0, 48, 0, 48, 0, 43, 0, 43, 0, 47, 0, 47, 0], lead: [69, 0, 72, 0, 76, 0, 74, 72, 71, 0, 67, 0, 71, 0, 74, 0, 69, 0, 72, 0, 76, 0, 79, 77, 76, 0, 74, 0, 72, 0, 71, 0] },
-    battle: { bpm: 150, bass: [40, 40, 52, 40, 43, 43, 55, 43, 45, 45, 57, 45, 47, 47, 59, 47], lead: [64, 0, 67, 69, 71, 0, 69, 67, 64, 0, 62, 0, 64, 67, 0, 0, 72, 0, 71, 69, 67, 0, 69, 71, 72, 0, 74, 0, 76, 0, 0, 0] },
-    boss: { bpm: 165, bass: [38, 38, 50, 38, 39, 39, 51, 39, 38, 38, 50, 38, 36, 36, 48, 36], lead: [62, 0, 65, 0, 69, 68, 0, 65, 62, 0, 63, 0, 62, 0, 0, 0, 74, 0, 72, 0, 69, 0, 68, 0, 65, 0, 63, 0, 62, 0, 61, 0] },
+  // ---- Música: composición procedural original ----
+  // Cada pista (menú, una por región y jefes) se compone con un generador determinista:
+  // progresión de acordes, melodía con motivos que se repiten y varían (A A' B A C C' B' A),
+  // bajo, arpegios y percusión. Todo es original; no usa ninguna melodía existente.
+  const MID = n => 440 * Math.pow(2, (n - 69) / 12);
+  const SCALES = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10], dorian: [0, 2, 3, 5, 7, 9, 10], mixo: [0, 2, 4, 5, 7, 9, 10], harm: [0, 2, 3, 5, 7, 8, 11] };
+  const RH = {
+    calm: [[0, 6, 8, 12], [0, 4, 8, 12], [0, 8, 12], [0, 6, 8, 10, 12], [0, 4, 6, 8, 12, 14]],
+    bounce: [[0, 3, 6, 8, 10, 12, 14], [0, 2, 4, 6, 8, 12], [0, 4, 6, 8, 12, 14], [0, 3, 6, 9, 12], [0, 2, 6, 8, 10, 14]],
+    drive: [[0, 2, 4, 6, 8, 10, 12, 14], [0, 3, 4, 8, 11, 12], [0, 4, 8, 10, 12, 14], [0, 2, 4, 8, 10, 12], [0, 3, 6, 8, 11, 14]],
   };
+  const TRACKS = {
+    menu: { bpm: 96, root: 60, scale: 'major', prog: [0, 5, 3, 4, 0, 5, 3, 4], seed: 7, mel: 'calm', duty: 0.5, arp: 1, drums: '', bass: 'quarter' },
+    r0: { bpm: 138, root: 60, scale: 'major', prog: [0, 4, 5, 2, 3, 0, 3, 4], seed: 21, mel: 'bounce', duty: 0.25, drums: 'rock', bass: 'pulse' },
+    r1: { bpm: 124, root: 62, scale: 'major', prog: [0, 5, 3, 4, 0, 2, 3, 4], seed: 32, mel: 'calm', duty: 0.5, arp: 1, drums: 'calm', bass: 'quarter' },
+    r2: { bpm: 132, root: 67, scale: 'mixo', prog: [0, 6, 3, 0, 0, 6, 4, 0], seed: 43, mel: 'bounce', duty: 0.125, drums: 'rock', bass: 'pulse' },
+    r3: { bpm: 116, root: 57, scale: 'minor', prog: [0, 5, 2, 6, 0, 5, 3, 4], seed: 54, mel: 'calm', duty: 0.25, arp: 1, drums: 'march', bass: 'quarter' },
+    r4: { bpm: 150, root: 64, scale: 'major', prog: [0, 4, 5, 3, 0, 4, 3, 4], seed: 65, mel: 'drive', duty: 0.5, drums: 'rock', bass: 'pulse' },
+    r5: { bpm: 108, root: 65, scale: 'major', prog: [0, 2, 5, 3, 0, 2, 3, 4], seed: 76, mel: 'calm', duty: 0.5, arp: 1, drums: 'calm', bass: 'quarter' },
+    r6: { bpm: 118, root: 58, scale: 'major', prog: [0, 3, 0, 4, 5, 3, 0, 4], seed: 87, mel: 'bounce', duty: 0.125, drums: 'rock', bass: 'pulse' },
+    r7: { bpm: 148, root: 60, scale: 'minor', prog: [0, 5, 2, 6, 0, 5, 6, 4], seed: 98, mel: 'drive', duty: 0.25, drums: 'march', bass: 'pulse' },
+    r8: { bpm: 136, root: 62, scale: 'dorian', prog: [0, 3, 6, 0, 0, 3, 4, 6], seed: 109, mel: 'bounce', duty: 0.25, drums: 'rock', bass: 'pulse' },
+    r9: { bpm: 144, root: 54, scale: 'harm', prog: [0, 6, 5, 4, 0, 6, 3, 4], seed: 120, mel: 'drive', duty: 0.125, arp: 1, drums: 'march', bass: 'pulse' },
+    boss: { bpm: 172, root: 57, scale: 'harm', prog: [0, 5, 6, 4, 0, 5, 6, 4], seed: 131, mel: 'drive', duty: 0.125, arp: 1, drums: 'march', bass: 'pulse' },
+    boss2: { bpm: 180, root: 52, scale: 'harm', prog: [0, 1, 0, 5, 0, 6, 5, 4], seed: 142, mel: 'drive', duty: 0.25, arp: 1, drums: 'march', bass: 'pulse' },
+  };
+  const rngOf = seed => () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  const composed = {};
+  function compose(name) {
+    if (composed[name]) return composed[name];
+    const T = TRACKS[name], rand = rngOf(T.seed), sc = SCALES[T.scale], L = sc.length;
+    const deg = d => T.root + sc[((d % L) + L) % L] + 12 * Math.floor(d / L);
+    const chordDeg = bar => T.prog[bar % T.prog.length];
+    const tones = c => [c, c + 2, c + 4, c + 7];
+    const nearestTone = (d, c) => { let best = d, bd = 99; for (const t of tones(c)) for (const o of [-L, 0, L]) { const x = t + o; if (Math.abs(x - d) < bd) { bd = Math.abs(x - d); best = x; } } return best; };
+    const LO = 0, HI = 11, CENTER = 5;
+    function genBar(bar, cur) {
+      const rh = RH[T.mel][Math.floor(rand() * RH[T.mel].length)], c = chordDeg(bar), notes = [];
+      for (const pos of rh) {
+        const r = rand();
+        let step = r < 0.26 ? -1 : r < 0.52 ? 1 : r < 0.64 ? -2 : r < 0.76 ? 2 : r < 0.82 ? 0 : r < 0.9 ? 3 : -3;
+        if (cur > CENTER + 3 && step > 0) step = -step; if (cur < CENTER - 3 && step < 0) step = -step;
+        cur = Math.max(LO, Math.min(HI, cur + step));
+        if (pos === 0 || pos === 8) cur = Math.max(LO, Math.min(HI, nearestTone(cur, c)));
+        notes.push({ pos, d: cur });
+      }
+      return { notes, cur };
+    }
+    function genUnit(bar0, cur) { const a = genBar(bar0, cur), b = genBar(bar0 + 1, a.cur); return { bars: [a.notes, b.notes], cur: b.cur }; }
+    const vary = (u, bar0) => { const b2 = u.bars[1].map(n => ({ ...n })), c = chordDeg(bar0 + 1); for (let i = Math.max(0, b2.length - 3); i < b2.length; i++) b2[i].d = Math.max(LO, Math.min(HI, b2[i].d + (rand() < 0.5 ? 1 : -1) * (1 + Math.floor(rand() * 2)))); b2[b2.length - 1].d = nearestTone(b2[b2.length - 1].d, c); return { bars: [u.bars[0], b2] }; };
+    const A = genUnit(0, CENTER), B = genUnit(4, CENTER + 2), C = genUnit(8, CENTER - 1), cad = { bars: [A.bars[0], A.bars[1].map(n => ({ ...n }))] };
+    cad.bars[1][cad.bars[1].length - 1].d = 0;
+    // 8 unidades de 2 compases: A A' B A  C C' B' A(final)
+    const form = [A, vary(A, 0), B, A, C, vary(C, 8), vary(B, 4), cad];
+    const mel = new Array(16 * 16).fill(null);
+    form.forEach((u, ui) => u.bars.forEach((notes, bi) => { const bar = ui * 2 + bi; notes.forEach((n, i) => { const next = i + 1 < notes.length ? notes[i + 1].pos : 16; mel[bar * 16 + n.pos] = { m: deg(n.d) + (T.root <= 58 ? 12 : 0), len: Math.max(1, next - n.pos) }; }); }));
+    return (composed[name] = { T, mel, deg, chordDeg, tones, L });
+  }
+  // onda de pulso con ancho configurable (sonido de consola clásica)
+  const waves = {};
+  function pulseWave(d) {
+    if (waves[d]) return waves[d];
+    const n = 32, re = new Float32Array(n), im = new Float32Array(n);
+    for (let k = 1; k < n; k++) re[k] = (2 / (k * Math.PI)) * Math.sin(k * Math.PI * d);
+    return (waves[d] = ctx.createPeriodicWave(re, im));
+  }
+  function note(f, dur, vol, when, wave, type, bright) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    if (wave) o.setPeriodicWave(pulseWave(wave)); else o.type = type || 'triangle';
+    o.frequency.setValueAtTime(f, when);
+    g.gain.setValueAtTime(0.0001, when); g.gain.linearRampToValueAtTime(vol, when + 0.012);
+    g.gain.setValueAtTime(vol * (bright ? 0.8 : 0.7), when + Math.max(0.02, dur * 0.55)); g.gain.exponentialRampToValueAtTime(0.001, when + dur);
+    o.connect(g); g.connect(musGain); o.start(when); o.stop(when + dur + 0.03);
+  }
+  function drum(kind, when, vol) {
+    if (kind === 'k') { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(150, when); o.frequency.exponentialRampToValueAtTime(42, when + 0.1); g.gain.setValueAtTime(0.55 * vol, when); g.gain.exponentialRampToValueAtTime(0.001, when + 0.13); o.connect(g); g.connect(musGain); o.start(when); o.stop(when + 0.14); return; }
+    const s = ctx.createBufferSource(); s.buffer = noiseBuf;
+    const f = ctx.createBiquadFilter(), g = ctx.createGain();
+    if (kind === 's') { f.type = 'bandpass'; f.frequency.value = 1900; g.gain.setValueAtTime(0.4 * vol, when); g.gain.exponentialRampToValueAtTime(0.001, when + 0.11); }
+    else { f.type = 'highpass'; f.frequency.value = 7000; g.gain.setValueAtTime(0.16 * vol, when); g.gain.exponentialRampToValueAtTime(0.001, when + 0.035); }
+    s.connect(f); f.connect(g); g.connect(musGain); s.start(when); s.stop(when + 0.13);
+  }
   function music(name) {
     init();
     if (!ctx) return;
+    if (name && !TRACKS[name]) name = 'r0';
     if (track === name) return;
     track = name;
     if (musicTimer) clearInterval(musicTimer);
     musicTimer = null;
     if (!name) return;
     musicStep = 0;
-    musicNext = ctx.currentTime + 0.1;
+    musicNext = ctx.currentTime + 0.12;
     musicTimer = setInterval(schedule, 50);
   }
   function schedule() {
     if (!ctx || !track) return;
-    const T = TRACKS[track];
-    const step = 60 / T.bpm / 2;
-    while (musicNext < ctx.currentTime + 0.2) {
-      const b = T.bass[musicStep % T.bass.length];
-      const l = T.lead[musicStep % T.lead.length];
-      if (b) tone('triangle', N(b), 0, step * 0.9, 0.5, musicNext, musGain);
-      if (l) tone('square', N(l), 0, step * 0.8, 0.18, musicNext, musGain);
-      if (musicStep % 4 === 0) { // bombo
-        const o = ctx.createOscillator(), g = ctx.createGain();
-        o.frequency.setValueAtTime(140, musicNext); o.frequency.exponentialRampToValueAtTime(40, musicNext + 0.1);
-        g.gain.setValueAtTime(0.5, musicNext); g.gain.exponentialRampToValueAtTime(0.001, musicNext + 0.12);
-        o.connect(g); g.connect(musGain); o.start(musicNext); o.stop(musicNext + 0.13);
+    const C = compose(track), T = C.T, stepT = 60 / T.bpm / 4;
+    while (musicNext < ctx.currentTime + 0.25) {
+      const i = musicStep % 256, bar = Math.floor(i / 16), st = i % 16, when = musicNext, cd = C.chordDeg(bar), root = C.deg(cd) - 12;
+      // melodía
+      const n = C.mel[i];
+      if (n) {
+        const dur = n.len * stepT * 0.94;
+        note(MID(n.m), dur, 0.2, when, T.duty);
+        note(MID(n.m) * 1.0035, dur, 0.09, when, 0.5);
       }
+      // bajo
+      if (T.bass === 'pulse') { if (st % 2 === 0) note(MID(root + (st % 8 === 4 ? 12 : st % 8 === 6 ? 7 : 0)), stepT * 1.8, 0.34, when, 0, 'triangle'); }
+      else if (st % 4 === 0) note(MID(root + (st === 8 ? 7 : 0)), stepT * 3.6, 0.34, when, 0, 'triangle');
+      // arpegio
+      if (T.arp && st % 2 === 0) { const t = C.tones(cd); note(MID(C.deg(t[(st / 2) % 4]) + 12), stepT * 1.5, 0.07, when, 0.125); }
+      // percusión
+      const dr = T.drums;
+      if (dr === 'rock') { if (st === 0 || st === 8 || (st === 10 && bar % 2)) drum('k', when, 1); if (st === 4 || st === 12) drum('s', when, 1); if (st % 2 === 0) drum('h', when, 1); }
+      else if (dr === 'march') { if (st % 4 === 0) drum('k', when, 1); if (st === 4 || st === 12) drum('s', when, 1); if (st % 2 === 0) drum('h', when, st % 4 === 2 ? 1 : 0.6); if (st === 14 && bar % 4 === 3) drum('s', when, 0.8); }
+      else if (dr === 'calm') { if (st === 0 || st === 8) drum('k', when, 0.8); if (st === 4 || st === 12) drum('h', when, 1); }
       musicStep++;
-      musicNext += step;
+      musicNext += stepT;
     }
   }
 

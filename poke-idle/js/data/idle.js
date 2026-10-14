@@ -320,6 +320,7 @@ const ACH_DEFS = [
   ['levels', 'Entrenamiento', 'up', [[100, 15], [1000, 35], [1e4, 80], [1e5, 200], [1e6, 400]], n => 'Sube ' + n + ' niveles en total'],
   ['coinsTotal', 'Millonario', 'coin', [[1e6, 20], [1e9, 50], [1e12, 100], [1e15, 200], [1e18, 400]], n => 'Gana ' + n + ' monedas en total'],
   ['skills', 'Habilidoso', 'fist', [[10, 15], [100, 50], [500, 120]], n => 'Usa ' + n + ' habilidades'],
+  ['itemsFound', 'Buscaobjetos', 'choiceband', [[1, 15], [10, 40], [50, 100], [200, 250]], n => 'Consigue ' + n + ' objetos'],
   ['dust', 'Polvo de estrellas', 'dust', [[100, 15], [1000, 50], [10000, 150], [1e5, 400]], n => 'Consigue ' + n + ' de polvo estelar'],
   ['crits', 'Golpe certero', 'zoom', [[1e3, 20], [1e4, 50], [1e5, 120], [1e6, 300]], n => 'Haz ' + n + ' críticos'],
   ['goldens', 'Fiebre del oro', 'amuletcoin', [[1, 20], [10, 50], [50, 120], [200, 300]], n => 'Derrota ' + n + ' Pokémon dorados'],
@@ -384,3 +385,27 @@ if (typeof MOVES !== 'undefined') {
   nm('vendetta', 'Vendetta', 'dark', 'burst', 120); nm('foco_resplandor', 'Foco Resplandor', 'steel', 'beam', 80); nm('ala_de_acero', 'Ala de Acero', 'steel', 'melee', 70);
   nm('beso_drenaje', 'Beso Drenaje', 'fairy', 'proj', 50); nm('explosion_magica', 'Explosión Mágica', 'fairy', 'meteor', 130);
 }
+
+// ---------- Objetos equipables: cada Pokémon lleva uno ----------
+const KOFI_URL = 'https://ko-fi.com/danelalonso';
+const ITEM_RAR = [null,
+  { name: 'Común', mult: 1, color: '#b9c1cc', dust: 20 },
+  { name: 'Raro', mult: 1.6, color: '#4fb4ff', dust: 60 },
+  { name: 'Épico', mult: 2.5, color: '#c47bff', dust: 180 },
+];
+// fx: dmg · dmgslow · spd · crit · boss · type · coins (equipo) · drop (equipo) · tap (equipo)
+const HELD = {
+  cinta: { name: 'Cinta Elección', icon: 'choiceband', fx: 'dmg', v: 0.2, desc: v => '+' + Math.round(v * 100) + '% de daño al que la lleva' },
+  vidasfera: { name: 'Vidasfera', icon: 'lifeorb', fx: 'dmgslow', v: 0.35, desc: v => '+' + Math.round(v * 100) + '% de daño, pero -10% de velocidad' },
+  panuelo: { name: 'Pañuelo Elección', icon: 'choicescarf', fx: 'spd', v: 0.1, desc: v => '+' + Math.round(v * 100) + '% de velocidad de ataque' },
+  zoom: { name: 'Gafas Zoom', icon: 'zoom', fx: 'crit', v: 0.06, desc: v => '+' + Math.round(v * 100) + '% de probabilidad de crítico' },
+  banda: { name: 'Banda Focus', icon: 'focussash', fx: 'boss', v: 0.3, desc: v => '+' + Math.round(v * 100) + '% de daño contra jefes' },
+  orbe: { name: 'Orbe de tipo', icon: 'stone', fx: 'type', v: 0.4, desc: (v, it) => '+' + Math.round(v * 100) + '% de daño si es de tipo ' + TYPE_NAMES[it.type] + ' (+' + Math.round(v * 20) + '% si no)' },
+  moneda: { name: 'Moneda Amuleto', icon: 'amuletcoin', fx: 'coins', v: 0.08, desc: v => '+' + Math.round(v * 100) + '% de monedas para todo el equipo' },
+  cascabel: { name: 'Cascabel Fortuna', icon: 'bell', fx: 'drop', v: 0.1, desc: v => '+' + Math.round(v * 100) + '% de tickets soltados (equipo)' },
+  guante: { name: 'Guante de Entrenador', icon: 'fist', fx: 'tap', v: 0.1, desc: v => '+' + Math.round(v * 100) + '% de daño por toque (equipo)' },
+};
+const ITEM_DROPS = [[92, 8, 0], [70, 28, 2], [45, 45, 10], [20, 55, 25], [5, 50, 45], [0, 30, 70]];   // [silvestre, jefe T1..T5]: reparto Común/Raro/Épico
+const ITEM_DUST_COST = 150;
+// Sinergias de equipo
+const TYPE_SYN = [0, 0, 0.08, 0.2, 0.35, 0.55, 0.8];

@@ -404,3 +404,44 @@ img.pix { image-rendering: pixelated; vertical-align: middle; }
 .pull .new { top: 4px; left: 4px; transform: none; z-index: 1; }
 @keyframes dnpop { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.4); } 12% { opacity: 1; transform: translate(-50%, -60%) scale(1.25); } 26% { transform: translate(-50%, -70%) scale(1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), -190%) scale(.95); } }
 @keyframes dncrit { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.3) rotate(-8deg); } 10% { opacity: 1; transform: translate(-50%, -60%) scale(1.6) rotate(4deg); } 24% { transform: translate(-50%, -70%) scale(1.15) rotate(-2deg); } 72% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), -210%) scale(1); } }
+
+/* ================= v4: objetos, sinergias, tutorial, Ko-fi ================= */
+.teamhead { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 8px; }
+.teamhead .seg { flex: 1; margin-bottom: 0; }
+.teamhead .btn { white-space: nowrap; }
+.rowbtns { display: flex; gap: 4px; }
+.rowbtns .btn { flex: 1; }
+.itemchip { width: 34px; height: 30px; flex: none; padding: 0; display: flex; align-items: center; justify-content: center; background: #0b1638; color: var(--dim); border: 0; border-radius: 6px; font: inherit; font-size: 18px; box-shadow: inset 0 0 0 2px var(--line); }
+.itemchip.has { box-shadow: inset 0 0 0 2px var(--rc, var(--yellow)); background: color-mix(in srgb, var(--rc) 18%, #0b1638); }
+.itemchip:hover { background: #14245a; }
+.syn { display: flex; flex-direction: column; background: #0b1638; border-radius: 8px; padding: 5px 10px; margin-bottom: 4px; box-shadow: inset 0 0 0 2px #5fe08a88; }
+.syn b { font-size: 14px; color: #7ff0a0; }
+.syn small { font-size: 12px; color: var(--dim); }
+.itemlist2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; align-content: start; }
+.it { position: relative; display: flex; align-items: center; gap: 8px; text-align: left; background: #0b1638; border: 0; border-radius: 8px; padding: 6px 8px; color: var(--ink); font: inherit; box-shadow: inset 0 0 0 2px var(--rc, var(--line)); }
+.it:hover { background: #14245a; }
+.it span { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.it b { font-size: 14px; color: var(--rc); }
+.it small { font-size: 11px; color: var(--dim); }
+.it em { position: absolute; top: 3px; right: 6px; font-size: 10px; font-style: normal; color: #7ff0a0; }
+.curitem { margin-bottom: 8px; }
+.curitem .it { width: 100%; }
+
+.kofi { display: inline-flex; align-items: center; gap: 8px; background: #29abe0; color: #fff; text-decoration: none; font-weight: 700; font-size: 16px; padding: 8px 16px; border-radius: 8px; box-shadow: 0 3px 0 #0f5f86, inset 0 0 0 2px #7fd4f5; }
+.kofi:hover { background: #3dbcf0; transform: translateY(-1px); }
+.kofi:active { transform: translateY(2px); box-shadow: 0 1px 0 #0f5f86, inset 0 0 0 2px #7fd4f5; }
+.kofi-box { text-align: center; }
+.kofi-box .kofi { margin-top: 2px; }
+
+.tut { position: fixed; inset: 0; z-index: 45; pointer-events: none; }
+.tut .tb { position: fixed; background: #02061acc; pointer-events: auto; }
+.tut .th { position: fixed; border-radius: 10px; box-shadow: 0 0 0 3px var(--yellow), 0 0 22px #ffd23faa; pointer-events: none; animation: tpulse 1.2s ease-in-out infinite; }
+@keyframes tpulse { 50% { box-shadow: 0 0 0 5px var(--yellow), 0 0 34px #ffd23f; } }
+.tut .tc { position: fixed; pointer-events: auto; background: var(--panel); border-radius: 10px; padding: 10px 14px 12px; box-shadow: 0 0 0 3px var(--yellow), 0 8px 0 #050a1c; animation: bin .25s; }
+.tut .tc .tp { color: var(--dim); font-size: 12px; }
+.tut .tc p { margin: 4px 0 6px; font-size: 16px; line-height: 1.3; }
+.tut .tc .tw { display: block; min-height: 0; color: var(--yellow); font-size: 14px; font-style: normal; margin-bottom: 4px; }
+.tut .tc .tbtn { display: flex; gap: 8px; justify-content: space-between; align-items: center; }
+.tut .tc .tbtn .btn.primary { margin-left: auto; }
+
+body { font-variant-ligatures: none; font-feature-settings: 'liga' 0, 'clig' 0; }

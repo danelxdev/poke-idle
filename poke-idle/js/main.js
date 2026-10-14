@@ -13,6 +13,8 @@
     coinSfx();
   });
 
+  // música: una pista por región; los jefes y los jefes finales tienen la suya
+  const musicFor = st => Core.isBoss(st) ? (Core.routeData(st).boss.tier >= 4 ? 'boss2' : 'boss') : 'r' + Core.regionOf(st);
   let lastCoinSfx = 0, lastHitSfx = 0, hidden = false, running = false, last = 0, uiT = 0;
   function coinSfx() { const n = performance.now(); if (n - lastCoinSfx > 90) { lastCoinSfx = n; Audio8.play('coin'); } }
 
@@ -26,6 +28,11 @@
     Audio8.play('levelup');
     UI.banner('¡' + DEX[d.dex].name + ' aprendió ' + mv.name + '!', 'Su ataque ahora es más potente', TYPE_COLORS[mv.type]);
   });
+  Core.on('item', it => {
+    const r = ITEM_RAR[it.rar];
+    Audio8.play(it.rar >= 2 ? 'item' : 'coin');
+    if (it.rar >= 2) UI.banner('¡' + HELD[it.id].name + (it.id === 'orbe' ? ' de ' + TYPE_NAMES[it.type] : '') + '!', r.name + ' · equípalo desde la pestaña Equipo', r.color);
+  });
   Core.on('tickets', t => { if (Core.S.started) UI.refresh(false); });
   Core.on('kill', k => {
     if (k.enemy.golden) UI.toast(Icons.html('gem', 18) + ' ¡Pokémon dorado! +' + k.gems + ' gemas');
@@ -37,7 +44,7 @@
   });
   Core.on('bossFail', () => { Audio8.play('death'); UI.banner('¡El jefe era demasiado fuerte!', 'Sube de nivel a tu equipo y vuelve a intentarlo', '#ff5050'); });
   Core.on('stage', s => {
-    Audio8.music(Core.isBoss(s) ? 'boss' : 'battle');
+    Audio8.music(musicFor(s));
     const r = Core.routeData(s);
     if (Core.isBoss(s)) UI.banner(r.boss.who + ' te desafía', r.boss.title + ' · ' + Core.bossTime(s) + ' segundos para vencerle', '#ff8040');
     else if (s % 10 === 1) UI.banner(r.name, REGIONS[Core.regionOf(s)].name + (Core.loopOf(s) ? ' · ciclo +' + Core.loopOf(s) : ''), '#9fe0ff');
@@ -73,7 +80,7 @@
     for (const k of Core.S.team) Sprites.preload(Core.S.mons[k].dex, Core.S.mons[k].shiny);
     UI.setTab('team');
     if (Core.S.stats.taps > 30) $('#tap-hint').classList.add('hidden');
-    Audio8.music(Core.isBoss(Core.S.stage) ? 'boss' : 'battle');
+    Audio8.music(musicFor(Core.S.stage));
     if (!running) { running = true; requestAnimationFrame(t => { last = t; loop(t); }); }
     welcome();
   }
@@ -90,9 +97,9 @@
     if (daily && !Core.S.daily.claimed) {
       parts.push(`<h2>Recompensa diaria</h2><p>Día <b>${Core.S.daily.streak}</b> de racha</p><p style="font-size:28px;color:#9fe8ff">${Icons.html('gem', 24)} ${Core.dailyReward()}</p><p class="hint">Vuelve mañana: la recompensa crece hasta el día 7. Tienes misiones nuevas.</p>`);
     }
-    if (!parts.length) return;
+    if (!parts.length) { if (!Core.S.tutDone) setTimeout(() => UI.tutStart(), 700); return; }
     UI.openModal(parts.join('<hr style="border-color:#2a3f8a">') + `<div class="row"><button class="btn big primary" id="w-ok">${daily && !Core.S.daily.claimed ? 'Recoger' : 'Seguir'}</button></div>`);
-    $('#w-ok').onclick = () => { const g = Core.claimDaily(); if (g) Audio8.play('ticket'); Core.save(); UI.closeModal(); UI.refresh(true); };
+    $('#w-ok').onclick = () => { const g = Core.claimDaily(); if (g) Audio8.play('ticket'); Core.save(); UI.closeModal(); UI.refresh(true); if (!Core.S.tutDone) setTimeout(() => UI.tutStart(), 500); };
   }
 
   // ---- guardado ----
@@ -108,6 +115,7 @@
   $('#btn-start').onclick = () => {
     Audio8.resume();
     Audio8.play('select');
+    if (!Core.S.started) Audio8.music('menu');
     if (Core.S.started) enterGame();
     else UI.starter(d => { Core.start(d); enterGame(); });
   };

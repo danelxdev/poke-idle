@@ -41,6 +41,24 @@ Los Pokémon **solo se consiguen en el gacha** (aparte de tu primer compañero).
 - La animación de apertura crece según la rareza: ticket, Poké Ball que se agita con un halo del color del mejor premio, destello y reveladas una a una, con efectos especiales para épicos, legendarios y shinies.
 - Las regiones nuevas del gacha se desbloquean al llegar a ellas.
 
+## Objetos y sinergias
+
+- **Objetos equipables**: cada Pokémon lleva uno. Hay 9 tipos (Cinta Elección, Vidasfera, Pañuelo Elección, Gafas Zoom, Banda Focus, Orbe de tipo, Moneda Amuleto, Cascabel Fortuna y Guante de Entrenador) en 3 rarezas (Común, Raro y Épico).
+- Los sueltan los jefes (cuanto más difícil, mejor rareza) y, con poca probabilidad, los Pokémon salvajes. En la **Mochila** puedes reciclarlos por polvo estelar o comprar uno al azar.
+- **Sinergias de equipo**: Afinidad de tipo (2 a 6 Pokémon del mismo tipo), Diversidad, Élite legendaria, Brillo compartido (shinies) y Equipo veterano (todos con ★3 o más).
+
+## Música
+
+La música es **original**: se compone con un generador de melodías, acordes, bajo, arpegios y percusión en estilo chiptune. Hay una pista para el menú, una para cada región (con su propia tonalidad y tempo), una para los jefes y otra para los jefes finales. No usa ninguna melodía de los juegos de Pokémon.
+
+## Tutorial
+
+Al empezar, una guía paso a paso te enseña el combate, las monedas, subir de nivel, abrir una Poké Ball, el equipo, los objetos, las habilidades y las misiones. Se puede repetir desde Ajustes.
+
+## Apoyar el proyecto
+
+Si te gusta, puedes invitarme a un café en [Ko-fi](https://ko-fi.com/danelalonso): hay botones en la pantalla de inicio y en Ajustes.
+
 ## Para volver cada día
 
 - Recompensa diaria con racha de 7 días, **4 misiones diarias** (de 21 posibles) y **3 misiones semanales** (de 12).
