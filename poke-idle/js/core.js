@@ -54,9 +54,9 @@ const Core = (() => {
       sk: { rage: 0, gold: 0, lure: 0 },        // instante (tiempo jugado) en el que está lista cada habilidad
       skOn: { rage: 0, gold: 0, lure: 0 },      // instante en el que termina cada habilidad
       stats: { kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, freePulls: 0, streak: 0, itemsFound: 0 },
-      pity: 0, pityE: 0, bannerLost: 0, freeDay: '', autoAcc: 0, inv: [], uid: 1, tutDone: false, last: Date.now(),
+      bossFails: {}, retryT: 0, pity: 0, pityE: 0, bannerLost: 0, freeDay: '', autoAcc: 0, inv: [], uid: 1, tutDone: false, last: Date.now(),
       daily: { day: '', streak: 0, claimed: true, quests: [] }, weekly: { week: -1, quests: [] }, ach: {},
-      buyMul: 1, settings: { music: 0.35, sfx: 0.6, nums: true, shake: true, bigNums: true },
+      buyMul: 1, settings: { music: 0.35, sfx: 0.6, nums: true, shake: true, bigNums: true, autoBoss: true },
     };
   }
   function load() {
@@ -68,6 +68,7 @@ const Core = (() => {
     for (const k of Object.keys(f)) if (d[k] === undefined) d[k] = f[k];
     for (const g of ['up', 'stats', 'settings', 'shop', 'sk', 'skOn', 'tk']) for (const k of Object.keys(f[g])) if (d[g][k] === undefined) d[g][k] = f[g][k];
     if (typeof d.badges !== 'object' || d.badges === null) d.badges = {};
+    if (typeof d.bossFails !== 'object' || d.bossFails === null) d.bossFails = {};
     for (const k of Object.keys(d.mons)) if (!DEX[d.mons[k].dex]) delete d.mons[k];
     for (const m of Object.values(d.mons)) if (m.shinyOwned === undefined) m.shinyOwned = !!m.shiny;
     // partidas antiguas: la base de algunas líneas cambió al añadir bebés (Pichu, Cleffa…)
@@ -89,7 +90,7 @@ const Core = (() => {
 
   // ---------------- fórmulas ----------------
   // hpB/hpG = vida del enemigo (base y crecimiento por etapa) · coinR = monedas por vida · lvlG = crecimiento del coste de nivel
-  const K = { hpB: 100, hpG: 1.17, hpL: 6, coinR: 0.0012, cd: 0.99, cf: 0.5, cs: 0.12, lvlG: 1.15, dG: 1.075 };
+  const K = { hpD: 0.055, hpD0: 100, hpD1: 300, hpS: 80, hpM: 1.8, hp0: 50, bw: 0.08, bwMin: 0.35, ready: 0.95, retryMax: 600, gate: 0.6, hpB: 100, hpG: 1.17, hpL: 6, coinR: 0.0012, cd: 0.994, cf: 0.5, cs: 0.12, lvlG: 1.15, dG: 1.075 };
   const route = s => Math.floor((s - 1) / 10);
   const routeIdx = s => route(s) % ROUTES.length;
   const routeData = s => ROUTES[routeIdx(s)];
@@ -99,11 +100,22 @@ const Core = (() => {
   const isBoss = s => s % 10 === 0;
   const bossTier = s => BOSS_TIER[routeData(s).boss.tier];
   const bossTime = s => bossTier(s).time + 3 * S.up.bosstime + 2 * S.shop.bt;
-  const enemyHp = s => Math.round(K.hpB * Math.pow(K.hpG, s - 1) + K.hpL * s) * (isBoss(s) ? bossTier(s).hp : 1);
+  // cada intento fallido contra un jefe lo debilita un poco, hasta un mínimo (evita muros eternos)
+  const bossEase = s => (isBoss(s) ? Math.max(K.bwMin, 1 - K.bw * (S.bossFails[s] || 0)) : 1);
+  const hpCurve = s => (s <= K.hp0 ? 1 : Math.pow((1 + s / K.hpS) / (1 + K.hp0 / K.hpS), K.hpM));   // endurece poco a poco el ritmo en las etapas altas
+  // crecimiento de vida acumulado: el factor por etapa baja poco a poco en las regiones lejanas
+  const hpTab = [1, 1];
+  function hpBase(s) {
+    for (let i = hpTab.length; i <= s; i++) { const k = i - 1, g = K.hpG - K.hpD * Math.max(0, Math.min(1, (k - K.hpD0) / K.hpD1)); hpTab[i] = hpTab[i - 1] * g; }
+    return K.hpB * hpTab[s];
+  }
+  const enemyHp = s => Math.round((hpBase(s) + K.hpL * s) * hpCurve(s)) * (isBoss(s) ? bossTier(s).hp * bossEase(s) : 1);
+  // poder del equipo contra el jefe de la etapa s (1 = lo derrota justo a tiempo)
+  const bossReady = s => { const r = routeData(s); return teamDps(DEX[r.boss.dex].types) * (1 + 0.04 * S.up.boss) * bossTime(s) / enemyHp(s); };
   const skillOn = id => S.skOn[id] > S.stats.time;
   const medalMult = () => 1 + 0.03 * S.medals;
   const coinMult = () => (1 + 0.15 * S.up.coin) * medalMult() * (1 + 0.06 * S.shop.coins) * (skillOn('gold') ? 3 : 1) * (1 + teamItemSum('coins') + synergies().coins);
-  const killCoins = s => Math.ceil(((K.hpB * Math.pow(K.hpG, s - 1) + K.hpL * s) * K.coinR * Math.pow(K.cd, s) + K.cf + s * K.cs) * coinMult() * (isBoss(s) ? 6 : 1));
+  const killCoins = s => Math.ceil(((hpBase(s) + K.hpL * s) * K.coinR * Math.pow(K.cd, s) + K.cf + s * K.cs) * coinMult() * (isBoss(s) ? 6 : 1));
   const dexCount = () => Object.keys(S.seen).length;
   const badgeCount = () => Object.keys(S.badges).length;
   const gemMult = () => 1 + 0.1 * S.shop.gems;
@@ -234,30 +246,30 @@ const Core = (() => {
     const e = F.enemy, s = e.stage;
     const coins = killCoins(s) * (e.golden ? 5 : 1);
     S.coins += coins; S.stats.coinsTotal += coins; S.stats.kills++;
-    let gems = e.golden ? 3 : 0;
+    let gems = e.golden ? 3 : 0, firstKill = false;
     if (e.golden) S.stats.goldens++;
     if (e.boss) {
       S.stats.bosses++;
       const t = BOSS_TIER[e.tier];
-      if (!S.bossFirst[s]) { S.bossFirst[s] = 1; gems += Math.round(t.gems * gemMult()); }
-      else gems += Math.round((2 + e.tier) * gemMult());
+      if (!S.bossFirst[s]) { S.bossFirst[s] = 1; firstKill = true; gems += Math.round(t.gems * gemMult()); }
+      else gems += Math.round((1 + e.tier) * gemMult());
       if (e.tier === 1) S.badges[s] = 1;
     }
     S.gems += gems;
     let tickets = null;
-    if (e.boss) tickets = Object.assign({}, BOSS_TICKETS[e.tier]);
+    if (e.boss) tickets = firstKill ? Object.assign({}, BOSS_TICKETS[e.tier]) : (rnd() < 0.5 ? { poke: 1 } : null);   // los tickets grandes solo la primera vez
     if (!e.boss && rnd() < catchChance() * (e.golden ? 10 : 1)) { tickets = rnd() < 0.1 ? { super: 1 } : { poke: 1 }; S.stats.catches++; }
     if (e.golden && rnd() < 0.3) tickets = Object.assign(tickets || {}, { super: ((tickets && tickets.super) || 0) + 1 });
     if (tickets) giveTickets(tickets);
     let item = null;
-    if (e.boss) item = dropItem(ITEM_DROPS[e.tier]);
+    if (e.boss && (firstKill || rnd() < 0.3)) item = dropItem(ITEM_DROPS[e.tier]);
     else if (rnd() < (e.golden ? 0.06 : 0.006)) item = dropItem(ITEM_DROPS[0]);
     emit('kill', { enemy: e, coins, gems, tickets, item });
     F.enemy = null; F.respawn = 0.45; F.hits = [];
-    if (e.boss) { advance(true); emit('bossWin', e); }
+    if (e.boss) { delete S.bossFails[s]; advance(true); emit('bossWin', e); }
     else {
       S.kills++;
-      if (S.kills >= 10 && S.auto) advance(false);
+      if (S.kills >= 10 && S.auto) { if (isBoss(S.stage + 1) && bossReady(S.stage + 1) < K.gate) { S.auto = false; S.retryT = 0; emit('bossWait', S.stage + 1); } else advance(false); }
     }
   }
   function advance(force) {
@@ -270,10 +282,12 @@ const Core = (() => {
   }
   function goStage(s) {
     if (s < 1 || s > S.maxStage) return;
-    S.stage = s; S.kills = 0; F.enemy = null; F.respawn = 0.3;
+    S.stage = s; S.kills = 0; S.retryT = 0; F.enemy = null; F.respawn = 0.3;
     emit('stage', S.stage);
   }
   function bossFail() {
+    S.bossFails[S.stage] = (S.bossFails[S.stage] || 0) + 1;
+    S.retryT = 0;
     S.stage = Math.max(1, S.stage - 1); S.kills = 10; S.auto = false;
     F.enemy = null; F.respawn = 0.6;
     emit('bossFail'); emit('stage', S.stage);
@@ -293,6 +307,7 @@ const Core = (() => {
   function tick(dt) {
     if (!S || !S.started || paused) return;
     S.stats.time += dt;
+    if (S.retryT >= 0 && !S.auto) { S.retryT += dt; if (S.settings.autoBoss && S.kills >= 10 && !isBoss(S.stage) && isBoss(S.stage + 1) && S.retryT >= 12 && (bossReady(S.stage + 1) >= K.ready || S.retryT >= K.retryMax)) fightBoss(); }
     if (S.up.autotap) { S.autoAcc += dt * 0.5 * S.up.autotap; while (S.autoAcc >= 1) { S.autoAcc -= 1; if (F.enemy) tap(true); } }
     if (!F.enemy) { F.respawn -= dt; if (F.respawn <= 0) spawn(); return; }
     const e = F.enemy;
@@ -364,7 +379,7 @@ const Core = (() => {
   function addMon(base, shiny) {
     let m = S.mons[base], isNew = false, dust = 0, newShiny = false;
     const rar = RAR[base];
-    if (!m) { m = S.mons[base] = { dex: base, lvl: 1 + 3 * S.shop.lvl, stars: 0, copies: 0, shiny: !!shiny, shinyOwned: !!shiny }; isNew = true; }
+    if (!m) { m = S.mons[base] = { dex: base, lvl: 1 + 2 * S.shop.lvl, stars: 0, copies: 0, shiny: !!shiny, shinyOwned: !!shiny }; isNew = true; }
     else {
       m.copies++;
       dust = Math.round(DUST_GAIN[rar] * (1 + 0.1 * S.up.alch + 0.15 * S.shop.dust) * (shiny ? 2 : 1));
@@ -573,9 +588,9 @@ const Core = (() => {
     const g = medalGain();
     if (!g) return 0;
     S.medals += g; S.mp += g; S.stats.prestiges++;
-    S.coins = 0; S.stage = 1; S.maxStage = 1; S.kills = 0; S.badges = {}; S.auto = true; S.slots = Math.min(S.slots, 2 + S.shop.slots);
+    S.coins = 0; S.stage = 1; S.maxStage = 1; S.kills = 0; S.badges = {}; S.bossFails = {}; S.retryT = 0; S.auto = true; S.slots = Math.min(S.slots, 2 + S.shop.slots);
     for (const k of Object.keys(S.up)) S.up[k] = 0;
-    for (const m of Object.values(S.mons)) m.lvl = 1 + 3 * S.shop.lvl;
+    for (const m of Object.values(S.mons)) m.lvl = 1 + 2 * S.shop.lvl;
     S.team = S.team.slice(0, S.slots);
     resetFight();
     return g;
@@ -604,12 +619,12 @@ const Core = (() => {
   }
 
   return {
-    K, DEX, CHILDREN, RAR, POOLG, BASES, bst, baseOf, stageOf, fmt, on, emit, F,
+    K, hpTab, DEX, CHILDREN, RAR, POOLG, BASES, bst, baseOf, stageOf, fmt, on, emit, F,
     get S() { return S; }, load, save, wipe, fresh, setRng(f) { rnd = f; },
     route, routeIdx, routeData, regionOf, regionOfRoute, loopOf, isBoss, bossTier, bossTime, enemyHp, killCoins, coinMult, globalDmg, monDmg, monRate, eff,
     levelCost, levelCostN, maxAffordable, upCost, shopCost, pokeBallPrice, critChance, critMult, catchChance, teamDps, tapDmg, medalGain, medalFor, dexCount, badgeCount,
     genUnlocked, unlockedGens, skillOn, skillReady, useSkill, goldenChance, gemMult,
-    tick, tap, advance, goStage, fightBoss, levelUp, starUp, setTeam, buySlot, buyUp, buyShop, addMon,
+    tick, tap, advance, goStage, fightBoss, bossEase, bossReady, levelUp, starUp, setTeam, buySlot, buyUp, buyShop, addMon,
     featured, featuredEpic, featuredLegend, ballAvailable, ticketCost, ticketPrice, buyTicket, dustTicket, giveTickets, pull, freePull, freePullReady, toggleShiny, moveOf, tierOf, unsetTeam, setPaused, itemOf, itemVal, itemDmg, equip, unequip, recycleItem, recycleSpare, buyItem, synergies, synMult, teamItemSum,
     checkDaily, dailyReward, claimDaily, questProg, claimQuest, achStat, claimAch, pendingRewards, legendsOwned,
     prestige, offline, start,

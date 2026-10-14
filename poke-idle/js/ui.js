@@ -18,11 +18,54 @@ const UI = (() => {
   function show(id) { $$('.screen').forEach(s => s.classList.toggle('active', s.id === id)); }
 
   // ---------------- pantallas iniciales ----------------
+  const REG_COL = ['#ff5f6d', '#ffd23f', '#5fe08a', '#4fb4ff', '#c47bff', '#ff8ad8', '#ff9a3d', '#9fe0ff', '#ff7a5a'];
   function title() {
     show('scr-title');
-    const k = $('#kofi-title'); if (k) { k.href = KOFI_URL; k.innerHTML = ico('cup', 24) + ' Apoyar en Ko-fi'; }
-    const ids = [25, 4, 249, 384, 7, 133, 258, 149, 382, 155, 150, 252];
-    $('#parade').innerHTML = ids.map(d => `<img class="px" src="${por(d)}" alt="">`).join('');
+    const s = S(), k = $('#kofi-title');
+    if (k) { k.href = KOFI_URL; k.innerHTML = ico('cup', 24) + ' Apoyar en Ko-fi'; }
+    TitleFX.start($('#title-bg'));
+    $('#logo-ball').innerHTML = ico('ball', 48);
+    $('#t-badges').innerHTML = [['book', POKEDEX.length + ' Pokémon'], ['boot', REGIONS.filter(r => r.gen).length + ' regiones'], ['crown', ROUTES.length + ' jefes'], ['ball', Object.keys(BALLS).length + ' Poké Balls'], ['trophy', ACHIEVEMENTS.length + ' logros']]
+      .map(([i, t], n) => `<span style="animation-delay:${0.1 + n * 0.08}s">${ico(i, 20)}${t}</span>`).join('');
+    // continuar
+    const started = s.started;
+    $('#btn-start').textContent = started ? 'Continuar' : 'Jugar';
+    $('#t-cont').classList.toggle('hidden', !started);
+    $('#t-new').classList.toggle('hidden', !started);
+    if (started) {
+      const n = Object.keys(s.mons).length, hrs = Math.floor(s.stats.time / 3600), mins = Math.floor(s.stats.time / 60) % 60;
+      $('#t-cont').innerHTML = `<div class="ct-team">${s.team.slice(0, 6).map(kk => `<img class="px" src="${por(s.mons[kk].dex, s.mons[kk].shiny)}" alt="">`).join('')}</div>
+        <div class="ct-info"><b>Tu aventura</b><span>${REGIONS[Core.regionOf(s.stage)].name} · etapa ${s.stage} <small>(máx. ${s.stats.maxStage})</small></span>
+        <small>${n} Pokémon · Pokédex ${Core.dexCount()}/${POKEDEX.length} · ${s.medals} medallas · ${hrs ? hrs + ' h ' : ''}${mins} min jugados</small></div>`;
+      $('#t-new').onclick = e => {
+        e.preventDefault();
+        openModal(`<h2>¿Empezar de nuevo?</h2><p>Se borrará tu partida actual: Pokémon, progreso y objetos.</p><div class="row"><button class="btn" id="n-no">Cancelar</button><button class="btn danger" id="n-yes">Sí, borrar todo</button></div>`);
+        $('#n-no').onclick = closeModal; $('#n-yes').onclick = () => { Core.wipe(); location.reload(); };
+      };
+    }
+    // Pokémon destacado
+    const fl = Core.featuredLegend(), fe = Core.featuredEpic();
+    $('#t-featured').innerHTML = `<h3>Destacados de la semana</h3><div class="t-feat">
+      <div class="tf big" style="--rc:${RARITY[5].color}"><img class="px" src="${por(fl)}" alt=""><b>${DEX[fl].name}</b><small>${RARITY[5].name}</small>${typeTags(fl)}</div>
+      <div class="tf" style="--rc:${RARITY[4].color}"><img class="px" src="${por(fe)}" alt=""><b>${DEX[fe].name}</b><small>${RARITY[4].name}</small>${typeTags(fe)}</div></div>
+      <p class="hint">Más probabilidad en la Bola Destacada.</p>`;
+    // regiones
+    $('#t-regions').innerHTML = `<h3>Viaja por 9 regiones</h3><div class="t-reg">${REGIONS.filter(r => r.gen).map((r, i) => {
+      const open = Core.genUnlocked(r.gen), n = POKEDEX.filter(p => p.gen === r.gen).length;
+      return `<div class="rg ${open ? '' : 'lock'}" style="--c:${REG_COL[i]}"><i></i><b>${r.name}</b><small>${open ? n + ' Pokémon' : 'Etapa ' + (r.first * 10 + 1)}</small></div>`;
+    }).join('')}</div>`;
+    // características
+    $('#t-cards').innerHTML = [
+      ['fist', 'Combate automático', 'Tu equipo pelea solo. Toca al enemigo para golpear más fuerte y usa habilidades.'],
+      ['ball', 'Gacha con tickets', 'Abre Poké Balls con rarezas, shinies, destacados y garantías.'],
+      ['up', 'Evoluciona y mejora', 'Nuevos ataques por nivel, evoluciones animadas, estrellas y objetos.'],
+      ['crown', 'Liga y prestigio', 'Reinicia el viaje con bonus permanentes y una tienda de mejoras.'],
+    ].map(([i, t, d], n) => `<div class="tcard" style="animation-delay:${0.3 + n * 0.1}s">${ico(i, 36)}<b>${t}</b><small>${d}</small></div>`).join('');
+    $('#t-news').innerHTML = `<h3>Novedades</h3><ul>
+      <li>Objetos equipables, sinergias de equipo y tutorial inicial.</li>
+      <li>Los Pokémon solo se consiguen en el gacha, con tickets.</li>
+      <li>Ataques que mejoran con el nivel y animaciones de evolución.</li>
+      <li>9 regiones, 971 Pokémon y música original por región.</li></ul>`;
   }
   function starter(cb) {
     show('scr-starter');
@@ -59,7 +102,8 @@ const UI = (() => {
     const box = $('#enemy-box');
     if (e) {
       box.classList.remove('hidden');
-      const name = e.boss ? (r.boss.who === DEX[e.dex].name ? r.boss.who : r.boss.who + ' · ' + DEX[e.dex].name) : (e.golden ? '✨ ' : '') + DEX[e.dex].name + (e.golden ? ' dorado' : '');
+      const eased = e.boss && Core.bossEase(e.stage) < 1 ? ' · −' + Math.round((1 - Core.bossEase(e.stage)) * 100) + '%' : '';
+      const name = e.boss ? (r.boss.who === DEX[e.dex].name ? r.boss.who : r.boss.who + ' · ' + DEX[e.dex].name) + eased : (e.golden ? '✨ ' : '') + DEX[e.dex].name + (e.golden ? ' dorado' : '');
       if ($('#enemy-name').textContent !== name) $('#enemy-name').textContent = name;
       $('#enemy-hp').style.width = Math.max(0, e.hp / e.max * 100) + '%';
       $('#enemy-hptxt').textContent = fmt(Math.max(0, Math.ceil(e.hp)));
@@ -77,7 +121,8 @@ const UI = (() => {
       const tx = on ? Math.ceil(s.skOn[id] - s.stats.time) + 's' : rem > 0 ? Math.ceil(rem) + 's' : '';
       const sm = b.querySelector('small'); if (sm.textContent !== tx) sm.textContent = tx;
     }
-    $('#dps').innerHTML = 'Daño/s <b>' + fmt(e ? Core.teamDps(e.types) : Core.teamDps()) + '</b> · Toque <b>' + fmt(Core.tapDmg()) + '</b>';
+    const waitBoss = !s.auto && s.kills >= 10 && !boss && Core.isBoss(s.stage + 1), rd = waitBoss ? Math.min(1, Core.bossReady(s.stage + 1)) : 0;
+    $('#dps').innerHTML = 'Daño/s <b>' + fmt(e ? Core.teamDps(e.types) : Core.teamDps()) + '</b> · Toque <b>' + fmt(Core.tapDmg()) + '</b>' + (waitBoss ? ` · Poder vs jefe <b style="color:${rd >= 0.95 ? '#7ff0a0' : '#ffd23f'}">${Math.round(rd * 100)}%</b>` : '');
     $('#quest-dot').classList.toggle('hidden', !Core.pendingRewards() && s.daily.claimed);
   }
 
@@ -404,7 +449,7 @@ const UI = (() => {
   const TUT = [
     { sel: '#arena', text: 'Tu Pokémon combate solo contra los Pokémon salvajes de cada ruta. ¡Toca a los enemigos para hacer daño extra!', wait: () => S().stats.taps >= 3, hint: 'Toca al enemigo 3 veces' },
     { sel: '.cur.coins', text: 'Cada Pokémon derrotado te da monedas. Mira cómo sube el contador.', next: 1 },
-    { sel: '.a-top', text: 'Cada 10 victorias pasas de etapa. En la décima hay un jefe con tiempo limitado: si no lo vences, vuelves a la etapa anterior.', next: 1 },
+    { sel: '.a-top', text: 'Cada 10 victorias pasas de etapa. En la décima hay un jefe con tiempo limitado: si tu equipo aún no es lo bastante fuerte, sigue combatiendo en la etapa anterior y retará al jefe solo cuando esté listo.', next: 1 },
     { tab: 'team', sel: '[data-act="lvl"]', text: 'Gasta tus monedas en subir de nivel a tu Pokémon. Aprenderá ataques más potentes y evolucionará. ¡Sube un nivel!', wait: () => S().stats.levels >= 1, hint: 'Pulsa «Subir»', pre: () => { if (S().coins < 12) S().coins = 12; } },
     { sel: '#tabs [data-tab="gacha"]', text: 'Los Pokémon solo se consiguen en el gacha. Abre la pestaña.', wait: () => tab === 'gacha', hint: 'Toca «Gacha»' },
     { sel: '[data-act="pull"][data-v="poke"][data-n="1"]', text: 'Las bolas se abren con tickets. Tienes Tickets Poké de regalo. ¡Abre una Poké Ball!', wait: () => S().stats.pulls >= 1 && $('#gacha-fx').classList.contains('hidden'), hint: 'Pulsa «Abrir x1»' },
@@ -651,7 +696,7 @@ const UI = (() => {
     const tog = (k, label, sub) => `<div class="setrow"><span class="sl"><b>${label}</b><small>${sub}</small></span><button class="tog ${st[k] ? 'on' : ''}" data-k="${k}"><i></i></button></div>`;
     openModal(`<div class="set"><h2>${ico('gear', 32)} Ajustes</h2>
       <div class="sset"><h4>Sonido</h4>${slider('music', 'Música', 'sound')}${slider('sfx', 'Efectos', 'ticket')}</div>
-      <div class="sset"><h4>Combate</h4>${tog('nums', 'Números de daño', 'Muestra el daño y las monedas sobre el enemigo')}${tog('bigNums', 'Números grandes', 'Más tamaño para verlos mejor')}${tog('shake', 'Temblor de pantalla', 'En críticos y jefes')}</div>
+      <div class="sset"><h4>Combate</h4>${tog('nums', 'Números de daño', 'Muestra el daño y las monedas sobre el enemigo')}${tog('bigNums', 'Números grandes', 'Más tamaño para verlos mejor')}${tog('shake', 'Temblor de pantalla', 'En críticos y jefes')}${tog('autoBoss', 'Reintentar jefes solo', 'Vuelve a retar al jefe cuando tu equipo tenga fuerza para vencerlo')}</div>
       <div class="sset"><h4>Partida</h4><div class="row" style="margin:0"><button class="btn" id="s-exp">Exportar</button><button class="btn" id="s-imp">Importar</button><button class="btn danger" id="s-wipe">Borrar</button></div>
         <p class="hint" style="margin:8px 0 0">Tu partida se guarda sola en este navegador. Exporta un código para llevarla a otro dispositivo.</p></div>
       <div class="sset kofi-box"><h4>Apoya el proyecto</h4><p class="hint" style="margin:0 0 8px">PokéIdle es gratis y lo hace una sola persona. Si te gusta, puedes invitarme a un café.</p><a class="kofi" href="${KOFI_URL}" target="_blank" rel="noopener noreferrer">${ico('cup', 24)} Apoyar en Ko-fi</a></div>

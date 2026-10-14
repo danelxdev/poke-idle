@@ -42,7 +42,8 @@
     Audio8.play(e.tier >= 4 ? 'legend' : 'win');
     UI.banner('¡Has vencido a ' + r.boss.who + '!', e.tier === 1 ? 'Medalla de gimnasio: +3% de daño' : r.boss.title + ' derrotado', '#ffd23f');
   });
-  Core.on('bossFail', () => { Audio8.play('death'); UI.banner('¡El jefe era demasiado fuerte!', 'Sube de nivel a tu equipo y vuelve a intentarlo', '#ff5050'); });
+  Core.on('bossWait', st => { const r = Core.routeData(st); UI.banner('Aún no estás listo para ' + r.boss.who, 'Sigue combatiendo: lo retarás solo cuando tengas fuerza suficiente', '#ffd23f'); });
+  Core.on('bossFail', () => { Audio8.play('death'); UI.banner('¡El jefe era demasiado fuerte!', 'Sigue combatiendo: lo retarás solo cuando estés listo', '#ff5050'); });
   Core.on('stage', s => {
     Audio8.music(musicFor(s));
     const r = Core.routeData(s);

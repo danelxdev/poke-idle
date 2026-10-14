@@ -16,13 +16,26 @@
 <div id="bg"></div>
 
 <section id="scr-title" class="screen active">
-  <div class="title-wrap">
-    <h1 class="logo">Poké<span>Idle</span></h1>
-    <p class="tag">9 regiones, 971 Pokémon, 134 rutas y un gacha enorme</p>
-    <div id="parade" class="parade"></div>
-    <button class="btn big primary" id="btn-start">Jugar</button>
-    <a class="kofi" id="kofi-title" href="https://ko-fi.com/danelalonso" target="_blank" rel="noopener noreferrer">Apoyar en Ko-fi</a>
-    <p class="fine">Proyecto de fan sin ánimo de lucro · Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Pokémon © Nintendo/Creatures/GAME FREAK · <a href="CREDITS.md" target="_blank">Créditos</a></p>
+  <canvas id="title-bg"></canvas>
+  <div class="title-scroll">
+    <div class="title-wrap">
+      <div class="logo-wrap"><i class="logo-ball" id="logo-ball"></i><h1 class="logo">Poké<span>Idle</span></h1></div>
+      <p class="tag">Entrena, evoluciona y colecciona a todos los Pokémon</p>
+      <div class="badges" id="t-badges"></div>
+      <div class="cta">
+        <div class="cont hidden" id="t-cont"></div>
+        <button class="btn big primary" id="btn-start">Jugar</button>
+        <a class="link hidden" id="t-new" href="#">Empezar una partida nueva</a>
+      </div>
+      <div class="t-grid">
+        <div class="t-panel" id="t-featured"></div>
+        <div class="t-panel" id="t-regions"></div>
+      </div>
+      <div class="t-cards" id="t-cards"></div>
+      <div class="t-panel t-news" id="t-news"></div>
+      <a class="kofi" id="kofi-title" href="https://ko-fi.com/danelalonso" target="_blank" rel="noopener noreferrer">Apoyar en Ko-fi</a>
+      <p class="fine">Proyecto de fan sin ánimo de lucro · Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Pokémon © Nintendo/Creatures/GAME FREAK · <a href="CREDITS.md" target="_blank">Créditos</a></p>
+    </div>
   </div>
 </section>
 
@@ -92,6 +105,7 @@
 <script>const Save = { get d() { return Core.S; } };</script>
 <script src="js/audio.js"></script>
 <script src="js/arena.js"></script>
+<script src="js/title.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>
 </body>

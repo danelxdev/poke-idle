@@ -14,7 +14,7 @@ const STAR_MULT = [1, 1.6, 2.5, 4, 6.5, 10];    // ★0..★5
 const STAR_COPIES = [1, 2, 4, 6, 10];           // copias para pasar a la siguiente estrella
 const DUST_GAIN = [0, 3, 8, 20, 60, 150];       // polvo estelar por copia repetida
 const DUST_COST = [0, 60, 150, 400, 1200, 3500];// polvo para canjear un Pokémon concreto
-const EVO_LVL = [20, 45];                       // niveles de evolución (1.ª y 2.ª)
+const EVO_LVL = [16, 36];                       // niveles de evolución (1.ª y 2.ª)
 const RARITY_FIX = {};
 const RAR_CUT = [485, 505, 530];                // BST final de la línea para poder ser poco común, rara o épica
 
@@ -32,11 +32,11 @@ const REGIONS = [
   { name: 'Más allá', gen: 0, first: 126 },
 ];
 const BOSS_TIER = [null,
-  { name: 'Líder', hp: 9, time: 30, gems: 12, scale: 2 },
-  { name: 'Alto Mando', hp: 12, time: 35, gems: 20, scale: 2 },
-  { name: 'Campeón', hp: 16, time: 40, gems: 35, scale: 2.2 },
-  { name: 'Legendario', hp: 22, time: 45, gems: 50, scale: 2.4 },
-  { name: 'Jefe final', hp: 30, time: 60, gems: 80, scale: 2.6 },
+  { name: 'Líder', hp: 6, time: 30, gems: 12, scale: 2 },
+  { name: 'Alto Mando', hp: 8, time: 35, gems: 20, scale: 2 },
+  { name: 'Campeón', hp: 11, time: 40, gems: 35, scale: 2.2 },
+  { name: 'Legendario', hp: 15, time: 45, gems: 50, scale: 2.4 },
+  { name: 'Jefe final', hp: 20, time: 60, gems: 80, scale: 2.6 },
 ];
 
 // gens = generaciones de Pokémon salvajes · biome = índice de Tiles.THEMES · top = adorno del borde
@@ -236,7 +236,7 @@ const UPGRADES = {
   alch: { name: 'Alquimia', icon: 'dust', base: 20000, mul: 2.5, max: 15, desc: n => '+' + n * 10 + '% de polvo estelar' },
   bosstime: { name: 'Cronómetro', icon: 'clock', base: 20000, mul: 2.4, max: 10, desc: n => '+' + n * 3 + ' s para vencer a los jefes' },
 };
-const SLOT_COST = [0, 600, 2e5, 2e9, 5e12, 1e17];
+const SLOT_COST = [0, 150, 3e3, 1e5, 2e7, 1.5e10];
 
 // Habilidades activas (sin coste, con enfriamiento)
 const SKILLS = {
@@ -249,7 +249,7 @@ const SKILLS = {
 const LEAGUE_SHOP = {
   dmg: { name: 'Entrenamiento de Élite', icon: 'fist', base: 2, mul: 1.5, max: 50, desc: n => '+' + n * 6 + '% de daño' },
   coins: { name: 'Bolsillos Hondos', icon: 'coin', base: 2, mul: 1.5, max: 50, desc: n => '+' + n * 6 + '% de monedas' },
-  lvl: { name: 'Mochila de Caramelos', icon: 'candy', base: 3, mul: 1.7, max: 15, desc: n => 'Tras la Liga empiezas con +' + n * 3 + ' niveles' },
+  lvl: { name: 'Mochila de Caramelos', icon: 'candy', base: 3, mul: 1.7, max: 10, desc: n => 'Tras la Liga empiezas con +' + n * 2 + ' niveles' },
   slots: { name: 'Equipo de Campeón', icon: 'friends', base: 5, mul: 2.5, max: 4, desc: n => 'Tras la Liga conservas ' + (2 + n) + ' huecos' },
   offline: { name: 'Campamento', icon: 'clock', base: 3, mul: 1.8, max: 8, desc: n => 'Ganancias offline: hasta ' + (8 + n * 2) + ' h al ' + (50 + n * 5) + '%' },
   catch: { name: 'Radar de Tickets', icon: 'tkSuper', base: 3, mul: 1.7, max: 10, desc: n => '+' + (n * 0.4).toFixed(1) + '% de tickets soltados' },

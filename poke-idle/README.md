@@ -71,9 +71,38 @@ A partir de la etapa 60 puedes reiniciar el viaje a cambio de **medallas** (+3% 
 
 Tu equipo también sigue ganando monedas hasta 8 horas mientras estás fuera, ampliable en la Liga.
 
-## Equilibrio
+## Progresión y equilibrio
 
-Las constantes están en `Core.K` (`js/core.js`) y se pueden comprobar con simulaciones en Node cargando `pokedex.js`, `idle.js` y `core.js`.
+Todas las constantes están en `Core.K` (`js/core.js`) y el ritmo se ha calibrado con simulaciones en Node (cargando `pokedex.js`, `idle.js` y `core.js`) de un jugador que compra siempre lo más rentable y toca 2 veces por segundo.
+
+**Fórmulas principales**
+
+- **Vida del enemigo** = (100 · g^(etapa−1) + 6 · etapa) · curva. El factor `g` es 1,17 y baja poco a poco hasta 1,115 entre las etapas 100 y 400, y la curva añade un endurecimiento suave desde la etapa 50.
+- **Monedas por baja** ≈ vida · 0,0012 · 0,994^etapa + 0,5 + 0,12 · etapa. Los jefes dan x6.
+- **Coste de subir de nivel** = 6 · 1,15^(nivel−1) (por rareza x1 a x2,4). **Daño por nivel**: x1,075 y x2 cada 25 niveles.
+- **Huecos de equipo**: 150, 3 K, 100 K, 20 M y 15 B monedas.
+- **Jefes**: vida x6 (líder), x8 (Alto Mando), x11 (campeón), x15 (legendario) o x20 (final), con 30 a 60 s de tiempo.
+- **Medallas de la Liga** = ((etapa−45)/12)^1,4, cada una +3% de daño y monedas.
+
+**Para que no se haga pesado**
+
+- El juego **no entra en un jefe** hasta tener poder para vencerlo (60% o más). Si no está listo, sigue combatiendo y lo reta solo al llegar al 95%. Se ve el «Poder vs jefe» y se puede desactivar en Ajustes.
+- Cada intento fallido **debilita al jefe un 8%** (hasta un 65%).
+- Los tickets grandes y los objetos de los jefes caen sobre todo la primera vez que los vences, para que repetir el viaje no regale poder sin límite.
+
+**Ritmo medido (jugador activo y muy eficiente; uno normal tardará de 1,5 a 2,5 veces más)**
+
+| Sin reiniciar la Liga | Tiempo |
+|---|---|
+| Etapa 10 (Brock) | 6 min |
+| Etapa 20 | 18 min |
+| Etapa 40 | 55 min |
+| Etapa 60 (se desbloquea la Liga) | 2 h |
+| Etapa 100 | 3 h |
+| Etapa 140 (fin de Kanto) | 4 h |
+| Etapa 200 | 6 h |
+
+La espera más larga contra un jefe en esa partida es de unos 35 minutos. Con la Liga: el primer reinicio llega hacia las 3 h, la mayor parte de Kanto y Johto queda hecha hacia las 5 h y Hoenn se abre hacia las 10 h. Las regiones siguientes (Sinnoh en adelante) tardan días.
 
 ## Créditos
 
