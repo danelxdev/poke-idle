@@ -49,7 +49,18 @@ Los Pokémon **solo se consiguen en el gacha** (aparte de tu primer compañero).
 
 ## Música
 
-La música es **original**: se compone con un generador de melodías, acordes, bajo, arpegios y percusión en estilo chiptune. Hay una pista para el menú, una para cada región (con su propia tonalidad y tempo), una para los jefes y otra para los jefes finales. No usa ninguna melodía de los juegos de Pokémon.
+La música es **original** y se genera con código, en un estilo relajado y cálido. Cada pista usa una progresión de acordes conocida, melodías de frases de 4 compases (motivo, respuesta, repetición y cadencia) y estos instrumentos:
+
+- **Melodía:** voz suave con un ligero vibrato y eco.
+- **Colchón de cuerdas:** acordes largos que suenan de fondo.
+- **Bajo:** redondo y discreto.
+- **Caja de música:** arpegios que se repiten sobre cada acorde.
+- **Percusión:** suave, con bombo discreto y escobillas, solo en algunas pistas.
+- **Efectos:** reverberación y fundido entre pistas.
+
+Hay una pista para el menú, una para cada región (con su propia tonalidad y tempo), una para los jefes y otra para los jefes finales. No usa ninguna melodía de los juegos de Pokémon.
+
+La calidad se comprueba con números: en todas las pistas los tiempos fuertes caen en notas del acorde, el 80% de los movimientos de la melodía son de un paso, los saltos grandes son menos del 10% y el volumen no satura.
 
 ## Tutorial
 
