@@ -77,6 +77,10 @@ Se desbloquea al llegar a la etapa 10. Los retos sustituyen al combate normal (u
 
 Con la simulación de equilibrio: en el techo de cada etapa un jugador supera sin problema hasta el piso ~14 y el jefe fácil/normal del evento; los pisos con regla, el jefe difícil y el extremo exigen preparar el equipo (tipos, objetos y mejoras).
 
+## Equipos guardados
+
+El botón **Equipos** de la pestaña Equipo guarda hasta 4 equipos con nombre y los carga con un toque (uno para farmear, otro para el evento o la Torre…). Se guardan las especies, así que sobreviven a evoluciones y a la Liga; si el equipo tiene más Pokémon que huecos, se cargan los primeros.
+
 ## Objetos y sinergias
 
 - **Objetos equipables**: cada Pokémon lleva uno. Hay 9 tipos (Cinta Elección, Vidasfera, Pañuelo Elección, Gafas Zoom, Banda Focus, Orbe de tipo, Moneda Amuleto, Cascabel Fortuna y Guante de Entrenador) en 3 rarezas (Común, Raro y Épico).

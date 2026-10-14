@@ -47,7 +47,7 @@ const Core = (() => {
   function fresh() {
     return {
       v: 1, started: false, coins: 0, gems: 50, dust: 0, tk: { poke: 5, super: 1, ultra: 0, master: 0 }, stage: 1, maxStage: 1, kills: 0, auto: true,
-      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 },
+      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, presets: [1, 2, 3, 4].map(i => ({ name: 'Equipo ' + i, team: [] })), event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 },
       up: { tap: 0, train: 0, coin: 0, crit: 0, critdmg: 0, speed: 0, catch: 0, golden: 0, bosstime: 0, type: 0, boss: 0, autotap: 0, alch: 0 },
       shop: { dmg: 0, coins: 0, lvl: 0, slots: 0, offline: 0, catch: 0, shiny: 0, gems: 0, skill: 0, dust: 0, tapd: 0, critb: 0, disc: 0, bt: 0, egg: 0 },
       medals: 0, mp: 0, badges: {}, bossFirst: {},
@@ -81,6 +81,8 @@ const Core = (() => {
     if (giftEgg) d.eggs.push({ t: 0, p: 0 });
     d.eggs = d.eggs.filter(e => e && EGGS[e.t]).slice(0, EGG_CAP);
     if (!(d.inc >= 1)) d.inc = 1;
+    if (!Array.isArray(d.presets)) d.presets = f.presets;
+    d.presets = [0, 1, 2, 3].map(i => { const p = d.presets[i] || {}; return { name: typeof p.name === 'string' && p.name ? p.name.slice(0, 16) : 'Equipo ' + (i + 1), team: Array.isArray(p.team) ? p.team.map(String).filter(k => d.mons[k]) : [] }; });
     if (!d.event || typeof d.event !== 'object') d.event = f.event;
     if (!d.tower || typeof d.tower.best !== 'number') d.tower = { best: 0 };
     // partidas antiguas: la base de algunas líneas cambió al añadir bebés (Pichu, Cleffa…)
@@ -512,6 +514,17 @@ const Core = (() => {
     F.timers = S.team.map(() => 0.3);
   }
   function setTeamList(keys) { S.team = keys.slice(0, S.slots); F.timers = S.team.map(() => 0.3); }
+  // equipos guardados: se guardan las especies, así que sobreviven a la Liga y a las evoluciones
+  function savePreset(i) { const p = S.presets[i]; if (!p || !S.team.length) return false; p.team = S.team.slice(); return true; }
+  function loadPreset(i) {
+    const p = S.presets[i]; if (!p || !p.team.length) return null;
+    const keys = p.team.filter((k, j, a) => S.mons[k] && a.indexOf(k) === j);
+    if (!keys.length) return null;
+    const lost = p.team.length - keys.length, cut = Math.max(0, keys.length - S.slots);
+    setTeamList(keys);
+    return { lost, cut };
+  }
+  function renamePreset(i, name) { const p = S.presets[i]; if (p) p.name = String(name).trim().slice(0, 16) || 'Equipo ' + (i + 1); }
   function unsetTeam(slot) { if (S.team.length > 1 && S.team[slot]) { S.team.splice(slot, 1); F.timers = S.team.map(() => 0.3); return true; } return false; }
   function buySlot() {
     if (S.slots >= 6) return false;
@@ -865,7 +878,7 @@ const Core = (() => {
     prestige, offline, start,
     natOf, natVal, ivSum, ivPct, ivGrade, ivBonus, trainIv, rerollNat, setNat,
     eggNeed, eggReady, eggsReady, giveEgg, hatch, moveEgg, buyEgg, incCost, buyInc,
-    typeEff, routeFoes, matchupAvg, bestTeam, strongTypes, setTeamList,
+    typeEff, routeFoes, matchupAvg, bestTeam, strongTypes, setTeamList, savePreset, loadPreset, renamePreset,
     refreshEvent, eventDaysLeft, eventFeat, eventPool, evBonus, towerUnlocked, towerSpec, eventSpec, chalReady, towerStarts, towerReward, startTower, startEvent, abortChal, claimEventTask, eventFreePull,
     get ev() { return curEv; }, get chal() { return chal; }, inChal: () => !!chal,
   };

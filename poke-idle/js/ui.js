@@ -203,6 +203,22 @@ const UI = (() => {
       <p class="hint">Cada piso es un duelo contra un Pokémon de un tipo distinto con vida y tiempo fijos. Sigues subiendo hasta que caes; los pisos cada 5 son guardianes con una regla especial. Las recompensas se dan la primera vez que superas cada piso y puedes empezar desde cualquier guardián que ya hayas superado.</p>`;
     return h;
   }
+  function presetModal() {
+    const s = S();
+    const row = (p, i) => `<div class="preset"><div class="pr-head"><input class="pr-name" data-i="${i}" value="${p.name.replace(/"/g, '')}" maxlength="16" autocomplete="off"><span class="pr-n">${p.team.length ? p.team.length + ' Pokémon' : 'Vacío'}</span></div>
+      <div class="pr-mons">${p.team.length ? p.team.map(k => s.mons[k] ? `<img src="${por(s.mons[k].dex, s.mons[k].shiny)}" title="${DEX[s.mons[k].dex].name}">` : '').join('') : '<small>Aún no has guardado ningún equipo aquí</small>'}</div>
+      <div class="row tight"><button class="btn small primary" data-load="${i}" ${p.team.length ? '' : 'disabled'}>Cargar</button><button class="btn small" data-save="${i}">Guardar el actual</button></div></div>`;
+    openModal(`<h2>Equipos guardados</h2><p class="hint">Guarda tu equipo actual y cámbialo con un toque, por ejemplo uno para farmear y otro para el evento o la Torre.</p>${s.presets.map(row).join('')}<div class="row"><button class="btn" id="pr-x">Cerrar</button></div>`);
+    $('#pr-x').onclick = closeModal;
+    $$('.pr-name').forEach(inp => inp.onchange = () => { Core.renamePreset(+inp.dataset.i, inp.value); Core.save(); });
+    $$('[data-save]').forEach(b => b.onclick = () => { if (Core.savePreset(+b.dataset.save)) { Audio8.play('item'); toast('Equipo guardado'); Core.save(); presetModal(); } else Audio8.play('error'); });
+    $$('[data-load]').forEach(b => b.onclick = () => {
+      const r = Core.loadPreset(+b.dataset.load);
+      if (!r) { Audio8.play('error'); return; }
+      Audio8.play('swap'); closeModal(); Core.save(); refresh(true);
+      toast(r.cut ? 'Equipo cargado (solo caben ' + S().slots + ')' : 'Equipo cargado');
+    });
+  }
   function incubatorHtml() {
     const s = S();
     let h = `<h3>Incubadora <small style="color:var(--dim)">${s.eggs.length}/${EGG_CAP} huevos</small></h3><div class="incubator">`;
@@ -237,7 +253,7 @@ const UI = (() => {
       sig: () => { const s = S(); return JSON.stringify([s.team.map(k => [k, s.mons[k].lvl, s.mons[k].dex, s.mons[k].stars, s.mons[k].shiny, s.mons[k].item]), s.inv.length, s.slots, s.buyMul, s.buyMul === 'max' ? Math.floor(Math.log(s.coins + 1) * 3) : 0, s.medals, s.up.train, Core.dexCount(), s.badges, s.team.map(k => [s.mons[k].nat, Core.ivSum(s.mons[k])]), Core.routeIdx(s.stage), Core.isBoss(s.stage), s.kills >= 10 && !s.auto]); },
       html() {
         const s = S();
-        let h = `<div class="teamhead"><div class="seg">${[1, 10, 25, 'max'].map(v => `<button data-act="mul" data-v="${v}" class="${s.buyMul === v ? 'on' : ''}">${v === 'max' ? 'Máx' : 'x' + v}</button>`).join('')}</div><div class="rowbtns"><button class="btn small" data-act="best" title="Elige a tus Pokémon que mejor golpean a los enemigos de esta ruta">Mejor equipo</button><button class="btn small" data-act="bag">Mochila · ${s.inv.length}</button></div></div>`;
+        let h = `<div class="teamhead"><div class="seg">${[1, 10, 25, 'max'].map(v => `<button data-act="mul" data-v="${v}" class="${s.buyMul === v ? 'on' : ''}">${v === 'max' ? 'Máx' : 'x' + v}</button>`).join('')}</div><div class="rowbtns"><button class="btn small" data-act="presets" title="Guarda y carga equipos">Equipos</button><button class="btn small" data-act="best" title="Elige a tus Pokémon que mejor golpean a los enemigos de esta ruta">Mejor equipo</button><button class="btn small" data-act="bag">Mochila · ${s.inv.length}</button></div></div>`;
         const tgt = s.kills >= 10 && !s.auto && !Core.isBoss(s.stage) ? s.stage + 1 : s.stage, strong = Core.strongTypes(tgt);
         if (strong.length) h += `<div class="foehint">${Core.isBoss(tgt) ? 'Jefe' : 'Esta ruta'}: pega fuerte ${strong.map(o => `<span class="type" style="background:${TYPE_COLORS[o.t]}">${TYPE_ES[o.t]}</span>`).join('')}</div>`;
         for (let i = 0; i < 6; i++) {
@@ -430,6 +446,7 @@ const UI = (() => {
       case 'item': itemModal(v); return;
       case 'bag': bagModal(); return;
       case 'pull': doPull(v, +el.dataset.n); break;
+      case 'presets': presetModal(); return;
       case 'best': {
         const tgt = s.kills >= 10 && !s.auto && !Core.isBoss(s.stage) ? s.stage + 1 : s.stage;
         const keys = Core.bestTeam(tgt, s.slots);
