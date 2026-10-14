@@ -284,7 +284,7 @@ const UI = (() => {
       <div style="font-size:16px;color:var(--dim);margin-bottom:10px">Cada guerrero tiene sus propias mejoras: sólo cuentan cuando juegas con él.</div>
       <div class="filters"><b style="font-family:var(--px);font-size:10px">Guerrero</b>
         <select id="u-char">${owned.map(x => `<option value="${x.id}" ${x.id === upgChar ? 'selected' : ''}>${x.name}</option>`).join('')}</select>
-        <img class="px" style="width:40px;height:54px" src="${charImg(c)}">
+        <img class="px" style="width:34px;height:50px" src="${charImg(c)}">
         ${upgChar !== d.partner ? '<button class="btn small" id="u-partner">Hacer compañero</button>' : '<span class="chip" style="--rc:var(--yellow)">★ Compañero</span>'}
       </div>
       <div class="upg-list">${PUPGRADES.map(u => {
@@ -661,7 +661,7 @@ const UI = (() => {
     const newShinies = s.shinies.map(id => CHAR_BY[id].name).join(', ');
     modal(`<h2>${s.quit ? 'Run abandonada' : 'Has caído…'}</h2>
       ${s.newRecord ? '<p class="sub" style="color:var(--yellow)">¡Nuevo récord de tiempo!</p>' : ''}
-      <div style="display:flex;justify-content:center"><img class="px" style="width:80px;height:108px;${s.quit ? '' : 'filter:grayscale(.6)'}" src="${charImg(s.char)}"></div>
+      <div style="display:flex;justify-content:center"><img class="px" style="width:102px;height:150px;${s.quit ? '' : 'filter:grayscale(.6)'}" src="${charImg(s.char)}"></div>
       <div class="result-grid">
         <div>Tiempo<b>${fmtTime(s.time)}</b></div><div>Nivel<b>${s.lvl}</b></div><div>Enemigos<b>${fmt(s.kills)}</b></div><div>Jefes<b>${s.bosses}</b></div>
         <div>Zeni ganado<b>+${fmt(s.zeni)}</b></div><div>Tickets del gacha<b>${s.t1}${s.t10 ? ' · ×10: ' + s.t10 : ''}</b></div>
