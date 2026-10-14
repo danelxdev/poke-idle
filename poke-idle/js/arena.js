@@ -199,11 +199,11 @@ const Arena = (() => {
     if (lg) { const k = (t - lg.t0) / lg.dur; if (k >= 1) delete lunge[i]; else x += Math.sin(k * Math.PI) * lg.dx; }
     const a = anim[i];
     let an = 'idle', at = t + i * 0.37;
-    if (a && t - a.t0 < Sprites.animLen(m.dex, 'attack')) { an = 'attack'; at = t - a.t0; }
+    if (a && t - a.t0 < Sprites.animLen(Core.fdex(m), 'attack')) { an = 'attack'; at = t - a.t0; }
     const bob = an === 'idle' ? 0 : 0;
     shadow(x, y + 1, 7);
     if (m.stars >= 3) { ctx.globalAlpha = 0.18 + 0.1 * Math.sin(t * 4 + i); ctx.fillStyle = RARITY[Core.RAR[m.dex]].color; ctx.beginPath(); ctx.ellipse(x, y, 11, 4, 0, 0, 6.3); ctx.fill(); ctx.globalAlpha = 1; }
-    Sprites.draw(ctx, m.dex, m.shiny, an, lg ? 0 : 0, at, x, y + bob, 1, {});
+    Sprites.draw(ctx, Core.fdex(m), m.shiny, an, lg ? 0 : 0, at, x, y + bob, 1, {});
     if (m.shiny && Math.sin(t * 3 + i) > 0.9) { ctx.fillStyle = '#fff6b0'; ctx.fillRect(x + 6, y - 22, 1, 3); ctx.fillRect(x + 5, y - 21, 3, 1); }
   }
 

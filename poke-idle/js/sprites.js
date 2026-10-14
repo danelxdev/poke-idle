@@ -6,6 +6,7 @@
 const Sprites = (() => {
   const DEX = {};
   for (const p of POKEDEX) DEX[p.dex] = p;
+  if (typeof MEGA_DEX !== 'undefined') for (const p of MEGA_DEX) DEX[p.dex] = p;
   const imgs = new Map();
   // fila de la hoja según el octante del ángulo (0 = derecha, sentido horario en pantalla)
   const ROW_OF_OCT = [2, 1, 0, 7, 6, 5, 4, 3];

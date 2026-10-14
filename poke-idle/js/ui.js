@@ -34,7 +34,7 @@ const UI = (() => {
     $('#t-new').classList.toggle('hidden', !started);
     if (started) {
       const n = Object.keys(s.mons).length, hrs = Math.floor(s.stats.time / 3600), mins = Math.floor(s.stats.time / 60) % 60;
-      $('#t-cont').innerHTML = `<div class="ct-team">${s.team.slice(0, 6).map(kk => `<img class="px" src="${por(s.mons[kk].dex, s.mons[kk].shiny)}" alt="">`).join('')}</div>
+      $('#t-cont').innerHTML = `<div class="ct-team">${s.team.slice(0, 6).map(kk => `<img class="px" src="${por(Core.fdex(s.mons[kk]), s.mons[kk].shiny)}" alt="">`).join('')}</div>
         <div class="ct-info"><b>${L('Tu aventura', 'Your adventure')}</b><span>${REGIONS[Core.regionOf(s.stage)].name} · ${L('etapa', 'stage')} ${s.stage} <small>(${L('máx.', 'max')} ${s.stats.maxStage})</small></span>
         <small>${n} Pokémon · Pokédex ${Core.dexCount()}/${POKEDEX.length} · ${s.medals} ${L('medallas', 'medals')} · ${hrs ? hrs + ' h ' : ''}${mins} min ${L('jugados', 'played')}</small></div>`;
       $('#t-new').onclick = e => {
@@ -147,7 +147,7 @@ const UI = (() => {
     if (force || ns !== sig) { sig = ns; $('#tab-body').innerHTML = TABS[tab].html(); }
     const foe = Core.F.enemy;
     for (const c of $$('#tab-body [data-effk]')) {
-      const m = s.mons[c.dataset.effk], ef = m && foe ? Core.eff(m.dex, foe.types) : 1;
+      const m = s.mons[c.dataset.effk], ef = m && foe ? Core.eff(Core.fdex(m), foe.types) : 1;
       const t = ef >= 2 ? '▲ ×' + (Math.round(ef * 10) / 10) : ef < 0.5 ? L('✖ sin efecto', '✖ no effect') : ef < 1 ? '▼ ×½' : '', cl = 'effchip' + (ef >= 2 ? ' eup' : ef < 1 ? ' edn' : '');
       if (c.textContent !== t) c.textContent = t;
       if (c.className !== cl) c.className = cl;
@@ -171,7 +171,7 @@ const UI = (() => {
 
   const natTxt = m => { const n = Core.natOf(m); return n.up ? `${n.name} <em class="nu">▲${NAT_SHORT[n.up]}</em> <em class="nd">▼${NAT_SHORT[n.down]}</em>` : n.name + L(' (neutra)', ' (neutral)'); };
   let towerStart = 0;
-  const rewText = r => !r ? '' : [r.gems && '+' + r.gems + L(' gemas', ' gems'), r.dust && '+' + r.dust + L(' polvo', ' stardust'), ...Object.entries(r.tk || {}).map(([t, n]) => n + '× ' + TICKETS[t].name), r.egg !== undefined && EGGS[r.egg].name].filter(Boolean).join(' · ');
+  const rewText = r => !r ? '' : [r.gems && '+' + r.gems + L(' gemas', ' gems'), r.shards && '+' + r.shards + L(' fragmentos Mega', ' Mega shards'), r.dust && '+' + r.dust + L(' polvo', ' stardust'), ...Object.entries(r.tk || {}).map(([t, n]) => n + '× ' + TICKETS[t].name), r.egg !== undefined && EGGS[r.egg].name].filter(Boolean).join(' · ');
   const ruleTxt = r => r ? `<div class="rulebox"><b>${r.name}${r.only ? ' ' + TYPE_ES[r.only] : ''}</b>: ${r.desc}</div>` : '';
   function chalHtml() {
     const s = S();
@@ -206,7 +206,7 @@ const UI = (() => {
   function presetModal() {
     const s = S();
     const row = (p, i) => `<div class="preset"><div class="pr-head"><input class="pr-name" data-i="${i}" value="${p.name.replace(/"/g, '').replace(/^Equipo (\d)$/, L('Equipo $1', 'Team $1'))}" maxlength="16" autocomplete="off"><span class="pr-n">${p.team.length ? p.team.length + ' Pokémon' : L('Vacío', 'Empty')}</span></div>
-      <div class="pr-mons">${p.team.length ? p.team.map(k => s.mons[k] ? `<img src="${por(s.mons[k].dex, s.mons[k].shiny)}" title="${DEX[s.mons[k].dex].name}">` : '').join('') : '<small>' + L('Aún no has guardado ningún equipo aquí', 'You have not saved a team here yet') + '</small>'}</div>
+      <div class="pr-mons">${p.team.length ? p.team.map(k => s.mons[k] ? `<img src="${por(Core.fdex(s.mons[k]), s.mons[k].shiny)}" title="${DEX[Core.fdex(s.mons[k])].name}">` : '').join('') : '<small>' + L('Aún no has guardado ningún equipo aquí', 'You have not saved a team here yet') + '</small>'}</div>
       <div class="row tight"><button class="btn small primary" data-load="${i}" ${p.team.length ? '' : 'disabled'}>${L('Cargar', 'Load')}</button><button class="btn small" data-save="${i}">${L('Guardar el actual', 'Save current')}</button></div></div>`;
     openModal(`<h2>${L('Equipos guardados', 'Saved teams')}</h2><p class="hint">${L('Guarda tu equipo actual y cámbialo con un toque, por ejemplo uno para farmear y otro para el evento o la Torre.', 'Save your current team and swap with one tap, for example one for farming and another for the event or the Tower.')}</p>${s.presets.map(row).join('')}<div class="row"><button class="btn" id="pr-x">${L('Cerrar', 'Close')}</button></div>`);
     $('#pr-x').onclick = closeModal;
@@ -297,7 +297,7 @@ const UI = (() => {
 
   const TABS = {
     team: {
-      sig: () => { const s = S(); return JSON.stringify([s.team.map(k => [k, s.mons[k].lvl, s.mons[k].dex, s.mons[k].stars, s.mons[k].shiny, s.mons[k].item]), s.inv.length, s.slots, s.buyMul, s.buyMul === 'max' ? Math.floor(Math.log(s.coins + 1) * 3) : 0, s.medals, s.up.train, Core.dexCount(), s.badges, s.team.map(k => [s.mons[k].nat, Core.ivSum(s.mons[k])]), Core.routeIdx(s.stage), Core.isBoss(s.stage), s.kills >= 10 && !s.auto]); },
+      sig: () => { const s = S(); return JSON.stringify([s.team.map(k => [k, s.mons[k].lvl, s.mons[k].dex, s.mons[k].mf, s.mons[k].stars, s.mons[k].shiny, s.mons[k].item]), s.inv.length, s.slots, s.buyMul, s.buyMul === 'max' ? Math.floor(Math.log(s.coins + 1) * 3) : 0, s.medals, s.up.train, Core.dexCount(), s.badges, s.team.map(k => [s.mons[k].nat, Core.ivSum(s.mons[k])]), Core.routeIdx(s.stage), Core.isBoss(s.stage), s.kills >= 10 && !s.auto]); },
       html() {
         const s = S();
         let h = `<div class="teamhead"><div class="seg">${[1, 10, 25, 'max'].map(v => `<button data-act="mul" data-v="${v}" class="${s.buyMul === v ? 'on' : ''}">${v === 'max' ? L('Máx', 'Max') : 'x' + v}</button>`).join('')}</div><div class="rowbtns"><button class="btn small" data-act="presets" title="${L('Guarda y carga equipos', 'Save and load teams')}">${L('Equipos', 'Teams')}</button><button class="btn small" data-act="best" title="${L('Elige a tus Pokémon que mejor golpean a los enemigos de esta ruta', 'Picks your Pokémon that hit the enemies of this route best')}">${L('Mejor equipo', 'Best team')}</button><button class="btn small" data-act="bag">${L('Mochila', 'Bag')} · ${s.inv.length}</button></div></div>`;
@@ -312,13 +312,13 @@ const UI = (() => {
           if (!k) { h += `<div class="card empty"><div class="info"><b>${L('Hueco', 'Slot')} ${i + 1} ${L('libre', 'free')}</b><small>${L('Pon a combatir a otro de tus Pokémon', 'Put another one of your Pokémon to fight')}</small></div><button class="btn primary" data-act="pick" data-v="${i}">${L('Elegir', 'Choose')}</button></div>`; continue; }
           const m = s.mons[k], rar = Core.RAR[m.dex], st = Core.stageOf(m.dex), kids = Core.CHILDREN[m.dex];
           const evo = kids && st < EVO_LVL.length ? L(`Evoluciona a Nv. ${EVO_LVL[st]}`, `Evolves at Lv. ${EVO_LVL[st]}`) : '';
-          const t0 = DEX[m.dex].types[0], tier = Core.tierOf(m.lvl), mv = MOVES[Core.moveOf(m)];
+          const fd = Core.fdex(m), t0 = DEX[fd].types[0], tier = Core.tierOf(m.lvl), mv = MOVES[Core.moveOf(m)];
           const next = tier + 1 < TIER_LV.length ? L(`Nuevo ataque a Nv. ${TIER_LV[tier + 1]}: `, `New move at Lv. ${TIER_LV[tier + 1]}: `) + MOVES[MOVE_TIERS[t0][tier + 1]].name : L('Ataque máximo', 'Max move');
           const b = buyN(m);
           h += `<div class="card" style="--rc:${RARITY[rar].color}">
-            <img class="por" src="${por(m.dex, m.shiny)}" data-act="mon" data-v="${k}">
-            <div class="info"><b>${m.shiny ? '<span class="shiny-tag">✨</span>' : ''}${DEX[m.dex].name} <small style="display:inline">${L('Nv.', 'Lv.')} ${m.lvl}</small></b>
-            ${starsHtml(m.stars)} ${typeTags(m.dex)} <span data-effk="${k}"></span>
+            <img class="por" src="${por(fd, m.shiny)}" data-act="mon" data-v="${k}">
+            <div class="info"><b>${m.shiny ? '<span class="shiny-tag">✨</span>' : ''}${m.mf ? '<span class="megatag">MEGA</span>' : ''}${DEX[fd].name} <small style="display:inline">${L('Nv.', 'Lv.')} ${m.lvl}</small></b>
+            ${starsHtml(m.stars)} ${typeTags(fd)} <span data-effk="${k}"></span>
             <small class="natline">${natTxt(m)} · <span class="gr" style="background:${Core.ivGrade(m)[2]}">IV ${Math.round(Core.ivPct(m) * 100)}% · ${Core.ivGrade(m)[1]}</span></small>
             <small class="mv"><i style="background:${TYPE_COLORS[mv.type]}"></i>${mv.name} · ${fmt(Core.monDmg(m) / Core.monRate(m))} ${L('daño/s', 'dmg/s')}</small>
             <small class="evo">${evo ? evo + ' · ' : ''}${next}</small></div>
@@ -397,7 +397,7 @@ const UI = (() => {
           const canStar = cur && own.stars < 5 && own.copies >= STAR_COPIES[own.stars];
           const attr = own && seen ? `data-act="mon" data-v="${base}"` : seen ? `data-act="seen" data-v="${p.dex}"` : locked ? 'data-act="locked"' : 'data-act="noown"';
           h += `<button class="${seen ? '' : 'unk'} ${cur && s.team.includes(base) ? 'inteam' : ''}" style="--rc:${cur ? RARITY[Core.RAR[p.dex]].color : seen ? '#2a3f8a' : '#1d2a5a'}" ${attr}>
-            ${cur ? `<span class="lv">${own.lvl}</span>` : ''}${cur && own.shinyOwned ? '<span class="sh">✨</span>' : ''}${seen ? `<img src="${por(p.dex, cur && own.shiny)}" loading="lazy">` : `<span class="q">${locked ? '🔒' : '?'}</span>`}<span class="n">${seen ? (canStar ? '⬆ ' : '') + p.name : '#' + p.dex}</span></button>`;
+            ${cur ? `<span class="lv">${own.lvl}</span>` : ''}${cur && own.shinyOwned ? '<span class="sh">✨</span>' : ''}${seen ? `<img src="${por(p.dex, cur && own.shiny)}" loading="lazy">` : `<span class="q">${locked ? '🔒' : '?'}</span>`}<span class="n">${seen ? (canStar ? '⬆ ' : '') + p.name : (p.dex < 10000 ? '#' + p.dex : '#???')}</span></button>`;
         }
         return h + '</div><p class="hint">' + L('Los Pokémon que no tienes solo se consiguen en el gacha.', 'Pokémon you do not own can only be obtained from the gacha.') + '</p>';
       },
@@ -555,8 +555,8 @@ const UI = (() => {
     if (!list.length) return '<p class="hint">' + L('No hay ningún Pokémon con ese nombre.', 'No Pokémon with that name.') + '</p>';
     return '<div class="pickgrid">' + list.map(({ k, m, dps }) => {
       const at = s.team.indexOf(k);
-      return `<button class="pk ${at === pickSlot ? 'cur' : ''}" data-k="${k}" style="--rc:${RARITY[Core.RAR[m.dex]].color}"><img src="${por(m.dex, m.shiny)}" loading="lazy">
-        <b>${m.shiny ? '✨' : ''}${DEX[m.dex].name}</b><small>${L('Nv.', 'Lv.')} ${m.lvl} · ${starsHtml(m.stars)}</small><small>${fmt(dps)}/s</small>${at >= 0 ? `<span class="slot">${at + 1}</span>` : ''}</button>`;
+      return `<button class="pk ${at === pickSlot ? 'cur' : ''}" data-k="${k}" style="--rc:${RARITY[Core.RAR[m.dex]].color}"><img src="${por(Core.fdex(m), m.shiny)}" loading="lazy">
+        <b>${m.shiny ? '✨' : ''}${DEX[Core.fdex(m)].name}</b><small>${L('Nv.', 'Lv.')} ${m.lvl} · ${starsHtml(m.stars)}</small><small>${fmt(dps)}/s</small>${at >= 0 ? `<span class="slot">${at + 1}</span>` : ''}</button>`;
     }).join('') + '</div>';
   }
   function pickModal(slot) {
@@ -629,7 +629,7 @@ const UI = (() => {
     { sel: '#tabs [data-tab="chal"]', text: L('En Retos hay un evento cada semana con un tipo protagonista (bonus de daño, jefe, misiones y una bola propia) y la Torre de batalla, un duelo tras otro con reglas especiales.', 'Challenges has a weekly event with a featured type (damage bonus, boss, quests and its own ball) and the Battle Tower, one duel after another with special rules.'), next: 1 },
     { sel: '#tabs [data-tab="quests"]', text: L('Las misiones diarias y semanales, los logros y la recompensa diaria te dan gemas y tickets. ¡Entra cada día!', 'Daily and weekly quests, achievements and the daily reward give you gems and tickets. Come back every day!'), next: 1 },
     { sel: '#tabs [data-tab="league"]', text: L('Al llegar a la etapa 60 podrás entrar en la Liga: reinicias el viaje a cambio de bonus permanentes y una tienda de mejoras.', 'At stage 60 you can enter the League: you restart the journey in exchange for permanent bonuses and an upgrade shop.'), next: 1 },
-    { text: L('¡Listo! Ahora te toca a ti: llega lo más lejos que puedas, colecciona los 971 Pokémon y completa la Pokédex. Puedes repetir este tutorial desde Ajustes.', 'All set! Now it is your turn: get as far as you can, collect all 971 Pokémon and complete the Pokédex. You can repeat this tutorial from Settings.'), next: 1, last: 1 },
+    { text: L('¡Listo! Ahora te toca a ti: llega lo más lejos que puedas, colecciona los ' + POKEDEX.length + ' Pokémon y completa la Pokédex. Puedes repetir este tutorial desde Ajustes.', 'All set! Now it is your turn: get as far as you can, collect all ' + POKEDEX.length + ' Pokémon and complete the Pokédex. You can repeat this tutorial from Settings.'), next: 1, last: 1 },
   ];
   let tutI = -1, tutRaf = 0, tutEl = null;
   function tutStart(force) {
@@ -756,7 +756,7 @@ const UI = (() => {
 
   // ---------------- animación de evolución ----------------
   const evoQueue = []; let evoRun = false;
-  function evolveAnim(from, to, shiny) { evoQueue.push({ from, to, shiny }); if (!evoRun) nextEvo(); }
+  function evolveAnim(from, to, shiny, mega) { evoQueue.push({ from, to, shiny, mega }); if (!evoRun) nextEvo(); }
   function nextEvo() {
     const ev = evoQueue.shift();
     if (!ev) { evoRun = false; Core.setPaused(false); $('#evo').classList.add('hidden'); return; }
@@ -764,7 +764,7 @@ const UI = (() => {
     const box = $('#evo'), cv = $('#evo-cv'), g = cv.getContext('2d'), txt = $('#evo-txt'), ok = $('#evo-ok');
     box.classList.remove('hidden', 'done'); ok.classList.add('hidden');
     Sprites.preload(ev.to, ev.shiny); Sprites.preload(ev.from, ev.shiny);
-    txt.innerHTML = L(`¿Eh? ¡<b>${DEX[ev.from].name}</b> está evolucionando!`, `What? <b>${DEX[ev.from].name}</b> is evolving!`);
+    txt.innerHTML = ev.mega ? L(`¡<b>${DEX[ev.from].name}</b> está megaevolucionando!`, `<b>${DEX[ev.from].name}</b> is Mega Evolving!`) : L(`¿Eh? ¡<b>${DEX[ev.from].name}</b> está evolucionando!`, `What? <b>${DEX[ev.from].name}</b> is evolving!`);
     const parts = []; let t0 = performance.now(), finished = false, lastSw = -1, flashed = false, raf = 0;
     const rnd = (a, b) => a + Math.random() * (b - a);
     Audio8.play('charge');
@@ -785,7 +785,7 @@ const UI = (() => {
         if (idx !== lastSw) { lastSw = idx; if (idx % 2 === 0) Audio8.play('swap'); }
         if (Math.random() < 0.6) parts.push({ x: cx + rnd(-44, 44), y: cy - rnd(0, 90), vx: rnd(-10, 10), vy: rnd(-40, -10), l: 0.7, m: 0.7, c: '#ffffff' });
       } else { showNew = true; flash = t < 3.75; }
-      if (t >= 3.6 && !flashed) { flashed = true; box.classList.add('flash'); setTimeout(() => box.classList.remove('flash'), 600); Audio8.play('evolve'); for (let i = 0; i < 40; i++) { const a = Math.random() * 6.28, sp = rnd(30, 110); parts.push({ x: cx, y: cy - 44, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, l: 1, m: 1, c: pick(['#ffffff', '#ffd23f', '#9fe0ff', '#ff9ed8']) }); } txt.innerHTML = L(`¡<b>${DEX[ev.from].name}</b> ha evolucionado en <b style="color:#ffd23f">${DEX[ev.to].name}</b>!`, `<b>${DEX[ev.from].name}</b> evolved into <b style="color:#ffd23f">${DEX[ev.to].name}</b>!`); }
+      if (t >= 3.6 && !flashed) { flashed = true; box.classList.add('flash'); setTimeout(() => box.classList.remove('flash'), 600); Audio8.play('evolve'); for (let i = 0; i < 40; i++) { const a = Math.random() * 6.28, sp = rnd(30, 110); parts.push({ x: cx, y: cy - 44, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, l: 1, m: 1, c: pick(['#ffffff', '#ffd23f', '#9fe0ff', '#ff9ed8']) }); } txt.innerHTML = ev.mega ? L(`¡<b>${DEX[ev.from].name}</b> ha megaevolucionado en <b style="color:#ffd23f">${DEX[ev.to].name}</b>!`, `<b>${DEX[ev.from].name}</b> Mega Evolved into <b style="color:#ffd23f">${DEX[ev.to].name}</b>!`) : L(`¡<b>${DEX[ev.from].name}</b> ha evolucionado en <b style="color:#ffd23f">${DEX[ev.to].name}</b>!`, `<b>${DEX[ev.from].name}</b> evolved into <b style="color:#ffd23f">${DEX[ev.to].name}</b>!`); }
       const d = showNew ? ev.to : ev.from, bounce = t < 0.9 ? Math.sin(t * 8) * 1.5 : 0;
       Sprites.draw(g, d, ev.shiny, 'idle', Math.PI / 2, t, cx, cy + bounce, scaleOf(d), { flash });
       for (let i = parts.length - 1; i >= 0; i--) { const p = parts[i]; p.l -= 1 / 60; p.x += p.vx / 60; p.y += p.vy / 60; if (p.l <= 0) { parts.splice(i, 1); continue; } g.globalAlpha = p.l / p.m; g.fillStyle = p.c; g.fillRect(Math.round(p.x), Math.round(p.y), 2, 2); }
@@ -805,31 +805,34 @@ const UI = (() => {
   function monModal(key) {
     const s = S(), m = s.mons[key];
     if (!m) return;
-    const rar = Core.RAR[m.dex], p = DEX[m.dex], st = p.stats;
+    const rar = Core.RAR[m.dex], p = DEX[Core.fdex(m)], st = p.stats;
     const need = m.stars < 5 ? STAR_COPIES[m.stars] : 0;
     const inTeam = s.team.indexOf(key);
     let slots = '';
     for (let i = 0; i < s.slots; i++) {
       const k = s.team[i];
-      slots += `<button data-slot="${i}" class="${k === key ? 'cur' : ''}" title="${L('Hueco', 'Slot')} ${i + 1}">${k ? `<img src="${por(s.mons[k].dex, s.mons[k].shiny)}">` : '+'}</button>`;
+      slots += `<button data-slot="${i}" class="${k === key ? 'cur' : ''}" title="${L('Hueco', 'Slot')} ${i + 1}">${k ? `<img src="${por(Core.fdex(s.mons[k]), s.mons[k].shiny)}">` : '+'}</button>`;
     }
     const t0 = p.types[0], tier = Core.tierOf(m.lvl);
     const moves = MOVE_TIERS[t0].map((id, i) => `<span class="mvchip ${i <= tier ? 'on' : ''}" style="--tc:${TYPE_COLORS[MOVES[id].type]}">${MOVES[id].name}<small>${L('Nv.', 'Lv.')} ${TIER_LV[i]}</small></span>`).join('');
     openModal(`<h2>${m.shiny ? '✨ ' : ''}${p.name}</h2>
       <div class="monbig"><canvas id="mon-cv" width="72" height="72"></canvas><div class="stats">
-        <div style="color:${RARITY[rar].color};font-size:16px">${RARITY[rar].name} ${starsHtml(m.stars)}</div>${typeTags(m.dex)}
+        <div style="color:${RARITY[rar].color};font-size:16px">${RARITY[rar].name} ${starsHtml(m.stars)}</div>${typeTags(Core.fdex(m))}
         <div>${L('Nivel', 'Level')} <b>${m.lvl}</b> · ${L('Daño/s', 'Damage/s')} <b>${fmt(Core.monDmg(m) / Core.monRate(m))}</b></div>
         <div>${L(`PS ${st.hp} · Atq ${st.atk} · Def ${st.def} · AtE ${st.spa} · DfE ${st.spd} · Vel ${st.spe}`, `HP ${st.hp} · Atk ${st.atk} · Def ${st.def} · SpA ${st.spa} · SpD ${st.spd} · Spe ${st.spe}`)}</div>
         <div>${L('Copias', 'Copies')}: <b>${m.copies}</b>${need ? ' / ' + need + L(' para ★', ' for ★') + (m.stars + 1) + L(' (daño x', ' (damage x') + STAR_MULT[m.stars + 1] + ')' : L(' · ¡Estrellas al máximo!', ' · Stars maxed!')}</div>
       </div></div>
       <div class="mvlist">${moves}</div>
       ${genesHtml(m)}
+      ${megaHtml(key, m)}
       <div class="row">${need ? `<button class="btn primary" id="m-star" ${m.copies >= need ? '' : 'disabled'}>${L('Subir a ★', 'Upgrade to ★')}${m.stars + 1}</button>` : ''}${m.shinyOwned ? `<button class="btn" id="m-shiny">${L('Forma', 'Form')}: ${m.shiny ? '✨ Shiny' : 'Normal'}</button>` : ''}</div>
       <p class="hint" style="margin-top:12px">${inTeam >= 0 ? L('Está en tu equipo. Toca otro hueco para moverlo.', 'It is in your team. Tap another slot to move it.') : L('Elige el hueco del equipo donde quieres ponerlo:', 'Choose the team slot where you want to put it:')}</p>
       <div class="slotpick">${slots}</div>
       <div class="row"><button class="btn" id="m-close">${L('Cerrar', 'Close')}</button></div>`);
-    monCv = $('#mon-cv'); monCv.dataset.k = key; Sprites.preload(m.dex, m.shiny);
+    monCv = $('#mon-cv'); monCv.dataset.k = key; Sprites.preload(Core.fdex(m), m.shiny);
     $('#m-close').onclick = closeModal;
+    $$('[data-mega-unlock]').forEach(b => b.onclick = () => { if (Core.megaUnlock(key, b.dataset.megaUnlock)) { Core.save(); closeModal(); refresh(true); } else Audio8.play('error'); });
+    $$('[data-mega-set]').forEach(b => b.onclick = () => { Core.megaSet(key, b.dataset.megaSet || null); Audio8.play('swap'); Core.save(); monModal(key); refresh(true); });
     $$('[data-iv]').forEach(b => b.onclick = () => { if (Core.trainIv(key, b.dataset.iv)) { Audio8.play('levelup'); Core.save(); monModal(key); refresh(true); } else Audio8.play('error'); });
     if ($('#m-natre')) $('#m-natre').onclick = () => { if (Core.rerollNat(key)) { Audio8.play('item'); Core.save(); monModal(key); refresh(true); } else Audio8.play('error'); };
     if ($('#m-natset')) $('#m-natset').onclick = e => openDD(e.currentTarget, NATURES.map(n => [n.id, n.up ? `${n.name} · ▲${NAT_AXES[n.up]} ▼${NAT_AXES[n.down]}` : n.name + L(' · neutra', ' · neutral')]), m.nat, v => { if (Core.setNat(key, +v)) { Audio8.play('item'); Core.save(); monModal(key); refresh(true); } else Audio8.play('error'); });
@@ -837,15 +840,30 @@ const UI = (() => {
     if ($('#m-star')) $('#m-star').onclick = () => { if (Core.starUp(key)) { Audio8.play('legend'); banner(L('¡' + p.name + ' sube a ★' + m.stars + '!', p.name + ' reaches ★' + m.stars + '!'), L('Su daño se multiplica por ', 'Its damage is multiplied by ') + STAR_MULT[m.stars], '#ffd23f'); Core.save(); monModal(key); refresh(true); } };
     $$('.slotpick button').forEach(b => b.onclick = () => { Core.setTeam(+b.dataset.slot, key); Audio8.play('swap'); Core.save(); monModal(key); refresh(true); });
   }
+  function megaHtml(key, m) {
+    const forms = Core.megaForms(m);
+    if (!forms.length) return '';
+    const s = S(), cost = Core.megaCost(m);
+    let h = `<div class="genes mega"><div class="genehead"><span>${L('Megaevolución', 'Mega Evolution')}</span><span class="dustnum">${ico('stone', 14)} ${s.shards} ${L('fragmentos', 'shards')}</span></div>`;
+    for (const e of forms) {
+      const owned = m.megas.includes(e.form), on = m.mf === e.form, ok = Core.megaCan(m, e.form);
+      const bst = Object.values(e.stats).reduce((a, b) => a + b, 0) - Object.values(DEX[m.dex].stats).reduce((a, b) => a + b, 0);
+      h += `<div class="megarow ${on ? 'on' : ''}"><img src="${por(e.dex, m.shiny)}"><div class="info"><b>${e.name}</b>${typeTags(e.dex)}<small>+${bst} ${L('estadísticas base', 'base stats')}</small></div>
+        ${owned ? `<button class="btn small ${on ? '' : 'primary'}" data-mega-set="${on ? '' : e.form}">${on ? L('Desactivar', 'Deactivate') : L('Activar', 'Activate')}</button>`
+          : `<button class="btn small primary" data-mega-unlock="${e.form}" ${ok ? '' : 'disabled'}>${ico('stone', 12)} ${cost}</button>`}</div>`;
+    }
+    const need = [m.lvl < MEGA_LV ? L('Nivel ' + MEGA_LV, 'Level ' + MEGA_LV) : '', s.shards < cost ? L(cost + ' fragmentos', cost + ' shards') : ''].filter(Boolean).join(' · ');
+    return h + `<p class="hint" style="margin:6px 0 0">${L('Solo una forma Mega activa a la vez. Los fragmentos se consiguen en la Torre y en el evento semanal.', 'Only one Mega form can be active at a time. Shards come from the Tower and the weekly event.')}${need && !forms.every(e => m.megas.includes(e.form)) ? ' ' + L('Te falta: ', 'You need: ') + need + '.' : ''}</p></div>`;
+  }
   const tchip = t => `<span class="type" style="background:${TYPE_COLORS[t]}">${TYPE_ES[t]}</span>`;
   function genesHtml(m) {
     const s = S(), nt = Core.natOf(m), gr = Core.ivGrade(m);
-    const strong = Object.keys(TYPE_NAMES).filter(t => Math.max(...DEX[m.dex].types.map(a => Core.typeEff(a, [t]))) >= 2);
+    const strong = Object.keys(TYPE_NAMES).filter(t => Math.max(...DEX[Core.fdex(m)].types.map(a => Core.typeEff(a, [t]))) >= 2);
     const ivRows = ['d', 's', 'c'].map(k => `<div class="ivrow"><span>${IV_NAMES[k]}</span><div class="ivbar"><i style="width:${m.iv[k] / IV_MAX * 100}%"></i></div><b>${m.iv[k]}</b>${m.iv[k] < IV_MAX ? `<button class="btn small" data-iv="${k}" ${s.dust >= ivTrainCost(m.iv[k]) ? '' : 'disabled'} title="${L('Entrenar este IV', 'Train this IV')} (+${IV_TRAIN_STEP})">+${IV_TRAIN_STEP} ${ico('dust', 10)}${ivTrainCost(m.iv[k])}</button>` : '<small class="max">' + L('MÁX', 'MAX') + '</small>'}</div>`).join('');
     return `<div class="genes"><div class="genehead"><span>${L('Naturaleza', 'Nature')} <b>${natTxt(m)}</b></span><span class="dustnum">${ico('dust', 14)} ${fmt(s.dust)}</span></div>
       <div class="row tight"><button class="btn small" id="m-natre" ${s.dust >= NAT_REROLL_COST ? '' : 'disabled'}>${L('Cambiar al azar', 'Reroll')} ${ico('dust', 10)}${NAT_REROLL_COST}</button><button class="btn small" id="m-natset" ${s.dust >= NAT_CHOOSE_COST ? '' : 'disabled'}>${L('Elegir', 'Choose')} ${ico('dust', 10)}${NAT_CHOOSE_COST}</button></div>
       <div class="genehead"><span>IVs</span><span class="gr" style="background:${gr[2]}">${Math.round(Core.ivPct(m) * 100)}% · ${gr[1]}</span></div>${ivRows}
-      <div class="foehint">${DEX[m.dex].name} ${L('pega fuerte a', 'hits hard against')} ${strong.length ? strong.map(tchip).join('') : '—'}</div></div>`;
+      <div class="foehint">${DEX[Core.fdex(m)].name} ${L('pega fuerte a', 'hits hard against')} ${strong.length ? strong.map(tchip).join('') : '—'}</div></div>`;
   }
   function drawMonCv(t) {
     if (!monCv || !monCv.isConnected) { monCv = null; return; }
@@ -853,7 +871,7 @@ const UI = (() => {
     const g = monCv.getContext('2d');
     g.imageSmoothingEnabled = false;
     g.clearRect(0, 0, 72, 72);
-    if (m) Sprites.draw(g, m.dex, m.shiny, 'idle', Math.PI / 2, t, 36, 56, 1, {});
+    if (m) Sprites.draw(g, Core.fdex(m), m.shiny, 'idle', Math.PI / 2, t, 36, 56, 1, {});
   }
 
   let mapReg = -1;

@@ -4,7 +4,7 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
 
 ## Qué incluye
 
-- **971 Pokémon de 9 regiones** (Kanto, Johto, Hoenn, Sinnoh, Teselia, Kalos, Alola, Galar y Paldea), con sprites animados, retratos y versión shiny. Los que no tienen sprite en SpriteCollab todavía no están.
+- **1 027 Pokémon de 9 regiones** (971 especies más 56 formas regionales de Alola, Galar, Hisui y Paldea) (Kanto, Johto, Hoenn, Sinnoh, Teselia, Kalos, Alola, Galar y Paldea), con sprites animados, retratos y versión shiny. Los que no tienen sprite en SpriteCollab todavía no están.
 - **134 rutas en 10 zonas**: las 9 regiones y «Más allá». Cada ruta tiene su escenario, sus Pokémon salvajes y un jefe al final. Al terminar vuelven a empezar en ciclos cada vez más duros.
 - **134 jefes** en 5 categorías:
   - **Líderes de gimnasio y Pokémon Tótem:** 72.
@@ -103,6 +103,16 @@ En la pestaña Gacha, bajo la incubadora: eliges un Pokémon **principal** (da l
 - **Avisos** (Ajustes → Aplicación): al ocultar la pestaña o la app, el juego calcula cuándo eclosionará el próximo huevo y cuándo se llenará el límite offline y programa un aviso. Funcionan mientras el navegador mantenga la página viva en segundo plano; con la app totalmente cerrada no se pueden enviar sin un servidor de notificaciones push (no hay ninguno).
 - **Actualizar**: el service worker se renueva solo al cambiar `sw.js`; para forzar una limpieza basta con subir el número de `VERSION`. Hay que añadir cualquier archivo nuevo a la lista `SHELL`.
 - Solo funciona desde `https://` o `localhost` (no desde `file://`).
+
+## Formas regionales y megaevoluciones
+
+**Formas regionales** (56: Alola, Galar, Hisui y Paldea). Son especies propias (ids de PokéAPI 10001+): salen en el gacha según su región (ids de generación 7, 8 y 9), aparecen como Pokémon salvajes en esas rutas y tienen sus propias líneas evolutivas (Rattata de Alola → Raticate de Alola; Pikachu puede evolucionar a Raichu o a Raichu de Alola al azar).
+
+**Megaevoluciones** (41 formas Mega y primigenias con sprite). No están en el gacha: se desbloquean desde la ficha del Pokémon.
+- Hace falta que sea la especie final de su línea, **nivel 50 o más** y **fragmentos Mega**: 4 (común/poco común), 6 (raro), 10 (épico) o 16 (legendario).
+- Los fragmentos se consiguen en la Torre (1 por guardián superado por primera vez, 2 desde el piso 50 y 3 desde el 100) y en el jefe del evento semanal (1 / 2 / 3 / 5 según la dificultad).
+- La forma Mega cambia sprite, **tipos**, ataques y estadísticas: el daño sube con su BST (p. ej. Charizard → Mega Charizard X, +41 %). Se puede activar y desactivar; **solo una forma Mega activa a la vez**.
+- Los datos y sprites se generan con `tools/fetch_forms.py` (`js/data/forms.js`).
 
 ## Equipos guardados
 

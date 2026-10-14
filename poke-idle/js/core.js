@@ -6,6 +6,8 @@ const Core = (() => {
   const _L = typeof L === 'function' ? L : es => es;      // traducción (js/i18n.js); en Node sin ella devuelve el español
   const DEX = {};
   for (const p of POKEDEX) DEX[p.dex] = p;
+  const MEGA_BY_BASE = {};                           // formas Mega: están en DEX (tipos, estadísticas, sprites) pero no en POKEDEX ni en el gacha
+  if (typeof MEGA_DEX !== 'undefined') for (const p of MEGA_DEX) { DEX[p.dex] = p; (MEGA_BY_BASE[p.base] = MEGA_BY_BASE[p.base] || []).push(p); }
   const CHILDREN = {};
   for (const p of POKEDEX) if (p.evo && DEX[p.evo]) (CHILDREN[p.evo] = CHILDREN[p.evo] || []).push(p.dex);
   const bst = d => { const s = DEX[d].stats; return s.hp + s.atk + s.def + s.spa + s.spd + s.spe; };
@@ -48,13 +50,13 @@ const Core = (() => {
   function fresh() {
     return {
       v: 1, started: false, coins: 0, gems: 50, dust: 0, tk: { poke: 5, super: 1, ultra: 0, master: 0 }, stage: 1, maxStage: 1, kills: 0, auto: true,
-      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, presets: [1, 2, 3, 4].map(i => ({ name: 'Equipo ' + i, team: [] })), event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 },
+      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, shards: 0, presets: [1, 2, 3, 4].map(i => ({ name: 'Equipo ' + i, team: [] })), event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 },
       up: { tap: 0, train: 0, coin: 0, crit: 0, critdmg: 0, speed: 0, catch: 0, golden: 0, bosstime: 0, type: 0, boss: 0, autotap: 0, alch: 0 },
       shop: { dmg: 0, coins: 0, lvl: 0, slots: 0, offline: 0, catch: 0, shiny: 0, gems: 0, skill: 0, dust: 0, tapd: 0, critb: 0, disc: 0, bt: 0, egg: 0 },
       medals: 0, mp: 0, badges: {}, bossFirst: {},
       sk: { rage: 0, gold: 0, lure: 0 },        // instante (tiempo jugado) en el que está lista cada habilidad
       skOn: { rage: 0, gold: 0, lure: 0 },      // instante en el que termina cada habilidad
-      stats: { kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, eventTiers: 0, bred: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, freePulls: 0, streak: 0, itemsFound: 0 },
+      stats: { megas: 0, kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, eventTiers: 0, bred: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, freePulls: 0, streak: 0, itemsFound: 0 },
       bossFails: {}, retryT: 0, pity: 0, pityE: 0, bannerLost: 0, freeDay: '', autoAcc: 0, inv: [], uid: 1, tutDone: false, last: Date.now(),
       daily: { day: '', streak: 0, claimed: true, quests: [] }, weekly: { week: -1, quests: [] }, ach: {},
       buyMul: 1, settings: { music: 0.35, sfx: 0.6, nums: true, shake: true, bigNums: true, autoBoss: true, notify: false, lang: null },
@@ -75,6 +77,9 @@ const Core = (() => {
     for (const m of Object.values(d.mons)) if (m.shinyOwned === undefined) m.shinyOwned = !!m.shiny;
     // partidas anteriores a las naturalezas, los IVs y los huevos: tiran sus datos una vez y reciben un huevo de regalo
     for (const m of Object.values(d.mons)) {
+      if (!Array.isArray(m.megas)) m.megas = [];
+      m.megas = m.megas.filter(f => (MEGA_BY_BASE[m.dex] || []).some(e => e.form === f));
+      if (!m.megas.includes(m.mf)) m.mf = null;
       if (!NATURES[m.nat]) m.nat = Math.floor(rnd() * NATURES.length);
       if (!m.iv || typeof m.iv.d !== 'number') m.iv = rollIv(8);
     }
@@ -150,7 +155,7 @@ const Core = (() => {
     it = it || itemOf(m); if (!it) return 0;
     const fx = HELD[it.id].fx, v = itemVal(it);
     if (fx === 'dmg' || fx === 'dmgslow') return v;
-    if (fx === 'type') return DEX[m.dex].types.includes(it.type) ? v : v * 0.2;
+    if (fx === 'type') return DEX[fdex(m)].types.includes(it.type) ? v : v * 0.2;
     return 0;
   }
   function itemSpd(m) { const it = itemOf(m); if (!it) return 0; const fx = HELD[it.id].fx; return fx === 'spd' ? itemVal(it) : fx === 'dmgslow' ? -0.1 : 0; }
@@ -163,9 +168,9 @@ const Core = (() => {
     if (chalRule('nosyn')) return { type: {}, dmg: 0, coins: 0, list: [] };
     const team = S.team.map(k => S.mons[k]).filter(Boolean), out = { type: {}, dmg: 0, coins: 0, list: [] };
     const cnt = {};
-    for (const m of team) for (const t of DEX[m.dex].types) cnt[t] = (cnt[t] || 0) + 1;
+    for (const m of team) for (const t of DEX[fdex(m)].types) cnt[t] = (cnt[t] || 0) + 1;
     for (const t of Object.keys(cnt)) if (cnt[t] >= 2) { out.type[t] = TYPE_SYN[Math.min(6, cnt[t])]; out.list.push({ id: 'type:' + t, name: _L('Afinidad ', 'Affinity: ') + TYPE_NAMES[t] + ' (' + cnt[t] + ')', txt: '+' + Math.round(out.type[t] * 100) + _L('% de daño a los de ese tipo', '% damage to that type') }); }
-    const prim = new Set(team.map(m => DEX[m.dex].types[0])).size;
+    const prim = new Set(team.map(m => DEX[fdex(m)].types[0])).size;
     if (prim >= 6) { out.dmg += 0.3; out.list.push({ id: 'div', name: _L('Diversidad total', 'Total diversity'), txt: _L('+30% de daño al equipo', '+30% team damage') }); }
     else if (prim >= 4) { out.dmg += 0.15; out.list.push({ id: 'div', name: _L('Diversidad', 'Diversity'), txt: _L('+15% de daño al equipo', '+15% team damage') }); }
     const leg = team.filter(m => RAR[m.dex] === 5).length;
@@ -179,7 +184,7 @@ const Core = (() => {
   }
   function synMult(m) {
     const sy = synergies(); let tb = 0;
-    for (const t of DEX[m.dex].types) tb = Math.max(tb, sy.type[t] || 0);
+    for (const t of DEX[fdex(m)].types) tb = Math.max(tb, sy.type[t] || 0);
     return 1 + sy.dmg + tb;
   }
 
@@ -216,9 +221,12 @@ const Core = (() => {
   const chalRule = id => !!(chal && chal.rule && chal.rule.id === id);
 
   const tierOf = lvl => { let t = 0; for (let i = 0; i < TIER_LV.length; i++) if (lvl >= TIER_LV[i]) t = i; return t; };
-  const moveOf = m => MOVE_TIERS[DEX[m.dex].types[0]][tierOf(m.lvl)];
-  function monDmg(m) { return power(m.dex) * RAR_MULT[RAR[m.dex]] * lvlMult(m.lvl) * STAR_MULT[m.stars] * (m.shiny ? 1.5 : 1) * TIER_MULT[tierOf(m.lvl)] * globalDmg() * (1 + itemDmg(m)) * synMult(m) * (1 + natVal(m, 'dmg')) * (1 + ivBonus(m, 'd')) * (curEv && DEX[m.dex].types.includes(curEv.type) ? 1 + EVENT_DMG : 1) * (chalRule('only') && !DEX[m.dex].types.includes(chal.rule.only) ? 0.5 : 1); }
-  function monRate(m) { const spe = DEX[m.dex].stats.spe; return Math.max(0.55, 1.25 - spe / 260) / ((1 + 0.04 * S.up.speed) * (1 + itemSpd(m)) * (1 + natVal(m, 'spd')) * (1 + ivBonus(m, 's'))); }
+  // forma con la que combate un Pokémon: la Mega activa o su especie normal
+  const megaOf = m => (m.mf ? (MEGA_BY_BASE[m.dex] || []).find(e => e.form === m.mf) : null);
+  const fdex = m => { const e = megaOf(m); return e ? e.dex : m.dex; };
+  const moveOf = m => MOVE_TIERS[DEX[fdex(m)].types[0]][tierOf(m.lvl)];
+  function monDmg(m) { return power(fdex(m)) * RAR_MULT[RAR[m.dex]] * lvlMult(m.lvl) * STAR_MULT[m.stars] * (m.shiny ? 1.5 : 1) * TIER_MULT[tierOf(m.lvl)] * globalDmg() * (1 + itemDmg(m)) * synMult(m) * (1 + natVal(m, 'dmg')) * (1 + ivBonus(m, 'd')) * (curEv && DEX[fdex(m)].types.includes(curEv.type) ? 1 + EVENT_DMG : 1) * (chalRule('only') && !DEX[fdex(m)].types.includes(chal.rule.only) ? 0.5 : 1); }
+  function monRate(m) { const spe = DEX[fdex(m)].stats.spe; return Math.max(0.55, 1.25 - spe / 260) / ((1 + 0.04 * S.up.speed) * (1 + itemSpd(m)) * (1 + natVal(m, 'spd')) * (1 + ivBonus(m, 's'))); }
   function typeEff(at, defTypes) {
     let e = 1;
     for (const t of defTypes) { const f = TYPE_CHART[at] && TYPE_CHART[at][t]; if (f !== undefined) e *= f; }
@@ -233,7 +241,7 @@ const Core = (() => {
   }
   // enemigos de una etapa como listas de tipos: el jefe, o los tipos que salen en la ruta
   const routeFoes = s => { const r = routeData(s); return isBoss(s) ? [DEX[r.boss.dex].types] : r.types.map(t => [t]); };
-  const matchupAvg = (m, foes) => foes.reduce((a, t) => a + eff(m.dex, t), 0) / foes.length;
+  const matchupAvg = (m, foes) => foes.reduce((a, t) => a + eff(fdex(m), t), 0) / foes.length;
   // los mejores Pokémon para una etapa (daño real contra sus enemigos, no solo contra uno)
   function bestTeam(s, n) {
     const foes = routeFoes(s);
@@ -259,7 +267,7 @@ const Core = (() => {
   const shinyRate = () => SHINY_RATE * (1 + 0.2 * S.shop.shiny) * (evBonus('shiny') ? 2 : 1);
   function teamDps(defTypes) {
     let d = 0;
-    for (const k of S.team) { const m = S.mons[k]; d += monDmg(m) / monRate(m) * (defTypes ? eff(m.dex, defTypes) : 1) * (1 + critChance(m) * (critMult() - 1)); }
+    for (const k of S.team) { const m = S.mons[k]; d += monDmg(m) / monRate(m) * (defTypes ? eff(fdex(m), defTypes) : 1) * (1 + critChance(m) * (critMult() - 1)); }
     return d;
   }
   const bossBonus = (e, m) => (e && e.boss ? (1 + 0.04 * S.up.boss) * (1 + (m ? itemBoss(m) + natVal(m, 'boss') : 0)) : 1);
@@ -400,10 +408,10 @@ const Core = (() => {
       if (F.timers[i] <= 0) {
         F.timers[i] += monRate(m);
         const crit = rnd() < critChance(m);
-        const ef = eff(m.dex, e.types);
+        const ef = eff(fdex(m), e.types);
         const dmg = monDmg(m) * ef * (crit ? critMult() : 1) * (0.9 + rnd() * 0.2) * bossBonus(e, m);
         F.hits.push({ t: 0.22, dmg, crit, slot: i, eff: ef });
-        emit('fire', { slot: i, dex: m.dex, delay: 0.22, move: moveOf(m), tier: tierOf(m.lvl) });
+        emit('fire', { slot: i, dex: fdex(m), delay: 0.22, move: moveOf(m), tier: tierOf(m.lvl) });
       }
     }
     for (let j = F.hits.length - 1; j >= 0; j--) {
@@ -456,12 +464,33 @@ const Core = (() => {
     return true;
   }
 
+  // ---------------- megaevolución ----------------
+  const megaForms = m => MEGA_BY_BASE[m.dex] || [];
+  const megaCost = m => MEGA_COST[RAR[m.dex]];
+  const megaCan = (m, form) => !m.megas.includes(form) && m.lvl >= MEGA_LV && S.shards >= megaCost(m);
+  function megaUnlock(key, form) {
+    const m = S.mons[key];
+    if (!m || !megaForms(m).some(e => e.form === form) || !megaCan(m, form)) return false;
+    S.shards -= megaCost(m); m.megas.push(form); S.stats.megas++;
+    megaSet(key, form);
+    emit('mega', { key, from: m.dex, to: fdex(m) });
+    return true;
+  }
+  // activa una forma (o la desactiva con null); solo MEGA_ACTIVE Pokémon a la vez
+  function megaSet(key, form) {
+    const m = S.mons[key];
+    if (!m || (form && !m.megas.includes(form))) return false;
+    if (form) { const act = Object.values(S.mons).filter(o => o.mf && o !== m); while (act.length >= MEGA_ACTIVE) act.shift().mf = null; }
+    m.mf = form || null;
+    return true;
+  }
+
   // ---------------- Pokémon ----------------
   function addMon(base, shiny, floor, bred) {
     let m = S.mons[base], isNew = false, dust = 0, newShiny = false, ivUp = null;
     const rar = RAR[base];
     floor = floor || 0;
-    if (!m) { m = S.mons[base] = { dex: base, lvl: 1 + 2 * S.shop.lvl, stars: 0, copies: 0, shiny: !!shiny, shinyOwned: !!shiny, nat: bred ? bred.nat : Math.floor(rnd() * NATURES.length), iv: bred ? Object.assign({}, bred.iv) : rollIv(floor) }; isNew = true; }
+    if (!m) { m = S.mons[base] = { dex: base, lvl: 1 + 2 * S.shop.lvl, stars: 0, copies: 0, shiny: !!shiny, shinyOwned: !!shiny, megas: [], mf: null, nat: bred ? bred.nat : Math.floor(rnd() * NATURES.length), iv: bred ? Object.assign({}, bred.iv) : rollIv(floor) }; isNew = true; }
     else {
       m.copies++;
       const cand = bred ? null : rollIv(floor);             // cada copia repetida tira unos IVs nuevos y te quedas con los mejores
@@ -493,7 +522,7 @@ const Core = (() => {
     const st = stageOf(m.dex), kids = CHILDREN[m.dex];
     if (kids && kids.length && st < EVO_LVL.length && m.lvl >= EVO_LVL[st]) {
       const from = m.dex, to = kids[Math.floor(rnd() * kids.length)];
-      m.dex = to; S.seen[to] = 1; S.stats.evolutions++;
+      m.dex = to; m.mf = null; m.megas = []; S.seen[to] = 1; S.stats.evolutions++;
       emit('evolve', { key, from, to });
       checkEvo(key);
     }
@@ -594,11 +623,13 @@ const Core = (() => {
     if (!r) return;
     if (r.gems) S.gems += r.gems;
     if (r.dust) { S.dust += r.dust; S.stats.dust += r.dust; }
+    if (r.shards) S.shards += r.shards;
     if (r.tk) giveTickets(r.tk);
     if (r.egg !== undefined) giveEgg(r.egg);
   }
   function towerReward(f) {
     const r = { gems: 3 + Math.floor(f / 2), dust: 5 + 2 * f };
+    if (f % 5 === 0) r.shards = 1 + (f >= 50 ? 1 : 0) + (f >= 100 ? 1 : 0);
     if (f % 5 === 0) r.tk = f <= 10 ? { super: 1 } : f <= 25 ? { super: 2 } : f <= 50 ? { ultra: 1 } : f <= 100 ? { ultra: 2 } : { master: 1 };
     if (f % 10 === 0) r.egg = f <= 20 ? 1 : f < 60 ? 2 : 3;
     return r;
@@ -841,6 +872,7 @@ const Core = (() => {
     if (st === 'dex') return dexCount();
     if (st === 'legends') return legendsOwned();
     if (st === 'tower') return S.tower.best;
+    if (st === 'megas') return S.stats.megas;
     if (st === 'ivGood') return Object.values(S.mons).filter(m => ivPct(m) >= 0.9).length;
     if (st === 'ivPerfect') return Object.values(S.mons).filter(m => m.iv.d === IV_MAX && m.iv.s === IV_MAX && m.iv.c === IV_MAX).length;
     if (st === 'stars5') return Object.values(S.mons).filter(m => m.stars >= 5).length;
@@ -922,6 +954,7 @@ const Core = (() => {
     featured, featuredEpic, featuredLegend, ballAvailable, ticketCost, ticketPrice, buyTicket, dustTicket, giveTickets, pull, freePull, freePullReady, toggleShiny, moveOf, tierOf, unsetTeam, setPaused, itemOf, itemVal, itemDmg, equip, unequip, recycleItem, recycleSpare, buyItem, synergies, synMult, teamItemSum,
     checkDaily, dailyReward, claimDaily, questText, questProg, claimQuest, achStat, claimAch, pendingRewards, legendsOwned,
     prestige, offline, start,
+    megaOf, fdex, megaForms, megaCost, megaCan, megaUnlock, megaSet, MEGA_BY_BASE,
     natOf, natVal, ivSum, ivPct, ivGrade, ivBonus, trainIv, rerollNat, setNat, breedCost, breedOk, breedExpect, breed, applyGenes,
     eggNeed, eggReady, eggsReady, giveEgg, hatch, moveEgg, buyEgg, incCost, buyInc,
     typeEff, routeFoes, matchupAvg, bestTeam, strongTypes, setTeamList, savePreset, loadPreset, renamePreset,

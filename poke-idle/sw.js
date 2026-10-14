@@ -6,7 +6,7 @@ const VERSION = 'pokeidle-v1';
 const SPRITES = 'pokeidle-sprites-v1';
 const MAX_SPRITES = 1500;
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'css/style.css',
-  'js/data/pokedex.js', 'js/data/moves.js', 'js/data/idle.js', 'js/i18n.js', 'js/data/en.js', 'js/art/tiles.js', 'js/art/vfx.js', 'js/art/icons.js',
+  'js/data/pokedex.js', 'js/data/forms.js', 'js/data/moves.js', 'js/data/idle.js', 'js/i18n.js', 'js/data/en.js', 'js/art/tiles.js', 'js/art/vfx.js', 'js/art/icons.js',
   'js/sprites.js', 'js/core.js', 'js/pwa.js', 'js/audio.js', 'js/arena.js', 'js/title.js', 'js/ui.js', 'js/main.js',
   'assets/pwa/icon-192.png', 'assets/pwa/icon-512.png', 'assets/pwa/apple-touch-icon.png'];
 

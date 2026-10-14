@@ -979,3 +979,100 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #996 Frigibax: Emmuffin, G〜, Inv3rse, Soulja, pi3.14
 - #997 Arctibax: Emmuffin, Soulja, pi3.14, ◥θ┴θ◤
 - #998 Baxcalibur: G〜, Soulja, pi3.14
+- #10034 Mega Charizard X: Emboarger, G〜, Kevin, Kevin0itachi, Morei, Soulja
+- #10037 Mega Alakazam: Emmuffin, Michael12, baronessfaron
+- #10038 Mega Gengar: Emboarger, Emmuffin, G〜, Michael12, baronessfaron
+- #10042 Mega Aerodactyl: Caitemis, Emmuffin, G〜, baronessfaron
+- #10044 Mega Mewtwo Y: G〜, JFain, Morei, baronessfaron
+- #10048 Mega Houndoom: Morei, Top_Kec
+- #10049 Mega Tyranitar: JFain, Sugi
+- #10051 Mega Gardevoir: baronessfaron
+- #10052 Mega Mawile: Emmuffin, baronessfaron
+- #10054 Mega Medicham: Emmuffin, JFain
+- #10055 Mega Manectric: Top_Kec, baronessfaron
+- #10056 Mega Banette: Emmuffin, Morei, baronessfaron, chime
+- #10057 Mega Absol: Deeshura, Emboarger, Emmuffin
+- #10059 Mega Lucario: Caitemis, Emmuffin, Morei, baronessfaron
+- #10062 Mega Latias: Emmuffin, Top_Kec
+- #10063 Mega Latios: Emmuffin, Top_Kec
+- #10065 Mega Sceptile: 0palite, Emmuffin, Morei, Soulja
+- #10066 Mega Sableye: Emmuffin, Ichor, Morei, NOLASMOR
+- #10067 Mega Altaria: Emmuffin, Ichor, Morei, ◥θ┴θ◤
+- #10068 Mega Gallade: Emmuffin, JFain, Morei
+- #10070 Mega Sharpedo: Emmuffin, Soulja, baronessfaron
+- #10071 Mega Slowbro: Emmuffin, Soulja
+- #10072 Mega Steelix: Ichor, Morei, Pokejavi., baronessfaron
+- #10074 Mega Glalie: Emmuffin, baronessfaron
+- #10075 Mega Diancie: Emmuffin, Pokejavi., baronessfaron
+- #10077 Primal Kyogre: Emmuffin, G〜, Keldaan, baronessfaron
+- #10078 Primal Groudon: Emmuffin, G〜, PoliteHoppip, baronessfaron
+- #10079 Mega Rayquaza: Top_Kec
+- #10087 Mega Camerupt: Caitemis, Emmuffin, baronessfaron
+- #10088 Mega Lopunny: JFain, Morei, baronessfaron
+- #10091 Alolan Rattata: Emmuffin, NeroIntruder, ShyStarryRain
+- #10092 Alolan Raticate: G〜, NeroIntruder, ShyStarryRain
+- #10100 Alolan Raichu: Emmuffin, ShyStarryRain, baronessfaron
+- #10101 Alolan Sandshrew: Emmuffin, Top_Kec, baronessfaron
+- #10102 Alolan Sandslash: Ichor, Morei, baronessfaron, rhys
+- #10103 Alolan Vulpix: NeroIntruder, baronessfaron
+- #10104 Alolan Ninetales: Audino, Ichor, NeroIntruder, baronessfaron
+- #10105 Alolan Diglett: Emboarger, Morei, NeroIntruder
+- #10106 Alolan Dugtrio: Deeshura, Morei, NeroIntruder, ShyStarryRain
+- #10107 Alolan Meowth: PhillipsYoung, ShyStarryRain, baronessfaron
+- #10108 Alolan Persian: Pink_no_tori, ShyStarryRain, TawnySoup
+- #10109 Alolan Geodude: Morei, NeroIntruder
+- #10110 Alolan Graveler: Morei, NeroIntruder
+- #10111 Alolan Golem: Morei, NeroIntruder
+- #10112 Alolan Grimer: Emboarger, Morei, NeroIntruder
+- #10113 Alolan Muk: Morei, NeroIntruder
+- #10114 Alolan Exeggutor: Emmuffin, ShyStarryRain, baronessfaron
+- #10115 Alolan Marowak: <@!196428059988066304>, Emmuffin
+- #10161 Galarian Meowth: Caitemis, G〜, Morei, Smingle, baronessfaron
+- #10162 Galarian Ponyta: EzerArt, Jhony-Rex, baronessfaron, ◥θ┴θ◤
+- #10163 Galarian Rapidash: EzerArt, Jhony-Rex, baronessfaron, deltaflare, lokatts
+- #10164 Galarian Slowpoke: <@!413387711152390145>, Emmuffin, FissionCube
+- #10165 Galarian Slowbro: Emmuffin, EzerArt, Morei, Pink_no_tori, baronessfaron
+- #10166 Galarian Farfetch’d: JFain, Morei, Noo
+- #10167 Galarian Weezing: Emmuffin, Jhony-Rex, baronessfaron
+- #10168 Galarian Mr. Mime: Emmuffin, TawnySoup, baronessfaron
+- #10169 Galarian Articuno: Caitemis, Emmuffin, baronessfaron, chime
+- #10170 Galarian Zapdos: Caitemis, Jhony-Rex, Morei, chime
+- #10171 Galarian Moltres: <@!228201428177387523>, CamusZekeSirius, EzerArt, Jhony-Rex, Morei, bwappi, chime
+- #10172 Galarian Slowking: Emmuffin, Soulja, baronessfaron
+- #10173 Galarian Corsola: Emmuffin, JFain, Morei
+- #10174 Galarian Zigzagoon: DasK, Emmuffin, Miju, Morei, Uni
+- #10175 Galarian Linoone: Emboarger, Morei, baronessfaron
+- #10176 Galarian Darumaka: Emmuffin, Uni
+- #10177 Galarian Darmanitan: Emmuffin, Soulja, baronessfaron
+- #10179 Galarian Yamask: Emmuffin, Pokejavi.
+- #10229 Hisuian Growlithe: Emmuffin, ShyStarryRain, baronessfaron
+- #10230 Hisuian Arcanine: Emboarger, Emmuffin, Mond, baronessfaron
+- #10231 Hisuian Voltorb: Axcel, Emboarger, Emmuffin
+- #10232 Hisuian Electrode: <@!413387711152390145>, Gelius, ShyStarryRain, electronvolt, rhys, teddg
+- #10233 Hisuian Typhlosion: Caitemis, Deeshura, Emmuffin
+- #10234 Hisuian Qwilfish: Emboarger, Fresco, JFain
+- #10235 Hisuian Sneasel: Emmuffin, ShyStarryRain, TawnySoup
+- #10236 Hisuian Samurott: Deeshura, Emmuffin, Soulja, baronessfaron
+- #10237 Hisuian Lilligant: GustavoMusinTG, Soulja, baronessfaron
+- #10238 Hisuian Zorua: Ichor, Morei, XModxGodX, baronessfaron
+- #10239 Hisuian Zoroark: Deeshura, Morei, baronessfaron
+- #10240 Hisuian Braviary: Emmuffin, JFain, Soulja, baronessfaron
+- #10241 Hisuian Sliggoo: Emmuffin
+- #10242 Hisuian Goodra: Emmuffin
+- #10243 Hisuian Avalugg: Emmuffin, baronessfaron
+- #10244 Hisuian Decidueye: Caitemis, Emmuffin, Reimu\_needs\_$$$, baronessfaron
+- #10250 Paldean Tauros: Emmuffin, Limomon
+- #10251 Paldean (Blaze) Tauros: Blanky, Emmuffin, Limomon, Noo
+- #10252 Paldean (Aqua) Tauros: Emmuffin, JFain
+- #10253 Paldean Wooper: JFain, ShyStarryRain, Uni
+- #10284 Mega Skarmory: Johanne2, Sonikku_A
+- #10287 Mega Excadrill: DeltaL, Emmuffin, G〜, Soulja, pi3.14
+- #10289 Mega Scrafty: Emmuffin, Soulja, pi3.14
+- #10290 Mega Eelektross: Emmuffin, Top_Kec
+- #10296 Mega Floette: DeltaL, Emmuffin, pi3.14
+- #10299 Mega Dragalge: DeltaL, Emmuffin, Soulja, pi3.14
+- #10300 Mega Hawlucha: Deeshura, Emmuffin, Soulja
+- #10301 Mega Zygarde: DeltaL, G〜, pi3.14
+- #10302 Mega Drampa: DeltaL, Emmuffin, Soulja, pi3.14
+- #10312 Mega Darkrai: Deeshura, Johanne2
+- #10319 Mega Zeraora: DeltaL, Emmuffin, pi3.14

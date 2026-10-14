@@ -311,7 +311,7 @@ const ACH_DEFS = [
   ['kills', 'Cazador', 'fist', [[1e3, 20], [1e4, 40], [5e4, 70], [2.5e5, 120], [1e6, 200], [5e6, 300], [1e8, 500]], n => 'Derrota ' + n + ' Pokémon'],
   ['taps', 'Dedo ágil', 'up', [[500, 15], [5e3, 30], [5e4, 80], [5e5, 200]], n => 'Toca ' + n + ' veces'],
   ['pulls', 'Lluvia de Balls', 'ball', [[10, 15], [50, 30], [100, 50], [250, 80], [500, 120], [1000, 200], [2500, 300], [5000, 500]], n => 'Abre ' + n + ' Poké Balls'],
-  ['dex', 'Pokédex', 'book', [[10, 20], [25, 25], [50, 40], [100, 70], [150, 100], [200, 130], [250, 160], [300, 200], [386, 300], [500, 250], [600, 280], [700, 320], [800, 360], [900, 400], [1025, 1500]], n => 'Registra ' + n + ' Pokémon'],
+  ['dex', 'Pokédex', 'book', [[10, 20], [25, 25], [50, 40], [100, 70], [150, 100], [200, 130], [250, 160], [300, 200], [386, 300], [500, 250], [600, 280], [700, 320], [800, 360], [900, 400], [POKEDEX.length, 1500]], n => 'Registra ' + n + ' Pokémon'],
   ['evolutions', 'Evolución', 'star', [[1, 15], [15, 40], [50, 70], [150, 120], [400, 200], [1000, 400]], n => 'Evoluciona ' + n + ' veces'],
   ['shinies', 'Brillante', 'shiny', [[1, 50], [3, 70], [10, 120], [25, 250], [50, 400], [100, 700]], n => 'Consigue ' + n + ' shinies'],
   ['maxStars', 'Estrellas', 'star', [[1, 15], [3, 40], [5, 100]], n => 'Lleva un Pokémon a ★' + n],
@@ -342,6 +342,7 @@ const ACH_DEFS = [
   ['tower', 'Escalador', 'crown', [[5, 25], [10, 50], [20, 100], [30, 150], [50, 300], [75, 500], [100, 800]], n => 'Llega al piso ' + n + ' de la Torre'],
   ['eventTiers', 'Cazador de eventos', 'trophy', [[1, 30], [10, 100], [40, 300], [100, 700]], n => 'Vence ' + n + ' veces al jefe de un evento'],
   ['bred', 'Guardería', 'egg2', [[1, 20], [10, 60], [50, 150], [200, 400]], n => 'Cría ' + n + ' huevos en la guardería'],
+  ['megas', 'Megaevolución', 'star', [[1, 40], [5, 120], [15, 300], [30, 600]], n => 'Desbloquea ' + n + ' formas Mega'],
   ['slots', 'Equipo completo', 'friends', [[3, 20], [6, 100]], n => 'Abre ' + n + ' huecos de equipo'],
 ];
 // Colecciones por tipo
@@ -470,10 +471,10 @@ const EVENT_BONUS = {
 const EVENT_DMG = 0.25;                                   // daño extra de los Pokémon del tipo de la semana
 // jefe del evento: vida = vida de un Pokémon salvaje en tu etapa máxima × hp
 const EVENT_TIERS = [
-  { name: 'Fácil', hp: 3, time: 45, rew: { gems: 20, tk: { super: 2 } } },
-  { name: 'Normal', hp: 7, time: 50, rew: { gems: 40, tk: { ultra: 1 }, egg: 0 } },
-  { name: 'Difícil', hp: 16, time: 55, rew: { gems: 80, tk: { ultra: 2 }, egg: 1 } },
-  { name: 'Extremo', hp: 40, time: 60, rew: { gems: 160, tk: { ultra: 2, master: 1 }, egg: 2 } },
+  { name: 'Fácil', hp: 3, time: 45, rew: { gems: 20, tk: { super: 2 }, shards: 1 } },
+  { name: 'Normal', hp: 7, time: 50, rew: { gems: 40, tk: { ultra: 1 }, egg: 0, shards: 2 } },
+  { name: 'Difícil', hp: 16, time: 55, rew: { gems: 80, tk: { ultra: 2 }, egg: 1, shards: 3 } },
+  { name: 'Extremo', hp: 40, time: 60, rew: { gems: 160, tk: { ultra: 2, master: 1 }, egg: 2, shards: 5 } },
 ];
 const EVENT_TASKS = [
   { id: 'k1', stat: 'kills', goal: 150, rew: { tk: { super: 2 } }, text: (n, t) => 'Derrota ' + n + ' Pokémon de tipo ' + t },
@@ -496,3 +497,10 @@ const TOWER_RULES = [
 const BREED_COST = [0, 30, 60, 120, 300, 700];            // polvo estelar según la rareza más alta
 const BREED_EGG = [0, 0, 0, 1, 2, 3];                      // tipo de huevo (EGGS) según esa rareza
 const BREED_HI = 0.7, BREED_BONUS = 2;                     // probabilidad de heredar el mejor IV de los dos, y bonus aleatorio 0..2
+
+// ---------------- megaevoluciones ----------------
+// Los Pokémon con forma Mega (o primigenia) la desbloquean gastando fragmentos Mega, que se consiguen en la Torre y en el evento semanal.
+// Solo puede haber una forma Mega activa a la vez. La forma cambia sprite, tipos, ataques y estadísticas (el daño sube con su BST).
+const MEGA_COST = [0, 4, 4, 6, 10, 16];                   // fragmentos según la rareza de la especie
+const MEGA_LV = 50;                                        // nivel mínimo para megaevolucionar
+const MEGA_ACTIVE = 1;                                     // formas Mega activas a la vez

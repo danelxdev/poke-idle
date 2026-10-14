@@ -620,3 +620,13 @@ body { font-variant-ligatures: none; font-feature-settings: 'liga' 0, 'clig' 0; 
 .langsw button { background: #0a1430d8; color: var(--dim); border: 0; border-radius: 6px; padding: 4px 9px; font: 700 12px var(--f); box-shadow: inset 0 0 0 2px var(--line); cursor: pointer; }
 .langsw button.on { color: var(--yellow); box-shadow: inset 0 0 0 2px var(--yellow); }
 #scr-title .title-wrap { position: relative; }
+
+/* ---- v12: megaevoluciones ---- */
+.megatag { display: inline-block; font-size: 10px; letter-spacing: 1px; font-weight: 700; background: linear-gradient(90deg, #ff8ad8, #ffd23f); color: #20102a; border-radius: 3px; padding: 0 4px; margin-right: 4px; vertical-align: middle; }
+.genes.mega { box-shadow: inset 0 0 0 2px #ff8ad855; }
+.megarow { display: flex; align-items: center; gap: 8px; padding: 4px; border-radius: 8px; margin: 4px 0; background: #0a1230; }
+.megarow.on { box-shadow: inset 0 0 0 2px #ff8ad8; }
+.megarow img { width: 44px; height: 44px; border-radius: 6px; background: #050c24; image-rendering: pixelated; }
+.megarow .info { flex: 1; min-width: 0; }
+.megarow .info b { display: block; font-size: 14px; }
+.megarow .info small { display: block; font-size: 11px; color: var(--dim); }

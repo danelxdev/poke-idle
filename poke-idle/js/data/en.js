@@ -67,7 +67,7 @@ const EN_ACH = {
   upMax: ['Maxed Out', n => 'Max out ' + n + ' upgrades'], shopLvl: ['League Veteran', n => 'Buy ' + n + ' levels in the League shop'], regions: ['Traveler', n => 'Open ' + n + ' regions'],
   hatched: ['Breeder', n => 'Hatch ' + n + ' eggs'], eggsFound: ['Egg Collector', n => 'Find ' + n + ' eggs'], ivGood: ['Good Potential', n => 'Own ' + n + ' Pokémon with IVs of 90% or more'],
   ivPerfect: ['Perfectionist', n => 'Own ' + n + ' Pokémon with perfect IVs (31/31/31)'], ivUps: ['Better Genes', n => 'Improve your Pokémon IVs ' + n + ' times with duplicates'],
-  tower: ['Climber', n => 'Reach floor ' + n + ' of the Tower'], eventTiers: ['Event Hunter', n => 'Beat an event boss ' + n + ' times'], bred: ['Nursery', n => 'Breed ' + n + ' eggs at the Nursery'], slots: ['Full Team', n => 'Open ' + n + ' team slots'],
+  tower: ['Climber', n => 'Reach floor ' + n + ' of the Tower'], eventTiers: ['Event Hunter', n => 'Beat an event boss ' + n + ' times'], bred: ['Nursery', n => 'Breed ' + n + ' eggs at the Nursery'], slots: ['Full Team', n => 'Open ' + n + ' team slots'], megas: ['Mega Evolution', n => 'Unlock ' + n + ' Mega forms'],
 };
 const EN_BOSS_ACH = { b130: 'Kanto Champion', b270: 'Johto Champion', b410: 'Hoenn Champion', b550: 'Sinnoh Champion', b690: 'Unova Champion', b830: 'Kalos Champion', b970: 'Alola Champion', b1110: 'Galar Champion', b1250: 'Paldea Champion', b1330: 'King of the World' };
 const EN_HELD = {
@@ -103,6 +103,7 @@ function EN_APPLY(set) {
   for (const t of Object.keys(TYPE_NAMES)) set(TYPE_NAMES, t, EN_TYPES[t]);
   for (const t of Object.keys(TYPE_ES)) set(TYPE_ES, t, EN_TYPES[t] || TYPE_ES[t]);
   for (const [id, n] of Object.entries(EN_MOVES)) if (MOVES[id]) set(MOVES[id], 'name', n);
+  if (typeof EN_FORMS !== 'undefined') for (const [d, n] of Object.entries(EN_FORMS)) { const p = POKEDEX.find(x => x.dex === +d) || MEGA_DEX.find(x => x.dex === +d); if (p) set(p, 'name', n); }
   for (const [d, n] of Object.entries(EN_POKE)) { const p = POKEDEX.find(x => x.dex === +d); if (p) set(p, 'name', n); }
   for (const [id, [n, d]] of Object.entries(EN_BALLS)) { set(BALLS[id], 'name', n); set(BALLS[id], 'desc', d); }
   for (const r of REGIONS) if (r.gen) { const b = BALLS['region' + r.gen]; set(b, 'name', r.name + ' Ball'); set(b, 'desc', 'Only Pokémon from ' + r.name + '.'); }

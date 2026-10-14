@@ -24,6 +24,7 @@
     UI.evolveAnim(d.from, d.to, Core.S.mons[d.key].shiny);
     Sprites.preload(d.to, Core.S.mons[d.key].shiny);
   });
+  Core.on('mega', d => { UI.evolveAnim(d.from, d.to, Core.S.mons[d.key].shiny, true); Sprites.preload(d.to, Core.S.mons[d.key].shiny); });
   Core.on('moveLearn', d => {
     const mv = MOVES[d.to];
     Audio8.play('levelup');
@@ -98,7 +99,7 @@
 
   function enterGame() {
     UI.show('scr-game');
-    for (const k of Core.S.team) Sprites.preload(Core.S.mons[k].dex, Core.S.mons[k].shiny);
+    for (const k of Core.S.team) Sprites.preload(Core.fdex(Core.S.mons[k]), Core.S.mons[k].shiny);
     UI.setTab('team');
     if (Core.S.stats.taps > 30) $('#tap-hint').classList.add('hidden');
     Audio8.music(musicFor(Core.S.stage));
