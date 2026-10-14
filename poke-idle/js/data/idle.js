@@ -214,7 +214,7 @@ const TICKETS = {
   ultra: { name: 'Ticket Ultra', icon: 'tkUltra', cur: 'gems', gems: 90, color: '#ffd23f' },
   master: { name: 'Ticket Maestro', icon: 'tkMaster', cur: 'gems', gems: 250, color: '#c47bff' },
 };
-const TICKET_DUST = { poke: 40, super: 150, ultra: 450, master: 1500 };   // polvo estelar por ticket
+const TICKET_DUST = { poke: 40, super: 150, ultra: 500, master: 2200 };   // polvo estelar por ticket
 const BOSS_TICKETS = [null, { poke: 2, super: 1 }, { poke: 3, super: 2 }, { super: 3, ultra: 1 }, { super: 2, ultra: 2 }, { ultra: 3, master: 1 }];
 const DAILY_TICKETS = [{ poke: 2 }, { poke: 2 }, { poke: 3 }, { poke: 3, super: 1 }, { poke: 4 }, { poke: 4, super: 1 }, { super: 2, ultra: 1 }];
 const PITY = 90;       // tiradas con gemas hasta un legendario garantizado
@@ -225,7 +225,7 @@ const SHINY_RATE = 1 / 100;
 const UPGRADES = {
   tap: { name: 'Golpe de Entrenador', icon: 'fist', base: 25, mul: 1.2, max: 999, desc: n => 'Cada toque hace un ' + (15 + n) + '% del daño/s del equipo' + (n ? ' +' + n * 3 : '') },
   train: { name: 'Entrenamiento', icon: 'up', base: 400, mul: 1.5, max: 999, desc: n => '+' + (n * 10) + '% de daño del equipo' },
-  coin: { name: 'Moneda Amuleto', icon: 'amuletcoin', base: 350, mul: 1.62, max: 999, desc: n => '+' + (n * 15) + '% de monedas' },
+  coin: { name: 'Hucha', icon: 'amuletcoin', base: 350, mul: 1.62, max: 999, desc: n => '+' + (n * 15) + '% de monedas' },
   crit: { name: 'Lente Zoom', icon: 'zoom', base: 1500, mul: 2.2, max: 20, desc: n => (3 + n * 2) + '% de críticos (x3 de daño)' },
   critdmg: { name: 'Garra Afilada', icon: 'quickclaw', base: 9000, mul: 2.7, max: 15, desc: n => 'Los críticos hacen x' + (3 + n * 0.25).toFixed(2) + ' de daño' },
   speed: { name: 'Banda Veloz', icon: 'choicescarf', base: 6000, mul: 2.7, max: 15, desc: n => '+' + (n * 4) + '% de velocidad de ataque' },
@@ -253,7 +253,7 @@ const LEAGUE_SHOP = {
   lvl: { name: 'Mochila de Caramelos', icon: 'candy', base: 3, mul: 1.7, max: 10, desc: n => 'Tras la Liga empiezas con +' + n * 2 + ' niveles' },
   slots: { name: 'Equipo de Campeón', icon: 'friends', base: 5, mul: 2.5, max: 4, desc: n => 'Tras la Liga conservas ' + (2 + n) + ' huecos' },
   offline: { name: 'Campamento', icon: 'clock', base: 3, mul: 1.8, max: 8, desc: n => 'Ganancias offline: hasta ' + (8 + n * 2) + ' h al ' + (50 + n * 5) + '%' },
-  catch: { name: 'Radar de Tickets', icon: 'tkSuper', base: 3, mul: 1.7, max: 10, desc: n => '+' + (n * 0.4).toFixed(1) + '% de tickets soltados' },
+  catch: { name: 'Imán de Tickets', icon: 'tkSuper', base: 3, mul: 1.7, max: 10, desc: n => '+' + (n * 0.4).toFixed(1) + '% de tickets soltados' },
   shiny: { name: 'Brillo Eterno', icon: 'shiny', base: 6, mul: 1.9, max: 10, desc: n => 'Shinies x' + (1 + n * 0.2).toFixed(1) + ' más frecuentes' },
   gems: { name: 'Buscagemas', icon: 'gem', base: 4, mul: 1.7, max: 10, desc: n => '+' + n * 10 + '% de gemas de jefes y misiones' },
   skill: { name: 'Maestro de Habilidades', icon: 'fist', base: 4, mul: 1.8, max: 10, desc: n => 'Habilidades: -' + n * 4 + '% de enfriamiento y +' + n * 2 + ' s de duración' },

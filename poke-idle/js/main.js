@@ -68,8 +68,9 @@
     Audio8.play(e.tier >= 4 ? 'legend' : 'win');
     UI.banner(L('¡Has vencido a ' + r.boss.who + '!', 'You beat ' + r.boss.who + '!'), e.tier === 1 ? L('Medalla de gimnasio: +3% de daño', 'Gym badge: +3% damage') : r.boss.title + L(' derrotado', ' defeated'), '#ffd23f');
   });
-  Core.on('bossWait', st => { const r = Core.routeData(st); UI.banner(L('Aún no estás listo para ' + r.boss.who, 'You are not ready for ' + r.boss.who + ' yet'), L('Sigue combatiendo: lo retarás solo cuando tengas fuerza suficiente', 'Keep fighting: you will challenge them only when strong enough'), '#ffd23f'); });
-  Core.on('bossFail', () => { Audio8.play('death'); UI.banner(L('¡El jefe era demasiado fuerte!', 'The boss was too strong!'), L('Sigue combatiendo: lo retarás solo cuando estés listo', 'Keep fighting: you will challenge them again when ready'), '#ff5050'); });
+  let ligaTip = false;
+  Core.on('bossWait', st => { const r = Core.routeData(st); if (!ligaTip && Core.medalGain() > 0) { ligaTip = true; setTimeout(() => UI.toast(L('Consejo: si te atascas, entra en la Liga (pestaña Liga) para ganar medallas permanentes', 'Tip: if you get stuck, enter the League (League tab) to earn permanent medals')), 3200); } UI.banner(L('Aún no estás listo para ' + r.boss.who, 'You are not ready for ' + r.boss.who + ' yet'), L('Sigue combatiendo: lo retarás solo cuando tengas fuerza suficiente', 'Keep fighting: the boss will be challenged only when you are strong enough'), '#ffd23f'); });
+  Core.on('bossFail', () => { Audio8.play('death'); UI.banner(L('¡El jefe era demasiado fuerte!', 'The boss was too strong!'), L('Sigue combatiendo: lo retarás de nuevo cuando estés listo', 'Keep fighting: the boss will be challenged again when you are ready'), '#ff5050'); });
   Core.on('stage', s => {
     Audio8.music(musicFor(s));
     const r = Core.routeData(s);

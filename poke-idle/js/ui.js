@@ -302,11 +302,11 @@ const UI = (() => {
         const s = S();
         let h = `<div class="teamhead"><div class="seg">${[1, 10, 25, 'max'].map(v => `<button data-act="mul" data-v="${v}" class="${s.buyMul === v ? 'on' : ''}">${v === 'max' ? L('Máx', 'Max') : 'x' + v}</button>`).join('')}</div><div class="rowbtns"><button class="btn small" data-act="presets" title="${L('Guarda y carga equipos', 'Save and load teams')}">${L('Equipos', 'Teams')}</button><button class="btn small" data-act="best" title="${L('Elige a tus Pokémon que mejor golpean a los enemigos de esta ruta', 'Picks your Pokémon that hit the enemies of this route best')}">${L('Mejor equipo', 'Best team')}</button><button class="btn small" data-act="bag">${L('Mochila', 'Bag')} · ${s.inv.length}</button></div></div>`;
         const tgt = s.kills >= 10 && !s.auto && !Core.isBoss(s.stage) ? s.stage + 1 : s.stage, strong = Core.strongTypes(tgt);
-        if (strong.length) h += `<div class="foehint">${Core.isBoss(tgt) ? L('Jefe', 'Boss') : L('Esta ruta', 'This route')}: ${L('pega fuerte', 'hits hard with')} ${strong.map(o => `<span class="type" style="background:${TYPE_COLORS[o.t]}">${TYPE_ES[o.t]}</span>`).join('')}</div>`;
+        if (strong.length) h += `<div class="foehint">${Core.isBoss(tgt) ? L('Contra el jefe', 'Against the boss') : L('En esta ruta', 'On this route')}: ${L('usa', 'use')} ${strong.map(o => `<span class="type" style="background:${TYPE_COLORS[o.t]}">${TYPE_ES[o.t]}</span>`).join('')}</div>`;
         for (let i = 0; i < 6; i++) {
           const k = s.team[i];
           if (i >= s.slots) {
-            h += i === s.slots ? `<div class="card locked"><div class="info"><b>${L('Hueco', 'Slot')} ${i + 1} ${L('bloqueado', 'locked')}</b><small>${L('Un Pokémon más combatiendo a la vez', 'One more Pokémon fighting at a time')}</small></div>${costBtn(SLOT_COST[i], L('Abrir', 'Unlock'), 'slot')}</div>` : '';
+            h += i === s.slots ? `<div class="card locked"><div class="info"><b>${L('Hueco', 'Slot')} ${i + 1} ${L('bloqueado', 'locked')}</b><small>${L('Un Pokémon más combatiendo a la vez', 'One more Pokémon fighting at a time')}</small></div>${costBtn(SLOT_COST[i], L('Desbloquear', 'Unlock'), 'slot')}</div>` : '';
             continue;
           }
           if (!k) { h += `<div class="card empty"><div class="info"><b>${L('Hueco', 'Slot')} ${i + 1} ${L('libre', 'free')}</b><small>${L('Pon a combatir a otro de tus Pokémon', 'Put another one of your Pokémon to fight')}</small></div><button class="btn primary" data-act="pick" data-v="${i}">${L('Elegir', 'Choose')}</button></div>`; continue; }
@@ -602,7 +602,7 @@ const UI = (() => {
       <div class="row"><button class="btn" id="bag-x">${L('Cerrar', 'Close')}</button></div>`);
     $('#modal-box').classList.add('wide');
     $('#bag-x').onclick = closeModal;
-    $('#bag-spare').onclick = () => { const r = Core.recycleSpare(); Audio8.play(r.n ? 'ticket' : 'error'); if (r.n) toast(L(`Reciclados ${r.n} objetos: +${r.d} polvo`, `Recycled ${r.n} items: +${r.d} stardust`)); Core.save(); bagModal(); refresh(true); };
+    $('#bag-spare').onclick = () => { const r = Core.recycleSpare(); Audio8.play(r.n ? 'ticket' : 'error'); if (r.n) toast(L(`${r.n} objeto${r.n > 1 ? 's reciclados' : ' reciclado'}: +${r.d} polvo`, `Recycled ${r.n} item${r.n > 1 ? 's' : ''}: +${r.d} stardust`)); Core.save(); bagModal(); refresh(true); };
     $('#bag-buy').onclick = () => { const it = Core.buyItem(); if (it) { Audio8.play('item'); banner(L('¡', '') + itemName(it) + '!', ITEM_RAR[it.rar].name + ' · ' + itemDesc(it), ITEM_RAR[it.rar].color); Core.save(); bagModal(); refresh(true); } };
     $('#bag-list').onclick = e => {
       const b = e.target.closest('.it'); if (!b) return;
@@ -864,7 +864,7 @@ const UI = (() => {
     return `<div class="genes"><div class="genehead"><span>${L('Naturaleza', 'Nature')} <b>${natTxt(m)}</b></span><span class="dustnum">${ico('dust', 14)} ${fmt(s.dust)}</span></div>
       <div class="row tight"><button class="btn small" id="m-natre" ${s.dust >= NAT_REROLL_COST ? '' : 'disabled'}>${L('Cambiar al azar', 'Reroll')} ${ico('dust', 10)}${NAT_REROLL_COST}</button><button class="btn small" id="m-natset" ${s.dust >= NAT_CHOOSE_COST ? '' : 'disabled'}>${L('Elegir', 'Choose')} ${ico('dust', 10)}${NAT_CHOOSE_COST}</button></div>
       <div class="genehead"><span>IVs</span><span class="gr" style="background:${gr[2]}">${Math.round(Core.ivPct(m) * 100)}% · ${gr[1]}</span></div>${ivRows}
-      <div class="foehint">${DEX[Core.fdex(m)].name} ${L('pega fuerte a', 'hits hard against')} ${strong.length ? strong.map(tchip).join('') : '—'}</div></div>`;
+      <div class="foehint">${DEX[Core.fdex(m)].name} ${L('es fuerte contra', 'is strong against')} ${strong.length ? strong.map(tchip).join('') : '—'}</div></div>`;
   }
   function drawMonCv(t) {
     if (!monCv || !monCv.isConnected) { monCv = null; return; }
@@ -987,7 +987,7 @@ const UI = (() => {
     openModal(`<div class="set"><h2>${ico('gear', 32)} ${L('Ajustes', 'Settings')}</h2>
       <div class="sset"><h4>${L('Idioma', 'Language')}</h4><div class="seg"><button data-lang="es" class="${I18N.lang === 'es' ? 'on' : ''}">Español</button><button data-lang="en" class="${I18N.lang === 'en' ? 'on' : ''}">English</button></div></div>
       <div class="sset"><h4>${L('Sonido', 'Sound')}</h4>${slider('music', L('Música', 'Music'), 'sound')}${slider('sfx', L('Efectos', 'Effects'), 'ticket')}</div>
-      <div class="sset"><h4>${L('Combate', 'Combat')}</h4>${tog('nums', L('Números de daño', 'Damage numbers'), L('Muestra el daño y las monedas sobre el enemigo', 'Shows damage and coins over the enemy'))}${tog('bigNums', L('Números grandes', 'Big numbers'), L('Más tamaño para verlos mejor', 'Bigger size to see them better'))}${tog('shake', L('Temblor de pantalla', 'Screen shake'), L('En críticos y jefes', 'On crits and bosses'))}${tog('autoBoss', L('Reintentar jefes solo', 'Auto-retry bosses'), L('Vuelve a retar al jefe cuando tu equipo tenga fuerza para vencerlo', 'Challenges the boss again when your team is strong enough to beat it'))}</div>
+      <div class="sset"><h4>${L('Combate', 'Combat')}</h4>${tog('nums', L('Números de daño', 'Damage numbers'), L('Muestra el daño y las monedas sobre el enemigo', 'Shows damage and coins over the enemy'))}${tog('bigNums', L('Números grandes', 'Big numbers'), L('Más tamaño para verlos mejor', 'Bigger size to see them better'))}${tog('shake', L('Temblor de pantalla', 'Screen shake'), L('En críticos y jefes', 'On crits and bosses'))}${tog('autoBoss', L('Reintentar jefes automáticamente', 'Auto-retry bosses'), L('Vuelve a retar al jefe cuando tu equipo tenga fuerza para vencerlo', 'Challenges the boss again when your team is strong enough to beat it'))}</div>
       <div class="sset"><h4>${L('Accesibilidad', 'Accessibility')}</h4>
         <div class="setrow col"><span class="sl"><b>${L('Tamaño del texto', 'Text size')}</b></span><div class="seg a11y" role="group" aria-label="${L('Tamaño del texto', 'Text size')}">${[[1, L('Normal', 'Normal')], [1.15, L('Grande', 'Large')], [1.3, L('Muy grande', 'Extra large')]].map(([v, l]) => `<button data-ak="text" data-av="${v}" class="${+a11y.text === v ? 'on' : ''}" aria-pressed="${+a11y.text === v}">${l}</button>`).join('')}</div></div>
         <div class="setrow col"><span class="sl"><b>${L('Animaciones', 'Animations')}</b></span><div class="seg a11y" role="group" aria-label="${L('Animaciones', 'Animations')}">${[['auto', L('Según el sistema', 'System setting')], ['reduce', L('Reducidas', 'Reduced')], ['full', L('Todas', 'Full')]].map(([v, l]) => `<button data-ak="motion" data-av="${v}" class="${a11y.motion === v ? 'on' : ''}" aria-pressed="${a11y.motion === v}">${l}</button>`).join('')}</div></div>

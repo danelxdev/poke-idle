@@ -104,6 +104,22 @@ En la pestaña Gacha, bajo la incubadora: eliges un Pokémon **principal** (da l
 - **Actualizar**: el service worker se renueva solo al cambiar `sw.js`; para forzar una limpieza basta con subir el número de `VERSION`. Hay que añadir cualquier archivo nuevo a la lista `SHELL`.
 - Solo funciona desde `https://` o `localhost` (no desde `file://`).
 
+## Estadísticas
+
+Ajustes → **Estadísticas** (o el botón de la pestaña Liga). El juego guarda una muestra por minuto jugado (hasta 240; al llenarse se queda con una de cada dos) y dibuja tres gráficas de línea en SVG: etapa máxima, monedas por segundo y daño por segundo del equipo (estas dos en escala logarítmica, indicada en el título). Pasando el ratón o el dedo aparece el valor de cada punto; hay una **vista de tabla** con los mismos datos. Debajo: Pokédex por región, Pokémon por rareza, potencial de IVs y tipos, y una lista de totales y récords (mayor daño/s, golpe más fuerte, Torre…).
+
+## Accesibilidad
+
+Ajustes → **Accesibilidad**:
+
+- **Tamaño del texto**: normal, grande o muy grande (paneles, ventanas y avisos).
+- **Animaciones**: «según el sistema» (respeta `prefers-reduced-motion`), reducidas o todas. Reducidas quita animaciones y transiciones, el temblor de pantalla y el movimiento de la portada.
+- **Sin destellos**: elimina los fogonazos del gacha, la evolución y los golpes.
+- **Alto contraste**: texto más claro, bordes marcados y foco más grueso.
+- **Paleta para daltonismo**: rarezas con la paleta Okabe-Ito (validada: separación ΔE ≥ 9 entre rarezas contiguas para deuteranopía, protanopía y tritanopía) y azul/naranja en lugar de rojo/verde. El nombre de la rareza y los símbolos ▲ ▼ se muestran siempre, así que el color nunca es lo único que informa.
+- **Teclado**: `1`–`7` cambian de pestaña, `Esc` cierra ventanas, `Tab` recorre los botones (con foco visible), `Enter` o `Espacio` activan los retratos, y el foco queda dentro de las ventanas y vuelve al cerrarlas.
+- **Lectores de pantalla**: roles de pestañas y ventana, `aria-live` en avisos, etiquetas en los botones de iconos y descripción del combate.
+
 ## Formas regionales y megaevoluciones
 
 **Formas regionales** (56: Alola, Galar, Hisui y Paldea). Son especies propias (ids de PokéAPI 10001+): salen en el gacha según su región (ids de generación 7, 8 y 9), aparecen como Pokémon salvajes en esas rutas y tienen sus propias líneas evolutivas (Rattata de Alola → Raticate de Alola; Pikachu puede evolucionar a Raichu o a Raichu de Alola al azar).
@@ -166,8 +182,8 @@ Todas las constantes están en `Core.K` (`js/core.js`) y el ritmo se ha calibrad
 **Fórmulas principales**
 
 - **Vida del enemigo** = (100 · g^(etapa−1) + 6 · etapa) · curva. El factor `g` es 1,17 y baja poco a poco hasta 1,115 entre las etapas 100 y 400, y la curva añade un endurecimiento suave desde la etapa 50.
-- **Monedas por baja** ≈ vida · 0,0012 · 0,994^etapa + 0,5 + 0,12 · etapa. Los jefes dan x6.
-- **Coste de subir de nivel** = 6 · 1,15^(nivel−1) (por rareza x1 a x2,4). **Daño por nivel**: x1,075 y x2 cada 25 niveles.
+- **Monedas por baja** ≈ vida · 0,0012 · d(etapa) + 0,5 + 0,12 · etapa, con d = 0,994^etapa hasta la 150 y 0,997 por etapa a partir de ahí. Los jefes dan x6.
+- **Coste de subir de nivel** = 6 · 1,15^(nivel−1) hasta el nivel 100 y 1,13 por nivel a partir de ahí (por rareza x1 a x2,4). **Daño por nivel**: x1,075 y x2 cada 25 niveles. El tramo suave evita que el juego se atasque del todo en las etapas altas.
 - **Huecos de equipo**: 150, 3 K, 100 K, 20 M y 15 B monedas.
 - **Jefes**: vida x6 (líder), x8 (Alto Mando), x11 (campeón), x15 (legendario) o x20 (final), con 30 a 60 s de tiempo.
 - **Medallas de la Liga** = ((etapa−45)/12)^1,4, cada una +3% de daño y monedas.
@@ -180,17 +196,23 @@ Todas las constantes están en `Core.K` (`js/core.js`) y el ritmo se ha calibrad
 
 **Ritmo medido (jugador activo y muy eficiente; uno normal tardará de 1,5 a 2,5 veces más)**
 
-| Sin reiniciar la Liga | Tiempo |
+| Sin reiniciar la Liga | Tiempo activo |
 |---|---|
-| Etapa 10 (Brock) | 6 min |
-| Etapa 20 | 18 min |
-| Etapa 40 | 55 min |
-| Etapa 60 (se desbloquea la Liga) | 2 h |
-| Etapa 100 | 3 h |
+| Etapa 20 | 6 min |
+| Etapa 40 | 30 min |
+| Etapa 60 (se desbloquea la Liga) | 1 h |
+| Etapa 100 | 2,4 h |
 | Etapa 140 (fin de Kanto) | 4 h |
-| Etapa 200 | 6 h |
+| Etapa 200 | 6,6 h |
+| Etapa 280 | 26 h |
 
-La espera más larga contra un jefe en esa partida es de unos 35 minutos. Con la Liga: el primer reinicio llega hacia las 3 h, la mayor parte de Kanto y Johto queda hecha hacia las 5 h y Hoenn se abre hacia las 10 h. Las regiones siguientes (Sinnoh en adelante) tardan días.
+Sin reiniciar, a partir de la etapa ~280 hay un muro de días: es el momento de repetir el viaje en la Liga. Jugando 2 h al día y reiniciando cuando compensa, la simulación llega hacia la etapa 500 el día 7, 630 el día 14 y 670–700 el día 21–30; después el avance es muy lento, un reto para los más constantes.
+
+**Otros recursos**
+
+- Polvo estelar: los tickets caros cuestan más (Poké 40, Super 150, Ultra 500, Master 2200) para que el polvo no los regale.
+- Torre: pasado el piso 100 solo cada 10 pisos da un ticket Master y el resto da Ultra, para que los pisos profundos no desbalanceen la economía.
+- Las gemas salen sobre todo de logros y misiones (unos 190 al día de ritmo constante); los huevos, fragmentos Mega y premios de evento se calibraron para no apartar de la progresión principal.
 
 ## Créditos
 

@@ -116,7 +116,7 @@ const Core = (() => {
 
   // ---------------- fórmulas ----------------
   // hpB/hpG = vida del enemigo (base y crecimiento por etapa) · coinR = monedas por vida · lvlG = crecimiento del coste de nivel
-  const K = { hpD: 0.055, hpD0: 100, hpD1: 300, hpS: 80, hpM: 1.8, hp0: 50, bw: 0.08, bwMin: 0.35, ready: 0.95, retryMax: 600, gate: 0.6, hpB: 100, hpG: 1.17, hpL: 6, coinR: 0.0012, cd: 0.994, cf: 0.5, cs: 0.12, lvlG: 1.15, dG: 1.075 };
+  const K = { hpD: 0.055, hpD0: 100, hpD1: 300, hpS: 80, hpM: 1.8, hp0: 50, bw: 0.08, bwMin: 0.35, ready: 0.95, retryMax: 600, gate: 0.6, hpB: 100, hpG: 1.17, hpL: 6, coinR: 0.0012, cd: 0.994, cdS: 150, cd2: 0.997, cf: 0.5, cs: 0.12, lvlG: 1.15, lvlS: 100, lvlG2: 1.13, dG: 1.075 };
   const route = s => Math.floor((s - 1) / 10);
   const routeIdx = s => route(s) % ROUTES.length;
   const routeData = s => ROUTES[routeIdx(s)];
@@ -141,7 +141,9 @@ const Core = (() => {
   const skillOn = id => S.skOn[id] > S.stats.time;
   const medalMult = () => 1 + 0.03 * S.medals;
   const coinMult = () => (1 + 0.15 * S.up.coin) * medalMult() * (1 + 0.06 * S.shop.coins) * (skillOn('gold') ? 3 : 1) * (1 + teamItemSum('coins') + synergies().coins + teamNat('coin')) * (evBonus('coins') ? 1.5 : 1);
-  const killCoins = s => Math.ceil(((hpBase(s) + K.hpL * s) * K.coinR * Math.pow(K.cd, s) + K.cf + s * K.cs) * coinMult() * (isBoss(s) ? 6 : 1));
+  // las monedas por vida bajan con la etapa; pasada la etapa cdS bajan más despacio para que el tramo largo no se estanque
+  const coinDecay = s => Math.pow(K.cd, Math.min(s, K.cdS)) * Math.pow(K.cd2, Math.max(0, s - K.cdS));
+  const killCoins = s => Math.ceil(((hpBase(s) + K.hpL * s) * K.coinR * coinDecay(s) + K.cf + s * K.cs) * coinMult() * (isBoss(s) ? 6 : 1));
   const dexCount = () => Object.keys(S.seen).length;
   const badgeCount = () => Object.keys(S.badges).length;
   const gemMult = () => 1 + 0.1 * S.shop.gems;
@@ -267,7 +269,8 @@ const Core = (() => {
     return Object.keys(TYPE_NAMES).map(t => ({ t, v: foes.reduce((a, d) => a + Math.min(2, Math.max(0.5, typeEff(t, d))), 0) / foes.length }))
       .filter(o => o.v >= 1.25).sort((a, b) => b.v - a.v).slice(0, 4);
   }
-  const levelCost = (m, l) => Math.ceil(6 * RAR_COST[RAR[m.dex]] * Math.pow(K.lvlG, l - 1));
+  // el coste de nivel crece 15% por nivel hasta el nivel lvlS y más despacio después, para que subir de nivel siga compensando en el tramo largo
+  const levelCost = (m, l) => Math.ceil(6 * RAR_COST[RAR[m.dex]] * Math.pow(K.lvlG, Math.min(l - 1, K.lvlS)) * Math.pow(K.lvlG2, Math.max(0, l - 1 - K.lvlS)));
   function levelCostN(m, n) { let c = 0; for (let i = 0; i < n; i++) c += levelCost(m, m.lvl + i); return c; }
   function maxAffordable(m) { let n = 0, c = 0; while (n < 1000) { const k = levelCost(m, m.lvl + n); if (c + k > S.coins) break; c += k; n++; } return { n, c }; }
   const upCost = id => Math.ceil(UPGRADES[id].base * Math.pow(UPGRADES[id].mul, S.up[id]));
@@ -645,7 +648,7 @@ const Core = (() => {
   function towerReward(f) {
     const r = { gems: 3 + Math.floor(f / 2), dust: 5 + 2 * f };
     if (f % 5 === 0) r.shards = 1 + (f >= 50 ? 1 : 0) + (f >= 100 ? 1 : 0);
-    if (f % 5 === 0) r.tk = f <= 10 ? { super: 1 } : f <= 25 ? { super: 2 } : f <= 50 ? { ultra: 1 } : f <= 100 ? { ultra: 2 } : { master: 1 };
+    if (f % 5 === 0) r.tk = f <= 10 ? { super: 1 } : f <= 25 ? { super: 2 } : f <= 50 ? { ultra: 1 } : f <= 100 ? { ultra: 2 } : f % 10 === 0 ? { master: 1 } : { ultra: 2 };
     if (f % 10 === 0) r.egg = f <= 20 ? 1 : f < 60 ? 2 : 3;
     return r;
   }
