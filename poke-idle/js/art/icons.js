@@ -94,6 +94,14 @@ const Icons = (() => {
       '............', '.....kk.....', '....kwk.....', '...kwwk.....', 'kkkwwwk.r..r', 'kwwwwwk..rr.', 'kwwwwwk..rr.', 'kkkwwwk.r..r', '...kwwk.....', '....kwk.....', '.....kk.....', '............'] },
     ticket: { pal: {y: '#ffd23f', d: '#c08a10', w: '#fff3b0', r: '#ff5f6d'}, rows: [
       '............', '............', 'kkkkkkkkkkkk', 'kwyyydyyyyyk', 'kyyyyyyrryyk', '.kyyydyrryk.', '.kyyyyyrryk.', 'kyyyydyyyyyk', 'kddddddddddk', 'kkkkkkkkkkkk', '............', '............'] },
+    tkPoke: { pal: { y: '#ff5f6d', d: '#b8283a', w: '#ffd3d8', r: '#ffd23f' }, rows: [
+      '............', '............', 'kkkkkkkkkkkk', 'kwyyydyyyyyk', 'kyyyyyyrryyk', '.kyyydyrryk.', '.kyyyyyrryk.', 'kyyyydyyyyyk', 'kddddddddddk', 'kkkkkkkkkkkk', '............', '............'] },
+    tkSuper: { pal: { y: '#4fb4ff', d: '#2a6fb0', w: '#cfe8ff', r: '#ffffff' }, rows: [
+      '............', '............', 'kkkkkkkkkkkk', 'kwyyydyyyyyk', 'kyyyyyyrryyk', '.kyyydyrryk.', '.kyyyyyrryk.', 'kyyyydyyyyyk', 'kddddddddddk', 'kkkkkkkkkkkk', '............', '............'] },
+    tkUltra: { pal: { y: '#ffd23f', d: '#c08a10', w: '#fff3b0', r: '#30303a' }, rows: [
+      '............', '............', 'kkkkkkkkkkkk', 'kwyyydyyyyyk', 'kyyyyyyrryyk', '.kyyydyrryk.', '.kyyyyyrryk.', 'kyyyydyyyyyk', 'kddddddddddk', 'kkkkkkkkkkkk', '............', '............'] },
+    tkMaster: { pal: { y: '#c47bff', d: '#7a3fb0', w: '#f0d8ff', r: '#ffd23f' }, rows: [
+      '............', '............', 'kkkkkkkkkkkk', 'kwyyydyyyyyk', 'kyyyyyyrryyk', '.kyyydyrryk.', '.kyyyyyrryk.', 'kyyyydyyyyyk', 'kddddddddddk', 'kkkkkkkkkkkk', '............', '............'] },
     // ---------- propios de PokéMazmorra ----------
     glasses: { pal: { b: '#3a3a5a', l: '#4fb4ff', w: '#cfe8ff' }, rows: [
       '............', '............', '............', 'kkkkkkkkkkkk', 'kwllkkkwllkk', 'klllk.klllk.',

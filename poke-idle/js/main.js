@@ -18,16 +18,16 @@
 
   // ---- avisos de eventos del juego ----
   Core.on('evolve', d => {
-    Audio8.play('evolve');
-    UI.banner('¡' + DEX[d.from].name + ' ha evolucionado en ' + DEX[d.to].name + '!', 'Su daño aumenta un montón', '#7ff0a0');
+    UI.evolveAnim(d.from, d.to, Core.S.mons[d.key].shiny);
     Sprites.preload(d.to, Core.S.mons[d.key].shiny);
   });
+  Core.on('moveLearn', d => {
+    const mv = MOVES[d.to];
+    Audio8.play('levelup');
+    UI.banner('¡' + DEX[d.dex].name + ' aprendió ' + mv.name + '!', 'Su ataque ahora es más potente', TYPE_COLORS[mv.type]);
+  });
+  Core.on('tickets', t => { if (Core.S.started) UI.refresh(false); });
   Core.on('kill', k => {
-    if (k.caught) {
-      Audio8.play('friend');
-      UI.banner((k.caught.shiny ? '✨ ' : '') + '¡Has capturado a ' + DEX[k.caught.base].name + '!', k.caught.isNew ? '¡Nuevo en tu Pokédex!' : '+1 copia para subir estrellas', '#7ff0a0');
-      UI.autoFill();
-    }
     if (k.enemy.golden) UI.toast(Icons.html('gem', 18) + ' ¡Pokémon dorado! +' + k.gems + ' gemas');
   });
   Core.on('bossWin', e => {
@@ -61,6 +61,7 @@
       Arena.frame(dt);
       UI.hud(dt);
       UI.drawMonCv(now / 1000);
+      UI.drawPv(dt);
       uiT += dt;
       if (uiT > 0.25) { uiT = 0; UI.refresh(false); }
     }

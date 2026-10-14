@@ -36,6 +36,7 @@ const UI = (() => {
     $('#coins').textContent = fmt(s.coins);
     $('#gems').textContent = fmt(s.gems);
     $('#dust').textContent = fmt(s.dust);
+    $('#tks').textContent = fmt(Object.values(s.tk).reduce((a, b) => a + b, 0));
     cpsT += dt;
     if (s.coins > lastCoins) cpsAcc += s.coins - lastCoins;
     lastCoins = s.coins;
@@ -91,7 +92,7 @@ const UI = (() => {
     const s = S();
     const ns = TABS[tab].sig();
     if (force || ns !== sig) { sig = ns; $('#tab-body').innerHTML = TABS[tab].html(); }
-    for (const b of $$('#tab-body [data-cost]')) b.disabled = s[b.dataset.cur || 'coins'] < +b.dataset.cost || b.dataset.off === '1';
+    for (const b of $$('#tab-body [data-cost]')) { const cur = b.dataset.cur || 'coins'; b.disabled = (cur.startsWith('tk:') ? s.tk[cur.slice(3)] : s[cur]) < +b.dataset.cost || b.dataset.off === '1'; }
   }
 
   const costBtn = (cost, label, act, extra = '', cur = 'coins') =>
@@ -115,17 +116,21 @@ const UI = (() => {
             h += i === s.slots ? `<div class="card locked"><div class="info"><b>Hueco ${i + 1} bloqueado</b><small>Un Pokémon más combatiendo a la vez</small></div>${costBtn(SLOT_COST[i], 'Abrir', 'slot')}</div>` : '';
             continue;
           }
-          if (!k) { h += `<div class="card"><div class="info"><b>Hueco libre</b><small>Elige un Pokémon en la Pokédex o abre Poké Balls</small></div><button class="btn small" data-act="tab" data-v="dex">Pokédex</button></div>`; continue; }
+          if (!k) { h += `<div class="card empty"><div class="info"><b>Hueco ${i + 1} libre</b><small>Pon a combatir a otro de tus Pokémon</small></div><button class="btn primary" data-act="pick" data-v="${i}">Elegir</button></div>`; continue; }
           const m = s.mons[k], rar = Core.RAR[m.dex], st = Core.stageOf(m.dex), kids = Core.CHILDREN[m.dex];
-          const evo = kids && st < EVO_LVL.length ? `<small class="evo">Evoluciona a Nv. ${EVO_LVL[st]}</small>` : '';
+          const evo = kids && st < EVO_LVL.length ? `Evoluciona a Nv. ${EVO_LVL[st]}` : '';
+          const t0 = DEX[m.dex].types[0], tier = Core.tierOf(m.lvl), mv = MOVES[Core.moveOf(m)];
+          const next = tier + 1 < TIER_LV.length ? `Nuevo ataque a Nv. ${TIER_LV[tier + 1]}: ${MOVES[MOVE_TIERS[t0][tier + 1]].name}` : 'Ataque máximo';
           const b = buyN(m);
           h += `<div class="card" style="--rc:${RARITY[rar].color}">
             <img class="por" src="${por(m.dex, m.shiny)}" data-act="mon" data-v="${k}">
             <div class="info"><b>${m.shiny ? '<span class="shiny-tag">✨</span>' : ''}${DEX[m.dex].name} <small style="display:inline">Nv. ${m.lvl}</small></b>
-            ${starsHtml(m.stars)} ${typeTags(m.dex)}<small>${fmt(Core.monDmg(m) / Core.monRate(m))} daño/s</small>${evo}</div>
-            ${costBtn(b.c, 'Subir +' + b.n, 'lvl', `data-v="${k}"`)}</div>`;
+            ${starsHtml(m.stars)} ${typeTags(m.dex)}
+            <small class="mv"><i style="background:${TYPE_COLORS[mv.type]}"></i>${mv.name} · ${fmt(Core.monDmg(m) / Core.monRate(m))} daño/s</small>
+            <small class="evo">${evo ? evo + ' · ' : ''}${next}</small></div>
+            <div class="acts">${costBtn(b.c, 'Subir +' + b.n, 'lvl', `data-v="${k}"`)}<button class="btn small" data-act="pick" data-v="${i}">Cambiar</button></div></div>`;
         }
-        h += `<p class="hint">Consejo: los Pokémon hacen x2 de daño cuando su tipo es eficaz contra el enemigo. Cada 25 niveles su daño se duplica.</p>`;
+        h += `<p class="hint">Consejo: los Pokémon hacen x2 de daño cuando su tipo es eficaz contra el enemigo. Cada 25 niveles su daño se duplica y cada cierto nivel aprenden un ataque más potente.</p>`;
         return h;
       },
     },
@@ -143,58 +148,59 @@ const UI = (() => {
       },
     },
     gacha: {
-      sig: () => { const s = S(); return JSON.stringify([s.pity, s.pityE, s.bannerLost, Core.pokeBallPrice(), Core.featuredEpic(), Core.featuredLegend(), Core.unlockedGens(), Core.freePullReady(), s.dust]); },
+      sig: () => { const s = S(); return JSON.stringify([s.pity, s.pityE, s.bannerLost, Core.ticketPrice('poke'), Core.featuredEpic(), Core.featuredLegend(), Core.unlockedGens(), Core.freePullReady(), s.tk, Math.floor(s.dust / 10)]); },
       html() {
         const s = S(), fe = Core.featuredEpic(), fl = Core.featuredLegend();
-        let h = '';
-        if (Core.freePullReady()) h += `<div class="feat free"><span>${ico('ball', 48)}</span><div><b>¡Tirada diaria gratis!</b><small>Una Poké Ball gratis cada día</small></div><button class="btn primary" data-act="freepull">Abrir</button></div>`;
+        let h = '<div class="tkgrid">' + Object.entries(TICKETS).map(([t, k]) => `<div class="tkbox" style="--tc:${k.color}">${ico(k.icon, 36)}<b>${s.tk[t]}</b><small>${k.name}</small>
+          <button class="btn small primary" data-act="buytk" data-v="${t}" data-n="1" data-cost="${Core.ticketPrice(t)}" data-cur="${k.cur}">+1 ${ico(k.cur === 'gems' ? 'gem' : 'coin', 10)} ${fmt(Core.ticketPrice(t))}</button></div>`).join('') + '</div>';
+        if (Core.freePullReady()) h += `<div class="feat free"><span>${ico('tkPoke', 48)}</span><div><b>¡Tirada diaria gratis!</b><small>Una Poké Ball gratis cada día, sin ticket</small></div><button class="btn primary" data-act="freepull">Abrir</button></div>`;
         const feat = (d, tag) => `<div class="feat"><span class="tagx">${tag}</span><img src="${por(d)}"><div><b>${DEX[d].name}</b><small>${RARITY[Core.RAR[d]].name}</small><br>${typeTags(d)}</div></div>`;
         h += `<h3>Destacados de la Bola Destacada</h3>` + feat(fl, 'LEGENDARIO · SEMANA') + feat(fe, 'ÉPICO · 3 DÍAS');
-        h += `<div class="pity">Épico garantizado en <b>${Math.max(0, PITY_EPIC - s.pityE)}</b> tiradas · Legendario en <b>${Math.max(0, PITY - s.pity)}</b> (solo con gemas)${s.bannerLost ? '<br><b style="color:#ffd23f">¡El próximo legendario de la Bola Destacada será el destacado!</b>' : ''}<div class="bar"><i style="width:${s.pity / PITY * 100}%"></i></div></div>`;
+        h += `<div class="pity">Épico garantizado en <b>${Math.max(0, PITY_EPIC - s.pityE)}</b> tiradas · Legendario en <b>${Math.max(0, PITY - s.pity)}</b> (con tickets Super, Ultra o Maestro)${s.bannerLost ? '<br><b style="color:#ffd23f">¡El próximo legendario de la Bola Destacada será el destacado!</b>' : ''}<div class="bar"><i style="width:${s.pity / PITY * 100}%"></i></div></div>`;
         const ballCard = ([id, b]) => {
-          const cur = b.cur;
+          const tk = TICKETS[b.ticket];
           return `<div class="ball-card"><span class="bi">${ico(b.icon, 48)}</span><b>${b.name}</b><p>${b.desc}</p>
             <div class="rates">${b.rates.map((r, k) => r ? `<span style="color:${RARITY[k].color}">${RARITY[k].name} ${r}%</span>` : '').join('')}</div>
             <div class="btns">
-              <button class="btn primary" data-act="pull" data-v="${id}" data-n="1" data-cost="${Core.ballPrice(id, 1)}" data-cur="${cur}">x1 ${ico(cur === 'gems' ? 'gem' : 'coin', 12)} ${fmt(Core.ballPrice(id, 1))}</button>
-              <button class="btn primary" data-act="pull" data-v="${id}" data-n="10" data-cost="${Core.ballPrice(id, 10)}" data-cur="${cur}">x10 ${ico(cur === 'gems' ? 'gem' : 'coin', 12)} ${fmt(Core.ballPrice(id, 10))}</button>
+              <button class="btn primary" data-act="pull" data-v="${id}" data-n="1" data-cost="1" data-cur="tk:${b.ticket}">Abrir x1 ${ico(tk.icon, 14)} 1</button>
+              <button class="btn primary" data-act="pull" data-v="${id}" data-n="10" data-cost="${Core.ticketCost(10)}" data-cur="tk:${b.ticket}">Abrir x10 ${ico(tk.icon, 14)} ${Core.ticketCost(10)}</button>
             </div></div>`;
         };
         const entries = Object.entries(BALLS);
-        h += entries.filter(([, b]) => !b.region && Core.ballAvailable(entries.find(e => e[1] === b)[0])).filter(([id]) => id !== 'master').map(ballCard).join('');
-        h += entries.filter(([id]) => id === 'master').map(ballCard).join('');
-        h += '<h3>Bolas regionales</h3><p class="hint">Solo Pokémon de la región. Se abren al llegar a ella.</p>';
+        h += entries.filter(([id, b]) => !b.region && id !== 'master').map(ballCard).join('');
+        h += ballCard(['master', BALLS.master]);
+        h += '<h3>Bolas regionales</h3><p class="hint">Solo Pokémon de la región (usan 1 Ticket Super). Se abren al llegar a ella.</p>';
         let locked = 0;
         for (const [id, b] of entries.filter(([, b]) => b.region)) {
           if (!Core.ballAvailable(id)) { if (!locked++) h += `<div class="ball-row locked"><span>${ico(b.icon, 24)}</span><b>${b.name}</b><small>Llega a ${REGIONS[b.gen - 1].name} (etapa ${REGIONS[b.gen - 1].first * 10 + 1})</small></div>`; continue; }
           h += `<div class="ball-row"><span>${ico(b.icon, 24)}</span><b>${b.name}</b>
-            <button class="btn small primary" data-act="pull" data-v="${id}" data-n="1" data-cost="${Core.ballPrice(id, 1)}" data-cur="gems">x1 ${ico('gem', 10)} ${fmt(Core.ballPrice(id, 1))}</button>
-            <button class="btn small primary" data-act="pull" data-v="${id}" data-n="10" data-cost="${Core.ballPrice(id, 10)}" data-cur="gems">x10 ${ico('gem', 10)} ${fmt(Core.ballPrice(id, 10))}</button></div>`;
+            <button class="btn small primary" data-act="pull" data-v="${id}" data-n="1" data-cost="1" data-cur="tk:super">x1 ${ico('tkSuper', 12)} 1</button>
+            <button class="btn small primary" data-act="pull" data-v="${id}" data-n="10" data-cost="${Core.ticketCost(10)}" data-cur="tk:super">x10 ${ico('tkSuper', 12)} ${Core.ticketCost(10)}</button></div>`;
         }
-        h += `<p class="hint">x10 cuesta como 9 y garantiza un Pokémon raro o mejor. Las copias repetidas suben estrellas (★ multiplica el daño) y dan <b>polvo estelar</b> (${ico('dust', 14)} ${fmt(s.dust)}): con él puedes canjear en la Pokédex el Pokémon que quieras. Las regiones nuevas se abren al llegar a ellas. 1 de cada 150 sale shiny (+50% de daño).</p>`;
+        h += `<h3>Taller de polvo estelar <small style="color:var(--dim)">${ico('dust', 14)} ${fmt(s.dust)}</small></h3><p class="hint">Cada copia repetida da polvo. Cámbialo por tickets:</p><div class="tkgrid">` + Object.entries(TICKETS).map(([t, k]) => `<button class="btn small" data-act="dusttk" data-v="${t}" data-cost="${TICKET_DUST[t]}" data-cur="dust">${ico(k.icon, 16)} ${fmt(TICKET_DUST[t])} ${ico('dust', 12)}</button>`).join('') + '</div>';
+        h += `<p class="hint">Los Pokémon solo se consiguen en el gacha. Los tickets caen de los Pokémon derrotados, de los jefes, las misiones y los logros, o se compran con monedas y gemas. x10 cuesta 9 tickets y garantiza un Pokémon raro o mejor. Las copias repetidas suben estrellas (★ multiplica el daño). 1 de cada 100 es shiny (+50% de daño).</p>`;
         return h;
       },
     },
     dex: {
-      sig: () => { const s = S(); return JSON.stringify([Object.keys(s.mons).length, Object.keys(s.seen).length, s.team, dexFilter, Core.unlockedGens(), Math.floor(s.dust / 20), Object.values(s.mons).map(m => m.dex + ':' + m.stars + ':' + (m.copies >= STAR_COPIES[m.stars] ? 1 : 0))]); },
+      sig: () => { const s = S(); return JSON.stringify([Object.keys(s.mons).length, Object.keys(s.seen).length, s.team, dexFilter, Core.unlockedGens(), Object.values(s.mons).map(m => m.dex + ':' + m.stars + ':' + m.lvl + ':' + (m.shiny ? 1 : 0) + (m.shinyOwned ? 1 : 0) + ':' + (m.copies >= STAR_COPIES[m.stars] ? 1 : 0))]); },
       html() {
         const s = S();
         const n = Core.dexCount();
         const filters = [['all', 'Todos'], ['mine', 'Solo los míos']].concat(REGIONS.filter(r => r.gen).map(r => [String(r.gen), r.name]));
-        let h = `<div class="dexhead"><span>Registrados <b style="color:#fff">${n}/${POKEDEX.length}</b> · +${n}% de daño · ${ico('dust', 14)} ${fmt(s.dust)}</span></div>
-          <div class="seg"><select class="sel" data-act="dexsel">${filters.map(([v, l]) => `<option value="${v}" ${dexFilter === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div><div class="dexgrid">`;
+        let h = `<div class="dexhead"><span>Registrados <b style="color:#fff">${n}/${POKEDEX.length}</b> · +${n}% de daño</span></div>
+          <button class="dd" data-act="dexdd">${filters.find(f => f[0] === dexFilter)[1]}<i></i></button><div class="dexgrid">`;
         for (const p of POKEDEX) {
           if (/^[1-9]$/.test(dexFilter)) { if (p.gen !== +dexFilter) continue; }
           const base = String(Core.baseOf(p.dex)), own = s.mons[base], seen = s.seen[p.dex];
           const cur = own && own.dex === p.dex, locked = !Core.genUnlocked(p.gen);
           if (dexFilter === 'mine' && !(own && seen)) continue;
-          const canBuy = !own && !locked && +base === p.dex && !seen;
           const canStar = cur && own.stars < 5 && own.copies >= STAR_COPIES[own.stars];
-          const attr = own && seen ? `data-act="mon" data-v="${base}"` : canBuy ? `data-act="dexbuy" data-v="${p.dex}"` : seen ? `data-act="seen" data-v="${p.dex}"` : locked ? 'data-act="locked"' : '';
-          h += `<button class="${seen ? '' : 'unk'} ${cur && s.team.includes(base) ? 'inteam' : ''}" style="--rc:${cur ? RARITY[Core.RAR[p.dex]].color : seen ? '#2a3f8a' : canBuy ? RARITY[Core.RAR[p.dex]].color + '66' : '#1d2a5a'}" ${attr}>
-            ${cur ? `<span class="lv">${own.lvl}</span>` : ''}${seen ? `<img src="${por(p.dex, cur && own.shiny)}" loading="lazy">` : `<span class="q">${locked ? '🔒' : '?'}</span>`}<span class="n">${seen ? (canStar ? '⬆ ' : '') + p.name : canBuy ? ico('dust', 10) + fmt(Core.dustCost(p.dex)) : '#' + p.dex}</span></button>`;
+          const attr = own && seen ? `data-act="mon" data-v="${base}"` : seen ? `data-act="seen" data-v="${p.dex}"` : locked ? 'data-act="locked"' : 'data-act="noown"';
+          h += `<button class="${seen ? '' : 'unk'} ${cur && s.team.includes(base) ? 'inteam' : ''}" style="--rc:${cur ? RARITY[Core.RAR[p.dex]].color : seen ? '#2a3f8a' : '#1d2a5a'}" ${attr}>
+            ${cur ? `<span class="lv">${own.lvl}</span>` : ''}${cur && own.shinyOwned ? '<span class="sh">✨</span>' : ''}${seen ? `<img src="${por(p.dex, cur && own.shiny)}" loading="lazy">` : `<span class="q">${locked ? '🔒' : '?'}</span>`}<span class="n">${seen ? (canStar ? '⬆ ' : '') + p.name : '#' + p.dex}</span></button>`;
         }
-        return h + '</div><p class="hint">Toca un Pokémon sin descubrir de una región abierta para canjearlo por polvo estelar.</p>';
+        return h + '</div><p class="hint">Los Pokémon que no tienes solo se consiguen en el gacha.</p>';
       },
     },
     quests: {
@@ -250,32 +256,56 @@ const UI = (() => {
     },
   };
 
+  // ---------------- desplegables propios ----------------
+  let ddEl = null;
+  function closeDD() { if (ddEl) { ddEl.remove(); ddEl = null; } }
+  function openDD(anchor, options, value, onPick) {
+    closeDD();
+    const r = anchor.getBoundingClientRect(), pop = document.createElement('div');
+    pop.className = 'dd-pop';
+    pop.style.left = r.left + 'px'; pop.style.top = (r.bottom + 4) + 'px'; pop.style.minWidth = r.width + 'px';
+    pop.innerHTML = options.map(([v, l]) => `<button data-v="${v}" class="${String(v) === String(value) ? 'on' : ''}">${l}</button>`).join('');
+    pop.onclick = e => { const b = e.target.closest('button'); if (b) { closeDD(); onPick(b.dataset.v); } };
+    document.body.appendChild(pop); ddEl = pop;
+    const pr = pop.getBoundingClientRect();
+    if (pr.bottom > innerHeight - 8) pop.style.top = Math.max(8, r.top - pr.height - 4) + 'px';
+    if (pr.right > innerWidth - 8) pop.style.left = Math.max(8, innerWidth - pr.width - 8) + 'px';
+    setTimeout(() => document.addEventListener('pointerdown', function out(e) { if (ddEl && !ddEl.contains(e.target)) { closeDD(); } else if (ddEl) document.addEventListener('pointerdown', out, { once: true }); }, { once: true }), 0);
+  }
+
   // ---------------- acciones ----------------
   function act(el) {
     const s = S(), a = el.dataset.act, v = el.dataset.v;
     switch (a) {
       case 'mul': s.buyMul = v === 'max' ? 'max' : +v; Audio8.play('click'); break;
       case 'lvl': {
-        const m = s.mons[v], b = buyN(m), before = m.dex;
-        if (Core.levelUp(v, b.n)) { Audio8.play(m.dex !== before ? 'evolve' : 'levelup'); } else Audio8.play('error');
+        const m = s.mons[v], b = buyN(m);
+        if (Core.levelUp(v, b.n)) Audio8.play('levelup'); else Audio8.play('error');
         break;
       }
-      case 'slot': if (Core.buySlot()) { Audio8.play('item'); banner('¡Nuevo hueco en el equipo!', 'Pon otro Pokémon a combatir desde la Pokédex', '#7ff0a0'); autoFill(); } break;
+      case 'slot': if (Core.buySlot()) { Audio8.play('item'); banner('¡Nuevo hueco en el equipo!', 'Elige qué Pokémon combate en él', '#7ff0a0'); autoFill(); } break;
       case 'up': if (Core.buyUp(v)) Audio8.play('levelup'); break;
       case 'tab': setTab(v); return;
+      case 'pick': pickModal(+v); return;
       case 'pull': doPull(v, +el.dataset.n); break;
       case 'freepull': doPull('poke', 1, true); break;
+      case 'buytk': if (Core.buyTicket(v, +el.dataset.n)) Audio8.play('item'); else Audio8.play('error'); break;
+      case 'dusttk': if (Core.dustTicket(v)) Audio8.play('ticket'); else Audio8.play('error'); break;
       case 'shop': if (Core.buyShop(v)) Audio8.play('levelup'); break;
-      case 'wquest': { const g = Core.claimQuest(+v, true); if (g) { Audio8.play('ticket'); toast(ico('gem', 18) + ' +' + g + ' gemas'); } break; }
-      case 'achall': achShowAll = !achShowAll; break;
-      case 'dexbuy': dexBuyModal(+v); return;
-      case 'locked': toast('Región bloqueada: llega a ella para descubrir sus Pokémon'); return;
-      case 'dexf': dexFilter = v; break;
+      case 'dexdd': {
+        const filters = [['all', 'Todos'], ['mine', 'Solo los míos']].concat(REGIONS.filter(r => r.gen).map(r => [String(r.gen), r.name]));
+        openDD(el, filters, dexFilter, val => { dexFilter = val; sig = ''; refresh(true); });
+        return;
+      }
       case 'mon': monModal(v); return;
       case 'seen': toast(DEX[v].name + ': lo has visto, pero aún no lo tienes'); return;
-      case 'daily': { const g = Core.claimDaily(); if (g) { Audio8.play('ticket'); toast(ico('gem', 18) + ' +' + g + ' gemas'); } break; }
-      case 'quest': { const g = Core.claimQuest(+v); if (g) { Audio8.play('ticket'); toast(ico('gem', 18) + ' +' + g + ' gemas'); } break; }
-      case 'ach': { const g = Core.claimAch(v); if (g) { Audio8.play('rare'); toast(ico('trophy', 18) + ' +' + g + ' gemas'); } break; }
+      case 'noown': toast('Solo se consigue en el gacha'); return;
+      case 'locked': toast('Región bloqueada: llega a ella para descubrir sus Pokémon'); return;
+      case 'daily': { const g = Core.claimDaily(); if (g) { Audio8.play('ticket'); toast(ico('gem', 18) + ' +' + g + ' gemas y tickets'); } break; }
+      case 'quest': { const g = Core.claimQuest(+v); if (g) { Audio8.play('ticket'); toast(ico('gem', 18) + ' +' + g + ' gemas y ticket'); } break; }
+      case 'wquest': { const g = Core.claimQuest(+v, true); if (g) { Audio8.play('ticket'); toast(ico('gem', 18) + ' +' + g + ' gemas y 2 tickets Super'); } break; }
+      case 'ach': { const g = Core.claimAch(v); if (g) { Audio8.play('rare'); toast(ico('trophy', 18) + ' +' + g + ' gemas y tickets'); } break; }
+      case 'achall': achShowAll = !achShowAll; break;
       case 'prestige': prestigeModal(); return;
     }
     Core.save();
@@ -287,35 +317,143 @@ const UI = (() => {
     while (s.team.length < s.slots && free.length) s.team.push(free.shift());
   }
 
+  // ---------------- cambiar Pokémon del equipo ----------------
+  let pickSlot = 0, pickSort = 'dps', pickQ = '';
+  const PICK_SORTS = [['dps', 'Por daño'], ['lvl', 'Por nivel'], ['rar', 'Por rareza'], ['num', 'Por número'], ['star', 'Por estrellas']];
+  function pickList() {
+    const s = S();
+    let list = Object.entries(s.mons).map(([k, m]) => ({ k, m, dps: Core.monDmg(m) / Core.monRate(m) }));
+    const q = pickQ.trim().toLowerCase();
+    if (q) list = list.filter(o => DEX[o.m.dex].name.toLowerCase().includes(q));
+    const key = { dps: o => -o.dps, lvl: o => -o.m.lvl, rar: o => -Core.RAR[o.m.dex] * 1e6 - o.m.lvl, num: o => o.m.dex, star: o => -o.m.stars * 1e6 - o.m.lvl }[pickSort];
+    list.sort((a, b) => key(a) - key(b));
+    if (!list.length) return '<p class="hint">No hay ningún Pokémon con ese nombre.</p>';
+    return '<div class="pickgrid">' + list.map(({ k, m, dps }) => {
+      const at = s.team.indexOf(k);
+      return `<button class="pk ${at === pickSlot ? 'cur' : ''}" data-k="${k}" style="--rc:${RARITY[Core.RAR[m.dex]].color}"><img src="${por(m.dex, m.shiny)}" loading="lazy">
+        <b>${m.shiny ? '✨' : ''}${DEX[m.dex].name}</b><small>Nv. ${m.lvl} · ${starsHtml(m.stars)}</small><small>${fmt(dps)}/s</small>${at >= 0 ? `<span class="slot">${at + 1}</span>` : ''}</button>`;
+    }).join('') + '</div>';
+  }
+  function pickModal(slot) {
+    pickSlot = slot;
+    openModal(`<h2>Hueco ${slot + 1}: elige un Pokémon</h2>
+      <div class="pickbar"><input class="search" id="pk-q" placeholder="Buscar por nombre…" value="${pickQ.replace(/"/g, '')}" autocomplete="off"><button class="dd" id="pk-sort">${PICK_SORTS.find(x => x[0] === pickSort)[1]}<i></i></button></div>
+      <div class="pickwrap" id="pk-list">${pickList()}</div>
+      <p class="hint">Si eliges uno que ya está en otro hueco, se intercambian.</p>
+      <div class="row">${S().team[slot] && S().team.length > 1 ? '<button class="btn danger" id="pk-rm">Quitar del equipo</button>' : ''}<button class="btn" id="pk-x">Cerrar</button></div>`);
+    $('#modal-box').classList.add('wide');
+    $('#pk-x').onclick = closeModal;
+    if ($('#pk-rm')) $('#pk-rm').onclick = () => { Core.unsetTeam(slot); Audio8.play('swap'); Core.save(); closeModal(); refresh(true); };
+    $('#pk-q').oninput = e => { pickQ = e.target.value; $('#pk-list').innerHTML = pickList(); };
+    $('#pk-sort').onclick = e => openDD(e.currentTarget, PICK_SORTS, pickSort, v => { pickSort = v; pickModal(slot); });
+    $('#pk-list').onclick = e => {
+      const b = e.target.closest('.pk'); if (!b) return;
+      Core.setTeam(slot, b.dataset.k); Audio8.play('swap'); Core.save(); closeModal(); refresh(true);
+    };
+  }
+
   // ---------------- gacha ----------------
   function doPull(id, n, free) {
     const res = free ? Core.freePull() : Core.pull(id, n);
     if (!res) { Audio8.play('error'); return; }
     autoFill();
     Core.save();
-    const fx = $('#gacha-fx');
-    const best = Math.max(...res.map(r => r.rar));
-    fx.classList.remove('hidden');
-    fx.innerHTML = `<div class="ballbig">${ico(BALLS[id].icon, 120)}</div><div class="tapclose">...</div>`;
-    let i = 0;
-    const shakes = setInterval(() => { Audio8.play('shake'); if (++i >= 3) clearInterval(shakes); }, 380);
+    Core.setPaused(true);
+    const fx = $('#gacha-fx'), ball = BALLS[id], best = Math.max(...res.map(r => r.rar)), anyShiny = res.some(r => r.shiny);
+    const col = RARITY[best].color;
+    fx.className = 'gacha-fx';
+    fx.innerHTML = `<div class="gx-rays" style="--c:#6a8aff"></div><div class="gx-stage"><div class="gx-ticket">${ico(TICKETS[free ? 'poke' : ball.ticket].icon, 64)}</div><div class="gx-ball" id="gx-ball"><div class="gx-aura" id="gx-aura"></div>${ico(ball.icon, 120)}</div><div class="gx-txt" id="gx-txt">Abriendo ${ball.name}…</div></div><button class="gx-skip" id="gx-skip">Saltar</button>`;
+    const aura = $('#gx-aura'), ballEl = $('#gx-ball'), steps = ['#ffffff', best >= 2 ? RARITY[Math.min(best, 3)].color : '#ffffff', best >= 4 ? RARITY[4].color : col, col];
+    const timers = [];
     let done = false;
-    const reveal = () => {
-      if (done) return; done = true; clearInterval(shakes);
+    const later = (f, ms) => timers.push(setTimeout(f, ms));
+    later(() => Audio8.play('shake'), 700);
+    [0, 1, 2].forEach(i => later(() => { Audio8.play('shake'); aura.style.setProperty('--ac', steps[i + 1]); aura.style.setProperty('--as', 1 + i * 0.5); ballEl.classList.add('s' + (i + 1)); if ($('#gx-txt')) $('#gx-txt').textContent = ['¡Se mueve!', '¡Algo bueno se acerca!', '¡Está a punto!'][i]; }, 900 + i * 650));
+    later(reveal, 3000);
+    $('#gx-skip').onclick = () => { if (!done) reveal(); };
+    function reveal() {
+      if (done) return; done = true; timers.forEach(clearTimeout);
       Audio8.play(best >= 5 ? 'legend' : best >= 4 ? 'rare' : 'pop');
-      const col = RARITY[best].color;
-      fx.innerHTML = `<div class="flash" style="--fc:${col}"></div><div class="pulls ${n === 1 ? 'one' : ''}">${res.map((r, j) => {
+      if (anyShiny) setTimeout(() => Audio8.play('rare'), 500);
+      const label = best >= 5 ? '¡LEGENDARIO!' : best >= 4 ? '¡ÉPICO!' : best >= 3 ? '¡RARO!' : '';
+      fx.classList.toggle('legend', best >= 5); fx.classList.toggle('epic', best === 4);
+      let cards = '';
+      res.forEach((r, j) => {
         const m = S().mons[r.base];
-        return `<div class="pull" style="--rc:${RARITY[r.rar].color};${r.rar >= 4 ? '--rg:' + RARITY[r.rar].color + '88;' : ''}animation-delay:${j * 0.08}s">
-          ${r.isNew ? '<span class="new">¡NUEVO!</span>' : ''}<img src="${por(r.base, r.shiny)}"><b>${r.shiny ? '✨' : ''}${DEX[r.base].name}</b><small>${RARITY[r.rar].name}</small>
-          ${r.isNew ? '' : `<span class="dup">+1 copia (${m.copies}/${m.stars < 5 ? STAR_COPIES[m.stars] : '★5'}) · +${r.dust} ${ico('dust', 12)}</span>`}</div>`;
-      }).join('')}</div><button class="btn big primary" id="pull-ok">¡Genial!</button>`;
+        cards += `<div class="pull r${r.rar} ${r.shiny ? 'shiny' : ''}" style="--rc:${RARITY[r.rar].color};animation-delay:${0.15 + j * (n > 1 ? 0.16 : 0)}s">
+          ${r.isNew ? '<span class="new">¡NUEVO!</span>' : ''}${r.shiny ? '<span class="shtag">✨ SHINY</span>' : ''}
+          ${n === 1 ? '<canvas class="pv" id="pv" width="128" height="128"></canvas>' : `<img src="${por(r.base, r.shiny)}">`}
+          <b>${DEX[r.base].name}</b><small>${RARITY[r.rar].name}</small>
+          ${r.isNew ? '' : `<span class="dup">+1 copia (${m.copies}/${m.stars < 5 ? STAR_COPIES[m.stars] : '★5'}) · +${r.dust} ${ico('dust', 12)}</span>`}
+          ${r.newShiny && !r.isNew ? '<span class="dup" style="color:#fff3a8">¡Versión shiny desbloqueada!</span>' : ''}
+          <i class="gl"></i></div>`;
+      });
+      fx.innerHTML = `<div class="gx-rays on" style="--c:${col}"></div><div class="flash" style="--fc:${col}"></div>
+        ${label ? `<div class="gx-label" style="--c:${col}">${label}</div>` : ''}${anyShiny ? '<div class="gx-label sh">✨ ¡SHINY! ✨</div>' : ''}
+        <div class="pulls ${n === 1 ? 'one' : ''}">${cards}</div><button class="btn big primary" id="pull-ok" style="animation:pin .4s ${0.4 + n * 0.16}s backwards">¡Genial!</button>`;
       $('#pull-ok').onclick = close;
-    };
-    const close = () => { fx.classList.add('hidden'); fx.onclick = null; refresh(true); };
-    setTimeout(reveal, 1200);
-    fx.onclick = e => { if (!done) reveal(); else if (e.target === fx) close(); };
+      if (n === 1) { pvT = 0; pvMon = { dex: res[0].dex, shiny: res[0].shiny }; Sprites.preload(res[0].dex, res[0].shiny); } else pvMon = null;
+      if (best >= 5) { const st = $('#stage'); }
+    }
+    function close() { pvMon = null; fx.classList.add('hidden'); fx.className = 'gacha-fx hidden'; Core.setPaused(false); refresh(true); }
+    fx.classList.remove('hidden');
   }
+  // sprite animado en la tarjeta de una tirada única
+  let pvMon = null, pvT = 0;
+  function drawPv(dt) {
+    if (!pvMon) return;
+    const cv = $('#pv'); if (!cv) return;
+    pvT += dt;
+    const g = cv.getContext('2d'); g.imageSmoothingEnabled = false; g.clearRect(0, 0, 128, 128);
+    const a = DEX[pvMon.dex].anim, h = (a.idle || a.walk).h;
+    Sprites.draw(g, pvMon.dex, pvMon.shiny, 'idle', Math.PI / 2, pvT, 64, 112, Math.min(3, 100 / h), {});
+  }
+
+  // ---------------- animación de evolución ----------------
+  const evoQueue = []; let evoRun = false;
+  function evolveAnim(from, to, shiny) { evoQueue.push({ from, to, shiny }); if (!evoRun) nextEvo(); }
+  function nextEvo() {
+    const ev = evoQueue.shift();
+    if (!ev) { evoRun = false; Core.setPaused(false); $('#evo').classList.add('hidden'); return; }
+    evoRun = true; Core.setPaused(true);
+    const box = $('#evo'), cv = $('#evo-cv'), g = cv.getContext('2d'), txt = $('#evo-txt'), ok = $('#evo-ok');
+    box.classList.remove('hidden', 'done'); ok.classList.add('hidden');
+    Sprites.preload(ev.to, ev.shiny); Sprites.preload(ev.from, ev.shiny);
+    txt.innerHTML = `¿Eh? ¡<b>${DEX[ev.from].name}</b> está evolucionando!`;
+    const parts = []; let t0 = performance.now(), finished = false, lastSw = -1, flashed = false, raf = 0;
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    Audio8.play('charge');
+    const scaleOf = d => { const a = DEX[d].anim; return Math.min(4.4, 150 / (a.idle || a.walk).h); };
+    function frame(now) {
+      const t = (now - t0) / 1000;
+      g.imageSmoothingEnabled = false; g.clearRect(0, 0, 160, 160);
+      const cx = 80, cy = 140;
+      // halo
+      const prog = Math.min(1, t / 3.4);
+      if (t > 0.9 && t < 3.9) { g.globalAlpha = 0.25 + 0.2 * Math.sin(t * 12); g.fillStyle = '#ffffff'; g.beginPath(); g.arc(cx, cy - 40, 30 + prog * 40, 0, 6.3); g.fill(); g.globalAlpha = 1; }
+      let showNew = false, flash = false;
+      if (t < 0.9) { flash = false; }
+      else if (t < 3.6) {
+        flash = true;
+        const period = 0.45 - prog * 0.39, idx = Math.floor((t - 0.9) / period);
+        showNew = idx % 2 === 1;
+        if (idx !== lastSw) { lastSw = idx; if (idx % 2 === 0) Audio8.play('swap'); }
+        if (Math.random() < 0.6) parts.push({ x: cx + rnd(-44, 44), y: cy - rnd(0, 90), vx: rnd(-10, 10), vy: rnd(-40, -10), l: 0.7, m: 0.7, c: '#ffffff' });
+      } else { showNew = true; flash = t < 3.75; }
+      if (t >= 3.6 && !flashed) { flashed = true; box.classList.add('flash'); setTimeout(() => box.classList.remove('flash'), 600); Audio8.play('evolve'); for (let i = 0; i < 40; i++) { const a = Math.random() * 6.28, sp = rnd(30, 110); parts.push({ x: cx, y: cy - 44, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, l: 1, m: 1, c: pick(['#ffffff', '#ffd23f', '#9fe0ff', '#ff9ed8']) }); } txt.innerHTML = `¡<b>${DEX[ev.from].name}</b> ha evolucionado en <b style="color:#ffd23f">${DEX[ev.to].name}</b>!`; }
+      const d = showNew ? ev.to : ev.from, bounce = t < 0.9 ? Math.sin(t * 8) * 1.5 : 0;
+      Sprites.draw(g, d, ev.shiny, 'idle', Math.PI / 2, t, cx, cy + bounce, scaleOf(d), { flash });
+      for (let i = parts.length - 1; i >= 0; i--) { const p = parts[i]; p.l -= 1 / 60; p.x += p.vx / 60; p.y += p.vy / 60; if (p.l <= 0) { parts.splice(i, 1); continue; } g.globalAlpha = p.l / p.m; g.fillStyle = p.c; g.fillRect(Math.round(p.x), Math.round(p.y), 2, 2); }
+      g.globalAlpha = 1;
+      if (t > 4.4 && !finished) { finished = true; ok.classList.remove('hidden'); }
+      if (!stop) raf = requestAnimationFrame(frame);
+    }
+    let stop = false;
+    ok.onclick = () => { stop = true; cancelAnimationFrame(raf); nextEvo(); };
+    $('#evo').onclick = e => { if (e.target.id === 'evo' && !finished) { /* acelerar: salta al final */ t0 -= 4400; } };
+    raf = requestAnimationFrame(frame);
+  }
+  const pick = a => a[Math.floor(Math.random() * a.length)];
 
   // ---------------- ficha de Pokémon ----------------
   let monCv = null;
@@ -330,6 +468,8 @@ const UI = (() => {
       const k = s.team[i];
       slots += `<button data-slot="${i}" class="${k === key ? 'cur' : ''}" title="Hueco ${i + 1}">${k ? `<img src="${por(s.mons[k].dex, s.mons[k].shiny)}">` : '+'}</button>`;
     }
+    const t0 = p.types[0], tier = Core.tierOf(m.lvl);
+    const moves = MOVE_TIERS[t0].map((id, i) => `<span class="mvchip ${i <= tier ? 'on' : ''}" style="--tc:${TYPE_COLORS[MOVES[id].type]}">${MOVES[id].name}<small>Nv. ${TIER_LV[i]}</small></span>`).join('');
     openModal(`<h2>${m.shiny ? '✨ ' : ''}${p.name}</h2>
       <div class="monbig"><canvas id="mon-cv" width="72" height="72"></canvas><div class="stats">
         <div style="color:${RARITY[rar].color};font-size:16px">${RARITY[rar].name} ${starsHtml(m.stars)}</div>${typeTags(m.dex)}
@@ -337,12 +477,14 @@ const UI = (() => {
         <div>PS ${st.hp} · Atq ${st.atk} · Def ${st.def} · AtE ${st.spa} · DfE ${st.spd} · Vel ${st.spe}</div>
         <div>Copias: <b>${m.copies}</b>${need ? ' / ' + need + ' para ★' + (m.stars + 1) + ' (daño x' + STAR_MULT[m.stars + 1] + ')' : ' · ¡Estrellas al máximo!'}</div>
       </div></div>
-      ${need ? `<div class="row"><button class="btn primary" id="m-star" ${m.copies >= need ? '' : 'disabled'}>Subir a ★${m.stars + 1}</button></div>` : ''}
+      <div class="mvlist">${moves}</div>
+      <div class="row">${need ? `<button class="btn primary" id="m-star" ${m.copies >= need ? '' : 'disabled'}>Subir a ★${m.stars + 1}</button>` : ''}${m.shinyOwned ? `<button class="btn" id="m-shiny">Forma: ${m.shiny ? '✨ Shiny' : 'Normal'}</button>` : ''}</div>
       <p class="hint" style="margin-top:12px">${inTeam >= 0 ? 'Está en tu equipo. Toca otro hueco para moverlo.' : 'Elige el hueco del equipo donde quieres ponerlo:'}</p>
       <div class="slotpick">${slots}</div>
       <div class="row"><button class="btn" id="m-close">Cerrar</button></div>`);
     monCv = $('#mon-cv'); monCv.dataset.k = key; Sprites.preload(m.dex, m.shiny);
     $('#m-close').onclick = closeModal;
+    if ($('#m-shiny')) $('#m-shiny').onclick = () => { Core.toggleShiny(key); Audio8.play('swap'); Core.save(); monModal(key); refresh(true); };
     if ($('#m-star')) $('#m-star').onclick = () => { if (Core.starUp(key)) { Audio8.play('legend'); banner('¡' + p.name + ' sube a ★' + m.stars + '!', 'Su daño se multiplica por ' + STAR_MULT[m.stars], '#ffd23f'); Core.save(); monModal(key); refresh(true); } };
     $$('.slotpick button').forEach(b => b.onclick = () => { Core.setTeam(+b.dataset.slot, key); Audio8.play('swap'); Core.save(); monModal(key); refresh(true); });
   }
@@ -353,14 +495,6 @@ const UI = (() => {
     g.imageSmoothingEnabled = false;
     g.clearRect(0, 0, 72, 72);
     if (m) Sprites.draw(g, m.dex, m.shiny, 'idle', Math.PI / 2, t, 36, 56, 1, {});
-  }
-
-  function dexBuyModal(d) {
-    const s = S(), c = Core.dustCost(d), rar = Core.RAR[d];
-    openModal(`<h2>Canjear por polvo estelar</h2><div class="monbig" style="justify-content:center"><img src="${por(d)}" style="width:96px;height:96px;image-rendering:pixelated;border-radius:8px;background:#0b1638"><div class="stats"><b style="font-size:20px">${DEX[d].name}</b><br><span style="color:${RARITY[rar].color}">${RARITY[rar].name}</span> ${typeTags(d)}<div>Coste: <b>${ico('dust', 14)} ${fmt(c)}</b> · Tienes ${fmt(s.dust)}</div></div></div>
-      <div class="row"><button class="btn" id="d-no">Cancelar</button><button class="btn primary" id="d-yes" ${s.dust >= c ? '' : 'disabled'}>Canjear</button></div>`);
-    $('#d-no').onclick = closeModal;
-    $('#d-yes').onclick = () => { const r = Core.dustBuy(d); closeModal(); if (r) { Audio8.play(r.rar >= 4 ? 'rare' : 'friend'); autoFill(); banner('¡' + DEX[d].name + ' se une a tu colección!', 'Canjeado con polvo estelar', RARITY[r.rar].color); Core.save(); refresh(true); } };
   }
 
   let mapReg = -1;
@@ -390,27 +524,49 @@ const UI = (() => {
   }
 
   function settings() {
-    const s = S().settings;
-    openModal(`<h2>Ajustes</h2>
-      <div class="setrow"><span>Música</span><input type="range" min="0" max="1" step="0.05" id="s-mus" value="${s.music}"></div>
-      <div class="setrow"><span>Efectos</span><input type="range" min="0" max="1" step="0.05" id="s-sfx" value="${s.sfx}"></div>
-      <div class="setrow"><span>Números de daño</span><input type="checkbox" id="s-nums" ${s.nums ? 'checked' : ''}></div>
-      <div class="row"><button class="btn danger" id="s-wipe">Borrar partida</button><button class="btn primary" id="s-ok">Listo</button></div>
-      <p class="fine">Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Arte de escenarios e iconos adaptado de pokesurvivor (MIT) · Pokémon © Nintendo/Creatures/GAME FREAK</p>`);
-    $('#s-mus').oninput = e => { s.music = +e.target.value; Audio8.setVolumes(); };
-    $('#s-sfx').oninput = e => { s.sfx = +e.target.value; Audio8.setVolumes(); };
-    $('#s-nums').onchange = e => { s.nums = e.target.checked; };
+    const st = S().settings;
+    const slider = (k, label, icon) => `<div class="setrow"><span class="sl">${ico(icon, 24)}<b>${label}</b></span><div class="slider" data-k="${k}" style="--v:${st[k]}"><div class="trk"><i></i><u></u></div><em>${Math.round(st[k] * 100)}%</em></div></div>`;
+    const tog = (k, label, sub) => `<div class="setrow"><span class="sl"><b>${label}</b><small>${sub}</small></span><button class="tog ${st[k] ? 'on' : ''}" data-k="${k}"><i></i></button></div>`;
+    openModal(`<div class="set"><h2>${ico('gear', 32)} Ajustes</h2>
+      <div class="sset"><h4>Sonido</h4>${slider('music', 'Música', 'sound')}${slider('sfx', 'Efectos', 'ticket')}</div>
+      <div class="sset"><h4>Combate</h4>${tog('nums', 'Números de daño', 'Muestra el daño y las monedas sobre el enemigo')}${tog('bigNums', 'Números grandes', 'Más tamaño para verlos mejor')}${tog('shake', 'Temblor de pantalla', 'En críticos y jefes')}</div>
+      <div class="sset"><h4>Partida</h4><div class="row" style="margin:0"><button class="btn" id="s-exp">Exportar</button><button class="btn" id="s-imp">Importar</button><button class="btn danger" id="s-wipe">Borrar</button></div>
+        <p class="hint" style="margin:8px 0 0">Tu partida se guarda sola en este navegador. Exporta un código para llevarla a otro dispositivo.</p></div>
+      <div class="row"><button class="btn big primary" id="s-ok">Listo</button></div>
+      <p class="fine">Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Escenarios e iconos adaptados de pokesurvivor (MIT) · Pokémon © Nintendo/Creatures/GAME FREAK</p></div>`);
+    $$('.slider').forEach(sl => {
+      const k = sl.dataset.k, trk = sl.querySelector('.trk');
+      const set = e => { const r = trk.getBoundingClientRect(), v = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); st[k] = Math.round(v * 20) / 20; sl.style.setProperty('--v', st[k]); sl.querySelector('em').textContent = Math.round(st[k] * 100) + '%'; Audio8.setVolumes(); };
+      sl.onpointerdown = e => { sl.setPointerCapture(e.pointerId); set(e); sl.onpointermove = set; };
+      sl.onpointerup = () => { sl.onpointermove = null; if (k === 'sfx') Audio8.play('coin'); Core.save(); };
+    });
+    $$('.tog').forEach(t => t.onclick = () => { st[t.dataset.k] = !st[t.dataset.k]; t.classList.toggle('on', st[t.dataset.k]); Audio8.play('click'); Core.save(); applySettings(); });
     $('#s-ok').onclick = () => { Core.save(); closeModal(); };
+    $('#s-exp').onclick = () => {
+      const code = btoa(unescape(encodeURIComponent(JSON.stringify(S()))));
+      if (navigator.clipboard) navigator.clipboard.writeText(code).catch(() => {});
+      openModal(`<h2>Exportar partida</h2><p class="hint">Copiado al portapapeles. Guarda este código:</p><textarea class="search area" readonly id="code">${code}</textarea><div class="row"><button class="btn primary" id="e-ok">Cerrar</button></div>`);
+      $('#code').onfocus = e => e.target.select(); $('#e-ok').onclick = settings;
+    };
+    $('#s-imp').onclick = () => {
+      openModal(`<h2>Importar partida</h2><p class="hint">Pega aquí el código exportado. Sustituirá tu partida actual.</p><textarea class="search area" id="code" placeholder="Pega el código…"></textarea><p class="hint" id="imp-err" style="color:#ff8080"></p><div class="row"><button class="btn" id="i-no">Cancelar</button><button class="btn primary" id="i-yes">Importar</button></div>`);
+      $('#i-no').onclick = settings;
+      $('#i-yes').onclick = () => {
+        try { const d = JSON.parse(decodeURIComponent(escape(atob($('#code').value.trim())))); if (!d || d.v !== 1 || !d.mons) throw 0; localStorage.setItem('pokeidle.save.v1', JSON.stringify(d)); location.reload(); }
+        catch (e) { $('#imp-err').textContent = 'Ese código no es válido.'; }
+      };
+    };
     $('#s-wipe').onclick = () => {
       openModal(`<h2>¿Borrar todo?</h2><p>Perderás todos tus Pokémon y tu progreso.</p><div class="row"><button class="btn" id="w-no">No</button><button class="btn danger" id="w-yes">Sí, borrar</button></div>`);
-      $('#w-no').onclick = closeModal;
+      $('#w-no').onclick = settings;
       $('#w-yes').onclick = () => { Core.wipe(); location.reload(); };
     };
   }
+  function applySettings() { const l = $('#dmg-layer'); if (l) { l.classList.toggle('big', S().settings.bigNums !== false); } }
 
   // ---------------- modales, avisos ----------------
   function openModal(html) { $('#modal-box').innerHTML = html; $('#modal').classList.remove('hidden'); }
-  function closeModal() { $('#modal').classList.add('hidden'); monCv = null; }
+  function closeModal() { $('#modal').classList.add('hidden'); $('#modal-box').classList.remove('wide'); monCv = null; closeDD(); }
   let bannerT = null;
   function banner(title, sub, color) {
     const b = $('#banner');
@@ -425,7 +581,6 @@ const UI = (() => {
   function toast(html) { const t = $('#toast'); t.innerHTML = html; t.classList.remove('hidden'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('hidden'), 2000); }
 
   function bind() {
-    $('#tab-body').addEventListener('change', e => { const el = e.target.closest('[data-act="dexsel"]'); if (el) { dexFilter = el.value; sig = ''; refresh(true); } });
     $('#tab-body').addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && !el.disabled) act(el); });
     $$('#tabs button').forEach(b => b.onclick = () => { Audio8.play('click'); setTab(b.dataset.tab); });
     $$('[data-ico]').forEach(s => s.innerHTML = ico(s.dataset.ico, 24));
@@ -440,9 +595,12 @@ const UI = (() => {
     $('#btn-map').innerHTML = ico('boot', 24);
     $('#btn-map').onclick = () => { mapReg = -1; mapModal(); };
     $('#i-dust').innerHTML = ico('dust', 24);
+    $('#i-tk').innerHTML = ico('tkPoke', 24);
+    $('#btn-tk').onclick = () => { Audio8.play('click'); setTab('gacha'); };
+    applySettings();
     $('#skills').innerHTML = Object.entries(SKILLS).map(([id, k]) => `<button class="skill" id="sk-${id}" data-sk="${id}" title="${k.name}: ${k.desc}">${ico(k.icon, 24)}<i></i><small></small></button>`).join('');
     $$('#skills .skill').forEach(b => b.onclick = e => { e.stopPropagation(); if (Core.useSkill(b.dataset.sk)) { Audio8.play(b.dataset.sk === 'rage' ? 'charge' : 'ticket'); banner(SKILLS[b.dataset.sk].name + '!', SKILLS[b.dataset.sk].desc, '#ff8040'); } });
   }
 
-  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, autoFill, monModal, mapModal };
+  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, autoFill, monModal, mapModal };
 })();

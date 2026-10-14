@@ -15,7 +15,8 @@ const STAR_COPIES = [1, 2, 4, 6, 10];           // copias para pasar a la siguie
 const DUST_GAIN = [0, 3, 8, 20, 60, 150];       // polvo estelar por copia repetida
 const DUST_COST = [0, 60, 150, 400, 1200, 3500];// polvo para canjear un Pokémon concreto
 const EVO_LVL = [20, 45];                       // niveles de evolución (1.ª y 2.ª)
-const RARITY_FIX = { 172: 3, 113: 3, 132: 2, 143: 4, 236: 2, 238: 2, 239: 2, 240: 2, 298: 2, 360: 3, 174: 2, 175: 3, 173: 2 };
+const RARITY_FIX = {};
+const RAR_CUT = [485, 505, 530];                // BST final de la línea para poder ser poco común, rara o épica
 
 // Regiones: la primera ruta de cada una (cada ruta = 10 etapas, la 10.ª es el jefe)
 const REGIONS = [
@@ -190,24 +191,34 @@ const ROUTES = [
 // Poké Balls del gacha. rates = probabilidad de cada rareza (1..5)
 // gen = solo Pokémon de esa región · banner = tiene destacados (50% al sacar épico/legendario)
 const BALLS = {
-  poke: { name: 'Poké Ball', icon: 'ball', cur: 'coins', rates: [0, 62, 28, 9, 1, 0], desc: 'Se compra con monedas. Su precio sube con tu progreso.' },
-  super: { name: 'Super Ball', icon: 'ball2', cur: 'gems', price: 30, rates: [0, 30, 38, 24, 7, 1], desc: 'Más Pokémon raros y épicos.' },
-  ultra: { name: 'Ultra Ball', icon: 'ball3', cur: 'gems', price: 90, rates: [0, 0, 25, 50, 21, 4], desc: 'Nunca sale un común. 4% de legendario.' },
-  banner: { name: 'Bola Destacada', icon: 'ballLux', cur: 'gems', price: 60, rates: [0, 0, 30, 44, 21, 5], banner: 1, desc: 'Tiene Pokémon destacados: la mitad de las veces que salga épico o legendario será uno de ellos. Si pierdes el 50/50 de un legendario, el siguiente es el destacado seguro.' },
-  region1: { name: 'Bola Kanto', icon: 'ball', cur: 'gems', price: 24, gen: 1, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Kanto.' },
-  region2: { name: 'Bola Johto', icon: 'ballJ', cur: 'gems', price: 26, gen: 2, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Johto.' },
-  region3: { name: 'Bola Hoenn', icon: 'ballH', cur: 'gems', price: 28, gen: 3, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Hoenn.' },
-  region4: { name: 'Bola Sinnoh', icon: 'ballR4', cur: 'gems', price: 30, gen: 4, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Sinnoh.' },
-  region5: { name: 'Bola Teselia', icon: 'ballR5', cur: 'gems', price: 32, gen: 5, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Teselia.' },
-  region6: { name: 'Bola Kalos', icon: 'ballR6', cur: 'gems', price: 34, gen: 6, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Kalos.' },
-  region7: { name: 'Bola Alola', icon: 'ballR7', cur: 'gems', price: 36, gen: 7, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Alola.' },
-  region8: { name: 'Bola Galar', icon: 'ballR8', cur: 'gems', price: 38, gen: 8, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Galar.' },
-  region9: { name: 'Bola Paldea', icon: 'ballR9', cur: 'gems', price: 40, gen: 9, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Paldea.' },
-  master: { name: 'Bola Maestra', icon: 'ball4', cur: 'gems', price: 250, rates: [0, 0, 0, 0, 72, 28], desc: 'Siempre épico o legendario: 28% de legendario.' },
+  poke: { name: 'Poké Ball', icon: 'ball', ticket: 'poke', rates: [0, 62, 28, 9, 1, 0], desc: 'La más común. Los tickets Poké se compran con monedas.' },
+  super: { name: 'Super Ball', icon: 'ball2', ticket: 'super', rates: [0, 30, 38, 24, 7, 1], desc: 'Más Pokémon raros y épicos.' },
+  ultra: { name: 'Ultra Ball', icon: 'ball3', ticket: 'ultra', rates: [0, 0, 25, 50, 21, 4], desc: 'Nunca sale un común. 4% de legendario.' },
+  banner: { name: 'Bola Destacada', icon: 'ballLux', ticket: 'ultra', rates: [0, 0, 30, 44, 21, 5], banner: 1, desc: 'Tiene Pokémon destacados: la mitad de las veces que salga épico o legendario será uno de ellos. Si pierdes el 50/50 de un legendario, el siguiente es el destacado seguro.' },
+  region1: { name: 'Bola Kanto', icon: 'ball', ticket: 'super', gen: 1, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Kanto.' },
+  region2: { name: 'Bola Johto', icon: 'ballJ', ticket: 'super', gen: 2, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Johto.' },
+  region3: { name: 'Bola Hoenn', icon: 'ballH', ticket: 'super', gen: 3, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Hoenn.' },
+  region4: { name: 'Bola Sinnoh', icon: 'ballR4', ticket: 'super', gen: 4, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Sinnoh.' },
+  region5: { name: 'Bola Teselia', icon: 'ballR5', ticket: 'super', gen: 5, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Teselia.' },
+  region6: { name: 'Bola Kalos', icon: 'ballR6', ticket: 'super', gen: 6, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Kalos.' },
+  region7: { name: 'Bola Alola', icon: 'ballR7', ticket: 'super', gen: 7, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Alola.' },
+  region8: { name: 'Bola Galar', icon: 'ballR8', ticket: 'super', gen: 8, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Galar.' },
+  region9: { name: 'Bola Paldea', icon: 'ballR9', ticket: 'super', gen: 9, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Paldea.' },
+  master: { name: 'Bola Maestra', icon: 'ball4', ticket: 'master', rates: [0, 0, 0, 0, 72, 28], desc: 'Siempre épico o legendario: 28% de legendario.' },
 };
+// Los gachas se abren con tickets. Se consiguen en combate, misiones y logros, o se compran (monedas o gemas).
+const TICKETS = {
+  poke: { name: 'Ticket Poké', icon: 'tkPoke', cur: 'coins', color: '#ff5f6d' },
+  super: { name: 'Ticket Super', icon: 'tkSuper', cur: 'gems', gems: 30, color: '#4fb4ff' },
+  ultra: { name: 'Ticket Ultra', icon: 'tkUltra', cur: 'gems', gems: 90, color: '#ffd23f' },
+  master: { name: 'Ticket Maestro', icon: 'tkMaster', cur: 'gems', gems: 250, color: '#c47bff' },
+};
+const TICKET_DUST = { poke: 40, super: 150, ultra: 450, master: 1500 };   // polvo estelar por ticket
+const BOSS_TICKETS = [null, { poke: 2, super: 1 }, { poke: 3, super: 2 }, { super: 3, ultra: 1 }, { super: 2, ultra: 2 }, { ultra: 3, master: 1 }];
+const DAILY_TICKETS = [{ poke: 2 }, { poke: 2 }, { poke: 3 }, { poke: 3, super: 1 }, { poke: 4 }, { poke: 4, super: 1 }, { super: 2, ultra: 1 }];
 const PITY = 90;       // tiradas con gemas hasta un legendario garantizado
 const PITY_EPIC = 25;  // y hasta un épico garantizado
-const SHINY_RATE = 1 / 150;
+const SHINY_RATE = 1 / 100;
 
 // Mejoras que se compran con monedas (se pierden al entrar en la Liga)
 const UPGRADES = {
@@ -217,7 +228,7 @@ const UPGRADES = {
   crit: { name: 'Lente Zoom', icon: 'zoom', base: 1500, mul: 2.2, max: 20, desc: n => (3 + n * 2) + '% de críticos (x3 de daño)' },
   critdmg: { name: 'Garra Afilada', icon: 'quickclaw', base: 9000, mul: 2.7, max: 15, desc: n => 'Los críticos hacen x' + (3 + n * 0.25).toFixed(2) + ' de daño' },
   speed: { name: 'Banda Veloz', icon: 'choicescarf', base: 6000, mul: 2.7, max: 15, desc: n => '+' + (n * 4) + '% de velocidad de ataque' },
-  catch: { name: 'Super Caña', icon: 'berry', base: 12000, mul: 2.5, max: 15, desc: n => (1.5 + n * 0.5).toFixed(1) + '% de capturar Pokémon salvajes' },
+  catch: { name: 'Radar de Tickets', icon: 'tkPoke', base: 12000, mul: 2.5, max: 15, desc: n => (1.5 + n * 0.5).toFixed(1) + '% de que un Pokémon derrotado suelte un ticket' },
   golden: { name: 'Polvo Dorado', icon: 'dust', base: 30000, mul: 2.6, max: 12, desc: n => 'Pokémon dorados: 1 de cada ' + Math.round(1 / (1 / 120 + n * 0.002)) },
   type: { name: 'Afinidad de Tipo', icon: 'stone', base: 15000, mul: 2.6, max: 20, desc: n => 'Los golpes súper eficaces hacen +' + n * 4 + '% más de daño' },
   boss: { name: 'Cazajefes', icon: 'rockyhelmet', base: 6000, mul: 2.2, max: 25, desc: n => '+' + n * 4 + '% de daño contra jefes' },
@@ -231,7 +242,7 @@ const SLOT_COST = [0, 600, 2e5, 2e9, 5e12, 1e17];
 const SKILLS = {
   rage: { name: 'Furia', icon: 'fist', dur: 15, cd: 120, desc: 'x3 de daño del equipo durante 15 s.' },
   gold: { name: 'Fiebre del Oro', icon: 'amuletcoin', dur: 20, cd: 150, desc: 'x3 de monedas durante 20 s.' },
-  lure: { name: 'Señuelo', icon: 'berry', dur: 15, cd: 100, desc: 'x6 de probabilidad de captura durante 15 s.' },
+  lure: { name: 'Lluvia de Tickets', icon: 'tkSuper', dur: 15, cd: 100, desc: 'x6 de probabilidad de soltar tickets durante 15 s.' },
 };
 
 // Tienda de la Liga: se compra con Puntos de Liga (se ganan al entrar en la Liga) y no se pierde nunca
@@ -241,7 +252,7 @@ const LEAGUE_SHOP = {
   lvl: { name: 'Mochila de Caramelos', icon: 'candy', base: 3, mul: 1.7, max: 15, desc: n => 'Tras la Liga empiezas con +' + n * 3 + ' niveles' },
   slots: { name: 'Equipo de Campeón', icon: 'friends', base: 5, mul: 2.5, max: 4, desc: n => 'Tras la Liga conservas ' + (2 + n) + ' huecos' },
   offline: { name: 'Campamento', icon: 'clock', base: 3, mul: 1.8, max: 8, desc: n => 'Ganancias offline: hasta ' + (8 + n * 2) + ' h al ' + (50 + n * 5) + '%' },
-  catch: { name: 'Radar de Capturas', icon: 'berry', base: 3, mul: 1.7, max: 10, desc: n => '+' + (n * 0.4).toFixed(1) + '% de captura' },
+  catch: { name: 'Radar de Tickets', icon: 'tkSuper', base: 3, mul: 1.7, max: 10, desc: n => '+' + (n * 0.4).toFixed(1) + '% de tickets soltados' },
   shiny: { name: 'Brillo Eterno', icon: 'shiny', base: 6, mul: 1.9, max: 10, desc: n => 'Shinies x' + (1 + n * 0.2).toFixed(1) + ' más frecuentes' },
   gems: { name: 'Buscagemas', icon: 'gem', base: 4, mul: 1.7, max: 10, desc: n => '+' + n * 10 + '% de gemas de jefes y misiones' },
   skill: { name: 'Maestro de Habilidades', icon: 'fist', base: 4, mul: 1.8, max: 10, desc: n => 'Habilidades: -' + n * 4 + '% de enfriamiento y +' + n * 2 + ' s de duración' },
@@ -266,7 +277,7 @@ const QUEST_POOL = [
   { stat: 'pulls', goal: 10, reward: 30, text: n => 'Abre ' + n + ' Poké Balls' },
   { stat: 'bosses', goal: 2, reward: 20, text: n => 'Vence a ' + n + ' jefes' },
   { stat: 'bosses', goal: 5, reward: 40, text: n => 'Vence a ' + n + ' jefes' },
-  { stat: 'catches', goal: 2, reward: 18, text: n => 'Captura ' + n + ' Pokémon salvajes' },
+  { stat: 'catches', goal: 2, reward: 18, text: n => 'Consigue ' + n + ' tickets en combate' },
   { stat: 'stages', goal: 10, reward: 15, text: n => 'Supera ' + n + ' etapas' },
   { stat: 'stages', goal: 30, reward: 30, text: n => 'Supera ' + n + ' etapas' },
   { stat: 'skills', goal: 2, reward: 12, text: n => 'Usa ' + n + ' habilidades activas' },
@@ -274,7 +285,7 @@ const QUEST_POOL = [
   { stat: 'crits', goal: 150, reward: 15, text: n => 'Haz ' + n + ' golpes críticos' },
   { stat: 'crits', goal: 800, reward: 30, text: n => 'Haz ' + n + ' golpes críticos' },
   { stat: 'goldens', goal: 1, reward: 20, text: n => 'Derrota ' + n + ' Pokémon dorado' },
-  { stat: 'dustBuys', goal: 1, reward: 25, text: n => 'Canjea ' + n + ' Pokémon con polvo estelar' },
+  { stat: 'dustBuys', goal: 1, reward: 25, text: n => 'Canjea polvo estelar por ' + n + ' ticket' },
   { stat: 'coinsTotal', goal: 1e4, reward: 12, text: n => 'Gana ' + n + ' monedas' },
 ];
 const WEEKLY_POOL = [
@@ -284,7 +295,7 @@ const WEEKLY_POOL = [
   { stat: 'taps', goal: 4000, reward: 100, text: n => 'Toca ' + n + ' veces a los enemigos' },
   { stat: 'levels', goal: 1500, reward: 130, text: n => 'Sube ' + n + ' niveles a tus Pokémon' },
   { stat: 'stages', goal: 150, reward: 140, text: n => 'Supera ' + n + ' etapas' },
-  { stat: 'catches', goal: 25, reward: 120, text: n => 'Captura ' + n + ' Pokémon salvajes' },
+  { stat: 'catches', goal: 25, reward: 120, text: n => 'Consigue ' + n + ' tickets en combate' },
   { stat: 'skills', goal: 20, reward: 90, text: n => 'Usa ' + n + ' habilidades activas' },
   { stat: 'crits', goal: 5000, reward: 110, text: n => 'Haz ' + n + ' golpes críticos' },
   { stat: 'goldens', goal: 10, reward: 130, text: n => 'Derrota ' + n + ' Pokémon dorados' },
@@ -304,7 +315,7 @@ const ACH_DEFS = [
   ['maxStars', 'Estrellas', 'star', [[1, 15], [3, 40], [5, 100]], n => 'Lleva un Pokémon a ★' + n],
   ['prestiges', 'Nuevo viaje', 'crown', [[1, 100], [3, 120], [5, 150], [10, 250], [25, 400], [50, 600], [100, 1000]], n => 'Entra ' + n + ' veces en la Liga'],
   ['bosses', 'Rompe-líderes', 'trophy', [[10, 25], [50, 60], [150, 120], [500, 250], [1000, 450], [2500, 800]], n => 'Vence a ' + n + ' jefes'],
-  ['catches', 'Cazapokémon', 'berry', [[5, 15], [25, 40], [100, 80], [500, 200], [1000, 350], [2500, 600]], n => 'Captura ' + n + ' Pokémon'],
+  ['catches', 'Recolector de tickets', 'tkPoke', [[5, 15], [25, 40], [100, 80], [500, 200], [1000, 350], [2500, 600]], n => 'Consigue ' + n + ' tickets en combate'],
   ['legends', 'Leyendas', 'trophy', [[1, 40], [5, 100], [10, 180], [20, 350], [40, 600], [80, 1000]], n => 'Ten ' + n + ' legendarios'],
   ['levels', 'Entrenamiento', 'up', [[100, 15], [1000, 35], [1e4, 80], [1e5, 200], [1e6, 400]], n => 'Sube ' + n + ' niveles en total'],
   ['coinsTotal', 'Millonario', 'coin', [[1e6, 20], [1e9, 50], [1e12, 100], [1e15, 200], [1e18, 400]], n => 'Gana ' + n + ' monedas en total'],
@@ -312,7 +323,7 @@ const ACH_DEFS = [
   ['dust', 'Polvo de estrellas', 'dust', [[100, 15], [1000, 50], [10000, 150], [1e5, 400]], n => 'Consigue ' + n + ' de polvo estelar'],
   ['crits', 'Golpe certero', 'zoom', [[1e3, 20], [1e4, 50], [1e5, 120], [1e6, 300]], n => 'Haz ' + n + ' críticos'],
   ['goldens', 'Fiebre del oro', 'amuletcoin', [[1, 20], [10, 50], [50, 120], [200, 300]], n => 'Derrota ' + n + ' Pokémon dorados'],
-  ['dustBuys', 'Trueque', 'dust', [[1, 20], [10, 60], [50, 200]], n => 'Canjea ' + n + ' Pokémon con polvo'],
+  ['dustBuys', 'Trueque', 'dust', [[1, 20], [10, 60], [50, 200]], n => 'Canjea polvo estelar por ' + n + ' tickets'],
   ['freePulls', 'Constancia', 'ball', [[7, 30], [30, 100], [100, 300]], n => 'Abre ' + n + ' tiradas diarias gratis'],
   ['streak', 'Racha', 'clock', [[7, 40], [14, 80], [30, 200], [60, 400], [100, 800]], n => 'Racha de ' + n + ' días seguidos'],
   ['stars5', 'Constelación', 'star', [[1, 60], [5, 150], [20, 400], [50, 900]], n => 'Ten ' + n + ' Pokémon con ★5'],
@@ -335,4 +346,41 @@ for (const [stat, name, icon, tiers, tpl] of ACH_DEFS) {
 // Logros de jefes importantes
 for (const [id, name, stage, reward] of [['b130', 'Campeón de Kanto', 131, 120], ['b270', 'Campeón de Johto', 271, 160], ['b410', 'Campeón de Hoenn', 411, 220], ['b550', 'Campeona de Sinnoh', 551, 260], ['b690', 'Campeón de Teselia', 691, 300], ['b830', 'Campeona de Kalos', 831, 340], ['b970', 'Campeón de Alola', 971, 380], ['b1110', 'Campeón de Galar', 1111, 420], ['b1250', 'Campeona de Paldea', 1251, 460], ['b1330', 'Rey del mundo', 1331, 800]]) {
   ACHIEVEMENTS.push({ id, stat: 'maxStage', goal: stage, reward, icon: 'crown', name, desc: 'Vence al último jefe de la región' });
+}
+
+// Ataques que van mejorando con el nivel del Pokémon: [id de MOVES] por tipo, uno por escalón
+const TIER_LV = [1, 15, 40, 80, 140];
+const TIER_MULT = [1, 1.15, 1.35, 1.6, 2];
+const MOVE_TIERS = {
+  normal: ['placaje', 'ataque_rapido', 'golpe_cuerpo', 'hiperrayo', 'giga_impacto'],
+  fire: ['ascuas', 'lanzallamas', 'envite_igneo', 'llamarada', 'erupcion'],
+  water: ['pistola_agua', 'burbuja', 'cascada', 'hidrobomba', 'surf'],
+  grass: ['latigo_cepa', 'hoja_afilada', 'drenadoras', 'rayo_solar', 'lluevehojas'],
+  electric: ['impactrueno', 'chispazo', 'rayo', 'trueno', 'voltio_cruel'],
+  ice: ['canto_helado', 'nieve_polvo', 'rayo_hielo', 'ventisca', 'cero_absoluto'],
+  fighting: ['golpe_karate', 'patada_baja', 'esfera_aural', 'a_bocajarro', 'puno_dinamico'],
+  poison: ['acido', 'picotazo_ven', 'bomba_lodo', 'puas_toxicas', 'lanzamugre'],
+  ground: ['disparo_lodo', 'huesomerang', 'excavar', 'terremoto', 'fisura'],
+  flying: ['picotazo', 'ataque_ala', 'golpe_aereo', 'tornado', 'pajaro_osado'],
+  psychic: ['confusion', 'psicorrayo', 'psicocorte', 'psiquico', 'premonicion'],
+  bug: ['picadura', 'zumbido', 'tijera_x', 'disparo_demora', 'megacuerno'],
+  rock: ['lanzarrocas', 'roca_afilada', 'avalancha', 'tumba_rocas', 'poder_pasado'],
+  ghost: ['lenguetazo', 'bola_sombra', 'tinieblas', 'garra_umbria', 'golpe_fantasma'],
+  dragon: ['furia_dragon', 'dragoaliento', 'cometa_draco', 'garra_dragon', 'ultraje'],
+  dark: ['mordisco', 'pulso_umbrio', 'triturar', 'juego_sucio', 'vendetta'],
+  steel: ['garra_metal', 'bomba_iman', 'cabeza_hierro', 'foco_resplandor', 'ala_de_acero'],
+  fairy: ['viento_feerico', 'brillo_magico', 'fuerza_lunar', 'beso_drenaje', 'explosion_magica'],
+};
+// Ataques nuevos (solo datos de aspecto: clase, tipo y potencia orientativa)
+if (typeof MOVES !== 'undefined') {
+  const nm = (id, name, type, cls, pow) => { if (!MOVES[id]) MOVES[id] = { name, type, cls, pow, cd: 1, cat: 'e' }; };
+  nm('giga_impacto', 'Giga Impacto', 'normal', 'meteor', 150); nm('envite_igneo', 'Envite Ígneo', 'fire', 'dash', 120); nm('erupcion', 'Erupción', 'fire', 'meteor', 150);
+  nm('cascada', 'Cascada', 'water', 'dash', 80); nm('lluevehojas', 'Lluevehojas', 'grass', 'burst', 130); nm('voltio_cruel', 'Voltio Cruel', 'electric', 'dash', 90);
+  nm('cero_absoluto', 'Cero Absoluto', 'ice', 'beam', 150); nm('puno_dinamico', 'Puño Dinámico', 'fighting', 'melee', 150); nm('lanzamugre', 'Lanzamugre', 'poison', 'proj', 120);
+  nm('fisura', 'Fisura', 'ground', 'meteor', 150); nm('pajaro_osado', 'Pájaro Osado', 'flying', 'dash', 120); nm('premonicion', 'Premonición', 'psychic', 'meteor', 120);
+  nm('megacuerno', 'Megacuerno', 'bug', 'melee', 120); nm('tumba_rocas', 'Tumba Rocas', 'rock', 'fan', 60); nm('poder_pasado', 'Poder Pasado', 'rock', 'burst', 90);
+  nm('garra_umbria', 'Garra Umbría', 'ghost', 'melee', 70); nm('golpe_fantasma', 'Golpe Fantasma', 'ghost', 'proj', 90); nm('garra_dragon', 'Garra Dragón', 'dragon', 'melee', 80);
+  nm('ultraje', 'Ultraje', 'dragon', 'burst', 120); nm('triturar', 'Triturar', 'dark', 'melee', 80); nm('juego_sucio', 'Juego Sucio', 'dark', 'proj', 95);
+  nm('vendetta', 'Vendetta', 'dark', 'burst', 120); nm('foco_resplandor', 'Foco Resplandor', 'steel', 'beam', 80); nm('ala_de_acero', 'Ala de Acero', 'steel', 'melee', 70);
+  nm('beso_drenaje', 'Beso Drenaje', 'fairy', 'proj', 50); nm('explosion_magica', 'Explosión Mágica', 'fairy', 'meteor', 130);
 }

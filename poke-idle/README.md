@@ -20,17 +20,25 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
 - Las **monedas** sirven para subir de nivel a tus Pokémon (evolucionan en los niveles 20 y 45), abrir huecos de equipo y comprar 13 mejoras (daño, monedas, críticos, afinidad de tipo, daño contra jefes, toque automático, polvo estelar…).
 - **3 habilidades activas** con enfriamiento: Furia (x3 de daño), Fiebre del Oro (x3 de monedas) y Señuelo (x6 de capturas).
 - **Mapa del mundo** para elegir en qué ruta farmear.
-- A veces un Pokémon salvaje derrotado se une a ti. Los Pokémon **dorados** dan gemas.
+- Los Pokémon **dorados** dan gemas y, a veces, un ticket Super.
+- Cada Pokémon **aprende ataques más potentes** al subir de nivel (Ascuas → Lanzallamas → Envite Ígneo → Llamarada → Erupción), con un efecto distinto en combate, y **evoluciona con una animación** en los niveles 20 y 45.
+- Puedes **cambiar** cualquier Pokémon del equipo por otro de tu colección desde la pestaña Equipo, con buscador y orden.
+- Los números de daño son grandes y de colores: críticos en amarillo, súper eficaces en naranja, toques en azul y monedas en dorado.
 
 ## Gacha
 
-- **14 tipos de Poké Ball**: Poké Ball (monedas), Super, Ultra, **Bola Destacada**, **Bola Maestra** (siempre épico o legendario) y **9 bolas regionales**, una por región, que solo dan Pokémon de esa región.
-- 5 rarezas. La tirada x10 cuesta como 9 y garantiza un Pokémon raro o mejor.
+Los Pokémon **solo se consiguen en el gacha** (aparte de tu primer compañero). Las Poké Balls se abren con **tickets**:
+
+- **4 tipos de ticket**: Poké (se compra con monedas), Super, Ultra y Maestro (se compran con gemas). También se cambian por **polvo estelar** en el Taller.
+- Los tickets **caen** de los Pokémon derrotados, de los jefes, de las misiones diarias y semanales, de los logros y de la recompensa diaria.
+- **14 tipos de Poké Ball**: Poké, Super, Ultra, **Bola Destacada**, **Bola Maestra** y **9 bolas regionales** (solo Pokémon de esa región).
+- 5 rarezas según la línea evolutiva: un Pidgey es común, un Charmander es épico y los legendarios son legendarios. La tirada x10 cuesta 9 tickets y garantiza un Pokémon raro o mejor.
+- **Shinies** (1 de cada 100): cuentan como una forma aparte que puedes activar o desactivar desde la ficha del Pokémon, y dan +50% de daño.
 - **Destacados rotativos**: un épico cada 3 días y un legendario cada semana. En la Bola Destacada la mitad de los épicos y legendarios son los destacados, y si pierdes el 50/50 el siguiente legendario es el destacado seguro.
-- **Garantías**: épico a las 25 tiradas con gemas y legendario a las 90.
-- **Tirada diaria gratis**.
-- **Estrellas**: las copias repetidas suben las estrellas del Pokémon (★5 = x10 de daño).
-- **Polvo estelar**: cada copia repetida da polvo. Con él canjeas en la Pokédex el Pokémon que quieras de una región abierta.
+- **Garantías**: épico a las 25 tiradas y legendario a las 90 (con tickets Super o mejores).
+- **Tirada diaria gratis** sin ticket.
+- **Estrellas**: las copias repetidas suben las estrellas del Pokémon (★5 = x10 de daño) y dan polvo estelar.
+- La animación de apertura crece según la rareza: ticket, Poké Ball que se agita con un halo del color del mejor premio, destello y reveladas una a una, con efectos especiales para épicos, legendarios y shinies.
 - Las regiones nuevas del gacha se desbloquean al llegar a ellas.
 
 ## Para volver cada día

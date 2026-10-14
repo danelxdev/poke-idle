@@ -7,7 +7,8 @@ const Arena = (() => {
   const POS = [[90, 104], [60, 76], [60, 132], [34, 104], [18, 70], [18, 136]];
   const EX = 178, EY = 106;
   let cv, ctx, t = 0;
-  const shots = [], texts = [], fx = [], coins = [];
+  const shots = [], texts = [], fx = [], coins = [], beams = [];
+  const lunge = {};          // slot -> { t0, dur, dx }
   const bgCache = new Map();
   const anim = {};           // slot -> { a: 'attack', t0 }
   let enemyAnim = { a: 'idle', t0: 0 }, enemyFlash = 0, enemyIn = 0, enemyDie = null, shake = 0;
@@ -26,16 +27,28 @@ const Arena = (() => {
       anim[d.slot] = { a: 'attack', t0: t };
       const p = POS[d.slot], m = Core.S.mons[Core.S.team[d.slot]];
       if (!m) return;
-      const types = Core.DEX[m.dex].types;
-      const tm = TYPE_MOVES[types[0]].a, look = VFX.forMove(tm[m.dex % tm.length]);
-      shots.push({ x: p[0] + 8, y: p[1] - 12, tx: EX - 6, ty: EY - 14 + rand(-6, 6), t: 0, dur: d.delay, look, big: Core.S.mons[Core.S.team[d.slot]].stars >= 3 });
+      const mv = MOVES[d.move] || { cls: 'proj' }, look = VFX.forMove(d.move), big = d.tier >= 3 || m.stars >= 3;
+      const sx = p[0] + 8, sy = p[1] - 12, tx = EX - 6, ty = EY - 14;
+      const shot = (o) => shots.push(Object.assign({ x: sx, y: sy, tx, ty: ty + rand(-6, 6), t: 0, dur: d.delay, look, big }, o));
+      switch (mv.cls) {
+        case 'fan': case 'orbit': case 'aura': case 'chain': case 'mines': for (let i = -1; i <= 1; i++) shot({ ty: ty + i * 12, big: false }); break;
+        case 'burst': for (let i = -2; i <= 2; i++) shot({ ty: ty + i * 8, tx: tx + rand(-6, 6), big: false, dur: d.delay * rand(0.8, 1.1) }); break;
+        case 'beam': beams.push({ x: sx, y: sy, tx, ty, t: 0, dur: 0.4, look }); break;
+        case 'meteor': for (let i = 0; i < 3; i++) shot({ x: tx + rand(-26, 26), y: -14 - i * 10, tx: tx + rand(-8, 8), ty: ty + rand(-4, 8), dur: d.delay * (0.7 + i * 0.15), big: true }); break;
+        case 'dash': lunge[d.slot] = { t0: t, dur: 0.34, dx: Math.min(80, tx - p[0] - 14) }; fx.push({ vfx: 'impact', pal: look.pal, x: tx, y: ty, life: 0.3, max: 0.3, delay: d.delay }); break;
+        case 'melee': lunge[d.slot] = { t0: t, dur: 0.3, dx: Math.min(60, tx - p[0] - 20) }; fx.push({ vfx: look.melee, pal: look.pal, x: tx - 4, y: ty, life: 0.3, max: 0.3, delay: d.delay }); break;
+        default: shot({});
+      }
     });
     Core.on('hit', h => {
       const e = Core.F.enemy;
       if (!e) return;
       enemyFlash = 0.08;
       enemyAnim = { a: 'hurt', t0: t };
-      if (Core.S.settings.nums) addText(EX + rand(-14, 14), EY - 30 * (e.boss ? 1.6 : 1) + rand(-6, 4), Core.fmt(h.dmg), h.crit ? '#ffd23f' : h.src === -1 ? '#9fe0ff' : '#ffffff', h.crit);
+      if (Core.S.settings.nums) {
+        const cls = h.crit ? 'crit' : h.src === -1 ? 'tap' : h.ef >= 2 ? 'eff' : h.ef < 1 ? 'weak' : '';
+        popup(Core.fmt(h.dmg) + (h.crit ? '!' : ''), cls, EX + rand(-16, 16), EY - 34 * (e.boss ? 1.5 : 1) + rand(-8, 4));
+      }
       for (let i = 0; i < (h.crit ? 8 : 3); i++) fx.push({ x: EX + rand(-6, 6), y: EY - 14 + rand(-8, 8), vx: rand(-60, 60), vy: rand(-60, 20), life: 0.3, max: 0.3, c: h.crit ? '#ffd23f' : '#ffffff', s: rand(1, 2.5) });
       if (h.crit) shake = 0.12;
     });
@@ -44,7 +57,9 @@ const Arena = (() => {
       const n = Math.min(10, 2 + Math.floor(Math.log10(k.coins + 1) * 2) + (k.enemy.boss ? 8 : 0));
       for (let i = 0; i < n; i++) coins.push({ x: EX + rand(-8, 8), y: EY - 10, vx: rand(-70, 50), vy: rand(-120, -50), t: 0, land: EY + rand(4, 16), fly: 0.55 + i * 0.03 });
       if (k.enemy.boss) shake = 0.4;
-      if (k.gems) addText(EX, EY - 50, '+' + k.gems + ' gemas', '#5fe0ff', true);
+      if (Core.S.settings.nums) popup('+' + Core.fmt(k.coins), 'coin', EX + rand(-10, 10), EY - 54);
+      if (k.gems) popup('+' + k.gems + ' gemas', 'gem', EX, EY - 74);
+      if (k.tickets) { let y = 94; for (const [tk, n] of Object.entries(k.tickets)) { popup('+' + n + ' ' + TICKETS[tk].name, 'tk', EX, EY - y); y += 16; } }
     });
   }
 
@@ -94,7 +109,20 @@ const Arena = (() => {
     return out;
   }
 
-  function addText(x, y, v, c, big) { if (texts.length > 30) texts.shift(); texts.push({ x, y, v, c, big, t: 0.8 }); }
+  function addText(x, y, v, c, big) { popup(v, big ? 'crit' : '', x, y); }
+  // números flotantes como elementos HTML: nítidos, grandes y con animación propia
+  function popup(text, cls, x, y) {
+    const layer = document.getElementById('dmg-layer');
+    if (!layer) return;
+    while (layer.childElementCount > 26) layer.firstChild.remove();
+    const el = document.createElement('span');
+    el.className = 'dn ' + (cls || '');
+    el.textContent = text;
+    el.style.left = (x / W * 100) + '%'; el.style.top = (y / H * 100) + '%';
+    el.style.setProperty('--dx', Math.round(rand(-22, 22)) + 'px');
+    layer.appendChild(el);
+    setTimeout(() => el.remove(), 1100);
+  }
 
   function shadow(x, y, r) { ctx.fillStyle = 'rgba(0,0,0,0.32)'; ctx.beginPath(); ctx.ellipse(Math.round(x), Math.round(y), r, r * 0.38, 0, 0, 6.3); ctx.fill(); }
 
@@ -106,7 +134,8 @@ const Arena = (() => {
     if (enemyDie) enemyDie.t -= dt;
     for (let i = shots.length - 1; i >= 0; i--) { const s = shots[i]; s.t += dt; if (s.t >= s.dur) { shots.splice(i, 1); fx.push({ vfx: 'impact', pal: s.look.pal, x: s.tx, y: s.ty, life: 0.18, max: 0.18 }); } }
     for (let i = texts.length - 1; i >= 0; i--) { texts[i].t -= dt; texts[i].y -= dt * 22; if (texts[i].t <= 0) texts.splice(i, 1); }
-    for (let i = fx.length - 1; i >= 0; i--) { const f = fx[i]; f.life -= dt; if (f.vx !== undefined) { f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 200 * dt; } if (f.life <= 0) fx.splice(i, 1); }
+    for (let i = beams.length - 1; i >= 0; i--) { beams[i].t += dt; if (beams[i].t >= beams[i].dur) beams.splice(i, 1); }
+    for (let i = fx.length - 1; i >= 0; i--) { const f = fx[i]; if (f.delay > 0) { f.delay -= dt; continue; } f.life -= dt; if (f.vx !== undefined) { f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 200 * dt; } if (f.life <= 0) fx.splice(i, 1); }
     for (let i = coins.length - 1; i >= 0; i--) {
       const c = coins[i]; c.t += dt;
       if (c.t < c.fly) { c.x += c.vx * dt; c.y += c.vy * dt; c.vy += 380 * dt; if (c.y > c.land) { c.y = c.land; c.vy *= -0.4; c.vx *= 0.6; } }
@@ -139,7 +168,13 @@ const Arena = (() => {
       const sh = s.look.proj;
       VFX.draw(ctx, sh, s.look.pal, x, y, { angle: VFX.isDir(sh) ? ang : VFX.spins(sh) ? t * 12 : 0, frame: Math.floor(t * 12), scale: s.big ? 1.2 : 0.85 });
     }
+    for (const bm of beams) {
+      const k = 1 - bm.t / bm.dur, len = Math.hypot(bm.tx - bm.x, bm.ty - bm.y), ang = Math.atan2(bm.ty - bm.y, bm.tx - bm.x), sh = bm.look.beam;
+      for (let d = 6; d < len; d += 9) VFX.draw(ctx, sh, bm.look.pal, bm.x + Math.cos(ang) * d, bm.y + Math.sin(ang) * d, { angle: VFX.isDir(sh) ? ang : 0, frame: Math.floor(t * 14 + d), scale: 0.7 + 0.25 * Math.sin(t * 30 + d), alpha: Math.min(1, k * 2) });
+    }
+    ctx.globalAlpha = 1;
     for (const f of fx) {
+      if (f.delay > 0) continue;
       const k = f.life / f.max;
       if (f.vfx) { VFX.draw(ctx, f.vfx, f.pal, f.x, f.y, { scale: 1 + (1 - k) * 0.5, frame: Math.floor((1 - k) * 4), alpha: Math.min(1, k * 2) }); continue; }
       ctx.globalAlpha = k; ctx.fillStyle = f.c; ctx.fillRect(Math.round(f.x), Math.round(f.y), Math.ceil(f.s), Math.ceil(f.s));
@@ -150,13 +185,6 @@ const Arena = (() => {
       ctx.fillStyle = '#7a5a00'; ctx.fillRect(Math.round(c.x) - w, Math.round(c.y) - 3, w * 2, 6);
       ctx.fillStyle = '#ffd23f'; ctx.fillRect(Math.round(c.x) - w + 1, Math.round(c.y) - 2, Math.max(1, w * 2 - 2), 4);
     }
-    ctx.textAlign = 'center';
-    for (const tx of texts) {
-      ctx.globalAlpha = Math.min(1, tx.t * 3);
-      ctx.font = (tx.big ? 'bold 11px' : '9px') + ' "Pixelify Sans", monospace';
-      ctx.lineWidth = 3; ctx.strokeStyle = '#0a0a1a'; ctx.strokeText(tx.v, Math.round(tx.x), Math.round(tx.y));
-      ctx.fillStyle = tx.c; ctx.fillText(tx.v, Math.round(tx.x), Math.round(tx.y));
-    }
     ctx.globalAlpha = 1;
     ctx.restore();
   }
@@ -164,14 +192,16 @@ const Arena = (() => {
   function drawMon(i, key) {
     const m = Core.S.mons[key];
     if (!m) return;
-    const [x, y] = POS[i];
+    let [x, y] = POS[i];
+    const lg = lunge[i];
+    if (lg) { const k = (t - lg.t0) / lg.dur; if (k >= 1) delete lunge[i]; else x += Math.sin(k * Math.PI) * lg.dx; }
     const a = anim[i];
     let an = 'idle', at = t + i * 0.37;
     if (a && t - a.t0 < Sprites.animLen(m.dex, 'attack')) { an = 'attack'; at = t - a.t0; }
     const bob = an === 'idle' ? 0 : 0;
     shadow(x, y + 1, 7);
     if (m.stars >= 3) { ctx.globalAlpha = 0.18 + 0.1 * Math.sin(t * 4 + i); ctx.fillStyle = RARITY[Core.RAR[m.dex]].color; ctx.beginPath(); ctx.ellipse(x, y, 11, 4, 0, 0, 6.3); ctx.fill(); ctx.globalAlpha = 1; }
-    Sprites.draw(ctx, m.dex, m.shiny, an, 0, at, x, y + bob, 1, {});
+    Sprites.draw(ctx, m.dex, m.shiny, an, lg ? 0 : 0, at, x, y + bob, 1, {});
     if (m.shiny && Math.sin(t * 3 + i) > 0.9) { ctx.fillStyle = '#fff6b0'; ctx.fillRect(x + 6, y - 22, 1, 3); ctx.fillRect(x + 5, y - 21, 3, 1); }
   }
 
@@ -193,5 +223,5 @@ const Arena = (() => {
   function frame(dt) { update(dt); draw(); }
   // posición (0..1) del enemigo en pantalla, para la barra de vida en HTML
   const enemyAnchor = () => ({ x: EX / W, y: (EY - 40) / H });
-  return { init, frame, enemyAnchor, addText, W, H };
+  return { init, frame, enemyAnchor, addText, popup, W, H };
 })();
