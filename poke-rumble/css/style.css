@@ -193,3 +193,7 @@ select { font-family: var(--f); font-size: 15px; background: #0b1638; color: var
   footer.fine { display: none; }
   .hm { min-width: 96px; padding: 2px 6px; } .hm b { font-size: 12px; }
 }
+
+img.pix { image-rendering: pixelated; vertical-align: middle; }
+.h-items span { display: inline-flex; padding: 1px; }
+.itemlist img.pix { margin-right: 4px; }

@@ -163,7 +163,7 @@ const UI = (() => {
       <h3>Niveles, tipos y evoluciones</h3>
       <p>Tus Pokémon ganan experiencia, suben de nivel y <b>evolucionan</b> durante la aventura. Los tipos importan: un ataque de Agua es muy eficaz contra un Pokémon de Fuego. Las técnicas de tu mismo tipo hacen un 50% más de daño.</p>
       <h3>Objetos</h3>
-      <div class="itemlist">${Object.values(ITEMS).map(i => `<div>${i.icon} <b>${i.name}</b>: ${i.desc}</div>`).join('')}</div>
+      <div class="itemlist">${Object.entries(ITEMS).map(([id, i]) => `<div>${Icons.html(Icons.item(id), 24)} <b>${i.name}</b>: ${i.desc}</div>`).join('')}</div>
       <h3>Pisos</h3>
       <p>${ZONES.map((z, i) => `${i + 1}. ${z.name} (${z.types.map(t => TYPE_ES[t]).join(', ')}) · Jefe: ${DEX[z.boss].name}`).join('<br>')}</p>
     </div>`;
@@ -281,7 +281,7 @@ const UI = (() => {
     const it = Object.entries(G.items).map(([id, n]) => id + n).join();
     if (cache.items !== it) {
       cache.items = it;
-      $('#h-items').innerHTML = Object.entries(G.items).map(([id, n]) => `<span title="${ITEMS[id].name}: ${ITEMS[id].desc}">${ITEMS[id].icon}${n > 1 ? '<em>' + n + '</em>' : ''}</span>`).join('');
+      $('#h-items').innerHTML = Object.entries(G.items).map(([id, n]) => `<span title="${ITEMS[id].name}: ${ITEMS[id].desc}">${Icons.html(Icons.item(id), 24)}${n > 1 ? '<em>' + n + '</em>' : ''}</span>`).join('');
     }
     const boss = G.enemies.find(e => e.boss && !e.dead);
     document.getElementById('h-boss').classList.toggle('hidden', !boss);

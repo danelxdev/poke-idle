@@ -159,6 +159,8 @@ const ZONES = [
   { name: 'Cueva Celeste', types: ['psychic', 'dragon', 'fire', 'fighting', 'ice'], lvl: 33, floor: ['#5a6a9a', '#50608f', '#6474a5'], wall: '#2a3060', rock: 'crystal', boss: 150, music: 'final' },
 ];
 
-// Constantes de la sala (estilo Isaac): 17 x 9 baldosas de 20 px
-const T = 20, COLS = 17, ROWS = 9, WALL = 22;
-const VIEW_W = COLS * T + WALL * 2, VIEW_H = ROWS * T + WALL * 2; // 384 x 224
+// Constantes de la sala (estilo Isaac): interior de 17 x 9 baldosas de 16 px.
+// Pared de 1 baldosa a los lados y abajo, y de 2 arriba (se ve su cara frontal).
+const T = 16, COLS = 17, ROWS = 9, WALL = 16, WALL_TOP = 32;
+const VIEW_W = COLS * T + WALL * 2, VIEW_H = ROWS * T + WALL_TOP + WALL; // 304 x 192
+const FULL_W = COLS + 2, FULL_H = ROWS + 3;                               // 19 x 12 baldosas
