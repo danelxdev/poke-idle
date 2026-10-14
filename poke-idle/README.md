@@ -12,6 +12,7 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
   - **Campeones:** 9, de Azul a Geeta.
   - **Legendarios:** 9, de Mewtwo a Koraidon.
   - **Jefes finales:** 8, como Rojo, Rayquaza, Giratina, Eternatus, Calyrex y Arceus.
+- **Huevos, naturalezas, IVs y tipos eficaces**: incubadora con 4 tipos de huevo, 25 naturalezas, IVs entrenables con polvo estelar y ayudas visuales de eficacia en combate (ver más abajo).
 - **Progresión lenta y constante**: cada etapa cuesta más que la anterior y los jefes son muros reales con límite de tiempo. Para avanzar mejoras a tu equipo, abres huecos, mejoras la banda y, sobre todo, repites el viaje en la **Liga**.
 
 ## Cómo se juega
@@ -40,6 +41,25 @@ Los Pokémon **solo se consiguen en el gacha** (aparte de tu primer compañero).
 - **Estrellas**: las copias repetidas suben las estrellas del Pokémon (★5 = x10 de daño) y dan polvo estelar.
 - La animación de apertura crece según la rareza: ticket, Poké Ball que se agita con un halo del color del mejor premio, destello y reveladas una a una, con efectos especiales para épicos, legendarios y shinies.
 - Las regiones nuevas del gacha se desbloquean al llegar a ellas.
+
+## Huevos, naturalezas, IVs y tipos
+
+**Huevos.** Cada victoria avanza los huevos que están en una incubadora (jefe ×5, Pokémon dorado ×3), también sin conexión. Hay cuatro tipos:
+
+| Huevo | Victorias | Rareza al eclosionar | IV mínimo |
+|---|---|---|---|
+| Común | 600 | como una Poké Ball (común/raro) | 0 |
+| Raro | 1 500 | raro o mejor (nunca común) | 8 |
+| Épico | 3 500 | raro o mejor, mayoría épico | 16 |
+| Legendario | 8 000 | épico o legendario (34 %) | 24 |
+
+Caen de los Pokémon derrotados (0,08 % por victoria, ×10 si es dorado), de la primera victoria contra cada jefe, de la racha de 7 días y de las misiones semanales; también se compran con gemas. Tienes una incubadora gratis (más caras: 150, 600 y 2 400 gemas) y hasta 10 huevos guardados (si está lleno, el huevo se convierte en polvo). La tienda de la Liga tiene «Calor de Incubación» (−5 % de victorias por nivel). Los Pokémon de huevo tienen un 50 % más de probabilidad de ser shiny. Las partidas anteriores reciben un huevo común de regalo.
+
+**Naturalezas (25).** Como en los juegos: una sube un eje y baja otro (las 5 neutras no cambian nada). Ejes: Ataque→Daño (+10 % / −5 %), Velocidad (+8 % / −4 %), At. Esp.→Crítico (+3 % / −1,5 % de probabilidad), Defensa→Botín (+4 % / −2 % de monedas por Pokémon del equipo) y Def. Esp.→Jefes (+10 % / −5 % de daño a jefes).
+
+**IVs.** Cada Pokémon tiene tres IVs de 0 a 31: Daño (hasta +10 %), Velocidad (hasta +5 %) y Crítico (hasta +2 %). Al conseguir un Pokémon que ya tienes, la copia tira IVs nuevos y **te quedas con los mejores** (además de dar polvo y estrellas). El polvo estelar también sirve para entrenar un IV (+3 por 15 + 3·IV de polvo), cambiar la naturaleza al azar (60) o elegirla (450). Nivel de potencial: Bajo < 35 %, Normal, Bueno (55 %), Muy bueno (75 %), Excelente (90 %) y Perfecto (31/31/31). Medido en la simulación de equilibrio, el efecto medio de IVs y naturalezas acelera la partida un ~5 % (dentro del margen de variación entre ejecuciones).
+
+**Tipos.** Cada Pokémon pega con su mejor tipo contra los tipos del enemigo: súper eficaz ×2 (más con la mejora «Afinidad de tipo»), resistido ×0,5 e inmune ×0,35 (nunca bloquea del todo). Ahora se ve: el enemigo muestra sus tipos, cada tarjeta del equipo indica ▲×2 / ▼×½ contra el enemigo actual, el mapa lista los tipos de cada ruta y cuáles les pegan más, y el botón **Mejor equipo** coloca a los Pokémon más eficaces para la ruta (o el jefe).
 
 ## Objetos y sinergias
 

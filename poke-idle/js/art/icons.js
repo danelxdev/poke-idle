@@ -25,6 +25,14 @@ const Icons = (() => {
       '.....kk.....', '....kyyk....', '...kkkkkk...', '..kwppppqk..', '.kwppppppqk.', '.kpppppppqk.', 'kpppppppppqk', 'kppqpqpqppqk', 'kkkkkkkkkkkk', '....kyyk....', '.....kk.....', '............'] },
     amuletcoin: { pal: {y: '#ffd23f', o: '#c08a10', w: '#fff3b0', r: '#ff5f6d'}, rows: [
       '..kk....kk..', '..krk..krk..', '...krkkrk...', '....kkkk....', '...kyyyyk...', '..kywyyyok..', '..kyyooyok..', '..kyyooyok..', '..kyyyyyok..', '...kooook...', '....kkkk....', '............'] },
+    egg0: { pal: {w: '#f4f1dc', d: '#c9c2a0', h: '#ffffff', x: '#7fd07a'}, rows: [
+      '....kkkk....', '...kwwwwk...', '..kwhwwwwk..', '..kwhwxwwk..', '.kwwwwwwwwk.', '.kwxwwwwxwk.', '.kwwwwwwwdk.', '.kwwwxwwwdk.', '.kwwwwwwwdk.', '..kwwwwwdk..', '...kddddk...', '....kkkk....'] },
+    egg1: { pal: {w: '#9fd4ff', d: '#5a98d0', h: '#e6f4ff', x: '#2f6fd0'}, rows: [
+      '....kkkk....', '...kwwwwk...', '..kwhwwwwk..', '..kwhwxwwk..', '.kwwwwwwwwk.', '.kwxwwwwxwk.', '.kwwwwwwwdk.', '.kwwwxwwwdk.', '.kwwwwwwwdk.', '..kwwwwwdk..', '...kddddk...', '....kkkk....'] },
+    egg2: { pal: {w: '#d2a0ff', d: '#8a58c0', h: '#f0e0ff', x: '#ff7ad0'}, rows: [
+      '....kkkk....', '...kwwwwk...', '..kwhwwwwk..', '..kwhwxwwk..', '.kwwwwwwwwk.', '.kwxwwwwxwk.', '.kwwwwwwwdk.', '.kwwwxwwwdk.', '.kwwwwwwwdk.', '..kwwwwwdk..', '...kddddk...', '....kkkk....'] },
+    egg3: { pal: {w: '#ffe27a', d: '#c89a20', h: '#fff8d0', x: '#ff6a3a'}, rows: [
+      '....kkkk....', '...kwwwwk...', '..kwhwwwwk..', '..kwhwxwwk..', '.kwwwwwwwwk.', '.kwxwwwwxwk.', '.kwwwwwwwdk.', '.kwwwxwwwdk.', '.kwwwwwwwdk.', '..kwwwwwdk..', '...kddddk...', '....kkkk....'] },
     luckyegg: { pal: {w: '#fffaf0', s: '#e0d6c8', r: '#ff5f6d'}, rows: [
       '....kkkk....', '...kwwwwk...', '..kwwrwwwk..', '..kwwwwwwk..', '.kwrwwwwrwk.', '.kwwwwwwwwk.', '.kwwwrwwwsk.', '.kwwwwwwwsk.', '.kwrwwwwssk.', '..kwwwwssk..', '...kkkkkk...', '............'] },
     lifeorb: { pal: {p: '#c04a98', d: '#7a1f5a', w: '#ffb0e0', r: '#ff3048'}, rows: [

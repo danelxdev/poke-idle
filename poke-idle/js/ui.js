@@ -105,6 +105,7 @@ const UI = (() => {
       const eased = e.boss && Core.bossEase(e.stage) < 1 ? ' · −' + Math.round((1 - Core.bossEase(e.stage)) * 100) + '%' : '';
       const name = e.boss ? (r.boss.who === DEX[e.dex].name ? r.boss.who : r.boss.who + ' · ' + DEX[e.dex].name) + eased : (e.golden ? '✨ ' : '') + DEX[e.dex].name + (e.golden ? ' dorado' : '');
       if ($('#enemy-name').textContent !== name) $('#enemy-name').textContent = name;
+      const ft = $('#foe-types'); if (ft.dataset.k !== String(e.dex)) { ft.dataset.k = e.dex; ft.innerHTML = typeTags(e.dex); }
       $('#enemy-hp').style.width = Math.max(0, e.hp / e.max * 100) + '%';
       $('#enemy-hptxt').textContent = fmt(Math.max(0, Math.ceil(e.hp)));
       $('#boss-timer').classList.toggle('hidden', !e.boss);
@@ -124,6 +125,7 @@ const UI = (() => {
     const waitBoss = !s.auto && s.kills >= 10 && !boss && Core.isBoss(s.stage + 1), rd = waitBoss ? Math.min(1, Core.bossReady(s.stage + 1)) : 0;
     $('#dps').innerHTML = 'Daño/s <b>' + fmt(e ? Core.teamDps(e.types) : Core.teamDps()) + '</b> · Toque <b>' + fmt(Core.tapDmg()) + '</b>' + (waitBoss ? ` · Poder vs jefe <b style="color:${rd >= 0.95 ? '#7ff0a0' : '#ffd23f'}">${Math.round(rd * 100)}%</b>` : '');
     $('#quest-dot').classList.toggle('hidden', !Core.pendingRewards() && s.daily.claimed);
+    $('#gacha-dot').classList.toggle('hidden', !Core.eggsReady());
   }
 
   // ---------------- pestañas ----------------
@@ -138,12 +140,43 @@ const UI = (() => {
     const s = S();
     const ns = TABS[tab].sig();
     if (force || ns !== sig) { sig = ns; $('#tab-body').innerHTML = TABS[tab].html(); }
+    const foe = Core.F.enemy;
+    for (const c of $$('#tab-body [data-effk]')) {
+      const m = s.mons[c.dataset.effk], ef = m && foe ? Core.eff(m.dex, foe.types) : 1;
+      const t = ef >= 2 ? '▲ ×' + (Math.round(ef * 10) / 10) : ef < 0.5 ? '✖ sin efecto' : ef < 1 ? '▼ ×½' : '', cl = 'effchip' + (ef >= 2 ? ' eup' : ef < 1 ? ' edn' : '');
+      if (c.textContent !== t) c.textContent = t;
+      if (c.className !== cl) c.className = cl;
+    }
+    for (const b of $$('#tab-body [data-egg]')) {
+      const e = s.eggs[+b.dataset.egg]; if (!e) continue;
+      const need = Core.eggNeed(e), w = Math.min(100, e.p / need * 100).toFixed(1) + '%', t = fmt(Math.floor(Math.min(e.p, need))) + ' / ' + fmt(need);
+      if (b.firstElementChild.style.width !== w) b.firstElementChild.style.width = w;
+      if (b.lastElementChild.textContent !== t) b.lastElementChild.textContent = t;
+    }
     for (const b of $$('#tab-body [data-cost]')) { const cur = b.dataset.cur || 'coins'; b.disabled = (cur.startsWith('tk:') ? s.tk[cur.slice(3)] : s[cur]) < +b.dataset.cost || b.dataset.off === '1'; }
   }
 
   const costBtn = (cost, label, act, extra = '', cur = 'coins') =>
     `<button class="btn primary buy" data-act="${act}" data-cost="${cost}" data-cur="${cur}" ${extra}><span>${label}</span><small>${ico(cur === 'gems' ? 'gem' : 'coin', 12)}${fmt(cost)}</small></button>`;
 
+  const natTxt = m => { const n = Core.natOf(m); return n.up ? `${n.name} <em class="nu">▲${NAT_SHORT[n.up]}</em> <em class="nd">▼${NAT_SHORT[n.down]}</em>` : n.name + ' (neutra)'; };
+  function incubatorHtml() {
+    const s = S();
+    let h = `<h3>Incubadora <small style="color:var(--dim)">${s.eggs.length}/${EGG_CAP} huevos</small></h3><div class="incubator">`;
+    const eggRow = (e, i, active) => {
+      const d = EGGS[e.t], ready = Core.eggReady(e);
+      return `<div class="eggrow ${ready ? 'ready' : ''}" style="--ec:${d.color}"><span class="eico">${ico('egg' + e.t, 40)}</span><div class="info"><b>${d.name}</b>
+        ${active ? `<div class="bar egg" data-egg="${i}"><i></i><span></span></div>` : '<small>En espera: no avanza hasta que tenga incubadora</small>'}</div>
+        ${ready ? `<button class="btn primary" data-act="hatch" data-v="${i}">¡Eclosionar!</button>` : active ? '' : `<button class="btn small" data-act="eggfront" data-v="${i}">Incubar</button>`}</div>`;
+    };
+    for (let i = 0; i < s.inc; i++) h += s.eggs[i] ? eggRow(s.eggs[i], i, true) : `<div class="eggrow empty"><span class="eico">${ico('egg0', 40)}</span><div class="info"><b>Incubadora libre</b><small>Los huevos caen de los Pokémon derrotados, los jefes y las misiones</small></div></div>`;
+    for (let i = s.inc; i < s.eggs.length; i++) h += eggRow(s.eggs[i], i, false);
+    const ic = Core.incCost();
+    if (ic) h += `<div class="eggrow locked"><div class="info"><b>Incubadora ${s.inc + 1}</b><small>Incuba un huevo más a la vez</small></div>${costBtn(ic, 'Comprar', 'buyinc', '', 'gems')}</div>`;
+    h += '</div><p class="hint">Cada victoria avanza los huevos que están en una incubadora (jefe ×5, dorado ×3), también sin conexión. Al eclosionar sale un Pokémon con IVs mínimos garantizados y un 50% más de probabilidad de ser shiny.</p>';
+    h += `<div class="eggshop">` + EGGS.map((d, t) => `<button class="btn small buy" data-act="buyegg" data-v="${t}" data-cost="${d.gems}" data-cur="gems" ${s.eggs.length >= EGG_CAP ? 'data-off="1"' : ''} title="${d.desc} Necesita ${fmt(d.need)} victorias."><span>${ico('egg' + t, 20)}</span><small>${ico('gem', 12)}${fmt(d.gems)}</small></button>`).join('') + '</div>';
+    return h;
+  }
   const itemName = it => HELD[it.id].name + (it.id === 'orbe' ? ' de ' + TYPE_NAMES[it.type] : '');
   const itemDesc = it => HELD[it.id].desc(Core.itemVal(it), it);
   function itemChip(k, m) {
@@ -158,10 +191,12 @@ const UI = (() => {
 
   const TABS = {
     team: {
-      sig: () => { const s = S(); return JSON.stringify([s.team.map(k => [k, s.mons[k].lvl, s.mons[k].dex, s.mons[k].stars, s.mons[k].shiny, s.mons[k].item]), s.inv.length, s.slots, s.buyMul, s.buyMul === 'max' ? Math.floor(Math.log(s.coins + 1) * 3) : 0, s.medals, s.up.train, Core.dexCount(), s.badges]); },
+      sig: () => { const s = S(); return JSON.stringify([s.team.map(k => [k, s.mons[k].lvl, s.mons[k].dex, s.mons[k].stars, s.mons[k].shiny, s.mons[k].item]), s.inv.length, s.slots, s.buyMul, s.buyMul === 'max' ? Math.floor(Math.log(s.coins + 1) * 3) : 0, s.medals, s.up.train, Core.dexCount(), s.badges, s.team.map(k => [s.mons[k].nat, Core.ivSum(s.mons[k])]), Core.routeIdx(s.stage), Core.isBoss(s.stage), s.kills >= 10 && !s.auto]); },
       html() {
         const s = S();
-        let h = `<div class="teamhead"><div class="seg">${[1, 10, 25, 'max'].map(v => `<button data-act="mul" data-v="${v}" class="${s.buyMul === v ? 'on' : ''}">${v === 'max' ? 'Máx' : 'x' + v}</button>`).join('')}</div><button class="btn small" data-act="bag">Mochila · ${s.inv.length}</button></div>`;
+        let h = `<div class="teamhead"><div class="seg">${[1, 10, 25, 'max'].map(v => `<button data-act="mul" data-v="${v}" class="${s.buyMul === v ? 'on' : ''}">${v === 'max' ? 'Máx' : 'x' + v}</button>`).join('')}</div><div class="rowbtns"><button class="btn small" data-act="best" title="Elige a tus Pokémon que mejor golpean a los enemigos de esta ruta">Mejor equipo</button><button class="btn small" data-act="bag">Mochila · ${s.inv.length}</button></div></div>`;
+        const tgt = s.kills >= 10 && !s.auto && !Core.isBoss(s.stage) ? s.stage + 1 : s.stage, strong = Core.strongTypes(tgt);
+        if (strong.length) h += `<div class="foehint">${Core.isBoss(tgt) ? 'Jefe' : 'Esta ruta'}: pega fuerte ${strong.map(o => `<span class="type" style="background:${TYPE_COLORS[o.t]}">${TYPE_ES[o.t]}</span>`).join('')}</div>`;
         for (let i = 0; i < 6; i++) {
           const k = s.team[i];
           if (i >= s.slots) {
@@ -177,7 +212,8 @@ const UI = (() => {
           h += `<div class="card" style="--rc:${RARITY[rar].color}">
             <img class="por" src="${por(m.dex, m.shiny)}" data-act="mon" data-v="${k}">
             <div class="info"><b>${m.shiny ? '<span class="shiny-tag">✨</span>' : ''}${DEX[m.dex].name} <small style="display:inline">Nv. ${m.lvl}</small></b>
-            ${starsHtml(m.stars)} ${typeTags(m.dex)}
+            ${starsHtml(m.stars)} ${typeTags(m.dex)} <span data-effk="${k}"></span>
+            <small class="natline">${natTxt(m)} · <span class="gr" style="background:${Core.ivGrade(m)[2]}">IV ${Math.round(Core.ivPct(m) * 100)}% · ${Core.ivGrade(m)[1]}</span></small>
             <small class="mv"><i style="background:${TYPE_COLORS[mv.type]}"></i>${mv.name} · ${fmt(Core.monDmg(m) / Core.monRate(m))} daño/s</small>
             <small class="evo">${evo ? evo + ' · ' : ''}${next}</small></div>
             <div class="acts">${costBtn(b.c, 'Subir +' + b.n, 'lvl', `data-v="${k}"`)}<div class="rowbtns">${itemChip(k, m)}<button class="btn small" data-act="pick" data-v="${i}">Cambiar</button></div></div></div>`;
@@ -186,7 +222,7 @@ const UI = (() => {
         h += '<h3>Sinergias de equipo</h3>';
         h += sy.list.length ? sy.list.map(x => `<div class="syn on"><b>${x.name}</b><small>${x.txt}</small></div>`).join('') : '<p class="hint">Aún no tienes ninguna activa.</p>';
         h += '<p class="hint">Mismo tipo: 2 Pokémon +8%, 3 +20%, 4 +35%, 5 +55%, 6 +80% de daño a los de ese tipo. Diversidad: 4 tipos distintos +15%, 6 +30%. Legendarios: 2 +20%, 4 +50%. Shinies: 2 +10% monedas, 4 +25%. Veterano: todos con ★3 o más +25%.</p>';
-        h += `<p class="hint">Consejo: los Pokémon hacen x2 de daño cuando su tipo es eficaz contra el enemigo. Cada 25 niveles su daño se duplica y cada cierto nivel aprenden un ataque más potente.</p>`;
+        h += `<p class="hint">Consejo: los Pokémon hacen x2 de daño cuando su tipo es eficaz contra el enemigo (lo ves en cada tarjeta) y la mitad si se resiste. Naturaleza e IVs mejoran a cada Pokémon: las copias repetidas tiran IVs nuevos y te quedas con los mejores. Cada 25 niveles su daño se duplica y cada cierto nivel aprenden un ataque más potente.</p>`;
         return h;
       },
     },
@@ -204,11 +240,12 @@ const UI = (() => {
       },
     },
     gacha: {
-      sig: () => { const s = S(); return JSON.stringify([s.pity, s.pityE, s.bannerLost, Core.ticketPrice('poke'), Core.featuredEpic(), Core.featuredLegend(), Core.unlockedGens(), Core.freePullReady(), s.tk, Math.floor(s.dust / 10)]); },
+      sig: () => { const s = S(); return JSON.stringify([s.pity, s.pityE, s.bannerLost, Core.ticketPrice('poke'), Core.featuredEpic(), Core.featuredLegend(), Core.unlockedGens(), Core.freePullReady(), s.tk, Math.floor(s.dust / 10), s.eggs.map(e => [e.t, Core.eggReady(e)]), s.inc, Core.incCost()]); },
       html() {
         const s = S(), fe = Core.featuredEpic(), fl = Core.featuredLegend();
         let h = '<div class="tkgrid">' + Object.entries(TICKETS).map(([t, k]) => `<div class="tkbox" style="--tc:${k.color}">${ico(k.icon, 36)}<b>${s.tk[t]}</b><small>${k.name}</small>
           <button class="btn small primary" data-act="buytk" data-v="${t}" data-n="1" data-cost="${Core.ticketPrice(t)}" data-cur="${k.cur}">+1 ${ico(k.cur === 'gems' ? 'gem' : 'coin', 10)} ${fmt(Core.ticketPrice(t))}</button></div>`).join('') + '</div>';
+        h += incubatorHtml();
         if (Core.freePullReady()) h += `<div class="feat free"><span>${ico('tkPoke', 48)}</span><div><b>¡Tirada diaria gratis!</b><small>Una Poké Ball gratis cada día, sin ticket</small></div><button class="btn primary" data-act="freepull">Abrir</button></div>`;
         const feat = (d, tag) => `<div class="feat"><span class="tagx">${tag}</span><img src="${por(d)}"><div><b>${DEX[d].name}</b><small>${RARITY[Core.RAR[d]].name}</small><br>${typeTags(d)}</div></div>`;
         h += `<h3>Destacados de la Bola Destacada</h3>` + feat(fl, 'LEGENDARIO · SEMANA') + feat(fe, 'ÉPICO · 3 DÍAS');
@@ -346,6 +383,17 @@ const UI = (() => {
       case 'item': itemModal(v); return;
       case 'bag': bagModal(); return;
       case 'pull': doPull(v, +el.dataset.n); break;
+      case 'best': {
+        const tgt = s.kills >= 10 && !s.auto && !Core.isBoss(s.stage) ? s.stage + 1 : s.stage;
+        const keys = Core.bestTeam(tgt, s.slots);
+        if (keys.join() === s.team.join()) { toast('Ya tienes el mejor equipo para esta ruta'); break; }
+        Core.setTeamList(keys); Audio8.play('swap'); toast('Equipo ideal para ' + (Core.isBoss(tgt) ? 'el jefe' : 'esta ruta'));
+        break;
+      }
+      case 'hatch': { const r = Core.hatch(+v); if (r) { Core.save(); playReveal([r], 'egg' + r.egg, 'egg' + r.egg, EGGS[r.egg].name); return; } break; }
+      case 'eggfront': Core.moveEgg(+v); Audio8.play('swap'); break;
+      case 'buyegg': if (Core.buyEgg(+v)) Audio8.play('item'); else Audio8.play('error'); break;
+      case 'buyinc': if (Core.buyInc()) { Audio8.play('levelup'); toast('¡Nueva incubadora!'); } else Audio8.play('error'); break;
       case 'freepull': doPull('poke', 1, true); break;
       case 'buytk': if (Core.buyTicket(v, +el.dataset.n)) Audio8.play('item'); else Audio8.play('error'); break;
       case 'dusttk': if (Core.dustTicket(v)) Audio8.play('ticket'); else Audio8.play('error'); break;
@@ -454,7 +502,9 @@ const UI = (() => {
     { sel: '#tabs [data-tab="gacha"]', text: 'Los Pokémon solo se consiguen en el gacha. Abre la pestaña.', wait: () => tab === 'gacha', hint: 'Toca «Gacha»' },
     { sel: '[data-act="pull"][data-v="poke"][data-n="1"]', text: 'Las bolas se abren con tickets. Tienes Tickets Poké de regalo. ¡Abre una Poké Ball!', wait: () => S().stats.pulls >= 1 && $('#gacha-fx').classList.contains('hidden'), hint: 'Pulsa «Abrir x1»' },
     { sel: '.tkgrid', text: 'Aquí ves tus tickets. Caen de los jefes, los Pokémon derrotados, las misiones y los logros, y también puedes comprarlos con monedas o gemas.', next: 1 },
+    { sel: '.incubator', text: 'Los huevos eclosionan con tus victorias, incluso sin conexión. Los de las incubadoras avanzan; ¡ya tienes uno de regalo! Al abrirlos salen Pokémon con IVs altos y más opciones de ser shiny.', next: 1 },
     { tab: 'team', sel: '[data-act="pick"]', text: 'Cuando tengas más Pokémon, cámbialos desde aquí. Abre más huecos para que combatan varios a la vez.', next: 1 },
+    { sel: '[data-act="best"]', text: 'Cada Pokémon tiene tipo, naturaleza e IVs. Los golpes súper eficaces hacen x2: mira las etiquetas ▲ de cada tarjeta, y «Mejor equipo» elige solo a los más eficaces para la ruta.', next: 1 },
     { sel: '.itemchip', text: 'Cada Pokémon puede llevar un objeto. Los jefes los sueltan y están en la Mochila.', next: 1 },
     { sel: '#skills', text: 'Tres habilidades activas: Furia (más daño), Fiebre del Oro (más monedas) y Lluvia de Tickets. Úsalas cuando estén listas.', next: 1 },
     { sel: '#tabs [data-tab="quests"]', text: 'Las misiones diarias y semanales, los logros y la recompensa diaria te dan gemas y tickets. ¡Entra cada día!', next: 1 },
@@ -523,13 +573,18 @@ const UI = (() => {
   function doPull(id, n, free) {
     const res = free ? Core.freePull() : Core.pull(id, n);
     if (!res) { Audio8.play('error'); return; }
+    Core.save();
+    playReveal(res, BALLS[id].icon, TICKETS[free ? 'poke' : BALLS[id].ticket].icon, BALLS[id].name);
+  }
+  function playReveal(res, ballIcon, tkIcon, title) {
+    const n = res.length;
     autoFill();
     Core.save();
     Core.setPaused(true);
-    const fx = $('#gacha-fx'), ball = BALLS[id], best = Math.max(...res.map(r => r.rar)), anyShiny = res.some(r => r.shiny);
+    const fx = $('#gacha-fx'), best = Math.max(...res.map(r => r.rar)), anyShiny = res.some(r => r.shiny);
     const col = RARITY[best].color;
     fx.className = 'gacha-fx';
-    fx.innerHTML = `<div class="gx-rays" style="--c:#6a8aff"></div><div class="gx-stage"><div class="gx-ticket">${ico(TICKETS[free ? 'poke' : ball.ticket].icon, 64)}</div><div class="gx-ball" id="gx-ball"><div class="gx-aura" id="gx-aura"></div>${ico(ball.icon, 120)}</div><div class="gx-txt" id="gx-txt">Abriendo ${ball.name}…</div></div><button class="gx-skip" id="gx-skip">Saltar</button>`;
+    fx.innerHTML = `<div class="gx-rays" style="--c:#6a8aff"></div><div class="gx-stage"><div class="gx-ticket">${ico(tkIcon, 64)}</div><div class="gx-ball" id="gx-ball"><div class="gx-aura" id="gx-aura"></div>${ico(ballIcon, 120)}</div><div class="gx-txt" id="gx-txt">${ballIcon.startsWith('egg') ? 'Eclosionando ' : 'Abriendo '}${title}…</div></div><button class="gx-skip" id="gx-skip">Saltar</button>`;
     const aura = $('#gx-aura'), ballEl = $('#gx-ball'), steps = ['#ffffff', best >= 2 ? RARITY[Math.min(best, 3)].color : '#ffffff', best >= 4 ? RARITY[4].color : col, col];
     const timers = [];
     let done = false;
@@ -551,6 +606,8 @@ const UI = (() => {
           ${r.isNew ? '<span class="new">¡NUEVO!</span>' : ''}${r.shiny ? '<span class="shtag">✨ SHINY</span>' : ''}
           ${n === 1 ? '<canvas class="pv" id="pv" width="128" height="128"></canvas>' : `<img src="${por(r.base, r.shiny)}">`}
           <b>${DEX[r.base].name}</b><small>${RARITY[r.rar].name}</small>
+          <span class="dup nat">${Core.natOf({ nat: r.nat }).name} · IV ${Math.round(Core.ivPct(m) * 100)}% · <span class="gr" style="background:${r.grade[2]}">${r.grade[1]}</span></span>
+          ${r.ivUp ? `<span class="dup" style="color:#7ff0a0">¡IVs mejorados! ${Math.round(r.ivUp.from * 100)}% → ${Math.round(r.ivUp.to * 100)}%</span>` : ''}
           ${r.isNew ? '' : `<span class="dup">+1 copia (${m.copies}/${m.stars < 5 ? STAR_COPIES[m.stars] : '★5'}) · +${r.dust} ${ico('dust', 12)}</span>`}
           ${r.newShiny && !r.isNew ? '<span class="dup" style="color:#fff3a8">¡Versión shiny desbloqueada!</span>' : ''}
           <i class="gl"></i></div>`;
@@ -645,15 +702,29 @@ const UI = (() => {
         <div>Copias: <b>${m.copies}</b>${need ? ' / ' + need + ' para ★' + (m.stars + 1) + ' (daño x' + STAR_MULT[m.stars + 1] + ')' : ' · ¡Estrellas al máximo!'}</div>
       </div></div>
       <div class="mvlist">${moves}</div>
+      ${genesHtml(m)}
       <div class="row">${need ? `<button class="btn primary" id="m-star" ${m.copies >= need ? '' : 'disabled'}>Subir a ★${m.stars + 1}</button>` : ''}${m.shinyOwned ? `<button class="btn" id="m-shiny">Forma: ${m.shiny ? '✨ Shiny' : 'Normal'}</button>` : ''}</div>
       <p class="hint" style="margin-top:12px">${inTeam >= 0 ? 'Está en tu equipo. Toca otro hueco para moverlo.' : 'Elige el hueco del equipo donde quieres ponerlo:'}</p>
       <div class="slotpick">${slots}</div>
       <div class="row"><button class="btn" id="m-close">Cerrar</button></div>`);
     monCv = $('#mon-cv'); monCv.dataset.k = key; Sprites.preload(m.dex, m.shiny);
     $('#m-close').onclick = closeModal;
+    $$('[data-iv]').forEach(b => b.onclick = () => { if (Core.trainIv(key, b.dataset.iv)) { Audio8.play('levelup'); Core.save(); monModal(key); refresh(true); } else Audio8.play('error'); });
+    if ($('#m-natre')) $('#m-natre').onclick = () => { if (Core.rerollNat(key)) { Audio8.play('item'); Core.save(); monModal(key); refresh(true); } else Audio8.play('error'); };
+    if ($('#m-natset')) $('#m-natset').onclick = e => openDD(e.currentTarget, NATURES.map(n => [n.id, n.up ? `${n.name} · ▲${NAT_AXES[n.up]} ▼${NAT_AXES[n.down]}` : n.name + ' · neutra']), m.nat, v => { if (Core.setNat(key, +v)) { Audio8.play('item'); Core.save(); monModal(key); refresh(true); } else Audio8.play('error'); });
     if ($('#m-shiny')) $('#m-shiny').onclick = () => { Core.toggleShiny(key); Audio8.play('swap'); Core.save(); monModal(key); refresh(true); };
     if ($('#m-star')) $('#m-star').onclick = () => { if (Core.starUp(key)) { Audio8.play('legend'); banner('¡' + p.name + ' sube a ★' + m.stars + '!', 'Su daño se multiplica por ' + STAR_MULT[m.stars], '#ffd23f'); Core.save(); monModal(key); refresh(true); } };
     $$('.slotpick button').forEach(b => b.onclick = () => { Core.setTeam(+b.dataset.slot, key); Audio8.play('swap'); Core.save(); monModal(key); refresh(true); });
+  }
+  const tchip = t => `<span class="type" style="background:${TYPE_COLORS[t]}">${TYPE_ES[t]}</span>`;
+  function genesHtml(m) {
+    const s = S(), nt = Core.natOf(m), gr = Core.ivGrade(m);
+    const strong = Object.keys(TYPE_NAMES).filter(t => Math.max(...DEX[m.dex].types.map(a => Core.typeEff(a, [t]))) >= 2);
+    const ivRows = ['d', 's', 'c'].map(k => `<div class="ivrow"><span>${IV_NAMES[k]}</span><div class="ivbar"><i style="width:${m.iv[k] / IV_MAX * 100}%"></i></div><b>${m.iv[k]}</b>${m.iv[k] < IV_MAX ? `<button class="btn small" data-iv="${k}" ${s.dust >= ivTrainCost(m.iv[k]) ? '' : 'disabled'} title="Entrenar este IV (+${IV_TRAIN_STEP})">+${IV_TRAIN_STEP} ${ico('dust', 10)}${ivTrainCost(m.iv[k])}</button>` : '<small class="max">MÁX</small>'}</div>`).join('');
+    return `<div class="genes"><div class="genehead"><span>Naturaleza <b>${natTxt(m)}</b></span><span class="dustnum">${ico('dust', 14)} ${fmt(s.dust)}</span></div>
+      <div class="row tight"><button class="btn small" id="m-natre" ${s.dust >= NAT_REROLL_COST ? '' : 'disabled'}>Cambiar al azar ${ico('dust', 10)}${NAT_REROLL_COST}</button><button class="btn small" id="m-natset" ${s.dust >= NAT_CHOOSE_COST ? '' : 'disabled'}>Elegir ${ico('dust', 10)}${NAT_CHOOSE_COST}</button></div>
+      <div class="genehead"><span>IVs</span><span class="gr" style="background:${gr[2]}">${Math.round(Core.ivPct(m) * 100)}% · ${gr[1]}</span></div>${ivRows}
+      <div class="foehint">${DEX[m.dex].name} pega fuerte a ${strong.length ? strong.map(tchip).join('') : '—'}</div></div>`;
   }
   function drawMonCv(t) {
     if (!monCv || !monCv.isConnected) { monCv = null; return; }
@@ -673,7 +744,7 @@ const UI = (() => {
       <div class="seg wrap">${REGIONS.map((r, i) => `<button data-reg="${i}" class="${i === mapReg ? 'on' : ''}" ${(L * ROUTES.length + r.first) * 10 + 1 > s.maxStage ? 'disabled' : ''}>${r.name}</button>`).join('')}</div><div class="maplist">`;
     for (let ri = reg.first; ri < end; ri++) {
       const r = ROUTES[ri], base = (L * ROUTES.length + ri) * 10 + 1, open = base <= s.maxStage, done = s.bossFirst[base + 9];
-      h += `<button class="maprow ${ri === cur ? 'cur' : ''}" data-go="${Math.min(base + 8, s.maxStage)}" ${open ? '' : 'disabled'}><b>${r.name}</b><small>${open ? 'Etapas ' + base + '–' + (base + 9) : 'Bloqueada'}</small><span class="mb"><img src="${por(r.boss.dex)}" class="px">${done ? '✓ ' : ''}${r.boss.who}</span></button>`;
+      h += `<button class="maprow ${ri === cur ? 'cur' : ''}" data-go="${Math.min(base + 8, s.maxStage)}" ${open ? '' : 'disabled'}><b>${r.name}</b><small>${open ? 'Etapas ' + base + '–' + (base + 9) : 'Bloqueada'}</small><small class="rt">Tipos: ${r.types.map(tchip).join('')} · Usa: ${Core.strongTypes(base).map(o => tchip(o.t)).join('') || '—'}</small><span class="mb"><img src="${por(r.boss.dex)}" class="px">${done ? '✓ ' : ''}${r.boss.who}</span></button>`;
     }
     openModal(h + '</div><div class="row"><button class="btn" id="map-x">Cerrar</button></div>');
     $('#map-x').onclick = closeModal;

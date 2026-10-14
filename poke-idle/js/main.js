@@ -33,6 +33,13 @@
     Audio8.play(it.rar >= 2 ? 'item' : 'coin');
     if (it.rar >= 2) UI.banner('¡' + HELD[it.id].name + (it.id === 'orbe' ? ' de ' + TYPE_NAMES[it.type] : '') + '!', r.name + ' · equípalo desde la pestaña Equipo', r.color);
   });
+  Core.on('egg', d => {
+    if (d.full) { UI.toast('Huevos al máximo: ' + EGGS[d.t].name + ' convertido en ' + d.dust + ' de polvo'); return; }
+    Audio8.play('item');
+    if (Core.S.started && d.t >= 1) UI.banner('¡Has encontrado un ' + EGGS[d.t].name + '!', 'Eclosiona en una incubadora de la pestaña Gacha', EGGS[d.t].color);
+    else if (Core.S.started) UI.toast(Icons.html('egg' + d.t, 18) + ' ¡Has encontrado un ' + EGGS[d.t].name + '!');
+  });
+  Core.on('eggReady', e => { Audio8.play('rare'); UI.banner('¡Un ' + EGGS[e.t].name + ' está listo!', 'Ve a la pestaña Gacha para eclosionarlo', EGGS[e.t].color); });
   Core.on('tickets', t => { if (Core.S.started) UI.refresh(false); });
   Core.on('kill', k => {
     if (k.enemy.golden) UI.toast(Icons.html('gem', 18) + ' ¡Pokémon dorado! +' + k.gems + ' gemas');
@@ -95,6 +102,7 @@
       const h = Math.floor(off.secs / 3600), m = Math.floor(off.secs / 60) % 60;
       parts.push(`<h2>¡Bienvenido de nuevo!</h2><p>Mientras no estabas (${h ? h + 'h ' : ''}${m}m) tu equipo derrotó <b>${Core.fmt(off.kills)}</b> Pokémon y ganó</p><p style="font-size:28px;color:var(--yellow)">${Icons.html('coin', 24)} ${Core.fmt(off.coins)}</p>`);
     }
+    if (Core.eggsReady()) parts.push(`<h2>¡Huevos listos!</h2><p>Tienes <b>${Core.eggsReady()}</b> huevo${Core.eggsReady() > 1 ? 's' : ''} listo${Core.eggsReady() > 1 ? 's' : ''} para eclosionar en la pestaña Gacha.</p>`);
     if (daily && !Core.S.daily.claimed) {
       parts.push(`<h2>Recompensa diaria</h2><p>Día <b>${Core.S.daily.streak}</b> de racha</p><p style="font-size:28px;color:#9fe8ff">${Icons.html('gem', 24)} ${Core.dailyReward()}</p><p class="hint">Vuelve mañana: la recompensa crece hasta el día 7. Tienes misiones nuevas.</p>`);
     }

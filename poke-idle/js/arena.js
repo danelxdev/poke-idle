@@ -59,6 +59,7 @@ const Arena = (() => {
       if (k.enemy.boss) shake = 0.4;
       if (Core.S.settings.nums) popup('+' + Core.fmt(k.coins), 'coin', EX + rand(-10, 10), EY - 54);
       if (k.gems) popup('+' + k.gems + ' gemas', 'gem', EX, EY - 74);
+      if (k.egg !== null && k.egg !== undefined) popup('+ ' + EGGS[k.egg].name, 'tk', EX, EY - 114);
       if (k.item) popup('+ ' + HELD[k.item.id].name, 'tk', EX, EY - 130);
       if (k.tickets) { let y = 94; for (const [tk, n] of Object.entries(k.tickets)) { popup('+' + n + ' ' + TICKETS[tk].name, 'tk', EX, EY - y); y += 16; } }
     });

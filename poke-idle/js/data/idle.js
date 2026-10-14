@@ -259,6 +259,7 @@ const LEAGUE_SHOP = {
   dust: { name: 'Alquimista', icon: 'dust', base: 4, mul: 1.7, max: 10, desc: n => '+' + n * 15 + '% de polvo estelar' },
   tapd: { name: 'Puño de Hierro', icon: 'fist', base: 3, mul: 1.6, max: 20, desc: n => '+' + n * 10 + '% de daño por toque' },
   critb: { name: 'Ojo de Águila', icon: 'zoom', base: 5, mul: 1.9, max: 10, desc: n => '+' + n + '% de probabilidad de crítico' },
+  egg: { name: 'Calor de Incubación', icon: 'egg0', base: 3, mul: 1.6, max: 10, desc: n => 'Los huevos necesitan un ' + n * 5 + '% menos de victorias' },
   disc: { name: 'Descuento de Entrenador', icon: 'coin', base: 4, mul: 1.8, max: 10, desc: n => 'Poké Ball de monedas -' + n * 4 + '% de precio' },
   bt: { name: 'Reloj de Arena', icon: 'clock', base: 5, mul: 1.9, max: 10, desc: n => '+' + n * 2 + ' s para vencer a los jefes' },
 };
@@ -332,6 +333,11 @@ const ACH_DEFS = [
   ['upMax', 'Mejorado al máximo', 'fist', [[1, 40], [3, 100], [6, 250], [13, 600]], n => 'Lleva ' + n + ' mejoras al nivel máximo'],
   ['shopLvl', 'Veterano de la Liga', 'crown', [[1, 30], [10, 80], [50, 250], [150, 700]], n => 'Compra ' + n + ' niveles en la tienda de la Liga'],
   ['regions', 'Viajero', 'boot', [[2, 40], [3, 60], [5, 150], [7, 300], [9, 600]], n => 'Abre ' + n + ' regiones'],
+  ['hatched', 'Criador', 'egg0', [[1, 20], [10, 50], [50, 120], [200, 300], [1000, 700]], n => 'Eclosiona ' + n + ' huevos'],
+  ['eggsFound', 'Coleccionista de huevos', 'egg1', [[5, 25], [25, 70], [100, 200]], n => 'Encuentra ' + n + ' huevos'],
+  ['ivGood', 'Buen potencial', 'star', [[1, 30], [10, 100], [50, 250]], n => 'Ten ' + n + ' Pokémon con IVs del 90% o más'],
+  ['ivPerfect', 'Perfeccionista', 'star', [[1, 60], [5, 150], [20, 400]], n => 'Ten ' + n + ' Pokémon con IVs perfectos (31/31/31)'],
+  ['ivUps', 'Mejores genes', 'up', [[1, 15], [25, 60], [100, 150]], n => 'Mejora los IVs de tus Pokémon ' + n + ' veces con copias repetidas'],
   ['slots', 'Equipo completo', 'friends', [[3, 20], [6, 100]], n => 'Abre ' + n + ' huecos de equipo'],
 ];
 // Colecciones por tipo
@@ -409,3 +415,39 @@ const ITEM_DROPS = [[92, 8, 0], [70, 28, 2], [45, 45, 10], [20, 55, 25], [5, 50,
 const ITEM_DUST_COST = 150;
 // Sinergias de equipo
 const TYPE_SYN = [0, 0, 0.08, 0.2, 0.35, 0.55, 0.8];
+
+// ---------------- naturalezas, IVs y huevos ----------------
+// Cinco ejes (como las estadísticas de los juegos): Ataque → Daño, Velocidad → Velocidad, At. Esp. → Crítico, Defensa → Botín, Def. Esp. → Jefes.
+const NAT_AXES = { dmg: 'Daño', spd: 'Velocidad', crit: 'Crítico', coin: 'Botín', boss: 'Jefes' };
+const NAT_SHORT = { dmg: 'Daño', spd: 'Vel.', crit: 'Crít.', coin: 'Botín', boss: 'Jefes' };
+const NAT_GAIN = { dmg: 0.10, spd: 0.08, crit: 0.03, coin: 0.04, boss: 0.10 };   // el eje que sube; el que baja pierde la mitad
+const NATURES = (() => {
+  const A = ['dmg', 'coin', 'crit', 'boss', 'spd'];                               // fila = eje que sube, columna = eje que baja (diagonal = neutra)
+  const names = [
+    ['Fuerte', 'Huraña', 'Firme', 'Pícara', 'Audaz'],
+    ['Osada', 'Dócil', 'Agitada', 'Floja', 'Plácida'],
+    ['Modesta', 'Afable', 'Tímida', 'Alocada', 'Mansa'],
+    ['Serena', 'Amable', 'Cauta', 'Rara', 'Grosera'],
+    ['Miedosa', 'Activa', 'Alegre', 'Ingenua', 'Seria'],
+  ];
+  const out = [];
+  for (let i = 0; i < 5; i++) for (let j = 0; j < 5; j++) out.push({ id: out.length, name: names[i][j], up: i === j ? null : A[i], down: i === j ? null : A[j] });
+  return out;
+})();
+const IV_MAX = 31, IV_EFF = { d: 0.10, s: 0.05, c: 0.02 };                       // daño +10%, velocidad +5%, crítico +2% con IV 31
+const IV_NAMES = { d: 'Daño', s: 'Velocidad', c: 'Crítico' };
+const IV_GRADES = [[1, 'Perfecto', '#ffd23f'], [0.9, 'Excelente', '#ff8ad8'], [0.75, 'Muy bueno', '#7ff0a0'], [0.55, 'Bueno', '#9fe0ff'], [0.35, 'Normal', '#c9c9d8'], [0, 'Bajo', '#9aa3c0']];
+const IV_TRAIN_STEP = 3, ivTrainCost = iv => 15 + 3 * iv;                        // polvo por +3 a un IV
+const NAT_REROLL_COST = 60, NAT_CHOOSE_COST = 450;                                // polvo
+const IV_FLOOR = { poke: 0, super: 4, ultra: 8, master: 14 };                     // IV mínimo según el ticket del gacha
+
+const EGGS = [
+  { name: 'Huevo común', need: 600, rates: [0, 55, 32, 11, 2, 0], floor: 0, color: '#d8e8b0', gems: 150, dust: 60, desc: 'Como una Poké Ball: casi siempre común o raro.' },
+  { name: 'Huevo raro', need: 1500, rates: [0, 0, 50, 38, 11, 1], floor: 8, color: '#7fc8ff', gems: 450, dust: 150, desc: 'Nunca sale un común. IVs de al menos 8.' },
+  { name: 'Huevo épico', need: 3500, rates: [0, 0, 0, 60, 36, 4], floor: 16, color: '#c47bff', gems: 1300, dust: 350, desc: 'Raro o mejor, IVs de al menos 16.' },
+  { name: 'Huevo legendario', need: 8000, rates: [0, 0, 0, 0, 66, 34], floor: 24, color: '#ffd23f', gems: 4000, dust: 800, desc: 'Épico o legendario, IVs de al menos 24.' },
+];
+const EGG_CAP = 10, EGG_SHINY = 1.5, EGG_WILD_DROP = 0.0008;                      // máximo de huevos, brillo extra y probabilidad por victoria
+const EGG_BOSS = [null, 0, 1, 1, 2, 3];                                           // huevo de la primera victoria contra un jefe según su categoría
+const EGG_WILD_TIER = [70, 25, 5];                                                // % de huevo común/raro/épico al caer uno
+const INC_COST = [0, 0, 150, 600, 2400];                                          // gemas por incubadora (1.ª gratis)

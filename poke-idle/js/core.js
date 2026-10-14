@@ -47,13 +47,13 @@ const Core = (() => {
   function fresh() {
     return {
       v: 1, started: false, coins: 0, gems: 50, dust: 0, tk: { poke: 5, super: 1, ultra: 0, master: 0 }, stage: 1, maxStage: 1, kills: 0, auto: true,
-      team: [], slots: 1, mons: {}, seen: {},
+      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1,
       up: { tap: 0, train: 0, coin: 0, crit: 0, critdmg: 0, speed: 0, catch: 0, golden: 0, bosstime: 0, type: 0, boss: 0, autotap: 0, alch: 0 },
-      shop: { dmg: 0, coins: 0, lvl: 0, slots: 0, offline: 0, catch: 0, shiny: 0, gems: 0, skill: 0, dust: 0, tapd: 0, critb: 0, disc: 0, bt: 0 },
+      shop: { dmg: 0, coins: 0, lvl: 0, slots: 0, offline: 0, catch: 0, shiny: 0, gems: 0, skill: 0, dust: 0, tapd: 0, critb: 0, disc: 0, bt: 0, egg: 0 },
       medals: 0, mp: 0, badges: {}, bossFirst: {},
       sk: { rage: 0, gold: 0, lure: 0 },        // instante (tiempo jugado) en el que está lista cada habilidad
       skOn: { rage: 0, gold: 0, lure: 0 },      // instante en el que termina cada habilidad
-      stats: { kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, freePulls: 0, streak: 0, itemsFound: 0 },
+      stats: { kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, freePulls: 0, streak: 0, itemsFound: 0 },
       bossFails: {}, retryT: 0, pity: 0, pityE: 0, bannerLost: 0, freeDay: '', autoAcc: 0, inv: [], uid: 1, tutDone: false, last: Date.now(),
       daily: { day: '', streak: 0, claimed: true, quests: [] }, weekly: { week: -1, quests: [] }, ach: {},
       buyMul: 1, settings: { music: 0.35, sfx: 0.6, nums: true, shake: true, bigNums: true, autoBoss: true },
@@ -64,6 +64,7 @@ const Core = (() => {
     try { d = JSON.parse(localStorage.getItem(KEY)); } catch (e) { d = null; }
     const f = fresh();
     const legacy = !!(d && typeof d === 'object' && d.started && d.tutDone === undefined);
+    const giftEgg = !!(d && typeof d === 'object' && d.started && d.eggs === undefined);
     if (!d || typeof d !== 'object' || d.v !== 1) d = f;
     for (const k of Object.keys(f)) if (d[k] === undefined) d[k] = f[k];
     for (const g of ['up', 'stats', 'settings', 'shop', 'sk', 'skOn', 'tk']) for (const k of Object.keys(f[g])) if (d[g][k] === undefined) d[g][k] = f[g][k];
@@ -71,6 +72,15 @@ const Core = (() => {
     if (typeof d.bossFails !== 'object' || d.bossFails === null) d.bossFails = {};
     for (const k of Object.keys(d.mons)) if (!DEX[d.mons[k].dex]) delete d.mons[k];
     for (const m of Object.values(d.mons)) if (m.shinyOwned === undefined) m.shinyOwned = !!m.shiny;
+    // partidas anteriores a las naturalezas, los IVs y los huevos: tiran sus datos una vez y reciben un huevo de regalo
+    for (const m of Object.values(d.mons)) {
+      if (!NATURES[m.nat]) m.nat = Math.floor(rnd() * NATURES.length);
+      if (!m.iv || typeof m.iv.d !== 'number') m.iv = rollIv(8);
+    }
+    if (!Array.isArray(d.eggs)) d.eggs = [];
+    if (giftEgg) d.eggs.push({ t: 0, p: 0 });
+    d.eggs = d.eggs.filter(e => e && EGGS[e.t]).slice(0, EGG_CAP);
+    if (!(d.inc >= 1)) d.inc = 1;
     // partidas antiguas: la base de algunas líneas cambió al añadir bebés (Pichu, Cleffa…)
     for (const k of Object.keys(d.mons)) {
       const b = String(baseOf(d.mons[k].dex));
@@ -114,7 +124,7 @@ const Core = (() => {
   const bossReady = s => { const r = routeData(s); return teamDps(DEX[r.boss.dex].types) * (1 + 0.04 * S.up.boss) * bossTime(s) / enemyHp(s); };
   const skillOn = id => S.skOn[id] > S.stats.time;
   const medalMult = () => 1 + 0.03 * S.medals;
-  const coinMult = () => (1 + 0.15 * S.up.coin) * medalMult() * (1 + 0.06 * S.shop.coins) * (skillOn('gold') ? 3 : 1) * (1 + teamItemSum('coins') + synergies().coins);
+  const coinMult = () => (1 + 0.15 * S.up.coin) * medalMult() * (1 + 0.06 * S.shop.coins) * (skillOn('gold') ? 3 : 1) * (1 + teamItemSum('coins') + synergies().coins + teamNat('coin'));
   const killCoins = s => Math.ceil(((hpBase(s) + K.hpL * s) * K.coinR * Math.pow(K.cd, s) + K.cf + s * K.cs) * coinMult() * (isBoss(s) ? 6 : 1));
   const dexCount = () => Object.keys(S.seen).length;
   const badgeCount = () => Object.keys(S.badges).length;
@@ -165,19 +175,46 @@ const Core = (() => {
     return 1 + sy.dmg + tb;
   }
 
+  // ---------------- naturalezas e IVs ----------------
+  const natOf = m => NATURES[m.nat] || NATURES[0];
+  const natVal = (m, ax) => { const n = natOf(m); return n.up === ax ? NAT_GAIN[ax] : n.down === ax ? -NAT_GAIN[ax] / 2 : 0; };
+  const teamNat = ax => { let x = 0; for (const k of S.team) if (S.mons[k]) x += natVal(S.mons[k], ax); return x; };
+  const ivSum = m => m.iv.d + m.iv.s + m.iv.c;
+  const ivPct = m => ivSum(m) / (3 * IV_MAX);
+  const ivGrade = m => { const p = ivPct(m); for (const g of IV_GRADES) if (p >= g[0]) return g; return IV_GRADES[IV_GRADES.length - 1]; };
+  const ivBonus = (m, k) => IV_EFF[k] * m.iv[k] / IV_MAX;
+  function rollIv(floor) { const r = () => Math.min(IV_MAX, floor + Math.floor(rnd() * (IV_MAX + 1 - floor))); return { d: r(), s: r(), c: r() }; }
+
   const tierOf = lvl => { let t = 0; for (let i = 0; i < TIER_LV.length; i++) if (lvl >= TIER_LV[i]) t = i; return t; };
   const moveOf = m => MOVE_TIERS[DEX[m.dex].types[0]][tierOf(m.lvl)];
-  function monDmg(m) { return power(m.dex) * RAR_MULT[RAR[m.dex]] * lvlMult(m.lvl) * STAR_MULT[m.stars] * (m.shiny ? 1.5 : 1) * TIER_MULT[tierOf(m.lvl)] * globalDmg() * (1 + itemDmg(m)) * synMult(m); }
-  function monRate(m) { const spe = DEX[m.dex].stats.spe; return Math.max(0.55, 1.25 - spe / 260) / ((1 + 0.04 * S.up.speed) * (1 + itemSpd(m))); }
+  function monDmg(m) { return power(m.dex) * RAR_MULT[RAR[m.dex]] * lvlMult(m.lvl) * STAR_MULT[m.stars] * (m.shiny ? 1.5 : 1) * TIER_MULT[tierOf(m.lvl)] * globalDmg() * (1 + itemDmg(m)) * synMult(m) * (1 + natVal(m, 'dmg')) * (1 + ivBonus(m, 'd')); }
+  function monRate(m) { const spe = DEX[m.dex].stats.spe; return Math.max(0.55, 1.25 - spe / 260) / ((1 + 0.04 * S.up.speed) * (1 + itemSpd(m)) * (1 + natVal(m, 'spd')) * (1 + ivBonus(m, 's'))); }
+  function typeEff(at, defTypes) {
+    let e = 1;
+    for (const t of defTypes) { const f = TYPE_CHART[at] && TYPE_CHART[at][t]; if (f !== undefined) e *= f; }
+    return e;
+  }
+  // multiplicador de daño del Pokémon contra un enemigo: usa su mejor tipo. Resistido ×0,5 (inmune ×0,35), eficaz ×2 o más
   function eff(dex, defTypes) {
     let best = 0;
-    for (const at of DEX[dex].types) {
-      let e = 1;
-      for (const t of defTypes) { const f = TYPE_CHART[at] && TYPE_CHART[at][t]; if (f !== undefined) e *= f; }
-      best = Math.max(best, e);
-    }
-    const b = Math.min(2.5, Math.max(0.5, best));
+    for (const at of DEX[dex].types) best = Math.max(best, typeEff(at, defTypes));
+    const b = Math.min(2.5, Math.max(best === 0 ? 0.35 : 0.5, best));
     return b >= 2 ? b * (1 + 0.04 * S.up.type) : b;
+  }
+  // enemigos de una etapa como listas de tipos: el jefe, o los tipos que salen en la ruta
+  const routeFoes = s => { const r = routeData(s); return isBoss(s) ? [DEX[r.boss.dex].types] : r.types.map(t => [t]); };
+  const matchupAvg = (m, foes) => foes.reduce((a, t) => a + eff(m.dex, t), 0) / foes.length;
+  // los mejores Pokémon para una etapa (daño real contra sus enemigos, no solo contra uno)
+  function bestTeam(s, n) {
+    const foes = routeFoes(s);
+    return Object.keys(S.mons).map(k => { const m = S.mons[k]; return { k, v: monDmg(m) / monRate(m) * matchupAvg(m, foes) * (1 + critChance(m) * (critMult() - 1)) }; })
+      .sort((a, b) => b.v - a.v).slice(0, n || S.slots).map(o => o.k);
+  }
+  // los tipos que mejor golpean a los enemigos de la etapa
+  function strongTypes(s) {
+    const foes = routeFoes(s);
+    return Object.keys(TYPE_NAMES).map(t => ({ t, v: foes.reduce((a, d) => a + Math.min(2, Math.max(0.5, typeEff(t, d))), 0) / foes.length }))
+      .filter(o => o.v >= 1.25).sort((a, b) => b.v - a.v).slice(0, 4);
   }
   const levelCost = (m, l) => Math.ceil(6 * RAR_COST[RAR[m.dex]] * Math.pow(K.lvlG, l - 1));
   function levelCostN(m, n) { let c = 0; for (let i = 0; i < n; i++) c += levelCost(m, m.lvl + i); return c; }
@@ -185,7 +222,7 @@ const Core = (() => {
   const upCost = id => Math.ceil(UPGRADES[id].base * Math.pow(UPGRADES[id].mul, S.up[id]));
   const shopCost = id => Math.ceil(LEAGUE_SHOP[id].base * Math.pow(LEAGUE_SHOP[id].mul, S.shop[id]));
   const pokeBallPrice = () => Math.ceil((1 - 0.04 * S.shop.disc) * 30 * Math.pow(1.2, Math.min(S.stats.maxStage, 140) - 1) * Math.pow(1.05, Math.max(0, S.stats.maxStage - 140)));
-  const critChance = m => 0.03 + 0.02 * S.up.crit + 0.01 * S.shop.critb + (m ? itemCrit(m) : 0);
+  const critChance = m => Math.max(0, 0.03 + 0.02 * S.up.crit + 0.01 * S.shop.critb + (m ? itemCrit(m) + natVal(m, 'crit') + ivBonus(m, 'c') : 0));
   const critMult = () => 3 + 0.25 * S.up.critdmg;
   const catchChance = () => (0.015 + 0.005 * S.up.catch + 0.004 * S.shop.catch) * (skillOn('lure') ? 6 : 1) * (1 + teamItemSum('drop'));
   const goldenChance = () => 1 / 120 + 0.002 * S.up.golden;
@@ -195,7 +232,7 @@ const Core = (() => {
     for (const k of S.team) { const m = S.mons[k]; d += monDmg(m) / monRate(m) * (defTypes ? eff(m.dex, defTypes) : 1) * (1 + critChance(m) * (critMult() - 1)); }
     return d;
   }
-  const bossBonus = (e, m) => (e && e.boss ? (1 + 0.04 * S.up.boss) * (1 + (m ? itemBoss(m) : 0)) : 1);
+  const bossBonus = (e, m) => (e && e.boss ? (1 + 0.04 * S.up.boss) * (1 + (m ? itemBoss(m) + natVal(m, 'boss') : 0)) : 1);
   const tapDmg = () => (1 + 3 * S.up.tap + teamDps() * (0.15 + 0.01 * S.up.tap)) * (1 + 0.1 * S.shop.tapd) * (1 + teamItemSum('tap'));
   const medalFor = ms => ms < 60 ? 0 : Math.max(1, Math.floor(Math.pow((ms - 45) / 12, 1.4)));
   const medalGain = () => medalFor(S.maxStage);
@@ -264,7 +301,12 @@ const Core = (() => {
     let item = null;
     if (e.boss && (firstKill || rnd() < 0.3)) item = dropItem(ITEM_DROPS[e.tier]);
     else if (rnd() < (e.golden ? 0.06 : 0.006)) item = dropItem(ITEM_DROPS[0]);
-    emit('kill', { enemy: e, coins, gems, tickets, item });
+    let egg = null;
+    if (e.boss && firstKill && EGG_BOSS[e.tier] !== undefined && EGG_BOSS[e.tier] !== null) egg = EGG_BOSS[e.tier];
+    else if (!e.boss && rnd() < EGG_WILD_DROP * (e.golden ? 10 : 1)) { let r = rnd() * 100; egg = 0; for (let t = 0; t < EGG_WILD_TIER.length; t++) { r -= EGG_WILD_TIER[t]; if (r < 0) { egg = t; break; } } }
+    if (egg !== null) giveEgg(egg);
+    eggProgress(e.boss ? 5 : e.golden ? 3 : 1);
+    emit('kill', { enemy: e, coins, gems, tickets, item, egg });
     F.enemy = null; F.respawn = 0.45; F.hits = [];
     if (e.boss) { delete S.bossFails[s]; advance(true); emit('bossWin', e); }
     else {
@@ -376,12 +418,15 @@ const Core = (() => {
   }
 
   // ---------------- Pokémon ----------------
-  function addMon(base, shiny) {
-    let m = S.mons[base], isNew = false, dust = 0, newShiny = false;
+  function addMon(base, shiny, floor) {
+    let m = S.mons[base], isNew = false, dust = 0, newShiny = false, ivUp = null;
     const rar = RAR[base];
-    if (!m) { m = S.mons[base] = { dex: base, lvl: 1 + 2 * S.shop.lvl, stars: 0, copies: 0, shiny: !!shiny, shinyOwned: !!shiny }; isNew = true; }
+    floor = floor || 0;
+    if (!m) { m = S.mons[base] = { dex: base, lvl: 1 + 2 * S.shop.lvl, stars: 0, copies: 0, shiny: !!shiny, shinyOwned: !!shiny, nat: Math.floor(rnd() * NATURES.length), iv: rollIv(floor) }; isNew = true; }
     else {
       m.copies++;
+      const cand = rollIv(floor);                           // cada copia repetida tira unos IVs nuevos y te quedas con los mejores
+      if (cand.d + cand.s + cand.c > ivSum(m)) { ivUp = { from: ivPct(m), to: (cand.d + cand.s + cand.c) / (3 * IV_MAX) }; m.iv = cand; S.stats.ivUps++; }
       dust = Math.round(DUST_GAIN[rar] * (1 + 0.1 * S.up.alch + 0.15 * S.shop.dust) * (shiny ? 2 : 1));
       S.dust += dust; S.stats.dust += dust;
       if (shiny && !m.shinyOwned) { m.shinyOwned = true; m.shiny = true; newShiny = true; }
@@ -389,7 +434,7 @@ const Core = (() => {
     if (shiny) S.stats.shinies++;
     S.seen[base] = 1;
     if (isNew && S.team.length < S.slots) S.team.push(String(base));
-    return { base, dex: m.dex, isNew, shiny: !!shiny, newShiny: newShiny || (isNew && !!shiny), rar, dust };
+    return { base, dex: m.dex, isNew, shiny: !!shiny, newShiny: newShiny || (isNew && !!shiny), rar, dust, ivUp, nat: m.nat, grade: ivGrade(m) };
   }
   function toggleShiny(key) { const m = S.mons[key]; if (!m || !m.shinyOwned) return false; m.shiny = !m.shiny; return true; }
   function levelUp(key, n) {
@@ -430,6 +475,7 @@ const Core = (() => {
     S.team = S.team.filter((k, i, a) => k && a.indexOf(k) === i);
     F.timers = S.team.map(() => 0.3);
   }
+  function setTeamList(keys) { S.team = keys.slice(0, S.slots); F.timers = S.team.map(() => 0.3); }
   function unsetTeam(slot) { if (S.team.length > 1 && S.team[slot]) { S.team.splice(slot, 1); F.timers = S.team.map(() => 0.3); return true; } return false; }
   function buySlot() {
     if (S.slots >= 6) return false;
@@ -453,6 +499,68 @@ const Core = (() => {
     if (S.mp < c) return false;
     S.mp -= c; S.shop[id]++;
     return true;
+  }
+
+  // ---------------- huevos ----------------
+  // los huevos de las primeras S.inc posiciones se incuban: cada victoria suma progreso (un jefe, 5; un dorado, 3) y también el tiempo fuera
+  const eggNeed = e => Math.ceil(EGGS[e.t].need * (1 - 0.05 * S.shop.egg));
+  const eggReady = e => e.p >= eggNeed(e);
+  const eggsReady = () => S.eggs.filter(eggReady).length;
+  function giveEgg(t) {
+    if (S.eggs.length >= EGG_CAP) { const d = EGGS[t].dust; S.dust += d; S.stats.dust += d; emit('egg', { t, full: true, dust: d }); return null; }
+    const e = { t, p: 0 };
+    S.eggs.push(e); S.stats.eggsFound++;
+    emit('egg', { t, egg: e });
+    return e;
+  }
+  function eggProgress(n) {
+    for (let i = 0; i < Math.min(S.inc, S.eggs.length); i++) {
+      const e = S.eggs[i];
+      if (eggReady(e)) continue;
+      e.p += n;
+      if (eggReady(e)) { e.p = eggNeed(e); emit('eggReady', e); }
+    }
+  }
+  function hatch(i) {
+    const e = S.eggs[i];
+    if (!e || !eggReady(e)) return null;
+    S.eggs.splice(i, 1);
+    const d = EGGS[e.t];
+    const dex = pickFrom({}, rollRarity(d.rates));
+    const res = addMon(dex, rnd() < shinyRate() * EGG_SHINY, d.floor);
+    S.stats.hatched++;
+    res.egg = e.t;
+    return res;
+  }
+  function moveEgg(i) { if (S.eggs[i] && i > 0) S.eggs.unshift(S.eggs.splice(i, 1)[0]); }
+  function buyEgg(t) {
+    const c = EGGS[t].gems;
+    if (S.gems < c || S.eggs.length >= EGG_CAP) return false;
+    S.gems -= c; giveEgg(t); return true;
+  }
+  const incCost = () => (S.inc < INC_COST.length - 1 ? INC_COST[S.inc + 1] : 0);
+  function buyInc() { const c = incCost(); if (!c || S.gems < c) return false; S.gems -= c; S.inc++; return true; }
+
+  // ---------------- entrenamiento de IVs y naturalezas (polvo estelar) ----------------
+  function trainIv(key, ax) {
+    const m = S.mons[key];
+    if (!m || m.iv[ax] >= IV_MAX) return false;
+    const c = ivTrainCost(m.iv[ax]);
+    if (S.dust < c) return false;
+    S.dust -= c; m.iv[ax] = Math.min(IV_MAX, m.iv[ax] + IV_TRAIN_STEP);
+    return true;
+  }
+  function rerollNat(key) {
+    const m = S.mons[key];
+    if (!m || S.dust < NAT_REROLL_COST) return false;
+    S.dust -= NAT_REROLL_COST;
+    let n; do { n = Math.floor(rnd() * NATURES.length); } while (n === m.nat);
+    m.nat = n; return true;
+  }
+  function setNat(key, id) {
+    const m = S.mons[key];
+    if (!m || !NATURES[id] || id === m.nat || S.dust < NAT_CHOOSE_COST) return false;
+    S.dust -= NAT_CHOOSE_COST; m.nat = id; return true;
   }
 
   // ---------------- gacha ----------------
@@ -516,7 +624,7 @@ const Core = (() => {
         } else if (rnd() < 0.5) dex = fe;
       }
       if (dex === null) dex = pickFrom(b, rar);
-      out.push(addMon(dex, rnd() < shinyRate()));
+      out.push(addMon(dex, rnd() < shinyRate(), IV_FLOOR[b.ticket] || 0));
     }
     S.stats.pulls += n;
     return out;
@@ -552,19 +660,21 @@ const Core = (() => {
     return changed;
   }
   function dailyReward() { return Math.round(DAILY_REWARD[(S.daily.streak - 1) % 7] * gemMult()); }
-  function claimDaily() { if (S.daily.claimed) return 0; S.daily.claimed = true; const g = dailyReward(); S.gems += g; giveTickets(DAILY_TICKETS[(S.daily.streak - 1) % 7]); return g; }
+  function claimDaily() { if (S.daily.claimed) return 0; S.daily.claimed = true; const g = dailyReward(); S.gems += g; giveTickets(DAILY_TICKETS[(S.daily.streak - 1) % 7]); if ((S.daily.streak - 1) % 7 === 6) giveEgg(1); return g; }
   const questProg = q => Math.min(q.goal, (S.stats[q.stat] || 0) - q.base);
   function claimQuest(i, weekly) {
     const q = (weekly ? S.weekly : S.daily).quests[i];
     if (!q || q.claimed || questProg(q) < q.goal) return 0;
     q.claimed = true;
-    const g = Math.round(q.reward * gemMult()); S.gems += g; giveTickets(weekly ? { super: 2 } : { poke: 1 }); return g;
+    const g = Math.round(q.reward * gemMult()); S.gems += g; giveTickets(weekly ? { super: 2 } : { poke: 1 }); if (weekly) giveEgg(0); return g;
   }
   const legendsOwned = () => Object.values(S.mons).filter(m => RAR[m.dex] === 5).length;
   function achStat(a) {
     const st = a.stat;
     if (st === 'dex') return dexCount();
     if (st === 'legends') return legendsOwned();
+    if (st === 'ivGood') return Object.values(S.mons).filter(m => ivPct(m) >= 0.9).length;
+    if (st === 'ivPerfect') return Object.values(S.mons).filter(m => m.iv.d === IV_MAX && m.iv.s === IV_MAX && m.iv.c === IV_MAX).length;
     if (st === 'stars5') return Object.values(S.mons).filter(m => m.stars >= 5).length;
     if (st === 'maxLvl') return Object.values(S.mons).reduce((x, m) => Math.max(x, m.lvl), 0);
     if (st === 'upMax') return Object.keys(UPGRADES).filter(k => S.up[k] >= UPGRADES[k].max).length;
@@ -606,6 +716,7 @@ const Core = (() => {
     const kills = Math.floor(secs / ttk * (0.5 + 0.05 * S.shop.offline));
     const coins = kills * killCoins(s);
     S.coins += coins; S.stats.coinsTotal += coins;
+    eggProgress(kills);
     return { secs, kills, coins };
   }
 
@@ -614,6 +725,7 @@ const Core = (() => {
     addMon(starter, false);
     S.team = [String(starter)];
     S.coins = 20;
+    giveEgg(0);
     checkDaily();
     save();
   }
@@ -628,6 +740,9 @@ const Core = (() => {
     featured, featuredEpic, featuredLegend, ballAvailable, ticketCost, ticketPrice, buyTicket, dustTicket, giveTickets, pull, freePull, freePullReady, toggleShiny, moveOf, tierOf, unsetTeam, setPaused, itemOf, itemVal, itemDmg, equip, unequip, recycleItem, recycleSpare, buyItem, synergies, synMult, teamItemSum,
     checkDaily, dailyReward, claimDaily, questProg, claimQuest, achStat, claimAch, pendingRewards, legendsOwned,
     prestige, offline, start,
+    natOf, natVal, ivSum, ivPct, ivGrade, ivBonus, trainIv, rerollNat, setNat,
+    eggNeed, eggReady, eggsReady, giveEgg, hatch, moveEgg, buyEgg, incCost, buyInc,
+    typeEff, routeFoes, matchupAvg, bestTeam, strongTypes, setTeamList,
   };
 })();
 if (typeof module !== 'undefined') module.exports = Core;
