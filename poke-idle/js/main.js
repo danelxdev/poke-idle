@@ -6,7 +6,12 @@
   const DEX = Core.DEX;
   Core.load();
   let pendingOffline = Core.S.started ? Core.offline() : null;
+  A11Y.apply(Core.S.settings.a11y);
   UI.bind();
+  A11Y.init({
+    close: () => { if (!document.querySelector('#modal').classList.contains('hidden')) UI.closeModal(); },
+    tab: i => UI.setTab(['team', 'up', 'gacha', 'dex', 'chal', 'quests', 'league'][i]),
+  });
   PWA.init();
   Arena.init($('#cv'), () => {
     const c = $('.cur.coins');

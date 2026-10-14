@@ -4,7 +4,7 @@
 
 const TitleFX = (() => {
   const W = 320, H = 180, GY = 160;
-  let cv, ctx, raf = 0, t = 0, last = 0;
+  let cv, ctx, raf = 0, t = 0, last = 0, frames = 0;
   let layers = [], ground = null, stars = [], clouds = [], flies = [], walkers = [], shoot = null, nextWalker = 0, bushes = null;
   const rnd = (a, b) => a + Math.random() * (b - a);
   const POP = [25, 4, 7, 1, 133, 39, 52, 54, 63, 66, 74, 92, 94, 104, 129, 143, 147, 152, 155, 158, 175, 179, 196, 197, 252, 255, 258, 280, 303, 359, 387, 390, 393, 447, 448, 570, 650, 653, 656, 722, 725, 728, 810, 813, 816, 906, 909, 912];
@@ -91,7 +91,8 @@ const TitleFX = (() => {
     // luciérnagas
     for (const f of flies) { f.p += dt * f.sp; const x = f.x + Math.sin(f.p * 1.3) * 8, y = f.y + Math.cos(f.p) * 5; ctx.globalAlpha = 0.4 + 0.6 * Math.abs(Math.sin(f.p * 1.7)); ctx.fillStyle = '#e8ff8a'; ctx.fillRect(Math.round(x), Math.round(y), 1, 1); ctx.globalAlpha *= 0.3; ctx.fillRect(Math.round(x) - 1, Math.round(y), 3, 1); ctx.fillRect(Math.round(x), Math.round(y) - 1, 1, 3); }
     ctx.globalAlpha = 1;
-    raf = requestAnimationFrame(frame);
+    frames++;
+    raf = (A11Y.reduced() && frames > 4) ? 0 : requestAnimationFrame(frame);   // con «reducir movimiento» la portada se queda quieta
   }
 
   function start(canvas) {

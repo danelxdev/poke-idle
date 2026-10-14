@@ -630,3 +630,64 @@ body { font-variant-ligatures: none; font-feature-settings: 'liga' 0, 'clig' 0; 
 .megarow .info { flex: 1; min-width: 0; }
 .megarow .info b { display: block; font-size: 14px; }
 .megarow .info small { display: block; font-size: 11px; color: var(--dim); }
+
+/* ---- v13: estadísticas ---- */
+.statbody { max-height: 62vh; overflow: auto; padding-right: 4px; text-align: left; }
+.statbody h3 { margin: 10px 0 6px; }
+.charts { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.charts.two { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.chart { position: relative; background: #0b1638; border-radius: 8px; padding: 8px; }
+.chart.wide { grid-column: 1 / -1; }
+.chart h4 { margin: 0 0 4px; font-size: 13px; color: var(--ink); }
+.chart h4 small { color: var(--dim); font-weight: 400; font-size: 11px; }
+.chart svg { width: 100%; height: auto; display: block; touch-action: none; }
+.cline { fill: none; stroke: #4fb4ff; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.cdot { fill: #4fb4ff; stroke: #0b1638; stroke-width: 2; }
+.cgrid { stroke: #ffffff18; stroke-width: 1; }
+.ccross { stroke: #ffffff66; stroke-width: 1; stroke-dasharray: 3 3; }
+.chov { fill: #fff; stroke: #4fb4ff; stroke-width: 2; }
+.clab { fill: #dfe8ff; font: 700 11px var(--f); }
+.cax { fill: #9aa8d6; font: 10px var(--f); }
+.ctip { position: absolute; top: 24px; background: #050c24; border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; font-size: 12px; pointer-events: none; white-space: nowrap; }
+.ctip.hidden { display: none; }
+.brow { display: grid; grid-template-columns: 92px 1fr auto; gap: 6px; align-items: center; font-size: 12px; margin: 3px 0; }
+.brow .bl { color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.brow .bt { height: 8px; background: #050c24; border-radius: 4px; overflow: hidden; }
+.brow .bt i { display: block; height: 100%; border-radius: 4px; }
+.tcols { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); column-gap: 14px; }
+.statgrid.wide { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.tblwrap { max-height: 46vh; overflow: auto; }
+.stbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.stbl th, .stbl td { text-align: right; padding: 3px 6px; border-bottom: 1px solid #ffffff12; }
+.stbl th:first-child, .stbl td:first-child { text-align: left; }
+.stbl th { color: var(--dim); position: sticky; top: 0; background: #0b1638; }
+
+/* ---- v14: accesibilidad ---- */
+.tab-body, .modal-box, .toast, .banner { zoom: var(--tz, 1); }
+:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.btn:focus-visible, button:focus-visible { border-radius: 6px; }
+/* reducir movimiento: sin animaciones ni transiciones (los números de daño se quedan visibles el tiempo normal) */
+html.a-rm *, html.a-rm *::before, html.a-rm *::after { animation-duration: .001ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+html.a-rm .dn { animation: none !important; opacity: 1 !important; transform: translate(-50%, -50%) !important; }
+html.a-rm .gx-ball, html.a-rm .gx-rays, html.a-rm .tball, html.a-rm .eggrow.ready, html.a-rm .eggrow.ready .eico { animation: none !important; }
+/* sin destellos */
+html.a-nf .gacha-fx .flash, html.a-nf .evoov.flash::after { display: none !important; }
+html.a-nf .gx-rays, html.a-nf .evoov-rays { opacity: .25 !important; animation: none !important; }
+/* alto contraste */
+html.a-hc { --dim: #d8dfff; --line: #8fa6ff; --ink: #ffffff; --bg: #050a1c; --panel: #0d1840; }
+html.a-hc .card, html.a-hc .quest, html.a-hc .eggrow, html.a-hc .chart, html.a-hc .syn, html.a-hc .tkbox { box-shadow: inset 0 0 0 2px #b9c8ff !important; }
+html.a-hc .btn:disabled, html.a-hc button:disabled { opacity: .72; }
+html.a-hc .hint, html.a-hc small { color: #dfe6ff !important; }
+html.a-hc :focus-visible { outline-width: 4px; }
+/* daltonismo: pares rojo/verde → azul/naranja (el sentido sigue indicado con ▲ ▼ y con texto) */
+html.a-cb { --green: #56b4e9; --red: #e69f00; }
+html.a-cb .effchip.eup { background: #0b4a75; color: #cfe9ff; }
+html.a-cb .effchip.edn { background: #7a4a00; color: #ffe2a8; }
+html.a-cb .natline em.nu, html.a-cb .genehead em.nu { color: #7fd0ff; }
+html.a-cb .natline em.nd, html.a-cb .genehead em.nd { color: #ffbf5a; }
+html.a-cb .bar.hp i { background: #56b4e9; }
+html.a-cb .tierbtn.done, html.a-cb .rdy.ok { color: #7fd0ff; }
+html.a-cb .rdy { color: #ffbf5a; }
+.seg.a11y button { font-size: 12px; padding: 5px 6px; }
+.setrow.col { flex-direction: column; align-items: stretch; gap: 4px; }
+.setrow.col .seg { width: 100%; }

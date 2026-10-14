@@ -108,7 +108,7 @@ const UI = (() => {
       const eased = e.boss && !e.chal && Core.bossEase(e.stage) < 1 ? ' · −' + Math.round((1 - Core.bossEase(e.stage)) * 100) + '%' : '';
       const ch = Core.chal;
       const name = e.chal && ch ? DEX[e.dex].name : e.boss ? (r.boss.who === DEX[e.dex].name ? r.boss.who : r.boss.who + ' · ' + DEX[e.dex].name) + eased : (e.golden ? '✨ ' : '') + DEX[e.dex].name + (e.golden ? L(' dorado', ' (golden)') : '');
-      if ($('#enemy-name').textContent !== name) $('#enemy-name').textContent = name;
+      if ($('#enemy-name').textContent !== name) { $('#enemy-name').textContent = name; A11Y.label($('#cv'), L('Combate contra ', 'Battle against ') + name); }
       const ft = $('#foe-types'); if (ft.dataset.k !== String(e.dex)) { ft.dataset.k = e.dex; ft.innerHTML = typeTags(e.dex); }
       $('#enemy-hp').style.width = Math.max(0, e.hp / e.max * 100) + '%';
       $('#enemy-hptxt').textContent = fmt(Math.max(0, Math.ceil(e.hp)));
@@ -136,7 +136,7 @@ const UI = (() => {
   // ---------------- pestañas ----------------
   function setTab(t) {
     tab = t; sig = '';
-    $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+    $$('#tabs button').forEach(b => { b.classList.toggle('on', b.dataset.tab === t); b.setAttribute('aria-selected', b.dataset.tab === t); });
     $('#tab-body').scrollTop = 0;
     refresh(true);
   }
@@ -144,7 +144,7 @@ const UI = (() => {
   function refresh(force) {
     const s = S();
     const ns = TABS[tab].sig();
-    if (force || ns !== sig) { sig = ns; $('#tab-body').innerHTML = TABS[tab].html(); }
+    if (force || ns !== sig) { sig = ns; $('#tab-body').innerHTML = TABS[tab].html(); A11Y.pass($('#tab-body')); }
     const foe = Core.F.enemy;
     for (const c of $$('#tab-body [data-effk]')) {
       const m = s.mons[c.dataset.effk], ef = m && foe ? Core.eff(Core.fdex(m), foe.types) : 1;
@@ -451,7 +451,7 @@ const UI = (() => {
             ${maxed ? '<button class="btn small" disabled>' + L('Máx.', 'Max') + '</button>' : `<button class="btn primary buy" data-act="shop" data-v="${id}" data-cost="${Core.shopCost(id)}" data-cur="mp"><span>${L('Comprar', 'Buy')}</span><small>${ico('crown', 12)}${Core.shopCost(id)}</small></button>`}</div>`;
         }
         const st = s.stats;
-        h += `</div><div class="statgrid"><span>${L('Etapa máxima', 'Max stage')} <b>${st.maxStage}</b></span><span>${L('Pokémon derrotados', 'Pokémon defeated')} <b>${fmt(st.kills)}</b></span><span>${L('Jefes vencidos', 'Bosses beaten')} <b>${fmt(st.bosses)}</b></span><span>${L('Poké Balls abiertas', 'Poké Balls opened')} <b>${fmt(st.pulls)}</b></span>
+        h += `</div><div class="row" style="margin:4px 0 8px"><button class="btn primary" data-act="stats">${L('Ver estadísticas y gráficas', 'View statistics and charts')}</button></div><div class="statgrid"><span>${L('Etapa máxima', 'Max stage')} <b>${st.maxStage}</b></span><span>${L('Pokémon derrotados', 'Pokémon defeated')} <b>${fmt(st.kills)}</b></span><span>${L('Jefes vencidos', 'Bosses beaten')} <b>${fmt(st.bosses)}</b></span><span>${L('Poké Balls abiertas', 'Poké Balls opened')} <b>${fmt(st.pulls)}</b></span>
           <span>${L('Capturas', 'Catches')} <b>${fmt(st.catches)}</b></span><span>${L('Evoluciones', 'Evolutions')} <b>${fmt(st.evolutions)}</b></span><span>Shinies <b>${fmt(st.shinies)}</b></span><span>${L('Monedas totales', 'Total coins')} <b>${fmt(st.coinsTotal)}</b></span>
           <span>${L('Medallas de gimnasio', 'Gym badges')} <b>${Core.badgeCount()}/24</b></span><span>${L('Tiempo jugado', 'Time played')} <b>${Math.floor(st.time / 3600)}h ${Math.floor(st.time / 60) % 60}m</b></span></div></div>`;
         return h;
@@ -532,6 +532,7 @@ const UI = (() => {
       case 'ach': { const g = Core.claimAch(v); if (g) { Audio8.play('rare'); toast(ico('trophy', 18) + ' +' + g + L(' gemas y tickets', ' gems and tickets')); } break; }
       case 'achall': achShowAll = !achShowAll; break;
       case 'prestige': prestigeModal(); return;
+      case 'stats': statsModal(false); return;
     }
     Core.save();
     refresh(true);
@@ -891,6 +892,84 @@ const UI = (() => {
     $$('.maprow').forEach(b => b.onclick = () => { if (b.disabled) return; Core.goStage(+b.dataset.go); S().auto = false; Audio8.play('select'); closeModal(); });
   }
 
+  // ---------------- estadísticas ----------------
+  const fmtT = sec => { const h = Math.floor(sec / 3600), m = Math.floor(sec / 60) % 60; return h ? h + 'h ' + m + 'm' : m + 'm'; };
+  let chartData = [];
+  // gráfica de líneas en SVG: una serie, una escala, líneas finas, etiqueta directa del último valor (y tabla alternativa)
+  function lineChart(idx, title, pts, o) {
+    o = o || {};
+    const W = 320, H = 118, pl = 6, pr = 6, pt = 14, pb = 16;
+    if (pts.length < 2) return `<div class="chart"><h4>${title}</h4><p class="hint" style="margin:6px 0">${L('Sigue jugando unos minutos para ver esta gráfica.', 'Keep playing for a few minutes to see this chart.')}</p></div>`;
+    const ys = pts.map(p => (o.log ? Math.log10(Math.max(1, p.y)) : p.y));
+    let y0 = Math.min(...ys), y1 = Math.max(...ys);
+    if (o.log) { y0 = Math.floor(y0); y1 = Math.max(y1, y0 + 1); } else { y0 = Math.min(0, y0); if (y1 === y0) y1 = y0 + 1; }
+    const x0 = pts[0].x, x1 = pts[pts.length - 1].x || 1;
+    const X = x => pl + (x1 === x0 ? 0 : (x - x0) / (x1 - x0)) * (W - pl - pr), Y = v => pt + (1 - (v - y0) / (y1 - y0)) * (H - pt - pb);
+    const poly = pts.map((p, i) => X(p.x).toFixed(1) + ',' + Y(ys[i]).toFixed(1)).join(' ');
+    const last = pts[pts.length - 1], lx = X(last.x), ly = Y(ys[ys.length - 1]);
+    chartData[idx] = { pts, ys, X, Y, W, H, fmtY: o.fmt || fmt };
+    const grid = [0, 0.5, 1].map(f => `<line x1="${pl}" x2="${W - pr}" y1="${(pt + f * (H - pt - pb)).toFixed(1)}" y2="${(pt + f * (H - pt - pb)).toFixed(1)}" class="cgrid"/>`).join('');
+    return `<div class="chart" data-chart="${idx}"><h4>${title}${o.log ? ` <small>${L('escala logarítmica', 'log scale')}</small>` : ''}</h4>
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}: ${(o.fmt || fmt)(last.y)}">${grid}
+        <polyline points="${poly}" class="cline"/><circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="3" class="cdot"/>
+        <text x="${Math.min(W - pr, lx).toFixed(1)}" y="${Math.max(10, ly - 7).toFixed(1)}" text-anchor="end" class="clab">${(o.fmt || fmt)(last.y)}</text>
+        <text x="${pl}" y="${H - 3}" class="cax">${fmtT(x0)}</text><text x="${W - pr}" y="${H - 3}" text-anchor="end" class="cax">${fmtT(x1)}</text>
+        <line class="ccross" x1="0" x2="0" y1="${pt}" y2="${H - pb}" style="display:none"/><circle class="chov" r="3.5" cx="0" cy="0" style="display:none"/></svg><div class="ctip hidden"></div></div>`;
+  }
+  const barRow = (label, n, max, color, extra) => `<div class="brow"><span class="bl">${label}</span><div class="bt"><i style="width:${max ? Math.max(n ? 2 : 0, n / max * 100).toFixed(1) : 0}%;background:${color}"></i></div><b>${extra || fmt(n)}</b></div>`;
+  function statsModal(table) {
+    const s = S(), st = s.stats, h = s.hist, mons = Object.values(s.mons);
+    chartData = [];
+    const stage = h.map(r => ({ x: r[0], y: r[1] }));
+    const cps = h.slice(1).map((r, i) => ({ x: r[0], y: Math.max(0, (r[2] - h[i][2]) / Math.max(1, r[0] - h[i][0])) }));
+    const dps = h.map(r => ({ x: r[0], y: r[4] }));
+    let body = '';
+    if (table) {
+      body += `<h3>${L('Tabla de datos', 'Data table')}</h3><div class="tblwrap"><table class="stbl"><thead><tr><th>${L('Tiempo', 'Time')}</th><th>${L('Etapa', 'Stage')}</th><th>${L('Monedas/s', 'Coins/s')}</th><th>${L('Daño/s', 'Damage/s')}</th></tr></thead><tbody>${h.slice(-40).map((r, i, a) => { const p = a[i - 1] || h[h.length - 41] || null; return `<tr><td>${fmtT(r[0])}</td><td>${r[1]}</td><td>${p ? fmt(Math.max(0, (r[2] - p[2]) / Math.max(1, r[0] - p[0]))) : '—'}</td><td>${fmt(r[4])}</td></tr>`; }).join('') || `<tr><td colspan="4">${L('Sin datos todavía', 'No data yet')}</td></tr>`}</tbody></table></div>`;
+    } else {
+      body += `<h3>${L('Progreso', 'Progress')}</h3><div class="charts">${lineChart(0, L('Etapa máxima', 'Max stage'), stage)}${lineChart(1, L('Monedas por segundo', 'Coins per second'), cps, { log: true })}${lineChart(2, L('Daño por segundo del equipo', 'Team damage per second'), dps, { log: true })}</div>`;
+    }
+    // colección
+    const regions = REGIONS.filter(r => r.gen).map(r => { const tot = POKEDEX.filter(p => p.gen === r.gen).length, got = Object.keys(s.seen).filter(d => DEX[d] && DEX[d].gen === r.gen).length; return [r.name, got, tot]; });
+    const rar = [1, 2, 3, 4, 5].map(r => [RARITY[r].name, mons.filter(m => Core.RAR[m.dex] === r).length, RARITY[r].color]);
+    const types = Object.keys(TYPE_NAMES).map(t => [TYPE_NAMES[t], mons.filter(m => DEX[Core.fdex(m)].types.includes(t)).length, TYPE_COLORS[t]]).sort((a, b) => b[1] - a[1]);
+    const grades = IV_GRADES.slice().reverse().map(g => [g[1], mons.filter(m => Core.ivGrade(m)[1] === g[1]).length, g[2]]);
+    const maxOf = a => Math.max(1, ...a.map(x => x[1]));
+    body += `<h3>${L('Colección', 'Collection')}</h3><div class="charts two">
+      <div class="chart"><h4>${L('Pokédex por región', 'Pokédex by region')}</h4>${regions.map(([n, g, t]) => barRow(n, g, t, '#4fb4ff', `${g}/${t}`)).join('')}</div>
+      <div class="chart"><h4>${L('Pokémon por rareza', 'Pokémon by rarity')}</h4>${rar.map(([n, c, col]) => barRow(n, c, maxOf(rar), col)).join('')}<h4 style="margin-top:8px">${L('Potencial (IVs)', 'Potential (IVs)')}</h4>${grades.map(([n, c, col]) => barRow(n, c, maxOf(grades), col)).join('')}</div>
+      <div class="chart wide"><h4>${L('Pokémon por tipo', 'Pokémon by type')}</h4><div class="tcols">${types.map(([n, c, col]) => barRow(n, c, maxOf(types), col)).join('')}</div></div></div>`;
+    // totales y récords
+    const done = ACHIEVEMENTS.filter(a => s.ach[a.id]).length;
+    const rows = [
+      [L('Tiempo jugado', 'Time played'), fmtT(st.time)], [L('Etapa máxima', 'Max stage'), st.maxStage], [L('Récord de la Torre', 'Tower record'), L('Piso ', 'Floor ') + s.tower.best],
+      [L('Mayor daño/s del equipo', 'Best team damage/s'), fmt(st.maxDps)], [L('Golpe más fuerte', 'Strongest hit'), fmt(st.bestHit)], [L('Pokémon derrotados', 'Pokémon defeated'), fmt(st.kills)],
+      [L('Jefes vencidos', 'Bosses beaten'), fmt(st.bosses)], [L('Toques', 'Taps'), fmt(st.taps)], [L('Golpes críticos', 'Critical hits'), fmt(st.crits)], [L('Monedas totales', 'Total coins'), fmt(st.coinsTotal)],
+      [L('Poké Balls abiertas', 'Poké Balls opened'), fmt(st.pulls)], [L('Huevos eclosionados', 'Eggs hatched'), fmt(st.hatched)], [L('Crías', 'Breedings'), fmt(st.bred)], [L('Shinies', 'Shinies'), fmt(st.shinies)],
+      [L('Evoluciones', 'Evolutions'), fmt(st.evolutions)], [L('Formas Mega', 'Mega forms'), fmt(st.megas)], [L('Veces en la Liga', 'League runs'), fmt(st.prestiges)], [L('Logros', 'Achievements'), done + '/' + ACHIEVEMENTS.length],
+    ];
+    body += `<h3>${L('Totales y récords', 'Totals and records')}</h3><div class="statgrid wide">${rows.map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('')}</div>`;
+    openModal(`<h2>${L('Estadísticas', 'Statistics')}</h2><div class="statbody">${body}</div><div class="row"><button class="btn small" id="st-tbl">${table ? L('Ver gráficas', 'Show charts') : L('Ver datos en tabla', 'Show data as table')}</button><button class="btn" id="st-x">${L('Cerrar', 'Close')}</button></div>`);
+    $('#modal-box').classList.add('wide');
+    $('#st-x').onclick = closeModal;
+    $('#st-tbl').onclick = () => statsModal(!table);
+    $$('.chart[data-chart]').forEach(c => {
+      const d = chartData[+c.dataset.chart], svg = c.querySelector('svg'), tip = c.querySelector('.ctip'), cross = c.querySelector('.ccross'), dot = c.querySelector('.chov');
+      if (!d || !svg) return;
+      const move = e => {
+        const r = svg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * d.W;
+        let best = 0, bd = 1e9;
+        d.pts.forEach((p, i) => { const dx = Math.abs(d.X(p.x) - x); if (dx < bd) { bd = dx; best = i; } });
+        const p = d.pts[best], px = d.X(p.x), py = d.Y(d.ys[best]);
+        cross.setAttribute('x1', px); cross.setAttribute('x2', px); cross.style.display = ''; dot.setAttribute('cx', px); dot.setAttribute('cy', py); dot.style.display = '';
+        tip.textContent = fmtT(p.x) + ' · ' + d.fmtY(p.y); tip.classList.remove('hidden');
+        tip.style.left = Math.min(r.width - 90, Math.max(0, px / d.W * r.width - 40)) + 'px';
+      };
+      const out = () => { cross.style.display = 'none'; dot.style.display = 'none'; tip.classList.add('hidden'); };
+      svg.addEventListener('pointermove', move); svg.addEventListener('pointerdown', move); svg.addEventListener('pointerleave', out);
+    });
+  }
+
   function prestigeModal() {
     const g = Core.medalGain();
     openModal(`<h2>${L('¿Entrar en la Liga?', 'Enter the League?')}</h2><p>${L(`Ganarás <b style="color:var(--yellow)">+${g} medallas</b> (+${g * 3}% de daño y monedas para siempre) y ${g} Puntos de Liga para la tienda.`, `You will earn <b style="color:var(--yellow)">+${g} medals</b> (+${g * 3}% damage and coins forever) and ${g} League Points for the shop.`)}</p>
@@ -901,20 +980,31 @@ const UI = (() => {
   }
 
   function settings() {
-    const st = S().settings;
+    const st = S().settings, a11y = st.a11y;
+    const a11yTog = (k, label, sub) => `<div class="setrow"><span class="sl"><b>${label}</b><small>${sub}</small></span><button class="tog ${a11y[k] ? 'on' : ''}" data-a11y="${k}" role="switch" aria-checked="${!!a11y[k]}" aria-label="${label}"><i></i></button></div>`;
     const slider = (k, label, icon) => `<div class="setrow"><span class="sl">${ico(icon, 24)}<b>${label}</b></span><div class="slider" data-k="${k}" style="--v:${st[k]}"><div class="trk"><i></i><u></u></div><em>${Math.round(st[k] * 100)}%</em></div></div>`;
     const tog = (k, label, sub) => `<div class="setrow"><span class="sl"><b>${label}</b><small>${sub}</small></span><button class="tog ${st[k] ? 'on' : ''}" data-k="${k}"><i></i></button></div>`;
     openModal(`<div class="set"><h2>${ico('gear', 32)} ${L('Ajustes', 'Settings')}</h2>
       <div class="sset"><h4>${L('Idioma', 'Language')}</h4><div class="seg"><button data-lang="es" class="${I18N.lang === 'es' ? 'on' : ''}">Español</button><button data-lang="en" class="${I18N.lang === 'en' ? 'on' : ''}">English</button></div></div>
       <div class="sset"><h4>${L('Sonido', 'Sound')}</h4>${slider('music', L('Música', 'Music'), 'sound')}${slider('sfx', L('Efectos', 'Effects'), 'ticket')}</div>
       <div class="sset"><h4>${L('Combate', 'Combat')}</h4>${tog('nums', L('Números de daño', 'Damage numbers'), L('Muestra el daño y las monedas sobre el enemigo', 'Shows damage and coins over the enemy'))}${tog('bigNums', L('Números grandes', 'Big numbers'), L('Más tamaño para verlos mejor', 'Bigger size to see them better'))}${tog('shake', L('Temblor de pantalla', 'Screen shake'), L('En críticos y jefes', 'On crits and bosses'))}${tog('autoBoss', L('Reintentar jefes solo', 'Auto-retry bosses'), L('Vuelve a retar al jefe cuando tu equipo tenga fuerza para vencerlo', 'Challenges the boss again when your team is strong enough to beat it'))}</div>
+      <div class="sset"><h4>${L('Accesibilidad', 'Accessibility')}</h4>
+        <div class="setrow col"><span class="sl"><b>${L('Tamaño del texto', 'Text size')}</b></span><div class="seg a11y" role="group" aria-label="${L('Tamaño del texto', 'Text size')}">${[[1, L('Normal', 'Normal')], [1.15, L('Grande', 'Large')], [1.3, L('Muy grande', 'Extra large')]].map(([v, l]) => `<button data-ak="text" data-av="${v}" class="${+a11y.text === v ? 'on' : ''}" aria-pressed="${+a11y.text === v}">${l}</button>`).join('')}</div></div>
+        <div class="setrow col"><span class="sl"><b>${L('Animaciones', 'Animations')}</b></span><div class="seg a11y" role="group" aria-label="${L('Animaciones', 'Animations')}">${[['auto', L('Según el sistema', 'System setting')], ['reduce', L('Reducidas', 'Reduced')], ['full', L('Todas', 'Full')]].map(([v, l]) => `<button data-ak="motion" data-av="${v}" class="${a11y.motion === v ? 'on' : ''}" aria-pressed="${a11y.motion === v}">${l}</button>`).join('')}</div></div>
+        ${a11yTog('nf', L('Sin destellos', 'No flashing'), L('Quita los fogonazos del gacha, la evolución y los golpes', 'Removes flashes in the gacha, evolutions and hits'))}
+        ${a11yTog('hc', L('Alto contraste', 'High contrast'), L('Texto más claro y bordes marcados', 'Lighter text and stronger borders'))}
+        ${a11yTog('cb', L('Paleta para daltonismo', 'Color-blind palette'), L('Rarezas y avisos con colores distinguibles (azul/naranja en lugar de rojo/verde)', 'Distinguishable rarity and alert colors (blue/orange instead of red/green)'))}
+        <p class="hint" style="margin:6px 0 0">${L('Atajos: 1–7 cambian de pestaña, Esc cierra ventanas y Tab recorre los botones.', 'Shortcuts: 1–7 switch tabs, Esc closes windows and Tab moves between buttons.')}</p></div>
       <div class="sset"><h4>${L('Aplicación', 'App')}</h4>${PWA.standalone() ? '<p class="hint" style="margin:0 0 6px">' + L('Estás usando la app instalada.', 'You are using the installed app.') + '</p>' : PWA.canInstall() ? '<div class="row" style="margin:0 0 6px"><button class="btn primary" id="s-inst">' + L('Instalar la app', 'Install the app') + '</button></div>' : '<p class="hint" style="margin:0 0 6px">' + L('Puedes instalarla desde el menú del navegador («Instalar app»). En iPhone: Compartir → Añadir a pantalla de inicio.', 'You can install it from the browser menu (“Install app”). On iPhone: Share → Add to Home Screen.') + '</p>'}
         <div class="setrow"><span class="sl"><b>${L('Avisos', 'Notifications')}</b><small id="ntf-sub"></small></span><button class="tog" id="s-notif"><i></i></button></div></div>
+      <div class="sset"><h4>${L('Estadísticas', 'Statistics')}</h4><div class="row" style="margin:0"><button class="btn" id="s-stats">${L('Ver estadísticas y gráficas', 'View statistics and charts')}</button></div></div>
       <div class="sset"><h4>${L('Partida', 'Save data')}</h4><div class="row" style="margin:0"><button class="btn" id="s-exp">${L('Exportar', 'Export')}</button><button class="btn" id="s-imp">${L('Importar', 'Import')}</button><button class="btn danger" id="s-wipe">${L('Borrar', 'Erase')}</button></div>
         <p class="hint" style="margin:8px 0 0">${L('Tu partida se guarda sola en este navegador. Exporta un código para llevarla a otro dispositivo.', 'Your game saves itself in this browser. Export a code to take it to another device.')}</p></div>
       <div class="sset kofi-box"><h4>${L('Apoya el proyecto', 'Support the project')}</h4><p class="hint" style="margin:0 0 8px">${L('PokéIdle es gratis y lo hace una sola persona. Si te gusta, puedes invitarme a un café.', 'PokéIdle is free and made by one person. If you like it, you can buy me a coffee.')}</p><a class="kofi" href="${KOFI_URL}" target="_blank" rel="noopener noreferrer">${ico('cup', 24)} ${L('Apoyar en Ko-fi', 'Support on Ko-fi')}</a></div>
       <div class="row"><button class="btn" id="s-tut">${L('Ver el tutorial', 'Watch the tutorial')}</button><button class="btn big primary" id="s-ok">${L('Listo', 'Done')}</button></div>
       <p class="fine">${L('Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Escenarios e iconos adaptados de pokesurvivor (MIT) · Pokémon © Nintendo/Creatures/GAME FREAK', 'Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Scenes and icons adapted from pokesurvivor (MIT) · Pokémon © Nintendo/Creatures/GAME FREAK')}</p></div>`);
+    $$('[data-ak]').forEach(b => b.onclick = () => { a11y[b.dataset.ak] = b.dataset.ak === 'text' ? +b.dataset.av : b.dataset.av; Core.save(); A11Y.apply(a11y); Audio8.play('click'); settings(); });
+    $$('[data-a11y]').forEach(b => b.onclick = () => { a11y[b.dataset.a11y] = !a11y[b.dataset.a11y]; Core.save(); A11Y.apply(a11y); Audio8.play('click'); settings(); refresh(true); });
     $$('[data-lang]').forEach(b => b.onclick = () => { S().settings.lang = b.dataset.lang; Core.save(); location.reload(); });
     $$('.slider').forEach(sl => {
       const k = sl.dataset.k, trk = sl.querySelector('.trk');
@@ -922,7 +1012,7 @@ const UI = (() => {
       sl.onpointerdown = e => { sl.setPointerCapture(e.pointerId); set(e); sl.onpointermove = set; };
       sl.onpointerup = () => { sl.onpointermove = null; if (k === 'sfx') Audio8.play('coin'); Core.save(); };
     });
-    $$('.tog').forEach(t => t.onclick = () => { st[t.dataset.k] = !st[t.dataset.k]; t.classList.toggle('on', st[t.dataset.k]); Audio8.play('click'); Core.save(); applySettings(); });
+    $$('.tog[data-k]').forEach(t => t.onclick = () => { st[t.dataset.k] = !st[t.dataset.k]; t.classList.toggle('on', st[t.dataset.k]); Audio8.play('click'); Core.save(); applySettings(); });
     const paintNtf = () => {
       const p = PWA.perm(), on = PWA.notifOn();
       $('#s-notif').classList.toggle('on', on);
@@ -931,6 +1021,7 @@ const UI = (() => {
     paintNtf();
     $('#s-notif').onclick = async () => { if (PWA.notifOn()) { st.notify = false; } else await PWA.enableNotify(); Audio8.play('click'); Core.save(); paintNtf(); };
     if ($('#s-inst')) $('#s-inst').onclick = async () => { await PWA.install(); settings(); };
+    $('#s-stats').onclick = () => statsModal(false);
     $('#s-ok').onclick = () => { Core.save(); closeModal(); };
     $('#s-tut').onclick = () => { closeModal(); setTab('team'); tutStart(true); };
     $('#s-exp').onclick = () => {
@@ -956,7 +1047,7 @@ const UI = (() => {
   function applySettings() { const l = $('#dmg-layer'); if (l) { l.classList.toggle('big', S().settings.bigNums !== false); } }
 
   // ---------------- modales, avisos ----------------
-  function openModal(html) { $('#modal-box').innerHTML = html; $('#modal').classList.remove('hidden'); }
+  function openModal(html) { $('#modal-box').innerHTML = html; $('#modal').classList.remove('hidden'); A11Y.pass($('#modal-box')); }
   function closeModal() { $('#modal').classList.add('hidden'); $('#modal-box').classList.remove('wide'); monCv = null; closeDD(); }
   let bannerT = null;
   function banner(title, sub, color) {
@@ -975,6 +1066,9 @@ const UI = (() => {
     $('#tab-body').addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && !el.disabled) act(el); });
     $$('#tabs button').forEach(b => b.onclick = () => { Audio8.play('click'); setTab(b.dataset.tab); });
     $$('[data-ico]').forEach(s => s.innerHTML = ico(s.dataset.ico, 24));
+    $$('#tabs button').forEach(b => { b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', b.classList.contains('on')); });
+    A11Y.label($('#btn-settings'), L('Ajustes', 'Settings')); A11Y.label($('#btn-map'), L('Mapa del mundo', 'World map')); A11Y.label($('#btn-tk'), L('Tickets de gacha', 'Gacha tickets'));
+    A11Y.label($('#st-prev'), L('Etapa anterior', 'Previous stage')); A11Y.label($('#st-next'), L('Etapa siguiente', 'Next stage'));
     $('#chal-x').onclick = () => { Core.abortChal(); Audio8.play('swap'); };
     $('#i-coin').innerHTML = ico('coin', 24);
     $('#i-gem').innerHTML = ico('gem', 24);
@@ -991,6 +1085,7 @@ const UI = (() => {
     $('#btn-tk').onclick = () => { Audio8.play('click'); setTab('gacha'); };
     applySettings();
     $('#skills').innerHTML = Object.entries(SKILLS).map(([id, k]) => `<button class="skill" id="sk-${id}" data-sk="${id}" title="${k.name}: ${k.desc}">${ico(k.icon, 24)}<i></i><small></small></button>`).join('');
+    $$('#skills .skill').forEach(b => b.setAttribute('aria-label', SKILLS[b.dataset.sk].name + ': ' + SKILLS[b.dataset.sk].desc));
     $$('#skills .skill').forEach(b => b.onclick = e => { e.stopPropagation(); if (Core.useSkill(b.dataset.sk)) { Audio8.play(b.dataset.sk === 'rage' ? 'charge' : 'ticket'); banner(SKILLS[b.dataset.sk].name + '!', SKILLS[b.dataset.sk].desc, '#ff8040'); } });
   }
 

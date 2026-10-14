@@ -67,7 +67,7 @@
   <main class="layout">
     <div class="arena-wrap">
       <div class="arena" id="arena">
-        <canvas id="cv"></canvas>
+        <canvas id="cv" role="img" aria-label="Combate"></canvas>
         <button class="mapbtn" id="btn-map" title="Mapa" data-en-title="Map"></button>
         <div class="a-top">
           <button class="st-arrow" id="st-prev">‹</button>
@@ -84,7 +84,7 @@
       </div>
     </div>
     <div class="side">
-      <nav class="tabs" id="tabs">
+      <nav class="tabs" id="tabs" role="tablist">
         <button data-tab="team" class="on"><span data-ico="friends"></span><span data-en="Team">Equipo</span></button>
         <button data-tab="up"><span data-ico="up"></span><span data-en="Upgrades">Mejoras</span></button>
         <button data-tab="gacha"><span data-ico="ball"></span><span>Gacha</span><i class="dot hidden" id="gacha-dot"></i></button>
@@ -96,13 +96,13 @@
       <div class="tab-body" id="tab-body"></div>
     </div>
   </main>
-  <div id="banner" class="banner hidden"><b></b><small></small></div>
+  <div id="banner" class="banner hidden" role="status" aria-live="polite"><b></b><small></small></div>
 </section>
 
-<div id="modal" class="modal hidden"><div class="modal-box" id="modal-box"></div></div>
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true"><div class="modal-box" id="modal-box"></div></div>
 <div id="evo" class="evoov hidden"><div class="evoov-rays"></div><canvas id="evo-cv" width="160" height="160"></canvas><div id="evo-txt" class="evoov-txt"></div><button class="btn big primary hidden" id="evo-ok" data-en="Great!">¡Genial!</button></div>
 <div id="gacha-fx" class="gacha-fx hidden"></div>
-<div id="toast" class="toast hidden"></div>
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
 <script src="js/data/pokedex.js"></script>
 <script src="js/data/forms.js"></script>
@@ -117,6 +117,7 @@
 <script src="js/sprites.js"></script>
 <script src="js/core.js"></script>
 <script src="js/pwa.js"></script>
+<script src="js/a11y.js"></script>
 <script>const Save = { get d() { return Core.S; } };</script>
 <script src="js/audio.js"></script>
 <script src="js/arena.js"></script>

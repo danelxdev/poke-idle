@@ -50,16 +50,16 @@ const Core = (() => {
   function fresh() {
     return {
       v: 1, started: false, coins: 0, gems: 50, dust: 0, tk: { poke: 5, super: 1, ultra: 0, master: 0 }, stage: 1, maxStage: 1, kills: 0, auto: true,
-      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, shards: 0, presets: [1, 2, 3, 4].map(i => ({ name: 'Equipo ' + i, team: [] })), event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 },
+      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, shards: 0, hist: [], presets: [1, 2, 3, 4].map(i => ({ name: 'Equipo ' + i, team: [] })), event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 },
       up: { tap: 0, train: 0, coin: 0, crit: 0, critdmg: 0, speed: 0, catch: 0, golden: 0, bosstime: 0, type: 0, boss: 0, autotap: 0, alch: 0 },
       shop: { dmg: 0, coins: 0, lvl: 0, slots: 0, offline: 0, catch: 0, shiny: 0, gems: 0, skill: 0, dust: 0, tapd: 0, critb: 0, disc: 0, bt: 0, egg: 0 },
       medals: 0, mp: 0, badges: {}, bossFirst: {},
       sk: { rage: 0, gold: 0, lure: 0 },        // instante (tiempo jugado) en el que está lista cada habilidad
       skOn: { rage: 0, gold: 0, lure: 0 },      // instante en el que termina cada habilidad
-      stats: { megas: 0, kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, eventTiers: 0, bred: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, freePulls: 0, streak: 0, itemsFound: 0 },
+      stats: { maxDps: 0, bestHit: 0, megas: 0, kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, eventTiers: 0, bred: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, freePulls: 0, streak: 0, itemsFound: 0 },
       bossFails: {}, retryT: 0, pity: 0, pityE: 0, bannerLost: 0, freeDay: '', autoAcc: 0, inv: [], uid: 1, tutDone: false, last: Date.now(),
       daily: { day: '', streak: 0, claimed: true, quests: [] }, weekly: { week: -1, quests: [] }, ach: {},
-      buyMul: 1, settings: { music: 0.35, sfx: 0.6, nums: true, shake: true, bigNums: true, autoBoss: true, notify: false, lang: null },
+      buyMul: 1, settings: { music: 0.35, sfx: 0.6, nums: true, shake: true, bigNums: true, autoBoss: true, notify: false, lang: null, a11y: { motion: 'auto', text: 1, nf: false, hc: false, cb: false } },
     };
   }
   function load() {
@@ -70,6 +70,8 @@ const Core = (() => {
     const giftEgg = !!(d && typeof d === 'object' && d.started && d.eggs === undefined);
     if (!d || typeof d !== 'object' || d.v !== 1) d = f;
     for (const k of Object.keys(f)) if (d[k] === undefined) d[k] = f[k];
+    if (!d.settings.a11y || typeof d.settings.a11y !== 'object') d.settings.a11y = Object.assign({}, f.settings.a11y);
+    for (const k of Object.keys(f.settings.a11y)) if (d.settings.a11y[k] === undefined) d.settings.a11y[k] = f.settings.a11y[k];
     for (const g of ['up', 'stats', 'settings', 'shop', 'sk', 'skOn', 'tk']) for (const k of Object.keys(f[g])) if (d[g][k] === undefined) d[g][k] = f[g][k];
     if (typeof d.badges !== 'object' || d.badges === null) d.badges = {};
     if (typeof d.bossFails !== 'object' || d.bossFails === null) d.bossFails = {};
@@ -87,6 +89,8 @@ const Core = (() => {
     if (giftEgg) d.eggs.push({ t: 0, p: 0 });
     d.eggs = d.eggs.filter(e => e && EGGS[e.t]).slice(0, EGG_CAP);
     if (!(d.inc >= 1)) d.inc = 1;
+    if (!Array.isArray(d.hist)) d.hist = [];
+    d.hist = d.hist.filter(h => Array.isArray(h) && h.length >= 5).slice(-HIST_MAX);
     if (!Array.isArray(d.presets)) d.presets = f.presets;
     d.presets = [0, 1, 2, 3].map(i => { const p = d.presets[i] || {}; return { name: typeof p.name === 'string' && p.name ? p.name.slice(0, 16) : 'Equipo ' + (i + 1), team: Array.isArray(p.team) ? p.team.map(String).filter(k => d.mons[k]) : [] }; });
     if (!d.event || typeof d.event !== 'object') d.event = f.event;
@@ -199,7 +203,16 @@ const Core = (() => {
   function rollIv(floor) { const r = () => Math.min(IV_MAX, floor + Math.floor(rnd() * (IV_MAX + 1 - floor))); return { d: r(), s: r(), c: r() }; }
 
   // ---------------- eventos semanales ----------------
-  let curEv = null, evT = 0, chal = null;
+  let curEv = null, evT = 0, chal = null, histT = 0;
+  // historial para las estadísticas: una muestra por minuto jugado; al llenarse se queda con una de cada dos
+  const HIST_STEP = 60, HIST_MAX = 240;
+  function sample() {
+    if (!S.team.length) return;
+    const d = teamDps();
+    if (d > S.stats.maxDps) S.stats.maxDps = d;
+    S.hist.push([Math.round(S.stats.time), S.maxStage, Math.round(S.stats.coinsTotal), S.stats.kills, Math.round(d)]);
+    if (S.hist.length > HIST_MAX) S.hist = S.hist.filter((_, i) => i % 2 === 1 || i === S.hist.length - 1);
+  }
   const evBonus = id => !!(curEv && curEv.bonus === id);
   function eventDef(w) {
     const type = EVENT_TYPES[w % EVENT_TYPES.length], cycle = Math.floor(w / EVENT_TYPES.length);
@@ -319,6 +332,7 @@ const Core = (() => {
     const e = F.enemy;
     if (!e || e.hp <= 0) return;
     e.hp -= dmg;
+    if (dmg > S.stats.bestHit) S.stats.bestHit = dmg;
     if (crit) S.stats.crits++;
     emit('hit', { dmg, crit, src, ef: ef || 1 });
     if (e.hp <= 0) kill();
@@ -396,6 +410,7 @@ const Core = (() => {
     if (!S || !S.started || paused) return;
     S.stats.time += dt;
     evT += dt; if (evT > 20) { evT = 0; refreshEvent(); }
+    histT += dt; if (histT >= HIST_STEP) { histT = 0; sample(); }
     if (S.retryT >= 0 && !S.auto) { S.retryT += dt; if (S.settings.autoBoss && S.kills >= 10 && !isBoss(S.stage) && isBoss(S.stage + 1) && S.retryT >= 12 && (bossReady(S.stage + 1) >= K.ready || S.retryT >= K.retryMax)) fightBoss(); }
     if (S.up.autotap) { S.autoAcc += dt * 0.5 * S.up.autotap; while (S.autoAcc >= 1) { S.autoAcc -= 1; if (F.enemy) tap(true); } }
     if (!F.enemy) { F.respawn -= dt; if (F.respawn <= 0) spawn(); return; }
@@ -954,7 +969,7 @@ const Core = (() => {
     featured, featuredEpic, featuredLegend, ballAvailable, ticketCost, ticketPrice, buyTicket, dustTicket, giveTickets, pull, freePull, freePullReady, toggleShiny, moveOf, tierOf, unsetTeam, setPaused, itemOf, itemVal, itemDmg, equip, unequip, recycleItem, recycleSpare, buyItem, synergies, synMult, teamItemSum,
     checkDaily, dailyReward, claimDaily, questText, questProg, claimQuest, achStat, claimAch, pendingRewards, legendsOwned,
     prestige, offline, start,
-    megaOf, fdex, megaForms, megaCost, megaCan, megaUnlock, megaSet, MEGA_BY_BASE,
+    sample, megaOf, fdex, megaForms, megaCost, megaCan, megaUnlock, megaSet, MEGA_BY_BASE,
     natOf, natVal, ivSum, ivPct, ivGrade, ivBonus, trainIv, rerollNat, setNat, breedCost, breedOk, breedExpect, breed, applyGenes,
     eggNeed, eggReady, eggsReady, giveEgg, hatch, moveEgg, buyEgg, incCost, buyInc,
     typeEff, routeFoes, matchupAvg, bestTeam, strongTypes, setTeamList, savePreset, loadPreset, renamePreset,

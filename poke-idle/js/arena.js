@@ -43,7 +43,7 @@ const Arena = (() => {
     Core.on('hit', h => {
       const e = Core.F.enemy;
       if (!e) return;
-      enemyFlash = 0.08;
+      enemyFlash = A11Y.noFlash() ? 0 : 0.08;
       enemyAnim = { a: 'hurt', t0: t };
       if (Core.S.settings.nums) {
         const cls = h.crit ? 'crit' : h.src === -1 ? 'tap' : h.ef >= 2 ? 'eff' : h.ef < 1 ? 'weak' : '';
@@ -151,7 +151,7 @@ const Arena = (() => {
     const ri = Core.route(S.stage) % ROUTES.length;
     const bg = background(ri);
     ctx.save();
-    if (shake > 0 && S.settings.shake !== false) ctx.translate(Math.round(rand(-2, 2)), Math.round(rand(-2, 2)));
+    if (shake > 0 && S.settings.shake !== false && !A11Y.reduced()) ctx.translate(Math.round(rand(-2, 2)), Math.round(rand(-2, 2)));
     ctx.drawImage(bg.img, 0, 0);
     if (bg.cells.length) Tiles.liquidSparkles(ctx, bg.cells, bg.bi, t);
     ctx.globalAlpha = 1;
