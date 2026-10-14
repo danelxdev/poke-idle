@@ -204,6 +204,7 @@ const BALLS = {
   region7: { name: 'Bola Alola', icon: 'ballR7', ticket: 'super', gen: 7, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Alola.' },
   region8: { name: 'Bola Galar', icon: 'ballR8', ticket: 'super', gen: 8, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Galar.' },
   region9: { name: 'Bola Paldea', icon: 'ballR9', ticket: 'super', gen: 9, region: 1, rates: [0, 26, 38, 26, 8, 2], desc: 'Solo Pokémon de Paldea.' },
+  event: { name: 'Bola del Evento', icon: 'ballLux', ticket: 'super', rates: [0, 26, 38, 26, 8, 2], event: 1, desc: 'Solo Pokémon del tipo de la semana. Al salir épico o legendario, la mitad de las veces es el destacado del evento.' },
   master: { name: 'Bola Maestra', icon: 'ball4', ticket: 'master', rates: [0, 0, 0, 0, 72, 28], desc: 'Siempre épico o legendario: 28% de legendario.' },
 };
 // Los gachas se abren con tickets. Se consiguen en combate, misiones y logros, o se compran (monedas o gemas).
@@ -338,6 +339,8 @@ const ACH_DEFS = [
   ['ivGood', 'Buen potencial', 'star', [[1, 30], [10, 100], [50, 250]], n => 'Ten ' + n + ' Pokémon con IVs del 90% o más'],
   ['ivPerfect', 'Perfeccionista', 'star', [[1, 60], [5, 150], [20, 400]], n => 'Ten ' + n + ' Pokémon con IVs perfectos (31/31/31)'],
   ['ivUps', 'Mejores genes', 'up', [[1, 15], [25, 60], [100, 150]], n => 'Mejora los IVs de tus Pokémon ' + n + ' veces con copias repetidas'],
+  ['tower', 'Escalador', 'crown', [[5, 25], [10, 50], [20, 100], [30, 150], [50, 300], [75, 500], [100, 800]], n => 'Llega al piso ' + n + ' de la Torre'],
+  ['eventTiers', 'Cazador de eventos', 'trophy', [[1, 30], [10, 100], [40, 300], [100, 700]], n => 'Vence ' + n + ' veces al jefe de un evento'],
   ['slots', 'Equipo completo', 'friends', [[3, 20], [6, 100]], n => 'Abre ' + n + ' huecos de equipo'],
 ];
 // Colecciones por tipo
@@ -451,3 +454,38 @@ const EGG_CAP = 10, EGG_SHINY = 1.5, EGG_WILD_DROP = 0.0008;                    
 const EGG_BOSS = [null, 0, 1, 1, 2, 3];                                           // huevo de la primera victoria contra un jefe según su categoría
 const EGG_WILD_TIER = [70, 25, 5];                                                // % de huevo común/raro/épico al caer uno
 const INC_COST = [0, 0, 150, 600, 2400];                                          // gemas por incubadora (1.ª gratis)
+
+// ---------------- eventos semanales y Torre de batalla ----------------
+// Cada semana cambia el tipo protagonista (18 semanas por ciclo) y un bonus general (cada 5 semanas se repite).
+const EVENT_TYPES = ['fire', 'water', 'grass', 'electric', 'ice', 'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy', 'normal'];
+const EVENT_BONUS_ORDER = ['shiny', 'eggs', 'coins', 'dust', 'tickets'];
+const EVENT_BONUS = {
+  shiny: { name: 'Semana brillante', txt: 'Los shinies son el doble de frecuentes' },
+  eggs: { name: 'Semana de cría', txt: 'Los huevos avanzan el doble de rápido' },
+  coins: { name: 'Semana dorada', txt: '+50% de monedas' },
+  dust: { name: 'Semana estelar', txt: 'El doble de polvo estelar' },
+  tickets: { name: 'Semana de tickets', txt: '+50% de tickets soltados' },
+};
+const EVENT_DMG = 0.25;                                   // daño extra de los Pokémon del tipo de la semana
+// jefe del evento: vida = vida de un Pokémon salvaje en tu etapa máxima × hp
+const EVENT_TIERS = [
+  { name: 'Fácil', hp: 3, time: 45, rew: { gems: 20, tk: { super: 2 } } },
+  { name: 'Normal', hp: 7, time: 50, rew: { gems: 40, tk: { ultra: 1 }, egg: 0 } },
+  { name: 'Difícil', hp: 16, time: 55, rew: { gems: 80, tk: { ultra: 2 }, egg: 1 } },
+  { name: 'Extremo', hp: 40, time: 60, rew: { gems: 160, tk: { ultra: 2, master: 1 }, egg: 2 } },
+];
+const EVENT_TASKS = [
+  { id: 'k1', stat: 'kills', goal: 150, rew: { tk: { super: 2 } }, text: (n, t) => 'Derrota ' + n + ' Pokémon de tipo ' + t },
+  { id: 'k2', stat: 'kills', goal: 600, rew: { tk: { ultra: 1 }, egg: 0 }, text: (n, t) => 'Derrota ' + n + ' Pokémon de tipo ' + t },
+  { id: 'p1', stat: 'pulls', goal: 10, rew: { tk: { ultra: 1 }, egg: 1 }, text: n => 'Abre ' + n + ' Bolas del Evento' },
+];
+const TOWER_UNLOCK = 10;                                  // etapa máxima necesaria
+const TOWER_HP0 = 2.5, TOWER_G = 1.07, TOWER_TIME = 40, TOWER_BOSS_X = 1.5, TOWER_BONUS = 0.003;   // vida piso 1 (× salvaje), crecimiento por piso, segundos, guardián, daño por piso récord
+const TOWER_RULES = [
+  { id: 'noitems', name: 'Sin objetos', desc: 'Los objetos equipados no funcionan' },
+  { id: 'nosyn', name: 'Sin sinergias', desc: 'Las sinergias de equipo están desactivadas' },
+  { id: 'only', name: 'Solo del tipo', desc: 'Los Pokémon de otro tipo hacen la mitad de daño' },
+  { id: 'nocrit', name: 'Sin críticos', desc: 'No hay golpes críticos' },
+  { id: 'fast', name: 'Contrarreloj', desc: 'La mitad de tiempo, pero un 45% menos de vida', hp: 0.55, time: 0.5 },
+  { id: 'armor', name: 'Armadura', desc: '+60% de vida y +40% de tiempo', hp: 1.6, time: 1.4 },
+];

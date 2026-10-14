@@ -96,22 +96,26 @@ const UI = (() => {
       pips.className = 'pips' + (boss ? ' boss' : '');
       pips.innerHTML = boss ? '<i></i>' : Array.from({ length: 10 }, (_, i) => `<i class="${i < s.kills ? 'on' : ''}"></i>`).join('');
     }
-    $('#st-prev').disabled = s.stage <= 1;
-    $('#st-next').disabled = s.stage >= s.maxStage || boss;
+    const inCh = Core.inChal();
+    $('#st-prev').disabled = s.stage <= 1 || inCh;
+    $('#st-next').disabled = s.stage >= s.maxStage || boss || inCh;
+    const cb = $('#chal-bar'); cb.classList.toggle('hidden', !inCh);
+    if (inCh) { const c = Core.chal, t = c.label + (c.rule ? ' · ' + c.rule.name + (c.rule.only ? ' ' + TYPE_ES[c.rule.only] : '') : ''); if ($('#chal-txt').textContent !== t) $('#chal-txt').textContent = t; }
     const e = Core.F.enemy;
     const box = $('#enemy-box');
     if (e) {
       box.classList.remove('hidden');
-      const eased = e.boss && Core.bossEase(e.stage) < 1 ? ' · −' + Math.round((1 - Core.bossEase(e.stage)) * 100) + '%' : '';
-      const name = e.boss ? (r.boss.who === DEX[e.dex].name ? r.boss.who : r.boss.who + ' · ' + DEX[e.dex].name) + eased : (e.golden ? '✨ ' : '') + DEX[e.dex].name + (e.golden ? ' dorado' : '');
+      const eased = e.boss && !e.chal && Core.bossEase(e.stage) < 1 ? ' · −' + Math.round((1 - Core.bossEase(e.stage)) * 100) + '%' : '';
+      const ch = Core.chal;
+      const name = e.chal && ch ? DEX[e.dex].name : e.boss ? (r.boss.who === DEX[e.dex].name ? r.boss.who : r.boss.who + ' · ' + DEX[e.dex].name) + eased : (e.golden ? '✨ ' : '') + DEX[e.dex].name + (e.golden ? ' dorado' : '');
       if ($('#enemy-name').textContent !== name) $('#enemy-name').textContent = name;
       const ft = $('#foe-types'); if (ft.dataset.k !== String(e.dex)) { ft.dataset.k = e.dex; ft.innerHTML = typeTags(e.dex); }
       $('#enemy-hp').style.width = Math.max(0, e.hp / e.max * 100) + '%';
       $('#enemy-hptxt').textContent = fmt(Math.max(0, Math.ceil(e.hp)));
       $('#boss-timer').classList.toggle('hidden', !e.boss);
-      if (e.boss) $('#boss-t').style.width = Math.max(0, Core.F.bossT / Core.bossTime(e.stage) * 100) + '%';
+      if (e.boss) $('#boss-t').style.width = Math.max(0, Core.F.bossT / (e.chal && Core.chal ? Core.chal.time : Core.bossTime(e.stage)) * 100) + '%';
     } else box.classList.add('hidden');
-    const bb = $('#btn-boss'), showBb = !s.auto && s.kills >= 10 && !boss;
+    const bb = $('#btn-boss'), showBb = !s.auto && s.kills >= 10 && !boss && !inCh;
     bb.classList.toggle('hidden', !showBb);
     if (showBb) { const t = Core.isBoss(s.stage + 1) ? '¡Reta al jefe!' : 'Avanzar etapa'; if (bb.textContent !== t) bb.textContent = t; }
     for (const [id, k] of Object.entries(SKILLS)) {
@@ -126,6 +130,7 @@ const UI = (() => {
     $('#dps').innerHTML = 'Daño/s <b>' + fmt(e ? Core.teamDps(e.types) : Core.teamDps()) + '</b> · Toque <b>' + fmt(Core.tapDmg()) + '</b>' + (waitBoss ? ` · Poder vs jefe <b style="color:${rd >= 0.95 ? '#7ff0a0' : '#ffd23f'}">${Math.round(rd * 100)}%</b>` : '');
     $('#quest-dot').classList.toggle('hidden', !Core.pendingRewards() && s.daily.claimed);
     $('#gacha-dot').classList.toggle('hidden', !Core.eggsReady());
+    $('#chal-dot').classList.toggle('hidden', !Core.towerUnlocked() || !(Core.ev && (!s.event.free || EVENT_TASKS.some(t => !s.event.claimed[t.id] && s.event[t.stat] >= t.goal))));
   }
 
   // ---------------- pestañas ----------------
@@ -147,6 +152,11 @@ const UI = (() => {
       if (c.textContent !== t) c.textContent = t;
       if (c.className !== cl) c.className = cl;
     }
+    for (const el of $$('#tab-body [data-rdy]')) {
+      const [k, v] = el.dataset.rdy.split(':'), r = Core.chalReady(k === 't' ? Core.towerSpec(+v) : Core.eventSpec(+v)), t = 'Poder ' + (r >= 10 ? '×' + Math.floor(r) : Math.round(r * 100) + '%'), cl = 'rdy' + (r >= 1 ? ' ok' : r >= 0.7 ? ' mid' : '');
+      if (el.textContent !== t) el.textContent = t;
+      if (el.className !== cl) el.className = cl;
+    }
     for (const b of $$('#tab-body [data-egg]')) {
       const e = s.eggs[+b.dataset.egg]; if (!e) continue;
       const need = Core.eggNeed(e), w = Math.min(100, e.p / need * 100).toFixed(1) + '%', t = fmt(Math.floor(Math.min(e.p, need))) + ' / ' + fmt(need);
@@ -160,6 +170,39 @@ const UI = (() => {
     `<button class="btn primary buy" data-act="${act}" data-cost="${cost}" data-cur="${cur}" ${extra}><span>${label}</span><small>${ico(cur === 'gems' ? 'gem' : 'coin', 12)}${fmt(cost)}</small></button>`;
 
   const natTxt = m => { const n = Core.natOf(m); return n.up ? `${n.name} <em class="nu">▲${NAT_SHORT[n.up]}</em> <em class="nd">▼${NAT_SHORT[n.down]}</em>` : n.name + ' (neutra)'; };
+  let towerStart = 0;
+  const rewText = r => !r ? '' : [r.gems && '+' + r.gems + ' gemas', r.dust && '+' + r.dust + ' polvo', ...Object.entries(r.tk || {}).map(([t, n]) => n + '× ' + TICKETS[t].name), r.egg !== undefined && EGGS[r.egg].name].filter(Boolean).join(' · ');
+  const ruleTxt = r => r ? `<div class="rulebox"><b>${r.name}${r.only ? ' ' + TYPE_ES[r.only] : ''}</b>: ${r.desc}</div>` : '';
+  function chalHtml() {
+    const s = S();
+    if (!Core.towerUnlocked()) return `<h3>Retos</h3><p class="hint">Derrota al primer jefe (etapa ${TOWER_UNLOCK}) para desbloquear el evento semanal y la Torre de batalla.</p>`;
+    const ev = Core.ev, col = TYPE_COLORS[ev.type], busy = Core.inChal() ? 'disabled' : '';
+    const bonus = EVENT_BONUS[ev.bonus], d = Core.eventDaysLeft();
+    let h = `<div class="evcard" style="--ec:${col}"><div class="evhead"><span class="evtag">EVENTO SEMANAL</span><b>Semana ${TYPE_NAMES[ev.type]}</b><small>Termina en ${d} día${d > 1 ? 's' : ''}</small></div>
+      <ul class="evfx"><li>Tus Pokémon de tipo ${TYPE_NAMES[ev.type]} hacen <b>+${Math.round(EVENT_DMG * 100)}%</b> de daño</li><li><b>${bonus.name}:</b> ${bonus.txt}</li></ul>
+      <div class="evrow"><img src="${por(ev.boss)}"><div>Jefe del evento<br><b>${DEX[ev.boss].name}</b> ${typeTags(ev.boss)}</div></div>
+      <div class="tiers">${EVENT_TIERS.map((t, i) => `<button class="tierbtn ${s.event.tiers[i] ? 'done' : ''}" data-act="evboss" data-v="${i}" ${busy}><b>${t.name}${s.event.tiers[i] ? '<span style="color:#7ff0a0">✓</span>' : ''}</b><span data-rdy="e:${i}" class="rdy"></span><small>${s.event.tiers[i] ? 'Recompensa ya recogida' : rewText(t.rew)}</small></button>`).join('')}</div>
+      <h3 style="margin-top:8px">Misiones del evento</h3>`;
+    h += EVENT_TASKS.map((t, i) => {
+      const p = Math.min(t.goal, s.event[t.stat]), got = s.event.claimed[t.id], ok = p >= t.goal;
+      return `<div class="etask"><div class="qi"><b>${t.text(fmt(t.goal), TYPE_NAMES[ev.type])}</b><small>${fmt(p)} / ${fmt(t.goal)} · ${rewText(t.rew)}</small><div class="bar"><i style="width:${p / t.goal * 100}%"></i></div></div>${got ? '<button class="btn small" disabled>✓</button>' : `<button class="btn ${ok ? 'primary' : ''}" data-act="evtask" data-v="${i}" ${ok ? '' : 'disabled'}>Recoger</button>`}</div>`;
+    }).join('');
+    const fl = Core.eventFeat(5), fe = Core.eventFeat(4), feat = (dx, tag) => dx ? `<div class="feat"><span class="tagx">${tag}</span><img src="${por(dx)}"><div><b>${DEX[dx].name}</b><small>${RARITY[Core.RAR[dx]].name}</small><br>${typeTags(dx)}</div></div>` : '';
+    h += `<h3>${BALLS.event.name}</h3><p class="hint">${BALLS.event.desc}</p>${feat(fl, 'LEGENDARIO · EVENTO')}${feat(fe, 'ÉPICO · EVENTO')}
+      <div class="btns row" style="margin-top:6px">${s.event.free ? '' : '<button class="btn primary" data-act="evfree">Tirada gratis</button>'}
+      <button class="btn primary" data-act="pull" data-v="event" data-n="1" data-cost="1" data-cur="tk:super">Abrir x1 ${ico('tkSuper', 14)} 1</button>
+      <button class="btn primary" data-act="pull" data-v="event" data-n="10" data-cost="${Core.ticketCost(10)}" data-cur="tk:super">Abrir x10 ${ico('tkSuper', 14)} ${Core.ticketCost(10)}</button></div></div>`;
+    // Torre
+    const starts = Core.towerStarts(), st = starts.includes(towerStart) ? towerStart : starts[starts.length - 1], sp = Core.towerSpec(st), nx = Core.towerSpec(s.tower.best + 1);
+    h += `<h3>Torre de batalla</h3><div class="tower"><div class="hint" style="text-align:center">Récord</div><div class="big">Piso ${s.tower.best}</div>
+      <p class="hint" style="text-align:center">+${(TOWER_BONUS * s.tower.best * 100).toFixed(1)}% de daño permanente (${TOWER_BONUS * 100}% por piso)</p>
+      <div class="floorline">Empiezas en el <b>piso ${st}</b> · ${typeTags(sp.dex)} <span data-rdy="t:${st}" class="rdy"></span></div>
+      <div class="floorline">Piso a batir: <b>${nx.floor}</b> · ${tchip(nx.type)} <span data-rdy="t:${nx.floor}" class="rdy"></span> · ${rewText(Core.towerReward(nx.floor))}</div>
+      ${ruleTxt(nx.rule)}
+      <div class="row" style="margin-top:6px">${starts.length > 1 ? `<button class="dd" data-act="towerdd">Empezar en el piso ${st}<i></i></button>` : ''}<button class="btn big primary" data-act="tower" data-v="${st}" ${busy}>Subir a la Torre</button></div></div>
+      <p class="hint">Cada piso es un duelo contra un Pokémon de un tipo distinto con vida y tiempo fijos. Sigues subiendo hasta que caes; los pisos cada 5 son guardianes con una regla especial. Las recompensas se dan la primera vez que superas cada piso y puedes empezar desde cualquier guardián que ya hayas superado.</p>`;
+    return h;
+  }
   function incubatorHtml() {
     const s = S();
     let h = `<h3>Incubadora <small style="color:var(--dim)">${s.eggs.length}/${EGG_CAP} huevos</small></h3><div class="incubator">`;
@@ -260,7 +303,7 @@ const UI = (() => {
             </div></div>`;
         };
         const entries = Object.entries(BALLS);
-        h += entries.filter(([id, b]) => !b.region && id !== 'master').map(ballCard).join('');
+        h += entries.filter(([id, b]) => !b.region && !b.event && id !== 'master').map(ballCard).join('');
         h += ballCard(['master', BALLS.master]);
         h += '<h3>Bolas regionales</h3><p class="hint">Solo Pokémon de la región (usan 1 Ticket Super). Se abren al llegar a ella.</p>';
         let locked = 0;
@@ -295,6 +338,10 @@ const UI = (() => {
         }
         return h + '</div><p class="hint">Los Pokémon que no tienes solo se consiguen en el gacha.</p>';
       },
+    },
+    chal: {
+      sig: () => { const s = S(); return JSON.stringify([Core.towerUnlocked(), Core.ev && Core.ev.w, s.event, s.tower.best, Core.inChal(), Core.towerStarts().length, towerStart, Core.eventDaysLeft()]); },
+      html: chalHtml,
     },
     quests: {
       sig: () => { const s = S(); return JSON.stringify([s.daily, s.weekly, s.ach, s.daily.quests.map(q => Core.questProg(q)), s.weekly.quests.map(q => Core.questProg(q)), ACHIEVEMENTS.map(a => Core.achStat(a) >= a.goal), achShowAll]); },
@@ -390,6 +437,11 @@ const UI = (() => {
         Core.setTeamList(keys); Audio8.play('swap'); toast('Equipo ideal para ' + (Core.isBoss(tgt) ? 'el jefe' : 'esta ruta'));
         break;
       }
+      case 'tower': if (Core.startTower(+v)) Audio8.play('select'); else Audio8.play('error'); break;
+      case 'evboss': if (Core.startEvent(+v)) Audio8.play('select'); else Audio8.play('error'); break;
+      case 'evtask': { const t = EVENT_TASKS[+v]; if (Core.claimEventTask(+v)) { Audio8.play('ticket'); toast('¡Recompensa! ' + rewText(t.rew)); } break; }
+      case 'evfree': { const r = Core.eventFreePull(); if (r) { Core.save(); playReveal(r, BALLS.event.icon, TICKETS.super.icon, BALLS.event.name); return; } break; }
+      case 'towerdd': openDD(el, Core.towerStarts().map(c => [c, 'Piso ' + c + (c === 1 ? '' : ' (guardián superado)')]), towerStart, val => { towerStart = +val; sig = ''; refresh(true); }); return;
       case 'hatch': { const r = Core.hatch(+v); if (r) { Core.save(); playReveal([r], 'egg' + r.egg, 'egg' + r.egg, EGGS[r.egg].name); return; } break; }
       case 'eggfront': Core.moveEgg(+v); Audio8.play('swap'); break;
       case 'buyegg': if (Core.buyEgg(+v)) Audio8.play('item'); else Audio8.play('error'); break;
@@ -507,6 +559,7 @@ const UI = (() => {
     { sel: '[data-act="best"]', text: 'Cada Pokémon tiene tipo, naturaleza e IVs. Los golpes súper eficaces hacen x2: mira las etiquetas ▲ de cada tarjeta, y «Mejor equipo» elige solo a los más eficaces para la ruta.', next: 1 },
     { sel: '.itemchip', text: 'Cada Pokémon puede llevar un objeto. Los jefes los sueltan y están en la Mochila.', next: 1 },
     { sel: '#skills', text: 'Tres habilidades activas: Furia (más daño), Fiebre del Oro (más monedas) y Lluvia de Tickets. Úsalas cuando estén listas.', next: 1 },
+    { sel: '#tabs [data-tab="chal"]', text: 'En Retos hay un evento cada semana con un tipo protagonista (bonus de daño, jefe, misiones y una bola propia) y la Torre de batalla, un duelo tras otro con reglas especiales.', next: 1 },
     { sel: '#tabs [data-tab="quests"]', text: 'Las misiones diarias y semanales, los logros y la recompensa diaria te dan gemas y tickets. ¡Entra cada día!', next: 1 },
     { sel: '#tabs [data-tab="league"]', text: 'Al llegar a la etapa 60 podrás entrar en la Liga: reinicias el viaje a cambio de bonus permanentes y una tienda de mejoras.', next: 1 },
     { text: '¡Listo! Ahora te toca a ti: llega lo más lejos que puedas, colecciona los 971 Pokémon y completa la Pokédex. Puedes repetir este tutorial desde Ajustes.', next: 1, last: 1 },
@@ -824,6 +877,7 @@ const UI = (() => {
     $('#tab-body').addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && !el.disabled) act(el); });
     $$('#tabs button').forEach(b => b.onclick = () => { Audio8.play('click'); setTab(b.dataset.tab); });
     $$('[data-ico]').forEach(s => s.innerHTML = ico(s.dataset.ico, 24));
+    $('#chal-x').onclick = () => { Core.abortChal(); Audio8.play('swap'); };
     $('#i-coin').innerHTML = ico('coin', 24);
     $('#i-gem').innerHTML = ico('gem', 24);
     $('#btn-settings').innerHTML = ico('gear', 24);
@@ -842,5 +896,5 @@ const UI = (() => {
     $$('#skills .skill').forEach(b => b.onclick = e => { e.stopPropagation(); if (Core.useSkill(b.dataset.sk)) { Audio8.play(b.dataset.sk === 'rage' ? 'charge' : 'ticket'); banner(SKILLS[b.dataset.sk].name + '!', SKILLS[b.dataset.sk].desc, '#ff8040'); } });
   }
 
-  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, tutStart, autoFill, monModal, mapModal };
+  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, rewText, tutStart, autoFill, monModal, mapModal };
 })();

@@ -54,10 +54,10 @@ const Arena = (() => {
     });
     Core.on('kill', k => {
       enemyDie = { e: k.enemy, t: 0.5 };
-      const n = Math.min(10, 2 + Math.floor(Math.log10(k.coins + 1) * 2) + (k.enemy.boss ? 8 : 0));
+      const n = k.coins ? Math.min(10, 2 + Math.floor(Math.log10(k.coins + 1) * 2) + (k.enemy.boss ? 8 : 0)) : 0;
       for (let i = 0; i < n; i++) coins.push({ x: EX + rand(-8, 8), y: EY - 10, vx: rand(-70, 50), vy: rand(-120, -50), t: 0, land: EY + rand(4, 16), fly: 0.55 + i * 0.03 });
       if (k.enemy.boss) shake = 0.4;
-      if (Core.S.settings.nums) popup('+' + Core.fmt(k.coins), 'coin', EX + rand(-10, 10), EY - 54);
+      if (Core.S.settings.nums && k.coins) popup('+' + Core.fmt(k.coins), 'coin', EX + rand(-10, 10), EY - 54);
       if (k.gems) popup('+' + k.gems + ' gemas', 'gem', EX, EY - 74);
       if (k.egg !== null && k.egg !== undefined) popup('+ ' + EGGS[k.egg].name, 'tk', EX, EY - 114);
       if (k.item) popup('+ ' + HELD[k.item.id].name, 'tk', EX, EY - 130);

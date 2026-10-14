@@ -40,6 +40,18 @@
     else if (Core.S.started) UI.toast(Icons.html('egg' + d.t, 18) + ' ¡Has encontrado un ' + EGGS[d.t].name + '!');
   });
   Core.on('eggReady', e => { Audio8.play('rare'); UI.banner('¡Un ' + EGGS[e.t].name + ' está listo!', 'Ve a la pestaña Gacha para eclosionarlo', EGGS[e.t].color); });
+  Core.on('chalStart', c => {
+    Audio8.music(c.kind === 'tower' && c.boss || c.kind === 'event' ? 'boss2' : 'boss');
+    UI.banner(c.label, c.rule ? c.rule.name + (c.rule.only ? ' ' + TYPE_ES[c.rule.only] : '') + ': ' + c.rule.desc : 'Vence al rival antes de que se acabe el tiempo', '#ff8040');
+  });
+  Core.on('chalWin', d => {
+    Audio8.play(d.kind === 'event' || d.floor % 5 === 0 ? 'legend' : 'win');
+    if (d.kind === 'event') UI.banner('¡Jefe del evento vencido!', d.first ? UI.rewText(d.rew) : 'Ya habías recogido esta recompensa', '#ffd23f');
+    else if (d.first && d.floor % 5 === 0) UI.banner('¡Piso ' + d.floor + ' superado!', UI.rewText(d.rew), '#ffd23f');
+    else UI.toast('Piso ' + d.floor + (d.first ? ' · ' + UI.rewText(d.rew) : ' superado'));
+  });
+  Core.on('chalFail', d => { Audio8.play('death'); UI.banner(d.kind === 'tower' ? 'La Torre te frena en el piso ' + d.floor : 'El jefe del evento resistió', d.kind === 'tower' ? 'Récord: piso ' + d.best : 'Mejora a tu equipo y vuelve a intentarlo', '#ff5050'); });
+  Core.on('chalEnd', () => { Audio8.music(musicFor(Core.S.stage)); UI.refresh(true); });
   Core.on('tickets', t => { if (Core.S.started) UI.refresh(false); });
   Core.on('kill', k => {
     if (k.enemy.golden) UI.toast(Icons.html('gem', 18) + ' ¡Pokémon dorado! +' + k.gems + ' gemas');

@@ -13,6 +13,7 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
   - **Legendarios:** 9, de Mewtwo a Koraidon.
   - **Jefes finales:** 8, como Rojo, Rayquaza, Giratina, Eternatus, Calyrex y Arceus.
 - **Huevos, naturalezas, IVs y tipos eficaces**: incubadora con 4 tipos de huevo, 25 naturalezas, IVs entrenables con polvo estelar y ayudas visuales de eficacia en combate (ver más abajo).
+- **Eventos semanales y Torre de batalla**: un tipo protagonista cada semana con jefe, misiones y bola propia, y una torre infinita con pisos de reglas especiales.
 - **Progresión lenta y constante**: cada etapa cuesta más que la anterior y los jefes son muros reales con límite de tiempo. Para avanzar mejoras a tu equipo, abres huecos, mejoras la banda y, sobre todo, repites el viaje en la **Liga**.
 
 ## Cómo se juega
@@ -60,6 +61,21 @@ Caen de los Pokémon derrotados (0,08 % por victoria, ×10 si es dorado), de la 
 **IVs.** Cada Pokémon tiene tres IVs de 0 a 31: Daño (hasta +10 %), Velocidad (hasta +5 %) y Crítico (hasta +2 %). Al conseguir un Pokémon que ya tienes, la copia tira IVs nuevos y **te quedas con los mejores** (además de dar polvo y estrellas). El polvo estelar también sirve para entrenar un IV (+3 por 15 + 3·IV de polvo), cambiar la naturaleza al azar (60) o elegirla (450). Nivel de potencial: Bajo < 35 %, Normal, Bueno (55 %), Muy bueno (75 %), Excelente (90 %) y Perfecto (31/31/31). Medido en la simulación de equilibrio, el efecto medio de IVs y naturalezas acelera la partida un ~5 % (dentro del margen de variación entre ejecuciones).
 
 **Tipos.** Cada Pokémon pega con su mejor tipo contra los tipos del enemigo: súper eficaz ×2 (más con la mejora «Afinidad de tipo»), resistido ×0,5 e inmune ×0,35 (nunca bloquea del todo). Ahora se ve: el enemigo muestra sus tipos, cada tarjeta del equipo indica ▲×2 / ▼×½ contra el enemigo actual, el mapa lista los tipos de cada ruta y cuáles les pegan más, y el botón **Mejor equipo** coloca a los Pokémon más eficaces para la ruta (o el jefe).
+
+## Eventos semanales y Torre de batalla (pestaña Retos)
+
+Se desbloquea al llegar a la etapa 10. Los retos sustituyen al combate normal (un solo enemigo con vida y tiempo fijos); no se guardan, así que si recargas la página pierdes el intento.
+
+**Evento semanal.** Cambia cada semana (el calendario es el mismo para todos): el tipo protagonista rota por los 18 tipos y un bonus general rota cada 5 semanas.
+- Tus Pokémon del tipo de la semana hacen **+25 %** de daño.
+- Bonus de la semana: shinies ×2, huevos ×2 de rápidos, +50 % monedas, ×2 polvo estelar o +50 % de tickets soltados.
+- **Jefe del evento** (uno de los Pokémon más fuertes de ese tipo) en 4 dificultades. Vida = vida de un Pokémon salvaje en tu etapa máxima × 3 / 7 / 16 / 40, con 45 / 50 / 55 / 60 s. La primera victoria de cada semana da gemas, tickets y huevos (hasta 160 gemas, 2 Ultra, 1 Maestro y un huevo épico). Cada botón muestra tu «Poder» (≥100 % = lo vences a tiempo).
+- **Misiones del evento**: derrotar 150 y 600 Pokémon del tipo de la semana y abrir 10 Bolas del Evento.
+- **Bola del Evento** (1 Ticket Super): solo Pokémon del tipo de la semana; al salir épico o legendario, la mitad de las veces es el destacado del evento. Una tirada gratis por semana.
+
+**Torre de batalla.** Pisos infinitos, cada uno contra un Pokémon de un tipo distinto. Piso *f*: vida = salvaje en tu etapa máxima × 2,5 × 1,07^(f−1) en 40 s. Sigues subiendo hasta que caes. Cada 5 pisos hay un guardián (×1,5 de vida) con una regla: sin objetos, sin sinergias, solo del tipo del piso (los demás hacen la mitad), sin críticos, contrarreloj (mitad de tiempo, −45 % de vida) o armadura (+60 % de vida, +40 % de tiempo). Las recompensas (gemas, polvo, tickets cada 5 pisos y huevos cada 10) se dan solo la primera vez que superas cada piso. Puedes empezar desde cualquier guardián superado. El récord da **+0,3 % de daño permanente por piso**.
+
+Con la simulación de equilibrio: en el techo de cada etapa un jugador supera sin problema hasta el piso ~14 y el jefe fácil/normal del evento; los pisos con regla, el jefe difícil y el extremo exigen preparar el equipo (tipos, objetos y mejoras).
 
 ## Objetos y sinergias
 

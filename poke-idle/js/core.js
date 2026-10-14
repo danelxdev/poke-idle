@@ -47,13 +47,13 @@ const Core = (() => {
   function fresh() {
     return {
       v: 1, started: false, coins: 0, gems: 50, dust: 0, tk: { poke: 5, super: 1, ultra: 0, master: 0 }, stage: 1, maxStage: 1, kills: 0, auto: true,
-      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1,
+      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 },
       up: { tap: 0, train: 0, coin: 0, crit: 0, critdmg: 0, speed: 0, catch: 0, golden: 0, bosstime: 0, type: 0, boss: 0, autotap: 0, alch: 0 },
       shop: { dmg: 0, coins: 0, lvl: 0, slots: 0, offline: 0, catch: 0, shiny: 0, gems: 0, skill: 0, dust: 0, tapd: 0, critb: 0, disc: 0, bt: 0, egg: 0 },
       medals: 0, mp: 0, badges: {}, bossFirst: {},
       sk: { rage: 0, gold: 0, lure: 0 },        // instante (tiempo jugado) en el que está lista cada habilidad
       skOn: { rage: 0, gold: 0, lure: 0 },      // instante en el que termina cada habilidad
-      stats: { kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, freePulls: 0, streak: 0, itemsFound: 0 },
+      stats: { kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, eventTiers: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, freePulls: 0, streak: 0, itemsFound: 0 },
       bossFails: {}, retryT: 0, pity: 0, pityE: 0, bannerLost: 0, freeDay: '', autoAcc: 0, inv: [], uid: 1, tutDone: false, last: Date.now(),
       daily: { day: '', streak: 0, claimed: true, quests: [] }, weekly: { week: -1, quests: [] }, ach: {},
       buyMul: 1, settings: { music: 0.35, sfx: 0.6, nums: true, shake: true, bigNums: true, autoBoss: true },
@@ -81,6 +81,8 @@ const Core = (() => {
     if (giftEgg) d.eggs.push({ t: 0, p: 0 });
     d.eggs = d.eggs.filter(e => e && EGGS[e.t]).slice(0, EGG_CAP);
     if (!(d.inc >= 1)) d.inc = 1;
+    if (!d.event || typeof d.event !== 'object') d.event = f.event;
+    if (!d.tower || typeof d.tower.best !== 'number') d.tower = { best: 0 };
     // partidas antiguas: la base de algunas líneas cambió al añadir bebés (Pichu, Cleffa…)
     for (const k of Object.keys(d.mons)) {
       const b = String(baseOf(d.mons[k].dex));
@@ -92,11 +94,13 @@ const Core = (() => {
     if (!Array.isArray(d.inv)) d.inv = [];
     invDirty = true;
     S = d;
+    chal = null;
+    refreshEvent();
     resetFight();
     return S;
   }
   function save() { if (!S) return; S.last = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* sin espacio */ } }
-  function wipe() { S = fresh(); resetFight(); save(); }
+  function wipe() { S = fresh(); chal = null; refreshEvent(); resetFight(); save(); }
 
   // ---------------- fórmulas ----------------
   // hpB/hpG = vida del enemigo (base y crecimiento por etapa) · coinR = monedas por vida · lvlG = crecimiento del coste de nivel
@@ -124,12 +128,12 @@ const Core = (() => {
   const bossReady = s => { const r = routeData(s); return teamDps(DEX[r.boss.dex].types) * (1 + 0.04 * S.up.boss) * bossTime(s) / enemyHp(s); };
   const skillOn = id => S.skOn[id] > S.stats.time;
   const medalMult = () => 1 + 0.03 * S.medals;
-  const coinMult = () => (1 + 0.15 * S.up.coin) * medalMult() * (1 + 0.06 * S.shop.coins) * (skillOn('gold') ? 3 : 1) * (1 + teamItemSum('coins') + synergies().coins + teamNat('coin'));
+  const coinMult = () => (1 + 0.15 * S.up.coin) * medalMult() * (1 + 0.06 * S.shop.coins) * (skillOn('gold') ? 3 : 1) * (1 + teamItemSum('coins') + synergies().coins + teamNat('coin')) * (evBonus('coins') ? 1.5 : 1);
   const killCoins = s => Math.ceil(((hpBase(s) + K.hpL * s) * K.coinR * Math.pow(K.cd, s) + K.cf + s * K.cs) * coinMult() * (isBoss(s) ? 6 : 1));
   const dexCount = () => Object.keys(S.seen).length;
   const badgeCount = () => Object.keys(S.badges).length;
   const gemMult = () => 1 + 0.1 * S.shop.gems;
-  const globalDmg = () => (1 + 0.1 * S.up.train) * medalMult() * (1 + 0.06 * S.shop.dmg) * (1 + 0.01 * dexCount()) * (1 + 0.03 * badgeCount()) * (skillOn('rage') ? 3 : 1);
+  const globalDmg = () => (1 + 0.1 * S.up.train) * (1 + TOWER_BONUS * S.tower.best) * medalMult() * (1 + 0.06 * S.shop.dmg) * (1 + 0.01 * dexCount()) * (1 + 0.03 * badgeCount()) * (skillOn('rage') ? 3 : 1);
   const lvlMult = l => Math.pow(K.dG, l - 1) * Math.pow(2, Math.floor(l / 25));
   const power = d => Math.pow(bst(d) / 100, 2);
   // ---------------- objetos equipables ----------------
@@ -137,7 +141,7 @@ const Core = (() => {
     if (invDirty) { invMap = new Map(S.inv.map(i => [i.u, i])); invDirty = false; }
     return invMap.get(u);
   }
-  const itemOf = m => (m && m.item ? invLookup(m.item) : null);
+  const itemOf = m => (m && m.item && !chalRule('noitems') ? invLookup(m.item) : null);
   const itemVal = it => HELD[it.id].v * ITEM_RAR[it.rar].mult;
   function itemDmg(m, it) {
     it = it || itemOf(m); if (!it) return 0;
@@ -153,6 +157,7 @@ const Core = (() => {
 
   // ---------------- sinergias de equipo ----------------
   function synergies() {
+    if (chalRule('nosyn')) return { type: {}, dmg: 0, coins: 0, list: [] };
     const team = S.team.map(k => S.mons[k]).filter(Boolean), out = { type: {}, dmg: 0, coins: 0, list: [] };
     const cnt = {};
     for (const m of team) for (const t of DEX[m.dex].types) cnt[t] = (cnt[t] || 0) + 1;
@@ -185,9 +190,31 @@ const Core = (() => {
   const ivBonus = (m, k) => IV_EFF[k] * m.iv[k] / IV_MAX;
   function rollIv(floor) { const r = () => Math.min(IV_MAX, floor + Math.floor(rnd() * (IV_MAX + 1 - floor))); return { d: r(), s: r(), c: r() }; }
 
+  // ---------------- eventos semanales ----------------
+  let curEv = null, evT = 0, chal = null;
+  const evBonus = id => !!(curEv && curEv.bonus === id);
+  function eventDef(w) {
+    const type = EVENT_TYPES[w % EVENT_TYPES.length], cycle = Math.floor(w / EVENT_TYPES.length);
+    const cands = POKEDEX.filter(p => p.types.includes(type) && !CHILDREN[p.dex]).sort((a, b) => bst(b.dex) - bst(a.dex) || a.dex - b.dex).slice(0, 8);
+    return { w, type, bonus: EVENT_BONUS_ORDER[w % EVENT_BONUS_ORDER.length], boss: cands[cycle % cands.length].dex };
+  }
+  function refreshEvent() {
+    const w = weekIdx();
+    if (!curEv || curEv.w !== w) curEv = eventDef(w);
+    if (S && S.event && S.event.week !== w) S.event = { week: w, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 };
+  }
+  const eventDaysLeft = () => 7 - (dayIndex() + 3) % 7;
+  const eventPool = (rar) => { const out = []; for (const g of unlockedGens()) for (const d of POOLG[g][rar]) if (DEX[d].types.includes(curEv.type)) out.push(d); return out; };
+  // destacado del evento (épico o legendario del tipo de la semana, fijo durante el ciclo)
+  function eventFeat(rar) {
+    const l = eventPool(rar);
+    return l.length ? l[Math.floor(curEv.w / EVENT_TYPES.length) % l.length] : null;
+  }
+  const chalRule = id => !!(chal && chal.rule && chal.rule.id === id);
+
   const tierOf = lvl => { let t = 0; for (let i = 0; i < TIER_LV.length; i++) if (lvl >= TIER_LV[i]) t = i; return t; };
   const moveOf = m => MOVE_TIERS[DEX[m.dex].types[0]][tierOf(m.lvl)];
-  function monDmg(m) { return power(m.dex) * RAR_MULT[RAR[m.dex]] * lvlMult(m.lvl) * STAR_MULT[m.stars] * (m.shiny ? 1.5 : 1) * TIER_MULT[tierOf(m.lvl)] * globalDmg() * (1 + itemDmg(m)) * synMult(m) * (1 + natVal(m, 'dmg')) * (1 + ivBonus(m, 'd')); }
+  function monDmg(m) { return power(m.dex) * RAR_MULT[RAR[m.dex]] * lvlMult(m.lvl) * STAR_MULT[m.stars] * (m.shiny ? 1.5 : 1) * TIER_MULT[tierOf(m.lvl)] * globalDmg() * (1 + itemDmg(m)) * synMult(m) * (1 + natVal(m, 'dmg')) * (1 + ivBonus(m, 'd')) * (curEv && DEX[m.dex].types.includes(curEv.type) ? 1 + EVENT_DMG : 1) * (chalRule('only') && !DEX[m.dex].types.includes(chal.rule.only) ? 0.5 : 1); }
   function monRate(m) { const spe = DEX[m.dex].stats.spe; return Math.max(0.55, 1.25 - spe / 260) / ((1 + 0.04 * S.up.speed) * (1 + itemSpd(m)) * (1 + natVal(m, 'spd')) * (1 + ivBonus(m, 's'))); }
   function typeEff(at, defTypes) {
     let e = 1;
@@ -222,11 +249,11 @@ const Core = (() => {
   const upCost = id => Math.ceil(UPGRADES[id].base * Math.pow(UPGRADES[id].mul, S.up[id]));
   const shopCost = id => Math.ceil(LEAGUE_SHOP[id].base * Math.pow(LEAGUE_SHOP[id].mul, S.shop[id]));
   const pokeBallPrice = () => Math.ceil((1 - 0.04 * S.shop.disc) * 30 * Math.pow(1.2, Math.min(S.stats.maxStage, 140) - 1) * Math.pow(1.05, Math.max(0, S.stats.maxStage - 140)));
-  const critChance = m => Math.max(0, 0.03 + 0.02 * S.up.crit + 0.01 * S.shop.critb + (m ? itemCrit(m) + natVal(m, 'crit') + ivBonus(m, 'c') : 0));
+  const critChance = m => chalRule('nocrit') ? 0 : Math.max(0, 0.03 + 0.02 * S.up.crit + 0.01 * S.shop.critb + (m ? itemCrit(m) + natVal(m, 'crit') + ivBonus(m, 'c') : 0));
   const critMult = () => 3 + 0.25 * S.up.critdmg;
-  const catchChance = () => (0.015 + 0.005 * S.up.catch + 0.004 * S.shop.catch) * (skillOn('lure') ? 6 : 1) * (1 + teamItemSum('drop'));
+  const catchChance = () => (0.015 + 0.005 * S.up.catch + 0.004 * S.shop.catch) * (skillOn('lure') ? 6 : 1) * (1 + teamItemSum('drop')) * (evBonus('tickets') ? 1.5 : 1);
   const goldenChance = () => 1 / 120 + 0.002 * S.up.golden;
-  const shinyRate = () => SHINY_RATE * (1 + 0.2 * S.shop.shiny);
+  const shinyRate = () => SHINY_RATE * (1 + 0.2 * S.shop.shiny) * (evBonus('shiny') ? 2 : 1);
   function teamDps(defTypes) {
     let d = 0;
     for (const k of S.team) { const m = S.mons[k]; d += monDmg(m) / monRate(m) * (defTypes ? eff(m.dex, defTypes) : 1) * (1 + critChance(m) * (critMult() - 1)); }
@@ -258,6 +285,12 @@ const Core = (() => {
     return pool[Math.floor(rnd() * pool.length)];
   }
   function spawn() {
+    if (chal) {
+      F.enemy = { dex: chal.dex, hp: chal.hp, max: chal.hp, boss: true, golden: false, tier: chal.tier, types: DEX[chal.dex].types, stage: 0, chal: true };
+      F.bossT = chal.time; F.timers = S.team.map((k, i) => 0.2 + i * 0.13); F.hits = [];
+      emit('spawn', F.enemy);
+      return;
+    }
     const s = S.stage, boss = isBoss(s);
     const r = routeData(s);
     const dex = boss ? r.boss.dex : pickWild(s);
@@ -281,6 +314,7 @@ const Core = (() => {
   }
   function kill() {
     const e = F.enemy, s = e.stage;
+    if (e.chal) return chalWin(e);
     const coins = killCoins(s) * (e.golden ? 5 : 1);
     S.coins += coins; S.stats.coinsTotal += coins; S.stats.kills++;
     let gems = e.golden ? 3 : 0, firstKill = false;
@@ -306,6 +340,7 @@ const Core = (() => {
     else if (!e.boss && rnd() < EGG_WILD_DROP * (e.golden ? 10 : 1)) { let r = rnd() * 100; egg = 0; for (let t = 0; t < EGG_WILD_TIER.length; t++) { r -= EGG_WILD_TIER[t]; if (r < 0) { egg = t; break; } } }
     if (egg !== null) giveEgg(egg);
     eggProgress(e.boss ? 5 : e.golden ? 3 : 1);
+    if (curEv && e.types.includes(curEv.type)) S.event.kills++;
     emit('kill', { enemy: e, coins, gems, tickets, item, egg });
     F.enemy = null; F.respawn = 0.45; F.hits = [];
     if (e.boss) { delete S.bossFails[s]; advance(true); emit('bossWin', e); }
@@ -323,7 +358,7 @@ const Core = (() => {
     emit('stage', S.stage);
   }
   function goStage(s) {
-    if (s < 1 || s > S.maxStage) return;
+    if (chal || s < 1 || s > S.maxStage) return;
     S.stage = s; S.kills = 0; S.retryT = 0; F.enemy = null; F.respawn = 0.3;
     emit('stage', S.stage);
   }
@@ -334,7 +369,7 @@ const Core = (() => {
     F.enemy = null; F.respawn = 0.6;
     emit('bossFail'); emit('stage', S.stage);
   }
-  function fightBoss() { if (!isBoss(S.stage) && S.kills >= 10) { S.auto = true; advance(true); } }
+  function fightBoss() { if (!chal && !isBoss(S.stage) && S.kills >= 10) { S.auto = true; advance(true); } }
 
   function tap(auto) {
     const e = F.enemy;
@@ -349,11 +384,12 @@ const Core = (() => {
   function tick(dt) {
     if (!S || !S.started || paused) return;
     S.stats.time += dt;
+    evT += dt; if (evT > 20) { evT = 0; refreshEvent(); }
     if (S.retryT >= 0 && !S.auto) { S.retryT += dt; if (S.settings.autoBoss && S.kills >= 10 && !isBoss(S.stage) && isBoss(S.stage + 1) && S.retryT >= 12 && (bossReady(S.stage + 1) >= K.ready || S.retryT >= K.retryMax)) fightBoss(); }
     if (S.up.autotap) { S.autoAcc += dt * 0.5 * S.up.autotap; while (S.autoAcc >= 1) { S.autoAcc -= 1; if (F.enemy) tap(true); } }
     if (!F.enemy) { F.respawn -= dt; if (F.respawn <= 0) spawn(); return; }
     const e = F.enemy;
-    if (e.boss) { F.bossT -= dt; if (F.bossT <= 0 && e.hp > 0) { bossFail(); return; } }
+    if (e.boss) { F.bossT -= dt; if (F.bossT <= 0 && e.hp > 0) { if (e.chal) chalFail(); else bossFail(); return; } }
     for (let i = 0; i < S.team.length; i++) {
       const m = S.mons[S.team[i]];
       if (F.timers[i] === undefined) F.timers[i] = 0.3;
@@ -427,7 +463,7 @@ const Core = (() => {
       m.copies++;
       const cand = rollIv(floor);                           // cada copia repetida tira unos IVs nuevos y te quedas con los mejores
       if (cand.d + cand.s + cand.c > ivSum(m)) { ivUp = { from: ivPct(m), to: (cand.d + cand.s + cand.c) / (3 * IV_MAX) }; m.iv = cand; S.stats.ivUps++; }
-      dust = Math.round(DUST_GAIN[rar] * (1 + 0.1 * S.up.alch + 0.15 * S.shop.dust) * (shiny ? 2 : 1));
+      dust = Math.round(DUST_GAIN[rar] * (1 + 0.1 * S.up.alch + 0.15 * S.shop.dust) * (shiny ? 2 : 1) * (evBonus('dust') ? 2 : 1));
       S.dust += dust; S.stats.dust += dust;
       if (shiny && !m.shinyOwned) { m.shinyOwned = true; m.shiny = true; newShiny = true; }
     }
@@ -501,6 +537,87 @@ const Core = (() => {
     return true;
   }
 
+  // ---------------- retos: jefe del evento y Torre de batalla ----------------
+  // Un reto sustituye al combate normal: un solo enemigo con vida y tiempo fijos. No se guarda: si recargas, se pierde el intento.
+  const chalBase = () => { let s = Math.max(10, S.maxStage); if (isBoss(s)) s--; return enemyHp(s); };
+  const chalTime = t => t + 3 * S.up.bosstime + 2 * S.shop.bt;
+  const towerUnlocked = () => S.stats.maxStage >= TOWER_UNLOCK;
+  const towerTypeOf = f => EVENT_TYPES[(f - 1) % EVENT_TYPES.length];
+  function towerSpec(f) {
+    const boss = f % 5 === 0, type = towerTypeOf(f);
+    let list = POKEDEX.filter(p => p.types.includes(type) && (boss ? !CHILDREN[p.dex] && bst(p.dex) >= 450 : !p.leg && (!CHILDREN[p.dex] || stageOf(p.dex) >= 1) )).sort((a, b) => a.dex - b.dex);
+    if (boss) list = list.sort((a, b) => bst(b.dex) - bst(a.dex)).slice(0, 10);
+    if (!list.length) list = POKEDEX.filter(p => p.types.includes(type));
+    const pick = list[(boss ? Math.floor(f / 5) : f * 7919) % list.length];
+    let rule = boss ? Object.assign({}, TOWER_RULES[(f / 5 - 1) % TOWER_RULES.length]) : null;
+    if (rule && rule.id === 'only') rule.only = type;
+    const hp = chalBase() * TOWER_HP0 * Math.pow(TOWER_G, f - 1) * (boss ? TOWER_BOSS_X : 1) * (rule && rule.hp || 1);
+    const time = chalTime(TOWER_TIME) * (rule && rule.time || 1);
+    return { kind: 'tower', floor: f, dex: pick.dex, hp, time, rule, type, boss, tier: f < 10 ? (boss ? 2 : 1) : f < 30 ? 3 : f < 60 ? 4 : 5, label: 'Torre · Piso ' + f };
+  }
+  function eventSpec(tier) {
+    const T = EVENT_TIERS[tier];
+    return { kind: 'event', tier: 2 + tier, dex: curEv.boss, hp: chalBase() * T.hp, time: chalTime(T.time), rule: null, type: curEv.type, boss: true, evTier: tier, label: 'Evento · Jefe ' + T.name.toLowerCase() };
+  }
+  // poder del equipo contra el reto (≥1: lo vence a tiempo)
+  function chalReady(spec) {
+    const prev = chal; chal = spec;
+    const r = teamDps(DEX[spec.dex].types) * spec.time / spec.hp;
+    chal = prev; return r;
+  }
+  const towerStarts = () => { const out = []; for (let c = 1; c - 1 <= S.tower.best; c += 5) out.push(c); return out; };
+  function startChal(spec) {
+    if (chal || !S.started || !S.team.length) return false;
+    chal = spec; F.enemy = null; F.respawn = 0.8; F.hits = []; F.timers = [];
+    emit('chalStart', spec);
+    return true;
+  }
+  function startTower(f) { return towerUnlocked() && towerStarts().includes(f) && startChal(towerSpec(f)); }
+  function startEvent(tier) { return towerUnlocked() && !!EVENT_TIERS[tier] && startChal(eventSpec(tier)); }
+  function endChal(info) { const c = chal; chal = null; F.enemy = null; F.respawn = 0.8; F.hits = []; emit('chalEnd', Object.assign({ kind: c && c.kind }, info)); }
+  function abortChal() { if (chal) endChal({ aborted: true }); }
+  function giveReward(r) {
+    if (!r) return;
+    if (r.gems) S.gems += r.gems;
+    if (r.dust) { S.dust += r.dust; S.stats.dust += r.dust; }
+    if (r.tk) giveTickets(r.tk);
+    if (r.egg !== undefined) giveEgg(r.egg);
+  }
+  function towerReward(f) {
+    const r = { gems: 3 + Math.floor(f / 2), dust: 5 + 2 * f };
+    if (f % 5 === 0) r.tk = f <= 10 ? { super: 1 } : f <= 25 ? { super: 2 } : f <= 50 ? { ultra: 1 } : f <= 100 ? { ultra: 2 } : { master: 1 };
+    if (f % 10 === 0) r.egg = f <= 20 ? 1 : f < 60 ? 2 : 3;
+    return r;
+  }
+  function chalWin(e) {
+    const c = chal;
+    emit('kill', { enemy: e, coins: 0, gems: 0, tickets: null, item: null, egg: null, chal: true });
+    F.enemy = null; F.hits = []; F.respawn = 1.4;
+    if (c.kind === 'tower') {
+      const first = c.floor > S.tower.best;
+      let rew = null;
+      if (first) { S.tower.best = c.floor; rew = towerReward(c.floor); giveReward(rew); }
+      emit('chalWin', { kind: 'tower', floor: c.floor, first, rew });
+      chal = towerSpec(c.floor + 1);                    // la Torre sigue hasta que caigas
+    } else {
+      const first = !S.event.tiers[c.evTier], rew = first ? EVENT_TIERS[c.evTier].rew : null;
+      if (first) { S.event.tiers[c.evTier] = 1; S.stats.eventTiers++; giveReward(rew); }
+      emit('chalWin', { kind: 'event', tier: c.evTier, first, rew });
+      endChal({ won: true });
+    }
+  }
+  function chalFail() {
+    const c = chal;
+    emit('chalFail', { kind: c.kind, floor: c.floor, tier: c.evTier, best: S.tower.best });
+    endChal({ won: false });
+  }
+  function claimEventTask(i) {
+    const t = EVENT_TASKS[i];
+    if (!t || S.event.claimed[t.id] || S.event[t.stat] < t.goal) return false;
+    S.event.claimed[t.id] = 1; giveReward(t.rew); return true;
+  }
+  function eventFreePull() { if (S.event.free) return null; S.event.free = 1; return pull('event', 1, true); }
+
   // ---------------- huevos ----------------
   // los huevos de las primeras S.inc posiciones se incuban: cada victoria suma progreso (un jefe, 5; un dorado, 3) y también el tiempo fuera
   const eggNeed = e => Math.ceil(EGGS[e.t].need * (1 - 0.05 * S.shop.egg));
@@ -514,6 +631,7 @@ const Core = (() => {
     return e;
   }
   function eggProgress(n) {
+    if (evBonus('eggs')) n *= 2;
     for (let i = 0; i < Math.min(S.inc, S.eggs.length); i++) {
       const e = S.eggs[i];
       if (eggReady(e)) continue;
@@ -596,6 +714,7 @@ const Core = (() => {
   function pickFrom(b, rar) {
     let list = [];
     for (const g of b.gen ? [b.gen] : unlockedGens()) list = list.concat(POOLG[g][rar]);
+    if (b.event) { const t = list.filter(d => DEX[d].types.includes(curEv.type)); if (t.length) list = t; }
     if (!list.length) return pickFrom(b, rar - 1);
     return list[Math.floor(rnd() * list.length)];
   }
@@ -623,10 +742,12 @@ const Core = (() => {
           else { dex = pickFrom(b, 5); if (dex === fe) S.bannerLost = 0; else S.bannerLost = 1; }
         } else if (rnd() < 0.5) dex = fe;
       }
+      if (dex === null && b.event && rar >= 4) { const f = eventFeat(rar); if (f && rnd() < 0.5) dex = f; }
       if (dex === null) dex = pickFrom(b, rar);
       out.push(addMon(dex, rnd() < shinyRate(), IV_FLOOR[b.ticket] || 0));
     }
     S.stats.pulls += n;
+    if (b.event) S.event.pulls += n;
     return out;
   }
   const freePullReady = () => S.freeDay !== today();
@@ -673,6 +794,7 @@ const Core = (() => {
     const st = a.stat;
     if (st === 'dex') return dexCount();
     if (st === 'legends') return legendsOwned();
+    if (st === 'tower') return S.tower.best;
     if (st === 'ivGood') return Object.values(S.mons).filter(m => ivPct(m) >= 0.9).length;
     if (st === 'ivPerfect') return Object.values(S.mons).filter(m => m.iv.d === IV_MAX && m.iv.s === IV_MAX && m.iv.c === IV_MAX).length;
     if (st === 'stars5') return Object.values(S.mons).filter(m => m.stars >= 5).length;
@@ -697,6 +819,7 @@ const Core = (() => {
   function prestige() {
     const g = medalGain();
     if (!g) return 0;
+    chal = null;
     S.medals += g; S.mp += g; S.stats.prestiges++;
     S.coins = 0; S.stage = 1; S.maxStage = 1; S.kills = 0; S.badges = {}; S.bossFails = {}; S.retryT = 0; S.auto = true; S.slots = Math.min(S.slots, 2 + S.shop.slots);
     for (const k of Object.keys(S.up)) S.up[k] = 0;
@@ -743,6 +866,8 @@ const Core = (() => {
     natOf, natVal, ivSum, ivPct, ivGrade, ivBonus, trainIv, rerollNat, setNat,
     eggNeed, eggReady, eggsReady, giveEgg, hatch, moveEgg, buyEgg, incCost, buyInc,
     typeEff, routeFoes, matchupAvg, bestTeam, strongTypes, setTeamList,
+    refreshEvent, eventDaysLeft, eventFeat, eventPool, evBonus, towerUnlocked, towerSpec, eventSpec, chalReady, towerStarts, towerReward, startTower, startEvent, abortChal, claimEventTask, eventFreePull,
+    get ev() { return curEv; }, get chal() { return chal; }, inChal: () => !!chal,
   };
 })();
 if (typeof module !== 'undefined') module.exports = Core;

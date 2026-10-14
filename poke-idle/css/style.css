@@ -105,7 +105,7 @@ img.pix { image-rendering: pixelated; vertical-align: middle; }
 .dps b { color: #fff; }
 .tap-hint { position: absolute; left: 50%; bottom: 8%; transform: translateX(-50%); font-size: 16px; color: #fff; text-shadow: 0 2px 0 #000; animation: hop 1s infinite; pointer-events: none; }
 .side { display: flex; flex-direction: column; min-height: 0; background: var(--panel); border-radius: 10px; box-shadow: 0 0 0 3px var(--line), 0 8px 0 #050a1c; overflow: hidden; }
-.tabs { display: grid; grid-template-columns: repeat(6, 1fr); background: #0b1638; }
+.tabs { display: grid; grid-template-columns: repeat(7, 1fr); background: #0b1638; }
 .tabs button { background: none; border: 0; padding: 6px 2px 5px; font-size: 12px; color: var(--dim); display: flex; flex-direction: column; align-items: center; gap: 1px; position: relative; box-shadow: inset 0 -2px 0 var(--line); }
 .tabs button.on { color: var(--yellow); background: var(--panel); box-shadow: inset 0 3px 0 var(--yellow); }
 .tabs .dot { position: absolute; top: 4px; right: 18%; width: 9px; height: 9px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 2px #0b1638; }
@@ -555,3 +555,36 @@ body { font-variant-ligatures: none; font-feature-settings: 'liga' 0, 'clig' 0; 
 .pull .dup.nat { color: #cfd8ff; }
 .gr { display: inline-block; padding: 0 6px; border-radius: 4px; color: #14182e; font-weight: 700; font-size: 12px; line-height: 1.5; }
 .pull .dup .gr { font-size: 13px; }
+
+/* ---- v8: eventos semanales y Torre ---- */
+.chal-bar { position: absolute; left: 50%; top: 52px; transform: translateX(-50%); z-index: 3; display: flex; align-items: center; gap: 8px; background: #2a0f1ee6; border-radius: 8px; padding: 3px 4px 3px 10px; font-size: 13px; box-shadow: inset 0 0 0 2px #ff6a7a; white-space: nowrap; max-width: 96%; }
+.chal-bar.hidden { display: none; }
+.chal-bar span { overflow: hidden; text-overflow: ellipsis; }
+.evcard { background: linear-gradient(160deg, #0f1c44, #0b1638); border-radius: 10px; padding: 8px; margin: 6px 0 10px; box-shadow: inset 0 0 0 2px var(--ec, var(--line)); }
+.evhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.evhead b { font-size: 18px; color: var(--ec); }
+.evhead small { color: var(--dim); font-size: 12px; margin-left: auto; }
+.evtag { font-size: 10px; letter-spacing: 1px; background: var(--ec); color: #10152a; padding: 0 5px; border-radius: 3px; font-weight: 700; }
+.evrow { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+.evrow img { width: 56px; height: 56px; border-radius: 8px; background: #050c24; image-rendering: pixelated; }
+.evfx { margin: 4px 0 6px; padding-left: 16px; font-size: 13px; color: #cfd8ff; }
+.evfx li { margin: 2px 0; }
+.tiers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 6px 0; }
+.tierbtn { background: #0a1230; border: 0; border-radius: 8px; padding: 6px; text-align: left; color: var(--ink); box-shadow: inset 0 0 0 2px var(--line); cursor: pointer; font-family: inherit; display: flex; flex-direction: column; gap: 1px; }
+.tierbtn:disabled { opacity: .5; cursor: default; }
+.tierbtn.done { box-shadow: inset 0 0 0 2px #3ca15f; }
+.tierbtn b { font-size: 14px; display: flex; justify-content: space-between; }
+.tierbtn small { font-size: 11px; color: var(--dim); }
+.rdy { font-size: 12px; font-weight: 700; color: #ffb4c0; }
+.rdy.ok { color: #7ff0a0; }
+.rdy.mid { color: #ffd23f; }
+.etask { display: flex; align-items: center; gap: 8px; background: #0a1230; border-radius: 8px; padding: 6px; margin-bottom: 4px; }
+.etask .qi { flex: 1; min-width: 0; }
+.etask .qi b { font-size: 13px; display: block; }
+.etask .qi small { font-size: 11px; color: var(--dim); }
+.tower { background: linear-gradient(160deg, #1a1030, #0b1638); border-radius: 10px; padding: 8px; box-shadow: inset 0 0 0 2px #8a6ad0; }
+.tower .big { font-size: 34px; color: var(--yellow); text-align: center; line-height: 1; margin: 2px 0; }
+.floorline { font-size: 13px; margin: 5px 0; color: #cfd8ff; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.floorline .type { margin: 0; }
+.rulebox { background: #2a1830; border-radius: 6px; padding: 4px 8px; font-size: 12px; color: #ffd9a8; margin: 4px 0; }
+@media (max-width: 860px) { .tabs button { font-size: 10px; } }
