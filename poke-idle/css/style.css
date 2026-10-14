@@ -614,3 +614,9 @@ body { font-variant-ligatures: none; font-feature-settings: 'liga' 0, 'clig' 0; 
 .nfx .seg button { font-size: 11px; padding: 4px 4px; }
 .ivrow .arrow { text-align: center; color: var(--dim); }
 .genes.cmp .ivrow { grid-template-columns: 90px 1fr 24px 1fr; }
+
+/* ---- v11: idioma ---- */
+.langsw { position: absolute; top: 0; right: 0; display: flex; gap: 4px; z-index: 3; }
+.langsw button { background: #0a1430d8; color: var(--dim); border: 0; border-radius: 6px; padding: 4px 9px; font: 700 12px var(--f); box-shadow: inset 0 0 0 2px var(--line); cursor: pointer; }
+.langsw button.on { color: var(--yellow); box-shadow: inset 0 0 0 2px var(--yellow); }
+#scr-title .title-wrap { position: relative; }

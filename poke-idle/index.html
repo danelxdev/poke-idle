@@ -25,14 +25,15 @@
   <canvas id="title-bg"></canvas>
   <div class="title-scroll">
     <div class="title-wrap">
+      <div class="langsw" id="langsw"><button data-lang="es">ES</button><button data-lang="en">EN</button></div>
       <div class="logo-wrap"><i class="logo-ball" id="logo-ball"></i><h1 class="logo">Poké<span>Idle</span></h1></div>
-      <p class="tag">Entrena, evoluciona y colecciona a todos los Pokémon</p>
+      <p class="tag" data-en="Train, evolve and collect all the Pokémon">Entrena, evoluciona y colecciona a todos los Pokémon</p>
       <div class="badges" id="t-badges"></div>
       <div class="cta">
         <div class="cont hidden" id="t-cont"></div>
-        <button class="btn big primary" id="btn-start">Jugar</button>
-        <a class="link hidden" id="t-install" href="#">Instalar la app</a>
-        <a class="link hidden" id="t-new" href="#">Empezar una partida nueva</a>
+        <button class="btn big primary" id="btn-start" data-en="Play">Jugar</button>
+        <a class="link hidden" id="t-install" href="#" data-en="Install the app">Instalar la app</a>
+        <a class="link hidden" id="t-new" href="#" data-en="Start a new game">Empezar una partida nueva</a>
       </div>
       <div class="t-grid">
         <div class="t-panel" id="t-featured"></div>
@@ -41,15 +42,15 @@
       <div class="t-cards" id="t-cards"></div>
       <div class="t-panel t-news" id="t-news"></div>
       <a class="kofi" id="kofi-title" href="https://ko-fi.com/danelalonso" target="_blank" rel="noopener noreferrer">Apoyar en Ko-fi</a>
-      <p class="fine">Proyecto de fan sin ánimo de lucro · Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Pokémon © Nintendo/Creatures/GAME FREAK · <a href="CREDITS.md" target="_blank">Créditos</a></p>
+      <p class="fine"><span data-en="Non-profit fan project · Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Pokémon © Nintendo/Creatures/GAME FREAK ·">Proyecto de fan sin ánimo de lucro · Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Pokémon © Nintendo/Creatures/GAME FREAK ·</span> <a href="CREDITS.md" target="_blank" data-en="Credits">Créditos</a></p>
     </div>
   </div>
 </section>
 
 <section id="scr-starter" class="screen">
   <div class="panel center-panel">
-    <h2>Elige a tu primer Pokémon</h2>
-    <p class="sub">Combatirá solo mientras tú le subes de nivel. Los demás los conseguirás en las Poké Balls y capturándolos por las rutas.</p>
+    <h2 data-en="Choose your first Pokémon">Elige a tu primer Pokémon</h2>
+    <p class="sub" data-en="It will fight on its own while you level it up. You will get the rest from Poké Balls.">Combatirá solo mientras tú le subes de nivel. Los demás los conseguirás en las Poké Balls.</p>
     <div id="starters" class="starter-grid"></div>
   </div>
 </section>
@@ -57,40 +58,40 @@
 <section id="scr-game" class="screen">
   <header class="top">
     <div class="logo tiny">Poké<span>Idle</span></div>
-    <div class="cur coins" title="Monedas"><span id="i-coin"></span><b id="coins">0</b><small id="cps"></small></div>
-    <div class="cur gems" title="Gemas"><span id="i-gem"></span><b id="gems">0</b></div>
-    <button class="cur tk" id="btn-tk" title="Tickets de gacha: toca para abrir el gacha"><span id="i-tk"></span><b id="tks">0</b></button>
-    <div class="cur dust" title="Polvo estelar: canjéalo por Pokémon en la Pokédex"><span id="i-dust"></span><b id="dust">0</b></div>
-    <button class="icobtn" id="btn-settings" title="Ajustes"></button>
+    <div class="cur coins" title="Monedas" data-en-title="Coins"><span id="i-coin"></span><b id="coins">0</b><small id="cps"></small></div>
+    <div class="cur gems" title="Gemas" data-en-title="Gems"><span id="i-gem"></span><b id="gems">0</b></div>
+    <button class="cur tk" id="btn-tk" title="Tickets de gacha: toca para abrir el gacha" data-en-title="Gacha tickets: tap to open the gacha"><span id="i-tk"></span><b id="tks">0</b></button>
+    <div class="cur dust" title="Polvo estelar: canjéalo por tickets en el Gacha" data-en-title="Stardust: trade it for tickets in the Gacha"><span id="i-dust"></span><b id="dust">0</b></div>
+    <button class="icobtn" id="btn-settings" title="Ajustes" data-en-title="Settings"></button>
   </header>
   <main class="layout">
     <div class="arena-wrap">
       <div class="arena" id="arena">
         <canvas id="cv"></canvas>
-        <button class="mapbtn" id="btn-map" title="Mapa"></button>
+        <button class="mapbtn" id="btn-map" title="Mapa" data-en-title="Map"></button>
         <div class="a-top">
           <button class="st-arrow" id="st-prev">‹</button>
           <div class="st-mid"><b id="route-name"></b><span id="stage-label"></span><div class="pips" id="pips"></div></div>
           <button class="st-arrow" id="st-next">›</button>
         </div>
-        <div class="chal-bar hidden" id="chal-bar"><span id="chal-txt"></span><button class="btn small danger" id="chal-x">Abandonar</button></div>
+        <div class="chal-bar hidden" id="chal-bar"><span id="chal-txt"></span><button class="btn small danger" id="chal-x" data-en="Give up">Abandonar</button></div>
         <div class="enemy-box" id="enemy-box"><b id="enemy-name"></b><div class="foe-types" id="foe-types"></div><div class="bar hp"><i id="enemy-hp"></i><span id="enemy-hptxt"></span></div><div class="bar timer hidden" id="boss-timer"><i id="boss-t"></i></div></div>
-        <button class="btn primary boss-btn hidden" id="btn-boss">¡Reta al jefe!</button>
+        <button class="btn primary boss-btn hidden" id="btn-boss" data-en="Challenge the boss!">¡Reta al jefe!</button>
         <div class="dmg-layer" id="dmg-layer"></div>
         <div class="skills" id="skills"></div>
         <div class="dps" id="dps"></div>
-        <div class="tap-hint" id="tap-hint">¡Toca para atacar!</div>
+        <div class="tap-hint" id="tap-hint" data-en="Tap to attack!">¡Toca para atacar!</div>
       </div>
     </div>
     <div class="side">
       <nav class="tabs" id="tabs">
-        <button data-tab="team" class="on"><span data-ico="friends"></span>Equipo</button>
-        <button data-tab="up"><span data-ico="up"></span>Mejoras</button>
-        <button data-tab="gacha"><span data-ico="ball"></span>Gacha<i class="dot hidden" id="gacha-dot"></i></button>
+        <button data-tab="team" class="on"><span data-ico="friends"></span><span data-en="Team">Equipo</span></button>
+        <button data-tab="up"><span data-ico="up"></span><span data-en="Upgrades">Mejoras</span></button>
+        <button data-tab="gacha"><span data-ico="ball"></span><span>Gacha</span><i class="dot hidden" id="gacha-dot"></i></button>
         <button data-tab="dex"><span data-ico="book"></span>Pokédex</button>
-        <button data-tab="chal"><span data-ico="fist"></span>Retos<i class="dot hidden" id="chal-dot"></i></button>
-        <button data-tab="quests"><span data-ico="trophy"></span>Misiones<i class="dot hidden" id="quest-dot"></i></button>
-        <button data-tab="league"><span data-ico="crown"></span>Liga</button>
+        <button data-tab="chal"><span data-ico="fist"></span><span data-en="Challenges">Retos</span><i class="dot hidden" id="chal-dot"></i></button>
+        <button data-tab="quests"><span data-ico="trophy"></span><span data-en="Quests">Misiones</span><i class="dot hidden" id="quest-dot"></i></button>
+        <button data-tab="league"><span data-ico="crown"></span><span data-en="League">Liga</span></button>
       </nav>
       <div class="tab-body" id="tab-body"></div>
     </div>
@@ -99,13 +100,16 @@
 </section>
 
 <div id="modal" class="modal hidden"><div class="modal-box" id="modal-box"></div></div>
-<div id="evo" class="evoov hidden"><div class="evoov-rays"></div><canvas id="evo-cv" width="160" height="160"></canvas><div id="evo-txt" class="evoov-txt"></div><button class="btn big primary hidden" id="evo-ok">¡Genial!</button></div>
+<div id="evo" class="evoov hidden"><div class="evoov-rays"></div><canvas id="evo-cv" width="160" height="160"></canvas><div id="evo-txt" class="evoov-txt"></div><button class="btn big primary hidden" id="evo-ok" data-en="Great!">¡Genial!</button></div>
 <div id="gacha-fx" class="gacha-fx hidden"></div>
 <div id="toast" class="toast hidden"></div>
 
 <script src="js/data/pokedex.js"></script>
 <script src="js/data/moves.js"></script>
 <script src="js/data/idle.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/data/en.js"></script>
+<script>I18N.apply(I18N.pref());</script>
 <script src="js/art/tiles.js"></script>
 <script src="js/art/vfx.js"></script>
 <script src="js/art/icons.js"></script>

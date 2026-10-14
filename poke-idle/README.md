@@ -43,6 +43,16 @@ Los Pokémon **solo se consiguen en el gacha** (aparte de tu primer compañero).
 - La animación de apertura crece según la rareza: ticket, Poké Ball que se agita con un halo del color del mejor premio, destello y reveladas una a una, con efectos especiales para épicos, legendarios y shinies.
 - Las regiones nuevas del gacha se desbloquean al llegar a ellas.
 
+## Idiomas (español / inglés)
+
+El juego está en **español** y en **inglés**. Se elige según el idioma del navegador la primera vez y se cambia en la portada (ES | EN) o en Ajustes; el cambio recarga la página.
+
+- `js/i18n.js`: `I18N.apply(lang)` y el atajo `L(es, en)` que usan los textos de la interfaz (`ui.js`, `main.js`, `core.js`…). El idioma se aplica antes de cargar el resto de scripts.
+- `js/data/en.js`: traducción de los datos (regiones, rutas, jefes, bolas, mejoras, objetos, logros, naturalezas, movimientos, nombres de Pokémon que cambian…). Al elegir inglés sustituye los textos en los objetos de datos y los restaura al volver al español.
+- Los textos del HTML estático usan `data-en` (contenido), `data-en-title` y `data-en-ph`.
+- Las misiones diarias guardan solo qué contar y cuánto: el texto se genera al mostrarlas, así que cambian con el idioma.
+- Para añadir un idioma: duplica el patrón `L()`/`EN_APPLY` y amplía `I18N.apply`.
+
 ## Huevos, naturalezas, IVs y tipos
 
 **Huevos.** Cada victoria avanza los huevos que están en una incubadora (jefe ×5, Pokémon dorado ×3), también sin conexión. Hay cuatro tipos:

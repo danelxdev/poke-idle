@@ -27,48 +27,48 @@
   Core.on('moveLearn', d => {
     const mv = MOVES[d.to];
     Audio8.play('levelup');
-    UI.banner('¡' + DEX[d.dex].name + ' aprendió ' + mv.name + '!', 'Su ataque ahora es más potente', TYPE_COLORS[mv.type]);
+    UI.banner(L('¡' + DEX[d.dex].name + ' aprendió ' + mv.name + '!', DEX[d.dex].name + ' learned ' + mv.name + '!'), L('Su ataque ahora es más potente', 'Its attack is now stronger'), TYPE_COLORS[mv.type]);
   });
   Core.on('item', it => {
     const r = ITEM_RAR[it.rar];
     Audio8.play(it.rar >= 2 ? 'item' : 'coin');
-    if (it.rar >= 2) UI.banner('¡' + HELD[it.id].name + (it.id === 'orbe' ? ' de ' + TYPE_NAMES[it.type] : '') + '!', r.name + ' · equípalo desde la pestaña Equipo', r.color);
+    if (it.rar >= 2) UI.banner(L('¡', '') + HELD[it.id].name + (it.id === 'orbe' ? L(' de ', ' · ') + TYPE_NAMES[it.type] : '') + '!', r.name + L(' · equípalo desde la pestaña Equipo', ' · equip it from the Team tab'), r.color);
   });
   Core.on('egg', d => {
-    if (d.full) { UI.toast('Huevos al máximo: ' + EGGS[d.t].name + ' convertido en ' + d.dust + ' de polvo'); return; }
+    if (d.full) { UI.toast(L('Huevos al máximo: ' + EGGS[d.t].name + ' convertido en ' + d.dust + ' de polvo', 'Eggs full: ' + EGGS[d.t].name + ' turned into ' + d.dust + ' stardust')); return; }
     Audio8.play('item');
-    if (Core.S.started && d.t >= 1) UI.banner('¡Has encontrado un ' + EGGS[d.t].name + '!', 'Eclosiona en una incubadora de la pestaña Gacha', EGGS[d.t].color);
-    else if (Core.S.started) UI.toast(Icons.html('egg' + d.t, 18) + ' ¡Has encontrado un ' + EGGS[d.t].name + '!');
+    if (Core.S.started && d.t >= 1) UI.banner(L('¡Has encontrado un ' + EGGS[d.t].name + '!', 'You found a ' + EGGS[d.t].name + '!'), L('Eclosiona en una incubadora de la pestaña Gacha', 'Hatch it in an incubator in the Gacha tab'), EGGS[d.t].color);
+    else if (Core.S.started) UI.toast(Icons.html('egg' + d.t, 18) + ' ' + L('¡Has encontrado un ' + EGGS[d.t].name + '!', 'You found a ' + EGGS[d.t].name + '!'));
   });
-  Core.on('eggReady', e => { Audio8.play('rare'); UI.banner('¡Un ' + EGGS[e.t].name + ' está listo!', 'Ve a la pestaña Gacha para eclosionarlo', EGGS[e.t].color); });
+  Core.on('eggReady', e => { Audio8.play('rare'); UI.banner(L('¡Un ' + EGGS[e.t].name + ' está listo!', 'A ' + EGGS[e.t].name + ' is ready!'), L('Ve a la pestaña Gacha para eclosionarlo', 'Go to the Gacha tab to hatch it'), EGGS[e.t].color); });
   Core.on('chalStart', c => {
     Audio8.music(c.kind === 'tower' && c.boss || c.kind === 'event' ? 'boss2' : 'boss');
-    UI.banner(c.label, c.rule ? c.rule.name + (c.rule.only ? ' ' + TYPE_ES[c.rule.only] : '') + ': ' + c.rule.desc : 'Vence al rival antes de que se acabe el tiempo', '#ff8040');
+    UI.banner(c.label, c.rule ? c.rule.name + (c.rule.only ? ' ' + TYPE_ES[c.rule.only] : '') + ': ' + c.rule.desc : L('Vence al rival antes de que se acabe el tiempo', 'Beat the rival before time runs out'), '#ff8040');
   });
   Core.on('chalWin', d => {
     Audio8.play(d.kind === 'event' || d.floor % 5 === 0 ? 'legend' : 'win');
-    if (d.kind === 'event') UI.banner('¡Jefe del evento vencido!', d.first ? UI.rewText(d.rew) : 'Ya habías recogido esta recompensa', '#ffd23f');
-    else if (d.first && d.floor % 5 === 0) UI.banner('¡Piso ' + d.floor + ' superado!', UI.rewText(d.rew), '#ffd23f');
-    else UI.toast('Piso ' + d.floor + (d.first ? ' · ' + UI.rewText(d.rew) : ' superado'));
+    if (d.kind === 'event') UI.banner(L('¡Jefe del evento vencido!', 'Event boss beaten!'), d.first ? UI.rewText(d.rew) : L('Ya habías recogido esta recompensa', 'You had already claimed this reward'), '#ffd23f');
+    else if (d.first && d.floor % 5 === 0) UI.banner(L('¡Piso ' + d.floor + ' superado!', 'Floor ' + d.floor + ' cleared!'), UI.rewText(d.rew), '#ffd23f');
+    else UI.toast(L('Piso ', 'Floor ') + d.floor + (d.first ? ' · ' + UI.rewText(d.rew) : L(' superado', ' cleared')));
   });
-  Core.on('chalFail', d => { Audio8.play('death'); UI.banner(d.kind === 'tower' ? 'La Torre te frena en el piso ' + d.floor : 'El jefe del evento resistió', d.kind === 'tower' ? 'Récord: piso ' + d.best : 'Mejora a tu equipo y vuelve a intentarlo', '#ff5050'); });
+  Core.on('chalFail', d => { Audio8.play('death'); UI.banner(d.kind === 'tower' ? L('La Torre te frena en el piso ' + d.floor, 'The Tower stops you at floor ' + d.floor) : L('El jefe del evento resistió', 'The event boss held out'), d.kind === 'tower' ? L('Récord: piso ', 'Record: floor ') + d.best : L('Mejora a tu equipo y vuelve a intentarlo', 'Improve your team and try again'), '#ff5050'); });
   Core.on('chalEnd', () => { Audio8.music(musicFor(Core.S.stage)); UI.refresh(true); });
   Core.on('tickets', t => { if (Core.S.started) UI.refresh(false); });
   Core.on('kill', k => {
-    if (k.enemy.golden) UI.toast(Icons.html('gem', 18) + ' ¡Pokémon dorado! +' + k.gems + ' gemas');
+    if (k.enemy.golden) UI.toast(Icons.html('gem', 18) + ' ' + L('¡Pokémon dorado! +' + k.gems + ' gemas', 'Golden Pokémon! +' + k.gems + ' gems'));
   });
   Core.on('bossWin', e => {
     const r = ROUTES[Core.route(e.stage) % ROUTES.length];
     Audio8.play(e.tier >= 4 ? 'legend' : 'win');
-    UI.banner('¡Has vencido a ' + r.boss.who + '!', e.tier === 1 ? 'Medalla de gimnasio: +3% de daño' : r.boss.title + ' derrotado', '#ffd23f');
+    UI.banner(L('¡Has vencido a ' + r.boss.who + '!', 'You beat ' + r.boss.who + '!'), e.tier === 1 ? L('Medalla de gimnasio: +3% de daño', 'Gym badge: +3% damage') : r.boss.title + L(' derrotado', ' defeated'), '#ffd23f');
   });
-  Core.on('bossWait', st => { const r = Core.routeData(st); UI.banner('Aún no estás listo para ' + r.boss.who, 'Sigue combatiendo: lo retarás solo cuando tengas fuerza suficiente', '#ffd23f'); });
-  Core.on('bossFail', () => { Audio8.play('death'); UI.banner('¡El jefe era demasiado fuerte!', 'Sigue combatiendo: lo retarás solo cuando estés listo', '#ff5050'); });
+  Core.on('bossWait', st => { const r = Core.routeData(st); UI.banner(L('Aún no estás listo para ' + r.boss.who, 'You are not ready for ' + r.boss.who + ' yet'), L('Sigue combatiendo: lo retarás solo cuando tengas fuerza suficiente', 'Keep fighting: you will challenge them only when strong enough'), '#ffd23f'); });
+  Core.on('bossFail', () => { Audio8.play('death'); UI.banner(L('¡El jefe era demasiado fuerte!', 'The boss was too strong!'), L('Sigue combatiendo: lo retarás solo cuando estés listo', 'Keep fighting: you will challenge them again when ready'), '#ff5050'); });
   Core.on('stage', s => {
     Audio8.music(musicFor(s));
     const r = Core.routeData(s);
-    if (Core.isBoss(s)) UI.banner(r.boss.who + ' te desafía', r.boss.title + ' · ' + Core.bossTime(s) + ' segundos para vencerle', '#ff8040');
-    else if (s % 10 === 1) UI.banner(r.name, REGIONS[Core.regionOf(s)].name + (Core.loopOf(s) ? ' · ciclo +' + Core.loopOf(s) : ''), '#9fe0ff');
+    if (Core.isBoss(s)) UI.banner(L(r.boss.who + ' te desafía', r.boss.who + ' challenges you'), r.boss.title + ' · ' + Core.bossTime(s) + L(' segundos para vencerle', ' seconds to beat them'), '#ff8040');
+    else if (s % 10 === 1) UI.banner(r.name, REGIONS[Core.regionOf(s)].name + (Core.loopOf(s) ? L(' · ciclo +', ' · loop +') + Core.loopOf(s) : ''), '#9fe0ff');
   });
   Core.on('spawn', e => { if (e.boss) Audio8.play('boss'); });
   Core.on('hit', h => { const n = performance.now(); if (n - lastHitSfx > 70) { lastHitSfx = n; Audio8.play('hit'); } });
@@ -113,14 +113,14 @@
     const parts = [];
     if (off) {
       const h = Math.floor(off.secs / 3600), m = Math.floor(off.secs / 60) % 60;
-      parts.push(`<h2>¡Bienvenido de nuevo!</h2><p>Mientras no estabas (${h ? h + 'h ' : ''}${m}m) tu equipo derrotó <b>${Core.fmt(off.kills)}</b> Pokémon y ganó</p><p style="font-size:28px;color:var(--yellow)">${Icons.html('coin', 24)} ${Core.fmt(off.coins)}</p>`);
+      parts.push(`<h2>${L('¡Bienvenido de nuevo!', 'Welcome back!')}</h2><p>${L(`Mientras no estabas (${h ? h + 'h ' : ''}${m}m) tu equipo derrotó <b>${Core.fmt(off.kills)}</b> Pokémon y ganó`, `While you were away (${h ? h + 'h ' : ''}${m}m) your team defeated <b>${Core.fmt(off.kills)}</b> Pokémon and earned`)}</p><p style="font-size:28px;color:var(--yellow)">${Icons.html('coin', 24)} ${Core.fmt(off.coins)}</p>`);
     }
-    if (Core.eggsReady()) parts.push(`<h2>¡Huevos listos!</h2><p>Tienes <b>${Core.eggsReady()}</b> huevo${Core.eggsReady() > 1 ? 's' : ''} listo${Core.eggsReady() > 1 ? 's' : ''} para eclosionar en la pestaña Gacha.</p>`);
+    if (Core.eggsReady()) parts.push(`<h2>${L('¡Huevos listos!', 'Eggs ready!')}</h2><p>${L(`Tienes <b>${Core.eggsReady()}</b> huevo${Core.eggsReady() > 1 ? 's' : ''} listo${Core.eggsReady() > 1 ? 's' : ''} para eclosionar en la pestaña Gacha.`, `You have <b>${Core.eggsReady()}</b> egg${Core.eggsReady() > 1 ? 's' : ''} ready to hatch in the Gacha tab.`)}</p>`);
     if (daily && !Core.S.daily.claimed) {
-      parts.push(`<h2>Recompensa diaria</h2><p>Día <b>${Core.S.daily.streak}</b> de racha</p><p style="font-size:28px;color:#9fe8ff">${Icons.html('gem', 24)} ${Core.dailyReward()}</p><p class="hint">Vuelve mañana: la recompensa crece hasta el día 7. Tienes misiones nuevas.</p>`);
+      parts.push(`<h2>${L('Recompensa diaria', 'Daily reward')}</h2><p>${L(`Día <b>${Core.S.daily.streak}</b> de racha`, `Day <b>${Core.S.daily.streak}</b> streak`)}</p><p style="font-size:28px;color:#9fe8ff">${Icons.html('gem', 24)} ${Core.dailyReward()}</p><p class="hint">${L('Vuelve mañana: la recompensa crece hasta el día 7. Tienes misiones nuevas.', 'Come back tomorrow: the reward grows until day 7. You have new quests.')}</p>`);
     }
     if (!parts.length) { if (!Core.S.tutDone) setTimeout(() => UI.tutStart(), 700); return; }
-    UI.openModal(parts.join('<hr style="border-color:#2a3f8a">') + `<div class="row"><button class="btn big primary" id="w-ok">${daily && !Core.S.daily.claimed ? 'Recoger' : 'Seguir'}</button></div>`);
+    UI.openModal(parts.join('<hr style="border-color:#2a3f8a">') + `<div class="row"><button class="btn big primary" id="w-ok">${daily && !Core.S.daily.claimed ? L('Recoger', 'Claim') : L('Seguir', 'Continue')}</button></div>`);
     $('#w-ok').onclick = () => { const g = Core.claimDaily(); if (g) Audio8.play('ticket'); Core.save(); UI.closeModal(); UI.refresh(true); if (!Core.S.tutDone) setTimeout(() => UI.tutStart(), 500); };
   }
 

@@ -3,6 +3,7 @@
 'use strict';
 
 const Core = (() => {
+  const _L = typeof L === 'function' ? L : es => es;      // traducción (js/i18n.js); en Node sin ella devuelve el español
   const DEX = {};
   for (const p of POKEDEX) DEX[p.dex] = p;
   const CHILDREN = {};
@@ -56,7 +57,7 @@ const Core = (() => {
       stats: { kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, eventTiers: 0, bred: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, freePulls: 0, streak: 0, itemsFound: 0 },
       bossFails: {}, retryT: 0, pity: 0, pityE: 0, bannerLost: 0, freeDay: '', autoAcc: 0, inv: [], uid: 1, tutDone: false, last: Date.now(),
       daily: { day: '', streak: 0, claimed: true, quests: [] }, weekly: { week: -1, quests: [] }, ach: {},
-      buyMul: 1, settings: { music: 0.35, sfx: 0.6, nums: true, shake: true, bigNums: true, autoBoss: true, notify: false },
+      buyMul: 1, settings: { music: 0.35, sfx: 0.6, nums: true, shake: true, bigNums: true, autoBoss: true, notify: false, lang: null },
     };
   }
   function load() {
@@ -163,17 +164,17 @@ const Core = (() => {
     const team = S.team.map(k => S.mons[k]).filter(Boolean), out = { type: {}, dmg: 0, coins: 0, list: [] };
     const cnt = {};
     for (const m of team) for (const t of DEX[m.dex].types) cnt[t] = (cnt[t] || 0) + 1;
-    for (const t of Object.keys(cnt)) if (cnt[t] >= 2) { out.type[t] = TYPE_SYN[Math.min(6, cnt[t])]; out.list.push({ id: 'type:' + t, name: 'Afinidad ' + TYPE_NAMES[t] + ' (' + cnt[t] + ')', txt: '+' + Math.round(out.type[t] * 100) + '% de daño a los de ese tipo' }); }
+    for (const t of Object.keys(cnt)) if (cnt[t] >= 2) { out.type[t] = TYPE_SYN[Math.min(6, cnt[t])]; out.list.push({ id: 'type:' + t, name: _L('Afinidad ', 'Affinity: ') + TYPE_NAMES[t] + ' (' + cnt[t] + ')', txt: '+' + Math.round(out.type[t] * 100) + _L('% de daño a los de ese tipo', '% damage to that type') }); }
     const prim = new Set(team.map(m => DEX[m.dex].types[0])).size;
-    if (prim >= 6) { out.dmg += 0.3; out.list.push({ id: 'div', name: 'Diversidad total', txt: '+30% de daño al equipo' }); }
-    else if (prim >= 4) { out.dmg += 0.15; out.list.push({ id: 'div', name: 'Diversidad', txt: '+15% de daño al equipo' }); }
+    if (prim >= 6) { out.dmg += 0.3; out.list.push({ id: 'div', name: _L('Diversidad total', 'Total diversity'), txt: _L('+30% de daño al equipo', '+30% team damage') }); }
+    else if (prim >= 4) { out.dmg += 0.15; out.list.push({ id: 'div', name: _L('Diversidad', 'Diversity'), txt: _L('+15% de daño al equipo', '+15% team damage') }); }
     const leg = team.filter(m => RAR[m.dex] === 5).length;
-    if (leg >= 4) { out.dmg += 0.5; out.list.push({ id: 'leg', name: 'Panteón legendario', txt: '+50% de daño al equipo' }); }
-    else if (leg >= 2) { out.dmg += 0.2; out.list.push({ id: 'leg', name: 'Élite legendaria', txt: '+20% de daño al equipo' }); }
+    if (leg >= 4) { out.dmg += 0.5; out.list.push({ id: 'leg', name: _L('Panteón legendario', 'Legendary pantheon'), txt: _L('+50% de daño al equipo', '+50% team damage') }); }
+    else if (leg >= 2) { out.dmg += 0.2; out.list.push({ id: 'leg', name: _L('Élite legendaria', 'Legendary elite'), txt: _L('+20% de daño al equipo', '+20% team damage') }); }
     const sh = team.filter(m => m.shiny).length;
-    if (sh >= 4) { out.coins += 0.25; out.list.push({ id: 'sh', name: 'Constelación shiny', txt: '+25% de monedas' }); }
-    else if (sh >= 2) { out.coins += 0.1; out.list.push({ id: 'sh', name: 'Brillo compartido', txt: '+10% de monedas' }); }
-    if (team.length >= 3 && team.every(m => m.stars >= 3)) { out.dmg += 0.25; out.list.push({ id: 'vet', name: 'Equipo veterano', txt: '+25% de daño (todos con ★3 o más)' }); }
+    if (sh >= 4) { out.coins += 0.25; out.list.push({ id: 'sh', name: _L('Constelación shiny', 'Shiny constellation'), txt: _L('+25% de monedas', '+25% coins') }); }
+    else if (sh >= 2) { out.coins += 0.1; out.list.push({ id: 'sh', name: _L('Brillo compartido', 'Shared shine'), txt: _L('+10% de monedas', '+10% coins') }); }
+    if (team.length >= 3 && team.every(m => m.stars >= 3)) { out.dmg += 0.25; out.list.push({ id: 'vet', name: _L('Equipo veterano', 'Veteran team'), txt: _L('+25% de daño (todos con ★3 o más)', '+25% damage (all with ★3 or more)') }); }
     return out;
   }
   function synMult(m) {
@@ -566,11 +567,11 @@ const Core = (() => {
     if (rule && rule.id === 'only') rule.only = type;
     const hp = chalBase() * TOWER_HP0 * Math.pow(TOWER_G, f - 1) * (boss ? TOWER_BOSS_X : 1) * (rule && rule.hp || 1);
     const time = chalTime(TOWER_TIME) * (rule && rule.time || 1);
-    return { kind: 'tower', floor: f, dex: pick.dex, hp, time, rule, type, boss, tier: f < 10 ? (boss ? 2 : 1) : f < 30 ? 3 : f < 60 ? 4 : 5, label: 'Torre · Piso ' + f };
+    return { kind: 'tower', floor: f, dex: pick.dex, hp, time, rule, type, boss, tier: f < 10 ? (boss ? 2 : 1) : f < 30 ? 3 : f < 60 ? 4 : 5, label: _L('Torre · Piso ', 'Tower · Floor ') + f };
   }
   function eventSpec(tier) {
     const T = EVENT_TIERS[tier];
-    return { kind: 'event', tier: 2 + tier, dex: curEv.boss, hp: chalBase() * T.hp, time: chalTime(T.time), rule: null, type: curEv.type, boss: true, evTier: tier, label: 'Evento · Jefe ' + T.name.toLowerCase() };
+    return { kind: 'event', tier: 2 + tier, dex: curEv.boss, hp: chalBase() * T.hp, time: chalTime(T.time), rule: null, type: curEv.type, boss: true, evTier: tier, label: _L('Evento · Jefe ' + T.name.toLowerCase(), 'Event · ' + T.name + ' boss') };
   }
   // poder del equipo contra el reto (≥1: lo vence a tiempo)
   function chalReady(spec) {
@@ -825,6 +826,8 @@ const Core = (() => {
   }
   function dailyReward() { return Math.round(DAILY_REWARD[(S.daily.streak - 1) % 7] * gemMult()); }
   function claimDaily() { if (S.daily.claimed) return 0; S.daily.claimed = true; const g = dailyReward(); S.gems += g; giveTickets(DAILY_TICKETS[(S.daily.streak - 1) % 7]); if ((S.daily.streak - 1) % 7 === 6) giveEgg(1); return g; }
+  // el texto de la misión se calcula al mostrarla (no se guarda) para que cambie con el idioma
+  const questText = q => { const d = (q.weekly ? WEEKLY_POOL : QUEST_POOL).concat(QUEST_POOL, WEEKLY_POOL).find(p => p.stat === q.stat && p.goal === q.goal); return d ? d.text(fmt(q.goal)) : q.text; };
   const questProg = q => Math.min(q.goal, (S.stats[q.stat] || 0) - q.base);
   function claimQuest(i, weekly) {
     const q = (weekly ? S.weekly : S.daily).quests[i];
@@ -917,7 +920,7 @@ const Core = (() => {
     genUnlocked, unlockedGens, skillOn, skillReady, useSkill, goldenChance, gemMult,
     tick, tap, advance, goStage, fightBoss, bossEase, bossReady, levelUp, starUp, setTeam, buySlot, buyUp, buyShop, addMon,
     featured, featuredEpic, featuredLegend, ballAvailable, ticketCost, ticketPrice, buyTicket, dustTicket, giveTickets, pull, freePull, freePullReady, toggleShiny, moveOf, tierOf, unsetTeam, setPaused, itemOf, itemVal, itemDmg, equip, unequip, recycleItem, recycleSpare, buyItem, synergies, synMult, teamItemSum,
-    checkDaily, dailyReward, claimDaily, questProg, claimQuest, achStat, claimAch, pendingRewards, legendsOwned,
+    checkDaily, dailyReward, claimDaily, questText, questProg, claimQuest, achStat, claimAch, pendingRewards, legendsOwned,
     prestige, offline, start,
     natOf, natVal, ivSum, ivPct, ivGrade, ivBonus, trainIv, rerollNat, setNat, breedCost, breedOk, breedExpect, breed, applyGenes,
     eggNeed, eggReady, eggsReady, giveEgg, hatch, moveEgg, buyEgg, incCost, buyInc,

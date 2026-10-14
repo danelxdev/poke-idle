@@ -43,8 +43,8 @@ const PWA = (() => {
     clear();
     if (!notifOn() || !Core.S.started) return;
     const eta = Core.nextEggEta(), cap = Core.offlineCapSecs();
-    if (eta !== null && eta < cap) timers.push(setTimeout(() => show('¡Un huevo está listo!', 'Vuelve a PokéIdle para eclosionarlo.', 'egg'), eta * 1000));
-    timers.push(setTimeout(() => show('Tu equipo ha llenado el límite offline', 'Vuelve para recoger tus monedas.', 'cap'), cap * 1000));
+    if (eta !== null && eta < cap) timers.push(setTimeout(() => show(L('¡Un huevo está listo!', 'An egg is ready!'), L('Vuelve a PokéIdle para eclosionarlo.', 'Come back to PokéIdle to hatch it.'), 'egg'), eta * 1000));
+    timers.push(setTimeout(() => show(L('Tu equipo ha llenado el límite offline', 'Your team has hit the offline limit'), L('Vuelve para recoger tus monedas.', 'Come back to collect your coins.'), 'cap'), cap * 1000));
   }
   function clear() { timers.forEach(clearTimeout); timers = []; }
 
