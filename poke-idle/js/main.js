@@ -53,10 +53,13 @@
   Core.on('spawn', e => { if (e.boss) Audio8.play('boss'); });
   Core.on('hit', h => { const n = performance.now(); if (n - lastHitSfx > 70) { lastHitSfx = n; Audio8.play('hit'); } });
 
+  Manual.init();
+
   // ---- toque en la arena ----
   $('#arena').addEventListener('pointerdown', e => {
     if (e.target.closest('button')) return;
     Audio8.resume();
+    if (Manual.on) return;
     const r = Core.tap();
     if (r) { $('#tap-hint').classList.add('hidden'); }
   });
@@ -66,6 +69,7 @@
     last = now;
     if (!hidden) {
       Core.tick(dt);
+      Manual.update(dt);
       Arena.frame(dt);
       UI.hud(dt);
       UI.drawMonCv(now / 1000);

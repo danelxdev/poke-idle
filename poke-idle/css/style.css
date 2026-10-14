@@ -503,3 +503,18 @@ body { font-variant-ligatures: none; font-feature-settings: 'liga' 0, 'clig' 0; 
   .logo-ball img { width: 44px; height: 44px; }
   .cont { flex-direction: column; text-align: center; } .ct-info { text-align: center; }
 }
+
+/* ---- v6: modo manual ---- */
+.manbtn { position: absolute; left: 6px; top: 44px; z-index: 2; background: #0a1430d8; color: var(--ink); border: 0; border-radius: 6px; padding: 4px 8px; font: 700 12px var(--f); box-shadow: inset 0 0 0 2px var(--line); cursor: pointer; }
+.manbtn.on { background: #1d6b3a; box-shadow: inset 0 0 0 2px #6dff9a; }
+.manbtn:disabled { opacity: .6; cursor: default; }
+.man-hud { position: absolute; left: 0; right: 0; bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 10px; z-index: 2; pointer-events: none; }
+.man-hud.hidden { display: none; }
+.man-hp i { font-style: normal; font-size: 20px; color: #3a2a3a; text-shadow: 0 2px 0 #000; }
+.man-hp i.full { color: #ff4d6d; }
+.man-combo { background: #0a1430d8; border-radius: 6px; padding: 3px 8px; font: 700 12px var(--f); color: #ffd23f; box-shadow: inset 0 0 0 2px var(--line); }
+.mandash { pointer-events: auto; background: #2a5bd6; color: #fff; border: 0; border-radius: 6px; padding: 6px 12px; font: 700 13px var(--f); box-shadow: 0 3px 0 #10286a; cursor: pointer; }
+.mandash.cd { opacity: .45; }
+.arena:has(.man-hud:not(.hidden)) { touch-action: none; }
+.arena:has(.man-hud:not(.hidden)) .tap-hint, .arena:has(.man-hud:not(.hidden)) .dps { display: none; }
+@media (max-width: 860px) { .man-hud { gap: 6px; } .man-combo { font-size: 11px; } }

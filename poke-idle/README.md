@@ -121,3 +121,7 @@ La espera más larga contra un jefe en esa partida es de unos 35 minutos. Con la
 - Datos: [PokéAPI](https://pokeapi.co/).
 - El motor de escenarios (`js/art/tiles.js`), los efectos (`js/art/vfx.js`) y los iconos (`js/art/icons.js`) están adaptados de [pokesurvivor](https://github.com/JPTER78/pokesurvivor) (MIT, ver `LICENSE-POKESURVIVOR.txt`).
 - Pokémon © Nintendo / Creatures / GAME FREAK. Este proyecto no está afiliado a ellos.
+
+## Modo manual (experimental)
+
+Botón **Manual** (o tecla `M`) en la arena: controlas al líder del equipo (WASD/flechas o arrastrando) y esquivas los proyectiles del rival; `Espacio`/botón **Esquiva** da un dash invulnerable. Cada 3 s sin ser alcanzado sube el combo (hasta ×5 = +60 % de daño de todo el equipo) y rozar las balas lo acelera. Tres impactos te aturden 12 s y el juego vuelve al modo automático. Es opcional: no cambia el progreso offline ni el equilibrio base. Código aislado en `js/manual.js` (más tres ganchos en `core.js`/`arena.js`) para poder quitarlo fácilmente.

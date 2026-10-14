@@ -206,6 +206,8 @@ const Core = (() => {
   const F = { enemy: null, timers: [], hits: [], respawn: 0, bossT: 0 };
   let paused = false;
   const setPaused = b => { paused = !!b; };
+  let extMult = 1;                                   // bonus externo de daño (modo manual)
+  const setExtMult = v => { extMult = v; };
   const wildCache = {};
   function wildPool(ri, maxEvo, rr) {
     const key = ri + '/' + maxEvo;
@@ -299,7 +301,7 @@ const Core = (() => {
     if (!e || e.hp <= 0) return null;
     if (!auto) S.stats.taps++;
     const crit = rnd() < critChance();
-    const dmg = tapDmg() * (crit ? critMult() : 1) * bossBonus(e);
+    const dmg = tapDmg() * (crit ? critMult() : 1) * bossBonus(e) * extMult;
     deal(dmg, crit, -1);
     return { dmg, crit };
   }
@@ -320,7 +322,7 @@ const Core = (() => {
         F.timers[i] += monRate(m);
         const crit = rnd() < critChance(m);
         const ef = eff(m.dex, e.types);
-        const dmg = monDmg(m) * ef * (crit ? critMult() : 1) * (0.9 + rnd() * 0.2) * bossBonus(e, m);
+        const dmg = monDmg(m) * ef * (crit ? critMult() : 1) * (0.9 + rnd() * 0.2) * bossBonus(e, m) * extMult;
         F.hits.push({ t: 0.22, dmg, crit, slot: i, eff: ef });
         emit('fire', { slot: i, dex: m.dex, delay: 0.22, move: moveOf(m), tier: tierOf(m.lvl) });
       }
@@ -625,7 +627,7 @@ const Core = (() => {
     levelCost, levelCostN, maxAffordable, upCost, shopCost, pokeBallPrice, critChance, critMult, catchChance, teamDps, tapDmg, medalGain, medalFor, dexCount, badgeCount,
     genUnlocked, unlockedGens, skillOn, skillReady, useSkill, goldenChance, gemMult,
     tick, tap, advance, goStage, fightBoss, bossEase, bossReady, levelUp, starUp, setTeam, buySlot, buyUp, buyShop, addMon,
-    featured, featuredEpic, featuredLegend, ballAvailable, ticketCost, ticketPrice, buyTicket, dustTicket, giveTickets, pull, freePull, freePullReady, toggleShiny, moveOf, tierOf, unsetTeam, setPaused, itemOf, itemVal, itemDmg, equip, unequip, recycleItem, recycleSpare, buyItem, synergies, synMult, teamItemSum,
+    featured, featuredEpic, featuredLegend, ballAvailable, ticketCost, ticketPrice, buyTicket, dustTicket, giveTickets, pull, freePull, freePullReady, toggleShiny, moveOf, tierOf, unsetTeam, setPaused, setExtMult, isPaused: () => paused, itemOf, itemVal, itemDmg, equip, unequip, recycleItem, recycleSpare, buyItem, synergies, synMult, teamItemSum,
     checkDaily, dailyReward, claimDaily, questProg, claimQuest, achStat, claimAch, pendingRewards, legendsOwned,
     prestige, offline, start,
   };

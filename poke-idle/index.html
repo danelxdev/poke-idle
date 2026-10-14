@@ -68,6 +68,8 @@
         </div>
         <div class="enemy-box" id="enemy-box"><b id="enemy-name"></b><div class="bar hp"><i id="enemy-hp"></i><span id="enemy-hptxt"></span></div><div class="bar timer hidden" id="boss-timer"><i id="boss-t"></i></div></div>
         <button class="btn primary boss-btn hidden" id="btn-boss">¡Reta al jefe!</button>
+        <button class="manbtn" id="btn-manual" title="Modo manual (tecla M): mueve a tu líder con WASD/flechas o arrastrando y esquiva los ataques para subir el daño">Manual</button>
+        <div class="man-hud hidden" id="man-hud"><div class="man-hp"></div><div class="man-combo"></div><button class="mandash" id="man-dash">Esquiva</button></div>
         <div class="dmg-layer" id="dmg-layer"></div>
         <div class="skills" id="skills"></div>
         <div class="dps" id="dps"></div>
@@ -105,6 +107,7 @@
 <script>const Save = { get d() { return Core.S; } };</script>
 <script src="js/audio.js"></script>
 <script src="js/arena.js"></script>
+<script src="js/manual.js"></script>
 <script src="js/title.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>

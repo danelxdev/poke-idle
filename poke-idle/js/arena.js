@@ -13,6 +13,8 @@ const Arena = (() => {
   const anim = {};           // slot -> { a: 'attack', t0 }
   let enemyAnim = { a: 'idle', t0: 0 }, enemyFlash = 0, enemyIn = 0, enemyDie = null, shake = 0;
   let onCoinFly = null;
+  const hooks = { pos: null, over: null };   // modo manual: posición del líder y capa superior
+  const posOf = i => (i === 0 && hooks.pos ? hooks.pos() : POS[i]);
 
   const rand = (a, b) => a + Math.random() * (b - a);
   const pick = a => a[Math.floor(Math.random() * a.length)];
@@ -25,7 +27,7 @@ const Arena = (() => {
     Core.on('spawn', e => { enemyIn = 0.45; enemyDie = null; enemyAnim = { a: 'walk', t0: t }; Sprites.preload(e.dex, false); });
     Core.on('fire', d => {
       anim[d.slot] = { a: 'attack', t0: t };
-      const p = POS[d.slot], m = Core.S.mons[Core.S.team[d.slot]];
+      const p = posOf(d.slot), m = Core.S.mons[Core.S.team[d.slot]];
       if (!m) return;
       const mv = MOVES[d.move] || { cls: 'proj' }, look = VFX.forMove(d.move), big = d.tier >= 3 || m.stars >= 3;
       const sx = p[0] + 8, sy = p[1] - 12, tx = EX - 6, ty = EY - 14;
@@ -156,7 +158,7 @@ const Arena = (() => {
     ctx.globalAlpha = 1;
 
     const list = [];
-    S.team.forEach((k, i) => list.push({ y: POS[i][1], f: () => drawMon(i, k) }));
+    S.team.forEach((k, i) => list.push({ y: posOf(i)[1], f: () => drawMon(i, k) }));
     const e = Core.F.enemy;
     if (e) list.push({ y: EY, f: () => drawEnemy(e, false) });
     else if (enemyDie && enemyDie.t > 0) list.push({ y: EY, f: () => drawEnemy(enemyDie.e, true) });
@@ -187,13 +189,14 @@ const Arena = (() => {
       ctx.fillStyle = '#ffd23f'; ctx.fillRect(Math.round(c.x) - w + 1, Math.round(c.y) - 2, Math.max(1, w * 2 - 2), 4);
     }
     ctx.globalAlpha = 1;
+    if (hooks.over) hooks.over(ctx, t);
     ctx.restore();
   }
 
   function drawMon(i, key) {
     const m = Core.S.mons[key];
     if (!m) return;
-    let [x, y] = POS[i];
+    let [x, y] = posOf(i);
     const lg = lunge[i];
     if (lg) { const k = (t - lg.t0) / lg.dur; if (k >= 1) delete lunge[i]; else x += Math.sin(k * Math.PI) * lg.dx; }
     const a = anim[i];
@@ -224,5 +227,5 @@ const Arena = (() => {
   function frame(dt) { update(dt); draw(); }
   // posición (0..1) del enemigo en pantalla, para la barra de vida en HTML
   const enemyAnchor = () => ({ x: EX / W, y: (EY - 40) / H });
-  return { init, frame, enemyAnchor, addText, popup, W, H };
+  return { init, frame, enemyAnchor, addText, popup, hooks, W, H, EX, EY };
 })();
