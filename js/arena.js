@@ -4,7 +4,10 @@
 
 const Arena = (() => {
   const W = 240, H = 144, TS = 16;
-  const POS = [[90, 104], [60, 76], [60, 132], [34, 104], [18, 70], [18, 136]];
+  // formación de los 6 huecos: más compacta y alejada del borde izquierdo (donde están los botones de habilidades)
+  const POS = [[102, 104], [78, 78], [78, 130], [56, 104], [42, 68], [42, 134]];
+  // los Pokémon grandes (Gyarados, Onix…) se dibujan algo más pequeños para que los 6 quepan sin salirse de la arena
+  const monScale = d => { const bb = typeof SPR_BOX !== 'undefined' ? SPR_BOX[d] : null; const sz = bb ? Math.max(bb[2] - bb[0], (bb[3] - bb[1]) * 0.95) : 30; return Math.max(0.5, Math.min(1, 36 / sz)); };
   const EX = 178, EY = 106;
   let cv, ctx, t = 0;
   const shots = [], texts = [], fx = [], coins = [], beams = [];
@@ -204,7 +207,7 @@ const Arena = (() => {
     const bob = an === 'idle' ? 0 : 0;
     shadow(x, y + 1, 7);
     if (m.stars >= 3) { ctx.globalAlpha = 0.18 + 0.1 * Math.sin(t * 4 + i); ctx.fillStyle = RARITY[Core.RAR[m.dex]].color; ctx.beginPath(); ctx.ellipse(x, y, 11, 4, 0, 0, 6.3); ctx.fill(); ctx.globalAlpha = 1; }
-    Sprites.draw(ctx, Core.fdex(m), m.shiny, an, lg ? 0 : 0, at, x, y + bob, 1, {});
+    Sprites.draw(ctx, Core.fdex(m), m.shiny, an, lg ? 0 : 0, at, x, y + bob, monScale(Core.fdex(m)), {});
     if (m.shiny && Math.sin(t * 3 + i) > 0.9) { ctx.fillStyle = '#fff6b0'; ctx.fillRect(x + 6, y - 22, 1, 3); ctx.fillRect(x + 5, y - 21, 3, 1); }
   }
 
