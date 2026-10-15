@@ -26,6 +26,11 @@ const UI = (() => {
     return { av, shiny: !!(own && own.shiny), name, title: (TITLES.find(t => t.id === pr.title) || TITLES[0]).name };
   }
   const esc = x => String(x).replace(/[<>&"']/g, '');
+  // enlaces del autor (título y ajustes)
+  const GITHUB_URL = 'https://github.com/danelxdev/', X_URL = 'https://x.com/InvertiBytes';
+  const SOC_GH = '<svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>';
+  const SOC_X = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
+  const socialHtml = () => `<a class="soc" href="${GITHUB_URL}" target="_blank" rel="noopener noreferrer" aria-label="GitHub">${SOC_GH}<span>GitHub</span></a><a class="soc" href="${X_URL}" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">${SOC_X}<span>@InvertiBytes</span></a>`;
   const avatarHtml = (size, px) => { const p = profInfo(); return `<span class="pavatar ${size}">${Sprites.html(p.av, p.shiny, px, true)}</span>`; };
   let chipKey = '';
   function paintProf(force) {
@@ -47,6 +52,7 @@ const UI = (() => {
   function title() {
     show('scr-title');
     const s = S(), k = $('#kofi-title');
+    const so = $('#t-social'); if (so) so.innerHTML = '<small>' + L('Hecho por Danel · síguelo:', 'Made by Danel · follow:') + '</small>' + socialHtml();
     if (k) { k.href = KOFI_URL; k.innerHTML = ico('cup', 24) + '<span>' + L('Apoyar el proyecto en Ko-fi', 'Support the project on Ko-fi') + '</span><i class="kheart" aria-hidden="true">♥</i>'; }
     TitleFX.start($('#title-bg'));
     $$('#langsw button').forEach(b => { b.classList.toggle('on', b.dataset.lang === I18N.lang); b.onclick = () => { if (b.dataset.lang === I18N.lang) return; s.settings.lang = b.dataset.lang; Core.save(); location.reload(); }; });
@@ -913,6 +919,7 @@ const UI = (() => {
       if (anyShiny) setTimeout(() => Audio8.play('rare'), 500);
       const label = best >= 5 ? L('¡LEGENDARIO!', 'LEGENDARY!') : best >= 4 ? L('¡ÉPICO!', 'EPIC!') : best >= 3 ? L('¡RARO!', 'RARE!') : '';
       fx.classList.toggle('legend', best >= 5); fx.classList.toggle('epic', best === 4);
+      fx.classList.add('res');
       let cards = '';
       res.forEach((r, j) => {
         const m = S().mons[r.base];
@@ -920,15 +927,15 @@ const UI = (() => {
           ${r.isNew ? '<span class="new">' + L('¡NUEVO!', 'NEW!') + '</span>' : ''}${r.shiny ? '<span class="shtag">✨ SHINY</span>' : ''}
           ${n === 1 ? '<canvas class="pv" id="pv" width="128" height="128"></canvas>' : `<img src="${por(r.base, r.shiny)}">`}
           <b>${DEX[r.base].name}</b><small>${RARITY[r.rar].name}</small>
-          <span class="dup nat">${Core.natOf({ nat: r.nat }).name} · IV ${Math.round(Core.ivPct(m) * 100)}% · <span class="gr" style="background:${r.grade[2]}">${r.grade[1]}</span></span>
+          <span class="dup nat"><span class="nt">${Core.natOf({ nat: r.nat }).name} · IV ${Math.round(Core.ivPct(m) * 100)}%</span> <span class="gr" style="background:${r.grade[2]}">${r.grade[1]}</span></span>
           ${r.genes ? '<span class="dup" style="color:#ffd6f2">' + L('Cría: genes nuevos de ', 'Offspring: new genes of ') + Math.round((r.genes.iv.d + r.genes.iv.s + r.genes.iv.c) / (3 * IV_MAX) * 100) + '% IV</span>' : ''}
-          ${r.ivUp ? `<span class="dup" style="color:#7ff0a0">${L('¡IVs mejorados!', 'IVs improved!')} ${Math.round(r.ivUp.from * 100)}% → ${Math.round(r.ivUp.to * 100)}%</span>` : ''}
-          ${r.isNew ? '' : `<span class="dup">${L('+1 copia', '+1 copy')} (${m.copies}/${m.stars < 5 ? STAR_COPIES[m.stars] : '★5'}) · +${r.dust} ${ico('dust', 12)}</span>`}
+          ${r.ivUp ? `<span class="dup" style="color:#7ff0a0">${n === 1 ? L('¡IVs mejorados!', 'IVs improved!') + ' ' : 'IV ↑ '}${Math.round(r.ivUp.from * 100)}→${Math.round(r.ivUp.to * 100)}%</span>` : ''}
+          ${r.isNew ? '' : `<span class="dup cp">${L('+1 copia', '+1 copy')} <span class="cc">(${m.copies}/${m.stars < 5 ? STAR_COPIES[m.stars] : '★5'})</span> · +${r.dust}<span class="dustic">${ico('dust', 12)}</span></span>`}
           ${r.newShiny && !r.isNew ? '<span class="dup" style="color:#fff3a8">' + L('¡Versión shiny desbloqueada!', 'Shiny form unlocked!') + '</span>' : ''}
           <i class="gl"></i></div>`;
       });
       fx.innerHTML = `<div class="gx-rays on" style="--c:${col}"></div><div class="flash" style="--fc:${col}"></div>
-        ${label ? `<div class="gx-label" style="--c:${col}">${label}</div>` : ''}${anyShiny ? '<div class="gx-label sh">✨ ' + L('¡SHINY!', 'SHINY!') + ' ✨</div>' : ''}
+        <div class="gx-labels">${label ? `<div class="gx-label" style="--c:${col}">${label}</div>` : ''}${anyShiny ? '<div class="gx-label sh">✨ ' + L('¡SHINY!', 'SHINY!') + ' ✨</div>' : ''}</div>
         <div class="pulls ${n === 1 ? 'one' : ''}">${cards}</div><button class="btn big primary" id="pull-ok" style="animation:pin .4s ${0.4 + n * 0.16}s backwards">${L('¡Genial!', 'Great!')}</button>`;
       $('#pull-ok').onclick = close;
       if (n === 1) { pvT = 0; pvMon = { dex: res[0].dex, shiny: res[0].shiny }; Sprites.preload(res[0].dex, res[0].shiny); } else pvMon = null;
@@ -1414,7 +1421,7 @@ const UI = (() => {
       <div class="sset"><h4>${L('Estadísticas', 'Statistics')}</h4><div class="row" style="margin:0"><button class="btn" id="s-stats">${L('Ver estadísticas y gráficas', 'View statistics and charts')}</button></div></div>
       <div class="sset"><h4>${L('Partida', 'Save data')}</h4><div class="row" style="margin:0"><button class="btn" id="s-exp">${L('Exportar', 'Export')}</button><button class="btn" id="s-imp">${L('Importar', 'Import')}</button><button class="btn danger" id="s-wipe">${L('Borrar', 'Erase')}</button></div>
         <p class="hint" style="margin:8px 0 0">${L('Tu partida se guarda sola en este navegador. Exporta un código para llevarla a otro dispositivo.', 'Your game saves itself in this browser. Export a code to take it to another device.')}</p></div>
-      <div class="sset kofi-box"><h4>${L('Apoya el proyecto', 'Support the project')}</h4><p class="hint" style="margin:0 0 8px">${L('PokéIdle es gratis y lo hace una sola persona. Si te gusta, puedes invitarme a un café.', 'PokéIdle is free and made by one person. If you like it, you can buy me a coffee.')}</p><a class="kofi" href="${KOFI_URL}" target="_blank" rel="noopener noreferrer">${ico('cup', 24)} ${L('Apoyar en Ko-fi', 'Support on Ko-fi')}</a></div>
+      <div class="sset kofi-box"><h4>${L('Apoya el proyecto', 'Support the project')}</h4><p class="hint" style="margin:0 0 8px">${L('PokéIdle es gratis y lo hace una sola persona. Si te gusta, puedes invitarme a un café.', 'PokéIdle is free and made by one person. If you like it, you can buy me a coffee.')}</p><a class="kofi" href="${KOFI_URL}" target="_blank" rel="noopener noreferrer">${ico('cup', 24)} ${L('Apoyar en Ko-fi', 'Support on Ko-fi')}</a><div class="socrow"><small>${L('Sígueme y reporta fallos o ideas:', 'Follow me and report bugs or ideas:')}</small><div>${socialHtml()}</div></div></div>
       <div class="row"><button class="btn" id="s-tut">${L('Ver el tutorial', 'Watch the tutorial')}</button><button class="btn big primary" id="s-ok">${L('Listo', 'Done')}</button></div>
       <p class="fine">${L('Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Escenarios e iconos adaptados de pokesurvivor (MIT) · Pokémon © Nintendo/Creatures/GAME FREAK', 'Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Scenes and icons adapted from pokesurvivor (MIT) · Pokémon © Nintendo/Creatures/GAME FREAK')}</p></div>`);
     $$('[data-ak]').forEach(b => b.onclick = () => { a11y[b.dataset.ak] = b.dataset.ak === 'text' ? +b.dataset.av : b.dataset.av; Core.save(); A11Y.apply(a11y); Audio8.play('click'); settings(); });

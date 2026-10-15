@@ -100,7 +100,7 @@ const Cloud = (() => {
     try { await push(); } catch (e) { /* ya quedó guardada en local */ }
     await st.client.auth.signOut();
     st.user = null; st.profile = null; st.loginDone = '';
-    S().cloud = { uid: '', rev: 0 }; Core.save();
+    Core.save();                                   // se conserva a qué cuenta pertenece esta partida: si vuelves a entrar con la misma, lo jugado como invitado se sube
     setStatus('guest'); notify('user');
   }
 
@@ -177,7 +177,22 @@ const Cloud = (() => {
     if (!row) { if (s.started) await push(); return; }
     if (!s.started) { await pullAndApply(); return; }
     if (s.cloud && s.cloud.uid === st.user.id && s.cloud.rev === row.rev) { st.lastPush = Date.now(); st.lastTime = s.stats.time; return; }       // ya está al día
+    // partida de invitado con progreso (nunca sincronizada) y otra distinta ya en la cuenta: se elige, para no perder nada
+    if ((!s.cloud || s.cloud.uid !== st.user.id) && s.stats.time > 180) { await guestDialog(row); return; }
     await pullAndApply();                                                    // con sesión iniciada manda siempre la partida de la nube (la local queda como copia .bak)
+  }
+  function guestDialog(remote) {
+    return new Promise(done => {
+      const fmtT = secs => { const h = Math.floor(secs / 3600), m = Math.floor(secs / 60) % 60; return (h ? h + ' h ' : '') + m + ' min'; };
+      const col = (title, o, rec) => `<div class="cfcol ${rec ? 'rec' : ''}"><b>${title}</b>${rec ? `<em>${L('Recomendada', 'Recommended')}</em>` : ''}<span>${L('Etapa máx.', 'Max stage')} <b>${o.max_stage}</b></span><span>${L('Medallas', 'Medals')} <b>${o.medals}</b></span><span>${L('Rango', 'Rank')} <b>${o.asc_rank}</b></span><span>Pokédex <b>${o.dex_count}</b></span><span>${L('Jugado', 'Played')} <b>${fmtT(o.play_time)}</b></span>${o.device ? `<small>${o.device}</small>` : ''}</div>`;
+      const loc = meta(), recCloud = remote.play_time >= loc.play_time;
+      UI.openModal(`<h2>${L('Tienes progreso de invitado', 'You have guest progress')}</h2><p class="hint">${L('Has jugado como invitado y tu cuenta ya tenía otra partida. Elige cuál conservar: la otra no se pierde del todo, se guarda como copia de seguridad.', 'You played as a guest and your account already had another game. Choose which one to keep: the other is not lost, it is kept as a backup.')}</p>
+        <div class="cfgrid">${col(L('En tu cuenta', 'In your account'), remote, recCloud)}${col(L('Como invitado', 'As a guest'), loc, !recCloud)}</div>
+        <div class="row"><button class="btn ${recCloud ? 'primary' : ''}" id="cf-cloud">${L('Usar la de mi cuenta', 'Use my account game')}</button><button class="btn ${recCloud ? '' : 'primary'}" id="cf-local">${L('Usar la de invitado', 'Use the guest game')}</button></div>`);
+      const q = id => document.querySelector(id);
+      q('#cf-cloud').onclick = async () => { UI.closeModal(); setStatus('syncing'); try { await pullAndApply(); } catch (e) { setStatus('error', String(e.message || e)); } done(); };
+      q('#cf-local').onclick = async () => { UI.closeModal(); st.busy = false; await push(true); done(); };      // la de la cuenta queda en las copias de seguridad del servidor
+    });
   }
   async function pullAndApply() {
     const { data, error } = await st.client.from('saves').select('data,format,rev').maybeSingle();
