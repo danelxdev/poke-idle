@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><base href="../../">
+<title>PokéIdle · vídeo promocional</title>
+<link rel="stylesheet" href="tools/promo/promo.css">
+<style>
+  #stage { width: 1080px; height: 1920px; }
+  #land { width: 1080px; height: 1920px; }
+  #navy { background: radial-gradient(ellipse at 50% 30%, #1b2e6c 0%, #0a1430 55%, #050c24 100%); }
+  #navy .stripes { position: absolute; inset: -200px; background: repeating-linear-gradient(-30deg, rgba(255,255,255,.025) 0 40px, transparent 40px 80px); }
+  #navy .stars { position: absolute; inset: 0; }
+  .scene { position: absolute; inset: 0; display: none; }
+  .hdr { position: absolute; left: 0; right: 0; text-align: center; }
+  .hdr .pill { font-size: 40px; }
+  .hdr .h1 { font-size: 104px; margin-top: 26px; }
+  .word { display: inline-block; }
+  .big-n { font-size: 250px; font-weight: 700; color: var(--yellow); line-height: .9; text-shadow: 0 14px 0 #8a5000, 0 26px 0 #050a1c, 0 0 80px rgba(255, 210, 63, .45); }
+  .legend { font-size: 130px; font-weight: 700; color: var(--yellow); text-shadow: 0 10px 0 #8a5000, 0 20px 0 #050a1c, 0 0 90px rgba(255, 210, 63, .8); white-space: nowrap; }
+  .arena { position: absolute; left: 0; width: 1080px; overflow: hidden; border-radius: 34px; box-shadow: 0 0 0 7px var(--yellow), 0 0 0 14px #0a1430, 0 0 90px rgba(255, 96, 64, .55); }
+  .arena img { position: absolute; display: block; }
+  .chip { display: inline-block; font-size: 40px; font-weight: 700; padding: 12px 26px 14px; margin: 0 8px 18px; }
+  .tick { position: absolute; left: 0; right: 0; text-align: center; font-size: 46px; font-weight: 700; color: #fff; }
+  .cta-url { font-size: 92px; font-weight: 700; color: #fff; text-shadow: 0 7px 0 #1a2a6a, 0 14px 0 #050a1c; }
+  .cta-url span { color: var(--yellow); }
+  .spark { position: absolute; width: 18px; height: 18px; background: #fff6b0; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); }
+</style>
+</head><body>
+<div id="stage">
+  <canvas id="land" class="bgc"></canvas>
+  <div id="navy" class="layer"><div class="stripes"></div><canvas class="stars" id="stars" width="1080" height="1920"></canvas><div class="rays" id="rays"></div></div>
+
+  <!-- A · portada -->
+  <div class="scene" id="sA">
+    <img id="aBall" class="abs" style="left:432px;top:300px;width:216px;height:216px">
+    <div class="hdr" style="top:560px"><h1 class="logo" id="aLogo" style="font-size:190px">Poké<span>Idle</span></h1></div>
+    <div class="hdr" style="top:830px"><div id="aTag" class="h1" style="font-size:58px;color:#f2f4ff">Entrena · Evoluciona · Colecciona</div></div>
+    <div class="hdr" style="top:960px"><span id="aChip" class="pill blue" style="font-size:38px">El juego idle de Pokémon</span></div>
+  </div>
+
+  <!-- B · combate automático -->
+  <div class="scene" id="sB">
+    <div class="hdr" style="top:120px"><span class="pill" id="bPill">COMBATE AUTOMÁTICO</span><div class="h1" id="bTitle"><span class="word">Tu</span> <span class="word">equipo</span><br><span class="word"><em>lucha</em></span> <span class="word"><em>solo</em></span></div></div>
+    <div class="phone" id="bPhone" style="left:178px;top:560px;width:724px"><div class="notch"></div><div class="scr"><img id="bImg"></div></div>
+    <div class="callout panel" id="bC1" style="left:36px;top:1080px"><img data-ico="friends"><div>6 Pokémon<small>a la vez en combate</small></div></div>
+    <div class="callout panel" id="bC2" style="right:36px;top:1340px"><img data-ico="fist"><div>¡Toca para<small>hacer daño extra!</small></div></div>
+    <div class="callout panel" id="bC3" style="left:60px;top:1600px"><img data-ico="coin"><div>Gana incluso<small>sin jugar (offline)</small></div></div>
+  </div>
+
+  <!-- C · jefes -->
+  <div class="scene" id="sC">
+    <div class="hdr" style="top:150px"><span class="pill red" id="cPill">JEFES</span><div class="h1" id="cTitle">¡Reta a los<br><em>legendarios</em>!</div></div>
+    <div class="arena" id="cArena" style="top:540px;height:800px"><img id="cImg"></div>
+    <div class="hdr" style="top:1440px" id="cChips"></div>
+  </div>
+
+  <!-- D · gacha -->
+  <div class="scene" id="sD">
+    <div class="hdr" style="top:120px" id="dHdr"><span class="pill pink" id="dPill">GACHA</span><div class="h1" id="dTitle">¿Qué <em>Pokémon</em><br>te saldrá?</div></div>
+    <div class="hdr" style="top:150px" id="dLeg"><div class="legend">¡LEGENDARIO!</div><div class="h1" style="font-size:64px;margin-top:10px">Mewtwo se une a tu equipo</div></div>
+    <div class="phone" id="dPhone" style="left:178px;top:560px;width:724px"><div class="notch"></div><div class="scr"><img id="dImg"></div></div>
+    <div id="dSparks"></div>
+  </div>
+
+  <!-- E · Pokédex -->
+  <div class="scene" id="sE">
+    <div class="hdr" style="top:110px"><div class="big-n" id="eN">0</div><div class="h1" style="font-size:96px;margin-top:20px">POKÉMON</div><div class="dim" style="font-size:40px;margin-top:22px;font-weight:700">Shinies, megas y formas regionales</div></div>
+    <div class="phone" id="ePhone" style="left:220px;top:700px;width:640px"><div class="notch"></div><div class="scr"><img id="eImg"></div></div>
+    <div id="eMons"></div>
+  </div>
+
+  <!-- F · todo lo demás -->
+  <div class="scene" id="sF">
+    <div class="hdr" style="top:140px"><div class="h1" id="fTitle" style="font-size:110px">¡Y mucho <em>más</em>!</div></div>
+    <div id="fGrid"></div>
+  </div>
+
+  <!-- G · evolución -->
+  <div class="scene" id="sG">
+    <div class="hdr" style="top:120px"><span class="pill green" id="gPill">EVOLUCIÓN</span><div class="h1" id="gTitle">Haz <em>crecer</em><br>a tu equipo</div></div>
+    <div class="phone" id="gPhone" style="left:178px;top:560px;width:724px"><div class="notch"></div><div class="scr"><img id="gImg"></div></div>
+  </div>
+
+  <!-- H · cierre -->
+  <div class="scene" id="sH">
+    <img id="hBall" class="abs" style="left:462px;top:250px;width:156px;height:156px">
+    <div class="hdr" style="top:440px"><h1 class="logo" id="hLogo" style="font-size:190px">Poké<span>Idle</span></h1></div>
+    <div class="hdr" style="top:720px"><span class="btnp" id="hBtn" style="font-size:78px">¡Juega GRATIS!</span></div>
+    <div class="hdr" style="top:930px"><div class="cta-url" id="hUrl">pokeidle<span>game</span>.com</div></div>
+    <div class="hdr" style="top:1065px"><div class="dim" id="hSub" style="font-size:42px;font-weight:700">Móvil y PC · Sin descargas · Guardado en la nube</div></div>
+  </div>
+
+  <div class="flash" id="flash"></div>
+  <div class="vign"></div>
+</div>
+
+<script src="js/data/pokedex.js"></script>
+<script src="js/data/forms.js"></script>
+<script src="js/data/moves.js"></script>
+<script src="js/data/idle.js"></script>
+<script src="js/art/tiles.js"></script>
+<script src="js/art/icons.js"></script>
+<script src="js/data/bbox.js"></script>
+<script src="js/sprites.js"></script>
+<script src="tools/promo/scenery.js"></script>
+<script>
+'use strict';
+const Q = new URLSearchParams(location.search), CLIPS = Q.get('clips');
+const $ = s => document.querySelector(s);
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const sg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+const oc = x => 1 - Math.pow(1 - x, 3);
+const ob = x => { const c1 = 1.70158, c3 = c1 + 1; return x <= 0 ? 0 : 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const io = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const BEAT = 0.5;
+// escenas [inicio, fin] en segundos (música a 120 ppm: 1 compás = 2 s)
+const SC = { A: [0, 4], B: [4, 8], C: [8, 12.5], D: [12.5, 17.5], E: [17.5, 21.5], F: [21.5, 25.5], G: [25.5, 29.5], H: [29.5, 34] };
+const CUTS = [4, 8, 12.5, 17.5, 21.5, 25.5, 29.5];
+const DUR = 34;
+
+for (const el of document.querySelectorAll('[data-ico]')) el.src = Icons.url(el.dataset.ico);
+$('#aBall').src = Icons.url('ball'); $('#hBall').src = Icons.url('ball');
+
+// paisaje
+const land = $('#land'), lctx = land.getContext('2d'); land.width = 270; land.height = 480; lctx.imageSmoothingEnabled = false;
+const LINE = [25, 4, 1, 7, 133, 150];
+const scene = Scenery.make(270, 480, 372, { seed: 11, until: 40, lineup: LINE });
+
+// estrellas del fondo azul
+const sctx = $('#stars').getContext('2d'), SR = Scenery.rng(5);
+const STARS = Array.from({ length: 140 }, () => ({ x: SR() * 1080, y: SR() * 1920, p: SR() * 6.28, s: SR() < 0.2 ? 6 : 3 }));
+function drawStars(t) { sctx.clearRect(0, 0, 1080, 1920); for (const s of STARS) { sctx.globalAlpha = (0.25 + 0.75 * Math.abs(Math.sin(t * 1.3 + s.p))) * 0.8; sctx.fillStyle = '#fff'; sctx.fillRect(Math.round(s.x / 3) * 3, Math.round(s.y / 3) * 3, s.s, s.s); } sctx.globalAlpha = 1; }
+
+// rasgos (escena F)
+const FEATS = [['egg0', 'Huevos', 'Incubadora y crianza'], ['shiny', 'Shinies', 'Caza los brillantes'], ['stone', 'Megaevolución', 'Y todas las evoluciones'], ['crown', 'Liga y rival', 'Medallas y duelos con Nico'],
+  ['cup', 'Torre de batalla', 'Cada piso, más difícil'], ['up', 'Ascensión', 'Final de partida sin techo'], ['trophy', 'Misiones', 'Diarias, semanales y logros'], ['star', 'Rankings', 'Compite con todo el mundo']];
+$('#fGrid').innerHTML = FEATS.map((f, i) => `<div class="feat panel" id="f${i}" style="left:${i % 2 ? 556 : 48}px;top:${430 + Math.floor(i / 2) * 290}px"><img src="${Icons.url(f[0])}"><div><b>${f[1]}</b><small>${f[2]}</small></div></div>`).join('');
+const CHIPS = [['Líderes', ''], ['Alto Mando', 'blue'], ['Campeones', 'pink'], ['Legendarios', 'red']];
+$('#cChips').innerHTML = CHIPS.map((c, i) => `<span class="chip pill ${c[1]}" id="cc${i}">${c[0]}</span>`).join('');
+// Pokémon flotando alrededor de la Pokédex
+const EMONS = [[25, 40, 760], [133, 860, 820], [448, 30, 1120], [94, 870, 1150], [658, 50, 1480], [700, 860, 1500], [6, 840, 1790], [3, 60, 1800]];
+$('#eMons').innerHTML = EMONS.map(([d, x, y], i) => `<div class="mon" id="em${i}" style="left:${x}px;top:${y}px">${Sprites.html(d, false, 180, true)}</div>`).join('');
+$('#dSparks').innerHTML = Array.from({ length: 26 }, (_, i) => `<i class="spark" id="sp${i}"></i>`).join('');
+
+const show = (id, on) => { const e = $(id); const v = on ? 'block' : 'none'; if (e.style.display !== v) e.style.display = v; };
+const pend = [];
+function setImg(img, clip, f) {
+  const src = CLIPS + '/' + clip + '/' + String(Math.max(0, Math.round(f))).padStart(4, '0') + '.jpg';
+  if (img.dataset.src !== src) { img.dataset.src = src; img.src = src; pend.push(img.decode().catch(() => {})); }
+}
+const css = (id, s) => { const e = typeof id === 'string' ? $(id) : id; for (const k in s) e.style[k] = s[k]; };
+const popS = (t, at, d) => ob(sg(t, at, at + (d || 0.35)));
+function inScene(t, k) { return t >= SC[k][0] && t < SC[k][1]; }
+
+function render(t) {
+  pend.length = 0;
+  // sprites de las cajas HTML: misma hora para todos
+  for (const a of document.getAnimations()) { a.pause(); a.currentTime = (t * 1000) % 1e7; }
+  const useLand = inScene(t, 'A') || inScene(t, 'F') || inScene(t, 'H');
+  land.style.display = useLand ? 'block' : 'none';
+  $('#navy').style.display = useLand ? 'none' : 'block';
+  if (useLand) {
+    const lineup = [];
+    if (inScene(t, 'H')) {
+      const lt = t - SC.H[0];
+      LINE.forEach((d, i) => { const tx = 30 + i * 42, x = tx - 330 * (1 - oc(sg(lt, 0.3 + i * 0.12, 1.3 + i * 0.12))); lineup.push({ d, sh: false, x, y: 452 - (i % 2) * 22, t: t, scale: 1.25, anim: lt > 1.3 + i * 0.12 ? 'idle' : 'walk', angle: lt > 1.3 + i * 0.12 ? Math.PI / 2 : 0 }); });
+    }
+    scene.draw(lctx, t + 6, { moonX: inScene(t, 'F') ? 400 : 214, moonY: 52, shoot: [[1.4 + 6, 230, 30], [31.2 + 6, 200, 60]], lineup, noWalkers: inScene(t, 'H') && false });
+    if (inScene(t, 'F')) { lctx.fillStyle = 'rgba(5,12,36,0.55)'; lctx.fillRect(0, 0, 270, 480); }
+  } else {
+    drawStars(t);
+    $('#navy .stripes').style.transform = `translateX(${(t * 40) % 92}px)`;
+  }
+  // rayos giratorios (gacha y jefes)
+  const rays = $('#rays');
+  const inD = inScene(t, 'D'), inC = inScene(t, 'C'), inG = inScene(t, 'G');
+  rays.style.display = inD || inC || inG ? 'block' : 'none';
+  if (inD || inC || inG) {
+    const leg = inD && t - SC.D[0] >= 3.0;
+    rays.style.setProperty('--rc', leg ? 'rgba(255,210,63,.32)' : inC ? 'rgba(255,96,64,.16)' : inG ? 'rgba(95,224,138,.14)' : 'rgba(106,138,255,.16)');
+    rays.style.transform = `rotate(${t * (leg ? 28 : 10)}deg) scale(${leg ? 1.15 : 1})`;
+    rays.style.top = inC ? '940px' : '50%';
+  }
+  for (const k of 'ABCDEFGH') show('#s' + k, inScene(t, k));
+
+  // A · portada
+  if (inScene(t, 'A')) {
+    const lt = t;
+    const fb = sg(lt, 0.45, 1.0), y = -400 + 700 * oc(fb) - 40 * Math.sin(Math.PI * sg(lt, 1.0, 1.25));
+    css('#aBall', { transform: `translateY(${y - 300}px) rotate(${(1 - oc(fb)) * -540}deg)`, opacity: lt < 0.45 ? 0 : 1 });
+    const ls = popS(lt, 1.0, 0.45);
+    css('#aLogo', { transform: `scale(${lt < 1 ? 0 : 0.2 + 0.8 * ls})`, opacity: lt < 1 ? 0 : 1 });
+    const tg = oc(sg(lt, 1.6, 2.1));
+    css('#aTag', { opacity: tg, transform: `translateY(${(1 - tg) * 40}px)` });
+    css('#aChip', { opacity: lt < 2.4 ? 0 : 1, transform: `scale(${popS(lt, 2.4, 0.35)})` });
+    const out = sg(lt, 3.6, 4.0);
+    css('#sA', { transform: `scale(${1 + out * 0.25})`, opacity: 1 - out });
+  }
+  // B · combate
+  if (inScene(t, 'B')) {
+    const lt = t - SC.B[0];
+    css('#bPill', { transform: `scale(${popS(lt, 0.05)})` });
+    [...document.querySelectorAll('#bTitle .word')].forEach((w, i) => css(w, { transform: `scale(${popS(lt, 0.15 + i * 0.25, 0.3)})` }));
+    const pi = oc(sg(lt, 0, 0.6));
+    css('#bPhone', { transform: `translateY(${(1 - pi) * 1200}px) rotate(${(1 - pi) * -8}deg) scale(${1 + lt * 0.012})` });
+    setImg($('#bImg'), 'fight', 20 + lt * 30);
+    [['#bC1', 1.3], ['#bC2', 2.0], ['#bC3', 2.7]].forEach(([id, at]) => css(id, { transform: `scale(${popS(lt, at, 0.35)})`, opacity: lt < at ? 0 : 1 }));
+  }
+  // C · jefes
+  if (inScene(t, 'C')) {
+    const lt = t - SC.C[0];
+    css('#cPill', { transform: `scale(${popS(lt, 0.05)})` });
+    css('#cTitle', { transform: `scale(${popS(lt, 0.2, 0.4)})` });
+    const ai = oc(sg(lt, 0, 0.45)), beat = Math.pow(1 - ((lt % BEAT) / BEAT), 6);
+    const sh = lt > 0.5 && lt < 4.1 ? beat * 6 : 0;
+    css('#cArena', { transform: `translateX(${(1 - ai) * 1100}px) translate(${Math.sin(lt * 61) * sh}px, ${Math.cos(lt * 47) * sh}px) scale(${1 + 0.035 * beat})` });
+    const z = 1.16 + lt * 0.025;
+    const img = $('#cImg');
+    // recorte de la arena (390×250 CSS desde y=46 → 3× en la captura)
+    const k = 1080 / 1170 * z;
+    css(img, { width: (1170 * k) + 'px', left: (-(1170 * k - 1080) / 2) + 'px', top: (400 - (138 + 375) * k) + 'px' });
+    setImg(img, 'boss', Math.min(205, lt * 30 * 1.36));
+    CHIPS.forEach((c, i) => { const at = 1.0 + i * 0.5; css('#cc' + i, { transform: `scale(${popS(lt, at)})`, opacity: lt < at ? 0 : 1 }); });
+  }
+  // D · gacha
+  if (inScene(t, 'D')) {
+    const lt = t - SC.D[0], rev = lt >= 3.0;
+    show('#dHdr', !rev); show('#dLeg', rev);
+    css('#dPill', { transform: `scale(${popS(lt, 0.05)})` });
+    css('#dTitle', { transform: `scale(${popS(lt, 0.2, 0.4)})` });
+    const pi = oc(sg(lt, 0, 0.5));
+    const kick = rev ? Math.pow(1 - sg(lt, 3.0, 3.5), 2) : 0;
+    const shake = lt > 0.9 && lt < 3 ? Math.sin(lt * 40) * 4 * sg(lt, 0.9, 2.9) : 0;
+    css('#dPhone', { transform: `translateY(${(1 - pi) * 1200}px) translateX(${shake}px) scale(${1 + kick * 0.06})` });
+    setImg($('#dImg'), 'gacha1', 12 + lt * 30);
+    if (rev) css('#dLeg', { transform: `scale(${popS(lt, 3.0, 0.45)})` });
+    for (let i = 0; i < 26; i++) {
+      const R = Scenery.rng(100 + i); R(); const a = R() * 6.283, sp = 500 + R() * 900, l = lt - 3.0 - R() * 0.25;
+      const e = $('#sp' + i);
+      if (!rev || l < 0 || l > 1.6) { e.style.display = 'none'; continue; }
+      e.style.display = 'block';
+      const d = sp * oc(Math.min(1, l / 1.2));
+      css(e, { left: (540 + Math.cos(a) * d) + 'px', top: (1100 + Math.sin(a) * d * 0.9 + 200 * l * l) + 'px', transform: `scale(${2 + R() * 2.5}) rotate(${l * 200}deg)`, opacity: 1 - sg(l, 1.0, 1.6) });
+    }
+  }
+  // E · Pokédex
+  if (inScene(t, 'E')) {
+    const lt = t - SC.E[0];
+    $('#eN').textContent = Math.round(1027 * oc(sg(lt, 0.1, 1.9)));
+    css('#eN', { transform: `scale(${0.6 + 0.4 * popS(lt, 0, 0.4) + (lt > 1.9 ? 0.06 * Math.pow(1 - sg(lt, 1.9, 2.3), 2) : 0)})` });
+    const pi = oc(sg(lt, 0.1, 0.7));
+    css('#ePhone', { transform: `translateY(${(1 - pi) * 1300}px)` });
+    setImg($('#eImg'), 'dex', Math.min(179, lt * 45));
+    EMONS.forEach((m, i) => { const at = 0.5 + i * 0.25; css('#em' + i, { transform: `translateY(${Math.sin(lt * 3 + i) * 10}px) scale(${popS(lt, at, 0.4)})`, opacity: lt < at ? 0 : 1 }); });
+  }
+  // F · rasgos (uno por pulso)
+  if (inScene(t, 'F')) {
+    const lt = t - SC.F[0];
+    css('#fTitle', { transform: `scale(${popS(lt, 0.0, 0.35)})` });
+    FEATS.forEach((f, i) => { const at = 0.35 + i * 0.4; css('#f' + i, { transform: `scale(${popS(lt, at, 0.35)})`, opacity: lt < at ? 0 : 1 }); });
+  }
+  // G · evolución
+  if (inScene(t, 'G')) {
+    const lt = t - SC.G[0];
+    css('#gPill', { transform: `scale(${popS(lt, 0.05)})` });
+    css('#gTitle', { transform: `scale(${popS(lt, 0.2, 0.4)})` });
+    const pi = oc(sg(lt, 0, 0.5));
+    css('#gPhone', { transform: `translateY(${(1 - pi) * 1200}px)` });
+    setImg($('#gImg'), 'evo', window.EVO0 + lt * 30 * window.EVOK);
+    css('#gImg', { transformOrigin: '50% 50%', transform: `scale(${1.12 + lt * 0.025})` });
+  }
+  // H · cierre
+  if (inScene(t, 'H')) {
+    const lt = t - SC.H[0];
+    const fb = sg(lt, 0.0, 0.5);
+    css('#hBall', { transform: `translateY(${(1 - oc(fb)) * -500}px) rotate(${(1 - oc(fb)) * -360}deg)` });
+    css('#hLogo', { transform: `scale(${popS(lt, 0.25, 0.45)})` });
+    const pulse = 1 + 0.05 * Math.pow(Math.abs(Math.sin(Math.PI * lt / BEAT / 2)), 4);
+    css('#hBtn', { transform: `scale(${popS(lt, 0.8, 0.35) * (lt > 1.2 ? pulse : 1)})` });
+    css('#hUrl', { transform: `scale(${popS(lt, 1.2, 0.35)})` });
+    css('#hSub', { opacity: oc(sg(lt, 1.6, 2.0)) });
+    css('#sH', { opacity: 1 });
+  }
+  // destello en cada corte y al revelar el legendario
+  let fl = 0;
+  for (const c of CUTS) if (t >= c && t < c + 0.2) fl = Math.max(fl, 0.55 * (1 - (t - c) / 0.2));
+  const rv = SC.D[0] + 3.0; if (t >= rv && t < rv + 0.3) fl = Math.max(fl, 0.85 * (1 - (t - rv) / 0.3));
+  fl = Math.max(fl, 1 - sg(t, 0, 0.5));
+  $('#flash').style.background = t < 0.5 ? '#000' : '#fff';
+  $('#flash').style.opacity = fl;
+  if (t > DUR - 0.6) { $('#flash').style.background = '#000'; $('#flash').style.opacity = sg(t, DUR - 0.6, DUR); }
+  return Promise.all(pend);
+}
+window.render = render; window.DUR = DUR;
+window.EVO0 = +(Q.get('evo0') || 0); window.EVOK = +(Q.get('evok') || 1);
+window.ready = async () => {
+  await document.fonts.ready;
+  const need = scene.walkers.map(w => [w.d, w.sh, 'walk']).concat(LINE.map(d => [d, false, 'walk'])).concat(LINE.map(d => [d, false, 'idle']));
+  return Scenery.ready(need);
+};
+</script>
+</body></html>

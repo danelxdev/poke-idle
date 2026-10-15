@@ -1,0 +1,22 @@
+<!doctype html><meta charset="utf-8"><title>audio</title>
+<script>
+// La música del juego renderizada sin tiempo real: AudioContext → OfflineAudioContext
+window.Save = { d: null };
+window.__secs = +(new URLSearchParams(location.search).get('s') || 36);
+window.AudioContext = function () { return (window.__ctx = new OfflineAudioContext(2, Math.ceil(44100 * window.__secs), 44100)); };
+function wav(buf) {
+  const n = buf.length, ch = 2, out = new DataView(new ArrayBuffer(44 + n * ch * 2)), w = (o, s) => { for (let i = 0; i < s.length; i++) out.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); out.setUint32(4, 36 + n * ch * 2, true); w(8, 'WAVE'); w(12, 'fmt '); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, ch, true);
+  out.setUint32(24, 44100, true); out.setUint32(28, 44100 * ch * 2, true); out.setUint16(32, ch * 2, true); out.setUint16(34, 16, true); w(36, 'data'); out.setUint32(40, n * ch * 2, true);
+  const L = buf.getChannelData(0), R = buf.getChannelData(Math.min(1, buf.numberOfChannels - 1));
+  for (let i = 0, o = 44; i < n; i++) for (const c of [L, R]) { const v = Math.max(-1, Math.min(1, c[i])); out.setInt16(o, v < 0 ? v * 0x8000 : v * 0x7fff, true); o += 2; }
+  let s = ''; const u = new Uint8Array(out.buffer); for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s);
+}
+async function music(name) { return wav(await Audio8.preview(name, window.__secs)); }
+async function sfx(cues) {   // cues: [[segundo, nombre], ...]
+  Audio8.init(); const c = window.__ctx;
+  for (const [t, n] of cues) c.suspend(t).then(() => { Audio8.play(n); c.resume(); });
+  return wav(await c.startRendering());
+}
+</script>
+<script src="../../js/audio.js"></script>

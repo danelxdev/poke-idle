@@ -1,0 +1,57 @@
+/* Estilos compartidos por el vídeo y las imágenes promocionales: misma paleta, tipografía y
+   relieve que el juego (css/style.css) pero a tamaño de póster. */
+@font-face { font-family: 'Pixelify Sans'; font-weight: 400; src: url('fonts/PixelifySans-400.woff2') format('woff2'); }
+@font-face { font-family: 'Pixelify Sans'; font-weight: 700; src: url('fonts/PixelifySans-700.woff2') format('woff2'); }
+:root { --bg: #0a1430; --panel: #142356; --panel2: #1b2e6c; --line: #2a3f8a; --ink: #f2f4ff; --dim: #9aa6d8; --yellow: #ffd23f; --red: #ff5050; --green: #5fe08a; --blue: #4aa8ff; --orange: #f0a020; }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #050c24; color: var(--ink); font-family: 'Pixelify Sans', monospace; overflow: hidden; }
+img, canvas, .px { image-rendering: pixelated; image-rendering: crisp-edges; }
+#stage { position: relative; overflow: hidden; background: #050c24; }
+.abs { position: absolute; }
+.layer { position: absolute; inset: 0; }
+.bgc { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+
+.logo { margin: 0; font-weight: 700; color: #fff; letter-spacing: 2px; line-height: 1; white-space: nowrap; text-shadow: 0 .05em 0 #1a2a6a, 0 .1em 0 #050a1c, 0 0 .5em rgba(74, 168, 255, .35); }
+.logo span { color: var(--yellow); }
+.h1 { font-weight: 700; color: #fff; line-height: 1.02; text-shadow: 0 .06em 0 #1a2a6a, 0 .12em 0 #050a1c; letter-spacing: 1px; }
+.h1 em { font-style: normal; color: var(--yellow); }
+.pill { display: inline-block; font-weight: 700; color: #2a1600; background: var(--yellow); border-radius: 14px; padding: .18em .6em .22em; box-shadow: 0 .14em 0 #8a5000, inset 0 0 0 .08em #fff2a8; letter-spacing: 2px; }
+.pill.red { background: #ff6040; color: #2a0600; box-shadow: 0 .14em 0 #7a1a08, inset 0 0 0 .08em #ffb0a0; }
+.pill.blue { background: #4aa8ff; color: #04203f; box-shadow: 0 .14em 0 #13457a, inset 0 0 0 .08em #c8e6ff; }
+.pill.pink { background: #ff7ad0; color: #3a0628; box-shadow: 0 .14em 0 #7a1858, inset 0 0 0 .08em #ffd0f0; }
+.pill.green { background: #5fe08a; color: #06301a; box-shadow: 0 .14em 0 #1a6a3a, inset 0 0 0 .08em #c8ffd8; }
+.panel { background: var(--panel); border-radius: 22px; box-shadow: 0 0 0 5px var(--line), 0 12px 0 #050a1c; }
+.btnp { display: inline-block; font-weight: 700; background: var(--orange); color: #2a1600; border-radius: 18px; padding: .3em 1.1em .36em; box-shadow: 0 .14em 0 #8a5000, inset 0 0 0 .07em #ffd060; }
+.dim { color: var(--dim); }
+
+/* móvil con la captura real del juego */
+.phone { position: absolute; border-radius: 86px; background: #070d24; padding: 20px; box-shadow: 0 0 0 5px #2a3f8a, 0 0 0 14px #0a1430, 0 0 0 18px #24398a, 0 40px 90px rgba(0, 0, 0, .65), 0 0 160px rgba(74, 168, 255, .28); }
+.phone .scr { display: block; border-radius: 66px; overflow: hidden; position: relative; background: #0a1430; }
+.phone .scr img { display: block; width: 100%; height: auto; }
+.phone .notch { position: absolute; left: 50%; top: 34px; width: 150px; height: 40px; margin-left: -75px; border-radius: 22px; background: #02050f; z-index: 2; }
+
+.callout { position: absolute; display: flex; align-items: center; gap: 22px; padding: 22px 34px 24px 26px; font-weight: 700; font-size: 46px; white-space: nowrap; }
+.callout img { width: 72px; height: 72px; }
+.callout small { display: block; font-size: 30px; font-weight: 400; color: var(--dim); margin-top: 4px; }
+
+.feat { position: absolute; width: 476px; height: 240px; display: flex; align-items: center; gap: 22px; padding: 0 26px; }
+.feat img { width: 104px; height: 104px; flex: none; }
+.feat b { display: block; font-size: 44px; line-height: 1.05; }
+.feat small { display: block; font-size: 29px; color: var(--dim); margin-top: 8px; line-height: 1.15; }
+
+.rays { position: absolute; left: 50%; top: 50%; width: 3200px; height: 3200px; margin: -1600px 0 0 -1600px; border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, var(--rc, rgba(106, 138, 255, .16)) 0deg 9deg, transparent 9deg 18deg);
+  -webkit-mask: radial-gradient(circle, #000 0%, #000 22%, transparent 62%); mask: radial-gradient(circle, #000 0%, #000 22%, transparent 62%); }
+.vign { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(2, 5, 18, .75) 100%); }
+.flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+.grain { position: absolute; inset: 0; pointer-events: none; opacity: .05; background-image: repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 4px); }
+
+/* Pokémon de la hoja de animación (igual que el juego, js/sprites.js → html) */
+.spr { display: inline-block; flex: none; position: relative; overflow: hidden; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; vertical-align: middle; }
+.spr.play { animation: sprplay var(--dur, .8s) steps(var(--n, 1)) infinite; }
+@keyframes sprplay { from { background-position-x: var(--ox, 0px); } to { background-position-x: calc(var(--ox, 0px) - var(--sw)); } }
+.spr > b { position: absolute; display: block; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
+.spr.play > b { animation: sprplay2 var(--dur, .8s) steps(var(--n, 1)) infinite; }
+@keyframes sprplay2 { from { background-position-x: 0; } to { background-position-x: calc(var(--sw) * -1); } }
+.spr.play:has(> b) { animation: none; }
+.mon { position: absolute; filter: drop-shadow(0 10px 0 rgba(0, 0, 0, .35)); }
