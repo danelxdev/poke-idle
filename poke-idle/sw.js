@@ -7,7 +7,7 @@ const SPRITES = 'pokeidle-sprites-v1';
 const MAX_SPRITES = 1500;
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'css/style.css',
   'js/data/pokedex.js', 'js/data/forms.js', 'js/data/moves.js', 'js/data/idle.js', 'js/i18n.js', 'js/data/en.js', 'js/data/extra.js', 'js/art/tiles.js', 'js/art/vfx.js', 'js/art/icons.js',
-  'js/sprites.js', 'js/core.js', 'js/pwa.js', 'js/a11y.js', 'js/audio.js', 'js/arena.js', 'js/title.js', 'js/ui.js', 'js/main.js',
+  'js/sprites.js', 'js/core.js', 'js/pwa.js', 'js/cloud-config.js', 'js/cloud.js', 'js/a11y.js', 'js/audio.js', 'js/arena.js', 'js/title.js', 'js/ui.js', 'js/main.js',
   'assets/pwa/icon-192.png', 'assets/pwa/icon-512.png', 'assets/pwa/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

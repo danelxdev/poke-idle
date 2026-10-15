@@ -16,6 +16,7 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
 - **Eventos semanales y Torre de batalla**: un tipo protagonista cada semana con jefe, misiones y bola propia, y una torre infinita con pisos de reglas especiales.
 - **Rival, entrenadores y Pokédex completa**: el rival Nico te desafía dos veces por región (20 duelos con historia), aparecen entrenadores con varios Pokémon seguidos y cada Pokémon tiene una ficha con estadísticas, debilidades, evolución y dónde aparece.
 - **Guía «¿Qué hago ahora?»**, **auras** en los enemigos, **perfil con títulos y avatar**, favoritos en la Pokédex y objetos exclusivos de final de partida.
+- **Cuenta con Google o como invitado**, partida en la nube, perfil público y **rankings** (Supabase; ver `supabase/README.md`). Opcional: sin configurar, el juego funciona como siempre.
 - **Consejos de novedades** (cada función se explica una sola vez, cuando se hace útil), **cosméticos** (marcos de retrato y fondos de arena) y un **resumen al volver** completo.
 - **Final de partida sin techo**: **Ascensión** (una segunda Liga con Rango, Esencia y multiplicadores permanentes que se acumulan) y **Duelos Maestros** de Nico, una escalera infinita cada vez más dura.
 - **Objetos, combos y tácticas**: 17 objetos con efectos distintos, fusión y taller, combos de objetos y 5 tácticas de equipo.
@@ -158,6 +159,17 @@ El botón **Equipos** de la pestaña Equipo guarda hasta 4 equipos con nombre y 
 - Cada duelo son **3 Pokémon seguidos con un solo cronómetro**; su equipo de cada región usa tipos distintos, así que importan los tipos de tu equipo. Se muestra el **Poder** del equipo (≥100 % = lo vences a tiempo).
 - La primera victoria da gemas, polvo y tickets (en los segundos duelos, además, fragmentos Mega, un huevo y un objeto) y **+1 % de daño permanente**. Después puedes pedir una **revancha** al día por duelo (polvo y gemas).
 - **Entrenadores**: de vez en cuando, en vez de un salvaje, aparece un entrenador con 2 Pokémon seguidos (3 desde la etapa 60). Al derrotar al último das un extra de monedas y, con suerte, gemas, tickets u objetos. Se ven en la tarjeta del enemigo (por ejemplo «Pescador Pablo 2/3»).
+
+## Cuenta, nube y rankings (opcional)
+
+Se activa rellenando `js/cloud-config.js` (guía completa en `supabase/README.md`, con el esquema de la base de datos en `supabase/schema.sql`). Sin configurar, no aparece nada y el juego funciona solo en el navegador.
+
+- **Pantalla de inicio**: botón **Iniciar sesión con Google** o, si prefieres, **Jugar** como invitado (la partida solo se guarda en ese dispositivo). Se puede iniciar sesión más tarde desde Ajustes → Cuenta.
+- **Partida en la nube**: se sube comprimida (gzip) cada ~2 minutos, al ocultar la pestaña y tras hitos (Ascensión, jefes, retos). Cada partida tiene una versión (`rev`); si la nube y el dispositivo difieren, el juego muestra las dos (etapa, medallas, Rango, Pokédex, tiempo jugado y dispositivo) y eliges cuál conservar. El servidor guarda las 3 últimas copias de seguridad y el navegador una (`pokeidle.save.v1.bak`). Los ajustes (volumen, idioma, accesibilidad) son de cada dispositivo.
+- **Perfil público**: nombre único (3–16 caracteres, con lista de palabras prohibidas), avatar, título y marco. El nombre automático es del tipo `Entrenador4821`.
+- **Rankings** (también visibles para invitados): etapa máxima, Rango/Esencia, Torre, Duelos Maestros, Pokédex, medallas y **semanal del evento**. Se puede salir de ellos en Ajustes → Cuenta, y hay un botón de denuncia por jugador.
+- **Trampas**: el servidor comprueba que las marcas sean verosímiles (etapa frente al tiempo jugado, saltos bruscos entre envíos…) y oculta las sospechosas; no se puede impedir del todo porque el juego corre en el navegador.
+- **Privacidad**: Ajustes → Cuenta → **Borrar mi cuenta y mis datos** elimina perfil, partida, copias, marcas y amigos.
 
 ## Consejos, cosméticos y resumen al volver
 

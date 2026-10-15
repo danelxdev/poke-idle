@@ -12,6 +12,7 @@ A browser idle game for Pokémon fans, with a ticket-based gacha. It is a non-pr
 - **Weekly events** (a featured type each week with a damage bonus, boss in 4 difficulties, quests and its own ball) and the infinite **Battle Tower** with guardian rules.
 - **Rival and trainers**: Nico challenges you twice in every region (20 duels with a short story, three Pokémon in a row on one timer, permanent +1% damage for each first win and a daily rematch), and trainers show up mid-route with several Pokémon in a row.
 - **Complete Pokédex**: an entry for every Pokémon (base stats, weaknesses and resistances, full evolution line, regional and Mega forms, moves, where it appears, times defeated and your own Pokémon), search, filters by region, type and status, sorting, completion by region and a bestiary.
+- **Google account or guest play**, cloud save, a public profile and **rankings** (Supabase; see `supabase/README.md`). Optional: without configuration the game works as before.
 - **Feature tips** (each new feature explained once, when it becomes useful), **cosmetics** (portrait frames and arena backgrounds) and a complete **welcome-back summary**.
 - **“What should I do now?” guide**, enemy **auras**, a **profile with titles and avatar**, Pokédex favorites and exclusive endgame items.
 - **Endgame with no ceiling**: **Ascension** (a second League run with a Rank, Essence and permanent multipliers that stack) and Nico’s endless **Master Duels** ladder, each level tougher than the last.

@@ -50,7 +50,7 @@ const Core = (() => {
   function fresh() {
     return {
       v: 1, started: false, coins: 0, gems: 50, dust: 0, tk: { poke: 5, super: 1, ultra: 0, master: 0 }, stage: 1, maxStage: 1, kills: 0, auto: true,
-      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, shards: 0, hist: [], presets: [1, 2, 3, 4].map(i => ({ name: 'Equipo ' + i, team: [] })), event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 }, rival: { won: {}, rem: {}, told: {}, master: 0 }, asc: { rank: 0, ess: 0 }, tactic: 'bal', foes: {}, profile: { name: '', avatar: 0, title: 'novato' }, favs: {}, ui: {}, cosm: { frame: 'classic', bg: 'auto' },
+      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, shards: 0, hist: [], presets: [1, 2, 3, 4].map(i => ({ name: 'Equipo ' + i, team: [] })), event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 }, rival: { won: {}, rem: {}, told: {}, master: 0 }, asc: { rank: 0, ess: 0 }, tactic: 'bal', foes: {}, profile: { name: '', avatar: 0, title: 'novato' }, favs: {}, ui: {}, cloud: { uid: '', rev: 0 }, cosm: { frame: 'classic', bg: 'auto' },
       up: { tap: 0, train: 0, coin: 0, crit: 0, critdmg: 0, speed: 0, catch: 0, golden: 0, bosstime: 0, type: 0, boss: 0, autotap: 0, alch: 0 },
       shop: { dmg: 0, coins: 0, lvl: 0, slots: 0, offline: 0, catch: 0, shiny: 0, gems: 0, skill: 0, dust: 0, tapd: 0, critb: 0, disc: 0, bt: 0, egg: 0 },
       medals: 0, mp: 0, badges: {}, bossFirst: {},
@@ -111,6 +111,8 @@ const Core = (() => {
     if (!TITLES.some(t => t.id === d.profile.title)) d.profile.title = 'novato';
     if (!d.favs || typeof d.favs !== 'object' || Array.isArray(d.favs)) d.favs = {};
     if (!d.ui || typeof d.ui !== 'object' || Array.isArray(d.ui)) d.ui = {};
+    if (!d.cloud || typeof d.cloud !== 'object') d.cloud = { uid: '', rev: 0 };
+    d.cloud.uid = typeof d.cloud.uid === 'string' ? d.cloud.uid : ''; d.cloud.rev = Math.max(0, Math.floor(+d.cloud.rev || 0));
     if (!d.ui.tips || typeof d.ui.tips !== 'object') d.ui.tips = {};
     if (!d.ui.biomes || typeof d.ui.biomes !== 'object') d.ui.biomes = {};
     if (!d.cosm || typeof d.cosm !== 'object') d.cosm = { frame: 'classic', bg: 'auto' };
@@ -136,7 +138,9 @@ const Core = (() => {
     resetFight();
     return S;
   }
-  function save() { if (!S) return; S.last = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* sin espacio */ } }
+  let frozen = false;
+  const freezeSave = b => { frozen = !!b; };           // para que, al cargar otra partida, el guardado de salida no la pise
+  function save() { if (!S || frozen) return; S.last = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* sin espacio */ } }
   function wipe() { S = fresh(); chal = null; refreshEvent(); resetFight(); save(); }
 
   // ---------------- fórmulas ----------------
@@ -1281,7 +1285,7 @@ const Core = (() => {
 
   return {
     K, hpTab, DEX, CHILDREN, RAR, POOLG, BASES, bst, baseOf, stageOf, fmt, on, emit, F,
-    get S() { return S; }, load, save, wipe, fresh, setRng(f) { rnd = f; },
+    get S() { return S; }, load, save, freezeSave, eventWeek: () => weekIdx(), wipe, fresh, setRng(f) { rnd = f; },
     route, routeIdx, routeData, regionOf, regionOfRoute, loopOf, isBoss, bossTier, bossTime, enemyHp, killCoins, coinMult, globalDmg, monDmg, monRate, eff,
     levelCost, levelCostN, maxAffordable, upCost, shopCost, pokeBallPrice, critChance, critMult, catchChance, teamDps, tapDmg, medalGain, medalFor, dexCount, badgeCount,
     genUnlocked, unlockedGens, skillOn, skillReady, useSkill, goldenChance, gemMult,

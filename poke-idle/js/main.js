@@ -67,6 +67,7 @@
   Core.on('chalEnd', () => { wantMusic(Core.S.stage); UI.refresh(true); });
   Core.on('trainerStart', t => { if (Core.S.started) { Audio8.play('trainer'); UI.toast(Icons.html('friends', 18) + ' ' + L(t.cls + ' ' + t.name + ' te desafía (' + t.n + ' Pokémon)', t.cls + ' ' + t.name + ' challenges you (' + t.n + ' Pokémon)')); } });
   Core.on('trainerWin', d => { Audio8.play('win'); UI.toast(Icons.html('friends', 18) + ' ' + L('¡' + d.trainer.cls + ' ' + d.trainer.name + ' vencido! ', d.trainer.cls + ' ' + d.trainer.name + ' beaten! ') + '+' + Core.fmt(d.coins) + ' ' + L('monedas', 'coins') + (d.gems ? ' · +' + d.gems + ' ' + L('gemas', 'gems') : '') + (d.tickets ? ' · +1 ticket' : '') + (d.item ? ' · ' + L('¡objeto!', 'item!') : '')); });
+  for (const ev of ['ascend', 'chalWin', 'bossWin', 'hatch']) Core.on(ev, () => Cloud.soon());
   Core.on('rivalReady', e => { Audio8.play('rare'); UI.banner(L('Nico quiere un duelo', 'Nico wants a duel'), REGIONS[e.region].name + L(' · pestaña Retos', ' · Challenges tab'), '#ff8040'); UI.refresh(true); });
   Core.on('tickets', t => { if (Core.S.started) UI.refresh(false); });
   Core.on('kill', k => {
@@ -141,13 +142,15 @@
   // ---- guardado ----
   setInterval(() => { if (!hidden && Core.S.started) Core.save(); }, 5000);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { hidden = true; Audio8.setHidden(true); if (Core.S.started) Core.save(); PWA.schedule(); }
+    if (document.hidden) { hidden = true; Cloud.flush(); Audio8.setHidden(true); if (Core.S.started) Core.save(); PWA.schedule(); }
     else { hidden = false; Audio8.setHidden(false); PWA.clear(); last = performance.now(); if (Core.S.started && $('#scr-game').classList.contains('active')) welcome(); }
   });
   window.addEventListener('pagehide', () => { if (Core.S.started) Core.save(); });
 
   // ---- inicio ----
   UI.title();
+  Cloud.on(() => UI.authChanged());
+  Cloud.init().then(() => UI.authChanged());
   $('#btn-start').onclick = () => {
     Audio8.resume();
     Audio8.play('select');

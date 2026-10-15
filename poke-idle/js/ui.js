@@ -589,7 +589,7 @@ const UI = (() => {
             ${maxed ? '<button class="btn small" disabled>' + L('Máx.', 'Max') + '</button>' : `<button class="btn primary buy" data-act="shop" data-v="${id}" data-cost="${Core.shopCost(id)}" data-cur="mp"><span>${L('Comprar', 'Buy')}</span><small>${ico('crown', 12)}${Core.shopCost(id)}</small></button>`}</div>`;
         }
         const st = s.stats;
-        h += `</div><div class="row" style="margin:4px 0 8px"><button class="btn primary" data-act="stats">${L('Ver estadísticas y gráficas', 'View statistics and charts')}</button></div><div class="statgrid"><span>${L('Etapa máxima', 'Max stage')} <b>${st.maxStage}</b></span><span>${L('Pokémon derrotados', 'Pokémon defeated')} <b>${fmt(st.kills)}</b></span><span>${L('Jefes vencidos', 'Bosses beaten')} <b>${fmt(st.bosses)}</b></span><span>${L('Poké Balls abiertas', 'Poké Balls opened')} <b>${fmt(st.pulls)}</b></span>
+        h += `</div><div class="row" style="margin:4px 0 8px"><button class="btn primary" data-act="stats">${L('Ver estadísticas y gráficas', 'View statistics and charts')}</button>${Cloud.enabled() ? `<button class="btn" data-act="ranking">${L('Rankings', 'Rankings')}</button>` : ''}</div><div class="statgrid"><span>${L('Etapa máxima', 'Max stage')} <b>${st.maxStage}</b></span><span>${L('Pokémon derrotados', 'Pokémon defeated')} <b>${fmt(st.kills)}</b></span><span>${L('Jefes vencidos', 'Bosses beaten')} <b>${fmt(st.bosses)}</b></span><span>${L('Poké Balls abiertas', 'Poké Balls opened')} <b>${fmt(st.pulls)}</b></span>
           <span>${L('Capturas', 'Catches')} <b>${fmt(st.catches)}</b></span><span>${L('Evoluciones', 'Evolutions')} <b>${fmt(st.evolutions)}</b></span><span>Shinies <b>${fmt(st.shinies)}</b></span><span>${L('Monedas totales', 'Total coins')} <b>${fmt(st.coinsTotal)}</b></span>
           <span>${L('Medallas de gimnasio', 'Gym badges')} <b>${Core.badgeCount()}/24</b></span><span>${L('Tiempo jugado', 'Time played')} <b>${Math.floor(st.time / 3600)}h ${Math.floor(st.time / 60) % 60}m</b></span></div></div>`;
         return h;
@@ -678,6 +678,7 @@ const UI = (() => {
       case 'prestige': prestigeModal(); return;
       case 'ascend': ascendModal(); return;
       case 'stats': statsModal(false); return;
+      case 'ranking': rankingModal(); return;
     }
     Core.save();
     refresh(true);
@@ -1122,6 +1123,74 @@ const UI = (() => {
     });
   }
 
+  // ---------------- cuenta y nube ----------------
+  const GOOGLE = '<svg class="gsvg" viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.3 5.7c4.3-4 6.8-9.9 6.8-17.1z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-2.9-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.3 0 11.7-2.1 15.6-5.7l-7.3-5.7c-2 1.4-4.7 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>';
+  function cloudStatus() {
+    const st = Cloud.status, ago = Cloud.lastPush ? Math.max(1, Math.round((Date.now() - Cloud.lastPush) / 60000)) : 0;
+    return st === 'ok' ? L('Partida sincronizada', 'Game synced') + (ago ? ' · ' + L('hace ' + ago + ' min', ago + ' min ago') : '') : st === 'syncing' ? L('Sincronizando…', 'Syncing…') : st === 'connecting' ? L('Conectando…', 'Connecting…') : st === 'offline' ? L('Sin conexión: juegas en este dispositivo', 'Offline: playing on this device') : st === 'paused' ? L('Sincronización en pausa: elige qué partida usar desde Ajustes → Cuenta', 'Sync paused: choose which game to use in Settings → Account') : st === 'error' ? L('No se pudo sincronizar. Se reintentará solo.', 'Could not sync. It will retry by itself.') : '';
+  }
+  function authPanel() {
+    const el = $('#t-auth'); if (!el) return;
+    if (!Cloud.enabled()) { el.classList.add('hidden'); return; }
+    el.classList.remove('hidden');
+    if (Cloud.user) {
+      const p = Cloud.profile;
+      el.innerHTML = `<div class="authuser"><b>${p ? p.nickname : ''}</b><small>${cloudStatus()}</small></div><div class="row tight"><button class="btn small" id="a-rank">${L('Rankings', 'Rankings')}</button><button class="btn small" id="a-out">${L('Cerrar sesión', 'Sign out')}</button></div>`;
+      $('#a-out').onclick = async () => { await Cloud.signOut(); authPanel(); };
+    } else if (Cloud.status === 'connecting') el.innerHTML = `<small>${L('Conectando…', 'Connecting…')}</small>`;
+    else el.innerHTML = `<button class="gbtn" id="a-google">${GOOGLE}<span>${L('Iniciar sesión con Google', 'Sign in with Google')}</span></button><small>${Cloud.status === 'offline' ? L('Sin conexión: pulsa «Jugar» para jugar como invitado.', 'Offline: press “Play” to play as a guest.') : L('o pulsa «Jugar» para jugar como invitado: tu partida solo se guarda en este dispositivo.', 'or press “Play” to play as a guest: your game is only saved on this device.')}</small><button class="linkbtn" id="a-rank">${L('Ver rankings', 'View rankings')}</button>`;
+    if ($('#a-google')) $('#a-google').onclick = async () => { $('#a-google').disabled = true; Audio8.play('select'); if (!(await Cloud.signIn())) authPanel(); };
+    if ($('#a-rank')) $('#a-rank').onclick = () => rankingModal();
+  }
+  function accBind() {
+    const box = $('#acc-box'); if (!box) return;
+    const u = Cloud.user, p = Cloud.profile;
+    box.innerHTML = u ? `<div class="setrow"><span class="sl"><b>${p ? p.nickname : ''}</b><small>${u.email || ''} · ${cloudStatus()}</small></span></div>
+        <div class="row tight" style="margin:4px 0"><button class="btn small primary" id="ac-sync">${L('Sincronizar ahora', 'Sync now')}</button><button class="btn small" id="ac-rank">${L('Rankings', 'Rankings')}</button><button class="btn small" id="ac-out">${L('Cerrar sesión', 'Sign out')}</button></div>
+        <div class="setrow"><span class="sl"><b>${L('Aparecer en los rankings', 'Appear in the rankings')}</b><small>${L('Se muestra tu nombre público, avatar y título', 'Your public name, avatar and title are shown')}</small></span><button class="tog ${p && p.show_in_rankings ? 'on' : ''}" id="ac-show" role="switch" aria-checked="${!!(p && p.show_in_rankings)}" aria-label="${L('Aparecer en los rankings', 'Appear in the rankings')}"><i></i></button></div>
+        <div class="row tight" style="margin:4px 0 0"><button class="btn small danger" id="ac-del">${L('Borrar mi cuenta y mis datos', 'Delete my account and data')}</button></div>`
+      : `<p class="hint" style="margin:0 0 6px">${L('Juegas como invitado: tu partida solo se guarda en este dispositivo. Con Google la guardas en la nube, la usas en otros dispositivos y apareces en los rankings.', 'You are playing as a guest: your game is only saved on this device. With Google you save it in the cloud, use it on other devices and appear in the rankings.')}</p>
+        <div class="row tight" style="margin:0"><button class="gbtn" id="ac-google">${GOOGLE}<span>${L('Iniciar sesión con Google', 'Sign in with Google')}</span></button><button class="btn small" id="ac-rank">${L('Ver rankings', 'View rankings')}</button></div>`;
+    const on = (id, f) => { const e = $(id); if (e) e.onclick = f; };
+    on('#ac-google', async () => { Audio8.play('select'); await Cloud.signIn(); });
+    on('#ac-rank', () => rankingModal());
+    on('#ac-sync', async () => { toast(L('Sincronizando…', 'Syncing…')); const ok = await Cloud.syncNow(); toast(ok ? L('Partida sincronizada', 'Game synced') : L('No se pudo sincronizar', 'Could not sync')); });
+    on('#ac-out', async () => { await Cloud.signOut(); accBind(); });
+    on('#ac-show', async () => { await Cloud.setShow(!(p && p.show_in_rankings)); accBind(); });
+    on('#ac-del', () => {
+      openModal(`<h2>${L('¿Borrar tu cuenta?', 'Delete your account?')}</h2><p>${L('Se borrarán tu perfil, tu partida en la nube, tus marcas de ranking y tus amigos. La partida de este dispositivo no se toca.', 'Your profile, cloud game, ranking scores and friends will be deleted. The game on this device is not touched.')}</p><div class="row"><button class="btn" id="d-no">${L('Cancelar', 'Cancel')}</button><button class="btn danger" id="d-yes">${L('Sí, borrar', 'Yes, delete')}</button></div>`);
+      $('#d-no').onclick = settings;
+      $('#d-yes').onclick = async () => { const ok = await Cloud.deleteAccount(); settings(); toast(ok ? L('Cuenta borrada', 'Account deleted') : L('No se pudo borrar la cuenta', 'Could not delete the account')); };
+    });
+  }
+  function authChanged() { authPanel(); accBind(); }
+  let rkBoard = 'stage';
+  async function rankingModal(b) {
+    if (b) rkBoard = b;
+    const want = rkBoard, tabs = [['stage', L('Etapa', 'Stage')], ['rank', L('Rango', 'Rank')], ['tower', L('Torre', 'Tower')], ['master', L('Maestro', 'Master')], ['dex', 'Pokédex'], ['medals', L('Medallas', 'Medals')], ['weekly', L('Semanal', 'Weekly')]];
+    openModal(`<h2>${L('Rankings', 'Rankings')}</h2><div class="seg wrap rktabs" role="tablist">${tabs.map(([id, n]) => `<button data-rk="${id}" class="${id === want ? 'on' : ''}" aria-pressed="${id === want}">${n}</button>`).join('')}</div>
+      <div id="rk-body" class="rk-body"><p class="hint">${L('Cargando…', 'Loading…')}</p></div><div id="rk-me" class="rk-me"></div>
+      <p class="hint" style="margin:6px 0 0">${Cloud.user ? L('Tus marcas se envían solas. Los rankings son por diversión.', 'Your scores are sent automatically. Rankings are for fun.') : L('Inicia sesión con Google para aparecer en los rankings.', 'Sign in with Google to appear in the rankings.')}</p>
+      <div class="row"><button class="btn" id="rk-x">${L('Cerrar', 'Close')}</button></div>`);
+    $('#modal-box').classList.add('wide');
+    $('#rk-x').onclick = closeModal;
+    $$('[data-rk]').forEach(t => t.onclick = () => rankingModal(t.dataset.rk));
+    const unit = { stage: L('etapa', 'stage'), rank: L('Rango', 'Rank'), tower: L('piso', 'floor'), master: L('nivel', 'level'), dex: 'Pokémon', medals: L('medallas', 'medals'), weekly: L('derrotas', 'defeats') };
+    const sub = (id, r) => (id === 'stage' && r.extra > 0 ? L('Rango ', 'Rank ') + r.extra : id === 'rank' ? L('Esencia ', 'Essence ') + fmt(r.extra || 0) : id === 'weekly' && r.extra > 0 ? r.extra + L(' jefes del evento', ' event bosses') : '');
+    try {
+      const { rows, me } = await Cloud.board(want);
+      if (rkBoard !== want || !$('#rk-body')) return;
+      $('#rk-body').innerHTML = rows.length ? rows.map(r => `<div class="rkrow ${r.is_me ? 'me' : ''}"><span class="rkn">#${r.rank}</span><img src="${por(DEX[r.avatar] ? r.avatar : 25)}" alt=""><div class="rki"><b>${String(r.nickname).replace(/[<>&"]/g, '')}</b><small>${((TITLES.find(t => t.id === r.title) || {}).name || '')}${sub(want, r) ? ' · ' + sub(want, r) : ''}</small></div><span class="rkv">${fmt(r.value)}<small>${unit[want]}</small></span>${Cloud.user && !r.is_me ? `<button class="rkflag" data-rp="${r.user_id}" aria-label="${L('Denunciar', 'Report')}" title="${L('Denunciar', 'Report')}">⚑</button>` : ''}</div>`).join('') : `<p class="hint">${L('Todavía no hay nadie en este ranking. ¡Sé el primero!', 'Nobody is in this ranking yet. Be the first!')}</p>`;
+      if (me) $('#rk-me').innerHTML = `<b>${L('Tu puesto', 'Your rank')}: #${me.rank}</b> <small>${L('de', 'of')} ${me.total} · ${fmt(me.value)} ${unit[want]}</small>`;
+      $$('[data-rp]').forEach(b => b.onclick = () => {
+        openModal(`<h2>${L('Denunciar jugador', 'Report player')}</h2><p class="hint">${L('¿Por qué lo denuncias?', 'Why are you reporting this player?')}</p><div class="seg wrap">${[[L('Nombre inapropiado', 'Inappropriate name')], [L('Sospecho de trampas', 'I suspect cheating')], [L('Otro motivo', 'Other')]].map(([t]) => `<button data-why="${t}">${t}</button>`).join('')}</div><div class="row"><button class="btn" id="rp-x">${L('Cancelar', 'Cancel')}</button></div>`);
+        $('#rp-x').onclick = () => rankingModal();
+        $$('[data-why]').forEach(w => w.onclick = async () => { const ok = await Cloud.report(b.dataset.rp, w.dataset.why); rankingModal(); toast(ok ? L('Gracias: lo revisaremos', 'Thanks: we will review it') : L('No se pudo enviar la denuncia', 'Could not send the report')); });
+      });
+    } catch (e) {
+      if ($('#rk-body')) $('#rk-body').innerHTML = `<p class="hint">${Cloud.enabled() ? L('No se pudo cargar el ranking. Comprueba tu conexión.', 'Could not load the ranking. Check your connection.') : L('Los rankings no están disponibles en esta versión.', 'Rankings are not available in this version.')}</p>`;
+    }
+  }
   // ---------------- consejos de novedades ----------------
   let lastTip = -1;
   function tipModal(t, replay) {
@@ -1188,18 +1257,25 @@ const UI = (() => {
     const owned = Object.values(s.mons).sort((a, b) => Core.bst(Core.fdex(b)) - Core.bst(Core.fdex(a)) || b.lvl - a.lvl).slice(0, 48);
     const av = pr.avatar && DEX[pr.avatar] ? pr.avatar : (s.team[0] ? Core.fdex(s.mons[s.team[0]]) : 25);
     openModal(`<h2>${L('Perfil', 'Profile')}</h2>
-      <div class="profhead"><img class="dxpor" src="${por(av)}" alt=""><div><input class="search" id="pf-name" maxlength="14" placeholder="${L('Tu nombre', 'Your name')}" value="${pr.name.replace(/"/g, '')}" aria-label="${L('Tu nombre', 'Your name')}"><small>${(TITLES.find(t => t.id === pr.title) || TITLES[0]).name}</small></div></div>
+      <div class="profhead"><img class="dxpor" src="${por(av)}" alt=""><div>${Cloud.user && Cloud.profile ? `<div class="nickrow"><input class="search" id="pf-name" maxlength="16" placeholder="${L('Nombre público', 'Public name')}" value="${Cloud.profile.nickname.replace(/"/g, '')}" aria-label="${L('Nombre público', 'Public name')}"><button class="btn small primary" id="pf-nick">${L('Guardar', 'Save')}</button></div><em id="pf-nickmsg" class="nickmsg"></em>` : `<input class="search" id="pf-name" maxlength="14" placeholder="${L('Tu nombre', 'Your name')}" value="${pr.name.replace(/"/g, '')}" aria-label="${L('Tu nombre', 'Your name')}">`}<small>${(TITLES.find(t => t.id === pr.title) || TITLES[0]).name}</small></div></div>
       <h4>${L('Avatar', 'Avatar')}</h4><div class="avgrid">${owned.map(m => `<button data-av="${Core.fdex(m)}" class="${pr.avatar === Core.fdex(m) ? 'on' : ''}" aria-label="${DEX[Core.fdex(m)].name}"><img src="${por(Core.fdex(m), m.shiny)}" alt=""></button>`).join('')}</div>
       <h4>${L('Marco del retrato', 'Portrait frame')} <small style="color:var(--dim)">${Core.framesOpen().length}/${FRAMES.length}</small></h4><div class="frgrid">${FRAMES.map(f => { const ok = Core.frameOpen(f); return `<button class="frprev ${s.cosm.frame === f.id ? 'on' : ''}" data-fr="${f.id}" data-frame-pick="${f.id}" ${ok ? '' : 'disabled'} aria-label="${f.name}" title="${ok ? f.name : f.hint}"><img src="${ok ? por(av) : por(av)}" alt="" style="${ok ? '' : 'filter:brightness(0) opacity(.5)'}"><small>${ok ? f.name : '???'}</small></button>`; }).join('')}</div>
       <h4>${L('Fondo de la arena', 'Arena background')} <small style="color:var(--dim)">${Core.biomesSeen().length}/${Tiles.THEMES.length}</small></h4><div class="bggrid"><button class="ttl ${s.cosm.bg === 'auto' ? 'on' : ''}" data-bg="auto"><b>${L('Automático', 'Automatic')}</b><small>${L('El de cada ruta', 'The one of each route')}</small></button>${Core.biomesSeen().map(i => `<button class="ttl ${String(s.cosm.bg) === String(i) ? 'on' : ''}" data-bg="${i}"><b><i class="sw" style="background:${Tiles.THEMES[i].floor}"></i>${biomeName(i)}</b></button>`).join('')}</div><p class="hint" style="margin:2px 0">${L('Los fondos se desbloquean al pasar por rutas con ese paisaje.', 'Backgrounds unlock when you travel through routes with that scenery.')}</p>
       <h4>${L('Título', 'Title')} <small style="color:var(--dim)">${open}/${TITLES.length}</small></h4><div class="titlist">${TITLES.map(t => { const ok = Core.titleOpen(t); return `<button class="ttl ${pr.title === t.id ? 'on' : ''}" data-ttl="${t.id}" ${ok ? '' : 'disabled'}><b>${ok ? t.name : '???'}</b><small>${ok ? '' : t.hint}</small></button>`; }).join('')}</div>
       <div class="row"><button class="btn" id="pf-x">${L('Volver', 'Back')}</button></div>`);
-    $('#pf-name').oninput = e => { Core.setName(e.target.value); };
-    $('#pf-name').onchange = () => { Core.save(); };
-    $$('[data-av]').forEach(b => b.onclick = () => { Core.setAvatar(+b.dataset.av); Core.save(); Audio8.play('swap'); profileModal(); });
-    $$('[data-frame-pick]').forEach(b => b.onclick = () => { if (Core.setFrame(b.dataset.framePick)) { document.documentElement.dataset.frame = S().cosm.frame; Core.save(); Audio8.play('select'); profileModal(); } });
+    if ($('#pf-nick')) $('#pf-nick').onclick = async () => {
+      const r = await Cloud.setNickname($('#pf-name').value), m = $('#pf-nickmsg');
+      m.textContent = r.ok ? L('¡Nombre guardado!', 'Name saved!') : r.reason === 'taken' ? L('Ese nombre ya está cogido.', 'That name is taken.') : r.reason === 'invalid' ? L('Usa de 3 a 16 letras, números, espacios, «.», «_» o «-» (sin palabras prohibidas).', 'Use 3 to 16 letters, numbers, spaces, “.”, “_” or “-” (no banned words).') : L('No se pudo guardar. Inténtalo de nuevo.', 'Could not save. Try again.');
+      m.className = 'nickmsg ' + (r.ok ? 'ok' : 'bad');
+    };
+    else {
+      $('#pf-name').oninput = e => { Core.setName(e.target.value); };
+      $('#pf-name').onchange = () => { Core.save(); };
+    }
+    $$('[data-av]').forEach(b => b.onclick = () => { Core.setAvatar(+b.dataset.av); Core.save(); Cloud.pushProfile(); Audio8.play('swap'); profileModal(); });
+    $$('[data-frame-pick]').forEach(b => b.onclick = () => { if (Core.setFrame(b.dataset.framePick)) { document.documentElement.dataset.frame = S().cosm.frame; Core.save(); Cloud.pushProfile(); Audio8.play('select'); profileModal(); } });
     $$('[data-bg]').forEach(b => b.onclick = () => { if (Core.setBg(b.dataset.bg)) { Core.save(); Audio8.play('swap'); profileModal(); } });
-    $$('[data-ttl]').forEach(b => b.onclick = () => { if (Core.setTitle(b.dataset.ttl)) { Core.save(); Audio8.play('select'); profileModal(); } });
+    $$('[data-ttl]').forEach(b => b.onclick = () => { if (Core.setTitle(b.dataset.ttl)) { Core.save(); Cloud.pushProfile(); Audio8.play('select'); profileModal(); } });
     $('#pf-x').onclick = () => { Core.save(); settings(); };
   }
   // ---------------- Ascensión ----------------
@@ -1227,7 +1303,7 @@ const UI = (() => {
       <p class="hint">${L('Vuelves a la etapa 1. Pierdes monedas, niveles, mejoras y algunos huecos. Conservas Pokémon, estrellas, gemas y Pokédex.', 'You go back to stage 1. You lose coins, levels, upgrades and some slots. You keep Pokémon, stars, gems and the Pokédex.')}</p>
       <div class="row"><button class="btn" id="p-no">${L('Todavía no', 'Not yet')}</button><button class="btn primary" id="p-yes">${L('¡Adelante!', 'Go ahead!')}</button></div>`);
     $('#p-no').onclick = closeModal;
-    $('#p-yes').onclick = () => { const n = Core.prestige(); closeModal(); Audio8.play('win'); banner(L('¡Bienvenido a la Liga!', 'Welcome to the League!'), '+' + n + L(' medallas · tu nuevo viaje empieza ahora', ' medals · your new journey starts now'), '#ffd23f'); Core.save(); refresh(true); };
+    $('#p-yes').onclick = () => { const n = Core.prestige(); closeModal(); Audio8.play('win'); banner(L('¡Bienvenido a la Liga!', 'Welcome to the League!'), '+' + n + L(' medallas · tu nuevo viaje empieza ahora', ' medals · your new journey starts now'), '#ffd23f'); Core.save(); Cloud.soon(); refresh(true); };
   }
 
   function settings() {
@@ -1237,6 +1313,7 @@ const UI = (() => {
     const tog = (k, label, sub) => `<div class="setrow"><span class="sl"><b>${label}</b><small>${sub}</small></span><button class="tog ${st[k] ? 'on' : ''}" data-k="${k}"><i></i></button></div>`;
     openModal(`<div class="set"><h2>${ico('gear', 32)} ${L('Ajustes', 'Settings')}</h2>
       <div class="sset"><h4>${L('Idioma', 'Language')}</h4><div class="seg"><button data-lang="es" class="${I18N.lang === 'es' ? 'on' : ''}">Español</button><button data-lang="en" class="${I18N.lang === 'en' ? 'on' : ''}">English</button></div></div>
+      ${Cloud.enabled() ? `<div class="sset"><h4>${L('Cuenta', 'Account')}</h4><div id="acc-box"></div></div>` : ''}
       <div class="sset"><h4>${L('Sonido', 'Sound')}</h4>${slider('master', L('Volumen general', 'Master volume'), 'gear')}${slider('music', L('Música', 'Music'), 'sound')}${slider('sfx', L('Efectos', 'Effects'), 'ticket')}${slider('combat', L('Sonidos de combate', 'Combat sounds'), 'fist')}
         <div class="setrow col"><span class="sl"><b>${L('Estilo de la música', 'Music style')}</b><small>${L('Cambia los instrumentos de todas las pistas', 'Changes the instruments of every track')}</small></span><div class="seg a11y" role="group">${[['warm', L('Cálido', 'Warm')], ['retro', L('Retro 8 bits', 'Retro 8-bit')], ['dream', L('Ensueño', 'Dreamy')]].map(([v, l]) => `<button data-sk="mstyle" data-sv="${v}" class="${st.mstyle === v ? 'on' : ''}" aria-pressed="${st.mstyle === v}">${l}</button>`).join('')}</div></div>
         <div class="setrow col"><span class="sl"><b>${L('Qué suena', 'What plays')}</b><small>${st.mmode === 'pin' ? L('Siempre la misma pista (elígela en la sala de música)', 'Always the same track (choose it in the music room)') : st.mmode === 'shuffle' ? L('Cambia de pista cada dos vueltas; los jefes y duelos mantienen la suya', 'Switches track every two loops; bosses and duels keep theirs') : L('Una pista por región, y una propia para jefes, duelos, Torre y eventos', 'One track per region, plus their own for bosses, duels, the Tower and events')}</small></span><div class="seg a11y" role="group">${[['region', L('Por región', 'By region')], ['shuffle', L('Aleatorio', 'Shuffle')], ['pin', L('Pista fija', 'Pinned track')]].map(([v, l]) => `<button data-sk="mmode" data-sv="${v}" class="${st.mmode === v ? 'on' : ''}" aria-pressed="${st.mmode === v}">${l}</button>`).join('')}</div></div>
@@ -1265,6 +1342,7 @@ const UI = (() => {
     $$('[data-a11y]').forEach(b => b.onclick = () => { a11y[b.dataset.a11y] = !a11y[b.dataset.a11y]; Core.save(); A11Y.apply(a11y); Audio8.play('click'); settings(); refresh(true); });
     $$('[data-sk]').forEach(b => b.onclick = () => { st[b.dataset.sk] = b.dataset.sv; Core.save(); Audio8.play('click'); if (b.dataset.sk === 'mstyle') Audio8.restyle(); else Audio8.remode(); settings(); });
     $('#s-music').onclick = musicModal;
+    accBind();
     $('#s-prof').onclick = profileModal;
     $('#s-tips').onclick = tipsModal;
     $$('[data-lang]').forEach(b => b.onclick = () => { S().settings.lang = b.dataset.lang; Core.save(); location.reload(); });
@@ -1296,7 +1374,7 @@ const UI = (() => {
       openModal(`<h2>${L('Importar partida', 'Import save')}</h2><p class="hint">${L('Pega aquí el código exportado. Sustituirá tu partida actual.', 'Paste the exported code here. It will replace your current game.')}</p><textarea class="search area" id="code" placeholder="${L('Pega el código…', 'Paste the code…')}"></textarea><p class="hint" id="imp-err" style="color:#ff8080"></p><div class="row"><button class="btn" id="i-no">${L('Cancelar', 'Cancel')}</button><button class="btn primary" id="i-yes">${L('Importar', 'Import')}</button></div>`);
       $('#i-no').onclick = settings;
       $('#i-yes').onclick = () => {
-        try { const d = JSON.parse(decodeURIComponent(escape(atob($('#code').value.trim())))); if (!d || d.v !== 1 || !d.mons) throw 0; localStorage.setItem('pokeidle.save.v1', JSON.stringify(d)); location.reload(); }
+        try { const d = JSON.parse(decodeURIComponent(escape(atob($('#code').value.trim())))); if (!d || d.v !== 1 || !d.mons) throw 0; Core.freezeSave(true); localStorage.setItem('pokeidle.save.v1', JSON.stringify(d)); location.reload(); }
         catch (e) { $('#imp-err').textContent = L('Ese código no es válido.', 'That code is not valid.'); }
       };
     };
@@ -1376,5 +1454,5 @@ const UI = (() => {
     $$('#skills .skill').forEach(b => b.onclick = e => { e.stopPropagation(); if (Core.useSkill(b.dataset.sk)) { Audio8.play(b.dataset.sk === 'rage' ? 'charge' : 'ticket'); banner(SKILLS[b.dataset.sk].name + '!', SKILLS[b.dataset.sk].desc, '#ff8040'); } });
   }
 
-  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, rewText, rivalTalk, cue, tipsTick, welcomeModal, tutStart, autoFill, monModal, mapModal };
+  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, rewText, rivalTalk, cue, tipsTick, welcomeModal, authChanged, authPanel, rankingModal, tutStart, autoFill, monModal, mapModal };
 })();
