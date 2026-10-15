@@ -85,7 +85,10 @@
     if (Core.isBoss(s)) UI.banner(L(r.boss.who + ' te desafía', r.boss.who + ' challenges you'), r.boss.title + ' · ' + Core.bossTime(s) + L(' segundos para vencerle', ' seconds to beat them'), '#ff8040');
     else if (s % 10 === 1) UI.banner(r.name, REGIONS[Core.regionOf(s)].name + (Core.loopOf(s) ? L(' · ciclo +', ' · loop +') + Core.loopOf(s) : ''), '#9fe0ff');
   });
-  Core.on('spawn', e => { if (e.boss) Audio8.play('boss'); });
+  Core.on('spawn', e => {
+    if (e.boss) Audio8.play('boss');
+    if (e.aura && !Core.S.ui.auraTip) { Core.S.ui.auraTip = 1; UI.banner(L('¡Un enemigo con aura!', 'An enemy with an aura!'), auraText(e.aura) + L(' · da +50% de monedas', ' · gives +50% coins'), '#c47bff'); }
+  });
   Core.on('hit', h => { const n = performance.now(); if (n - lastHitSfx > 70) { lastHitSfx = n; Audio8.play('hit'); } });
 
   // ---- toque en la arena ----

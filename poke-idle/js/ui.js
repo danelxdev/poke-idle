@@ -35,7 +35,7 @@ const UI = (() => {
     if (started) {
       const n = Object.keys(s.mons).length, hrs = Math.floor(s.stats.time / 3600), mins = Math.floor(s.stats.time / 60) % 60;
       $('#t-cont').innerHTML = `<div class="ct-team">${s.team.slice(0, 6).map(kk => `<img class="px" src="${por(Core.fdex(s.mons[kk]), s.mons[kk].shiny)}" alt="">`).join('')}</div>
-        <div class="ct-info"><b>${L('Tu aventura', 'Your adventure')}</b><span>${REGIONS[Core.regionOf(s.stage)].name} · ${L('etapa', 'stage')} ${s.stage} <small>(${L('máx.', 'max')} ${s.stats.maxStage})</small></span>
+        <div class="ct-info"><b>${s.profile.name ? s.profile.name + ' · ' : ''}${(TITLES.find(t => t.id === s.profile.title) || TITLES[0]).name}</b><span>${REGIONS[Core.regionOf(s.stage)].name} · ${L('etapa', 'stage')} ${s.stage} <small>(${L('máx.', 'max')} ${s.stats.maxStage})</small></span>
         <small>${n} Pokémon · Pokédex ${Core.dexCount()}/${POKEDEX.length} · ${s.medals} ${L('medallas', 'medals')} · ${hrs ? hrs + ' h ' : ''}${mins} min ${L('jugados', 'played')}</small></div>`;
       $('#t-new').onclick = e => {
         e.preventDefault();
@@ -109,7 +109,9 @@ const UI = (() => {
       box.classList.remove('hidden');
       const eased = e.boss && !e.chal && Core.bossEase(e.stage) < 1 ? ' · −' + Math.round((1 - Core.bossEase(e.stage)) * 100) + '%' : '';
       const ch = Core.chal;
-      const name = e.chal && ch ? DEX[e.dex].name + (e.part && e.part.n > 1 ? ' (' + e.part.i + '/' + e.part.n + ')' : '') : e.trainer ? DEX[e.dex].name + ' · ' + e.trainer.cls + ' ' + e.trainer.name + ' ' + e.trainer.i + '/' + e.trainer.n : e.boss ? (r.boss.who === DEX[e.dex].name ? r.boss.who : r.boss.who + ' · ' + DEX[e.dex].name) + eased : (e.golden ? '✨ ' : '') + DEX[e.dex].name + (e.golden ? L(' dorado', ' (golden)') : '');
+      const aura = e.aura ? ' ✦ ' + AURAS[e.aura.id].name + (e.aura.type ? ' ' + TYPE_NAMES[e.aura.type] : '') : '';
+      const name = (e.chal && ch ? DEX[e.dex].name + (e.part && e.part.n > 1 ? ' (' + e.part.i + '/' + e.part.n + ')' : '') : e.trainer ? DEX[e.dex].name + ' · ' + e.trainer.cls + ' ' + e.trainer.name + ' ' + e.trainer.i + '/' + e.trainer.n : e.boss ? (r.boss.who === DEX[e.dex].name ? r.boss.who : r.boss.who + ' · ' + DEX[e.dex].name) + eased : (e.golden ? '✨ ' : '') + DEX[e.dex].name + (e.golden ? L(' dorado', ' (golden)') : '')) + aura;
+      $('#enemy-name').title = e.aura ? auraText(e.aura) : '';
       if ($('#enemy-name').textContent !== name) { $('#enemy-name').textContent = name; A11Y.label($('#cv'), L('Combate contra ', 'Battle against ') + name); }
       const ft = $('#foe-types'); if (ft.dataset.k !== String(e.dex)) { ft.dataset.k = e.dex; ft.innerHTML = typeTags(e.dex); }
       $('#enemy-hp').style.width = Math.max(0, e.hp / e.max * 100) + '%';
@@ -174,7 +176,7 @@ const UI = (() => {
 
   const natTxt = m => { const n = Core.natOf(m); return n.up ? `${n.name} <em class="nu">▲${NAT_SHORT[n.up]}</em> <em class="nd">▼${NAT_SHORT[n.down]}</em>` : n.name + L(' (neutra)', ' (neutral)'); };
   let towerStart = 0;
-  const rewText = r => !r ? '' : [r.ess && '+' + r.ess + L(' Esencia', ' Essence'), r.gems && '+' + r.gems + L(' gemas', ' gems'), r.shards && '+' + r.shards + L(' fragmentos Mega', ' Mega shards'), r.dust && '+' + r.dust + L(' polvo', ' stardust'), ...Object.entries(r.tk || {}).map(([t, n]) => n + '× ' + TICKETS[t].name), r.egg !== undefined && EGGS[r.egg].name, r.item && L('un objeto', 'an item')].filter(Boolean).join(' · ');
+  const rewText = r => !r ? '' : [r.ess && '+' + r.ess + L(' Esencia', ' Essence'), r.gems && '+' + r.gems + L(' gemas', ' gems'), r.shards && '+' + r.shards + L(' fragmentos Mega', ' Mega shards'), r.dust && '+' + r.dust + L(' polvo', ' stardust'), ...Object.entries(r.tk || {}).map(([t, n]) => n + '× ' + TICKETS[t].name), r.egg !== undefined && EGGS[r.egg].name, r.item && L('un objeto', 'an item'), r.excl && L('un objeto exclusivo', 'an exclusive item')].filter(Boolean).join(' · ');
   const ruleTxt = r => r ? `<div class="rulebox"><b>${r.name}${r.only ? ' ' + TYPE_ES[r.only] : ''}</b>: ${r.desc}</div>` : '';
   function chalHtml() {
     const s = S();
@@ -340,8 +342,10 @@ const UI = (() => {
 
   // ---------------- Pokédex: filtros, cuadrícula y ficha ----------------
   let dexQ = '', dexType = 'all', dexState = 'all', dexSort = 'num';
+  const saveDexUi = () => { const u = S().ui; u.dexFilter = dexFilter; u.dexType = dexType; u.dexState = dexState; u.dexSort = dexSort; Core.save(); };
+  function loadDexUi() { const u = S().ui; if (u.dexFilter) dexFilter = u.dexFilter; if (u.dexType) dexType = u.dexType; if (u.dexState) dexState = u.dexState; if (u.dexSort) dexSort = u.dexSort; }
   const dexRegions = () => [['all', L('Todas las regiones', 'All regions')], ['mine', L('Solo los míos', 'Mine only')]].concat(REGIONS.filter(r => r.gen).map(r => [String(r.gen), r.name]));
-  const dexStates = () => [['all', L('Todos', 'All')], ['seen', L('Registrados', 'Registered')], ['missing', L('Sin registrar', 'Not registered')], ['owned', L('Los tengo', 'Owned')], ['shiny', L('Con shiny', 'With shiny')], ['forms', L('Formas regionales', 'Regional forms')]];
+  const dexStates = () => [['all', L('Todos', 'All')], ['seen', L('Registrados', 'Registered')], ['missing', L('Sin registrar', 'Not registered')], ['owned', L('Los tengo', 'Owned')], ['shiny', L('Con shiny', 'With shiny')], ['forms', L('Formas regionales', 'Regional forms')], ['favs', L('Favoritos', 'Favorites')]];
   const dexSorts = () => [['num', L('Número', 'Number')], ['name', L('Nombre', 'Name')], ['rar', L('Rareza', 'Rarity')], ['lvl', L('Nivel', 'Level')], ['bst', L('Estadísticas', 'Stats')]];
   const dexNum = p => String(p.of || p.dex).padStart(4, '0');
   function dexGrid() {
@@ -356,6 +360,7 @@ const UI = (() => {
       if (dexState === 'owned' && !cur) return false;
       if (dexState === 'shiny' && !(cur && own.shinyOwned)) return false;
       if (dexState === 'forms' && !p.form) return false;
+      if (dexState === 'favs' && !s.favs[p.dex]) return false;
       if (q && !((seen && p.name.toLowerCase().includes(q)) || (p.dex < 10000 && String(p.dex) === q.replace(/^0+/, '')) || (p.dex < 10000 && dexNum(p).startsWith(q)))) return false;
       return true;
     });
@@ -367,7 +372,7 @@ const UI = (() => {
       const base = String(Core.baseOf(p.dex)), own = s.mons[base], seen = s.seen[p.dex], cur = own && own.dex === p.dex, locked = !Core.genUnlocked(p.gen);
       const canStar = cur && own.stars < 5 && own.copies >= STAR_COPIES[own.stars];
       return `<button class="${seen ? '' : 'unk'} ${cur && s.team.includes(base) ? 'inteam' : ''}" style="--rc:${cur ? RARITY[Core.RAR[p.dex]].color : seen ? '#2a3f8a' : '#1d2a5a'}" data-act="dexinfo" data-v="${p.dex}" aria-label="${seen ? p.name : (p.dex < 10000 ? '#' + p.dex : L('Forma sin registrar', 'Unregistered form'))}">
-        ${cur ? `<span class="lv">${own.lvl}</span>` : ''}${cur && own.shinyOwned ? '<span class="sh">✨</span>' : ''}${seen ? `<img src="${por(p.dex, cur && own.shiny)}" loading="lazy" alt="">` : `<span class="q">${locked ? '🔒' : '?'}</span>`}<span class="n">${seen ? (canStar ? '⬆ ' : '') + p.name : (p.dex < 10000 ? '#' + p.dex : '#???')}</span></button>`;
+        ${cur ? `<span class="lv">${own.lvl}</span>` : ''}${cur && own.shinyOwned ? '<span class="sh">✨</span>' : ''}${s.favs[p.dex] ? '<span class="fv">★</span>' : ''}${seen ? `<img src="${por(p.dex, cur && own.shiny)}" loading="lazy" alt="">` : `<span class="q">${locked ? '🔒' : '?'}</span>`}<span class="n">${seen ? (canStar ? '⬆ ' : '') + p.name : (p.dex < 10000 ? '#' + p.dex : '#???')}</span></button>`;
     }).join('');
   }
   const STAT_NAMES = () => [['hp', 'HP', 'HP'], ['atk', 'Ataque', 'Attack'], ['def', 'Defensa', 'Defense'], ['spa', 'At. Esp.', 'Sp. Atk'], ['spd', 'Def. Esp.', 'Sp. Def'], ['spe', 'Velocidad', 'Speed']];
@@ -381,7 +386,7 @@ const UI = (() => {
     const s = S(), p = DEX[dex]; if (!p) return;
     const base = String(Core.baseOf(dex)), own = s.mons[base], seen = !!s.seen[dex], cur = own && own.dex === dex, rar = Core.RAR[dex], reg = REGIONS[p.gen - 1];
     const num = p.dex < 10000 ? '#' + String(p.dex).padStart(4, '0') : L('Forma regional', 'Regional form');
-    let h = `<div class="dxm"><div class="dxhead"><img class="dxpor ${seen ? '' : 'sil'}" src="${por(dex, cur && own.shiny)}" alt=""><div><small>${num}</small><h2>${seen ? p.name : '???'}</h2>${seen ? typeTags(dex) : ''}${seen ? `<span class="rartag" style="color:${RARITY[rar].color}">${RARITY[rar].name}</span>` : ''}<small>${reg ? reg.name : ''} · ${L('Generación', 'Generation')} ${p.gen}</small></div></div>`;
+    let h = `<div class="dxm"><div class="dxhead"><img class="dxpor ${seen ? '' : 'sil'}" src="${por(dex, cur && own.shiny)}" alt=""><div><small>${num}</small><h2>${seen ? p.name : '???'} ${seen ? `<button class="favbtn ${s.favs[dex] ? 'on' : ''}" id="dx-fav" aria-pressed="${!!s.favs[dex]}" aria-label="${L('Favorito', 'Favorite')}">★</button>` : ''}</h2>${seen ? typeTags(dex) : ''}${seen ? `<span class="rartag" style="color:${RARITY[rar].color}">${RARITY[rar].name}</span>` : ''}<small>${reg ? reg.name : ''} · ${L('Generación', 'Generation')} ${p.gen}</small></div></div>`;
     if (!seen) {
       h += `<p class="hint">${L('Aún no has registrado este Pokémon. Consíguelo en el gacha para ver su ficha completa.', 'You have not registered this Pokémon yet. Get it from the gacha to see its full entry.')}</p>${Core.genUnlocked(p.gen) ? '' : `<p class="hint">🔒 ${L('Llega a ' + reg.name + ' (etapa ' + (reg.first * 10 + 1) + ') para encontrarlo.', 'Reach ' + reg.name + ' (stage ' + (reg.first * 10 + 1) + ') to find it.')}</p>`}`;
     } else {
@@ -426,6 +431,7 @@ const UI = (() => {
     openModal(h);
     $('#modal-box').classList.add('wide');
     $('#dx-x').onclick = closeModal;
+    if ($('#dx-fav')) $('#dx-fav').onclick = () => { Core.toggleFav(dex); Core.save(); Audio8.play('click'); sig = ''; dexModal(dex); };
     if ($('#dx-mon')) $('#dx-mon').onclick = () => { closeModal(); monModal(base); };
   }
 
@@ -517,7 +523,7 @@ const UI = (() => {
       },
     },
     dex: {
-      sig: () => { const s = S(); return JSON.stringify([Object.keys(s.mons).length, Object.keys(s.seen).length, s.team, dexFilter, dexType, dexState, dexSort, Core.unlockedGens(), Object.keys(s.foes).length, Object.values(s.mons).map(m => m.dex + ':' + m.stars + ':' + m.lvl + ':' + (m.shiny ? 1 : 0) + (m.shinyOwned ? 1 : 0) + ':' + (m.copies >= STAR_COPIES[m.stars] ? 1 : 0))]); },
+      sig: () => { const s = S(); return JSON.stringify([Object.keys(s.mons).length, Object.keys(s.seen).length, s.team, dexFilter, dexType, dexState, dexSort, Core.unlockedGens(), Object.keys(s.foes).length, Object.keys(s.favs).length, Object.values(s.mons).map(m => m.dex + ':' + m.stars + ':' + m.lvl + ':' + (m.shiny ? 1 : 0) + (m.shinyOwned ? 1 : 0) + ':' + (m.copies >= STAR_COPIES[m.stars] ? 1 : 0))]); },
       html() {
         const s = S(), n = Core.dexCount(), all = POKEDEX.length;
         const owned = POKEDEX.filter(p => { const o = s.mons[String(Core.baseOf(p.dex))]; return o && o.dex === p.dex; }).length;
@@ -654,11 +660,11 @@ const UI = (() => {
       case 'buytk': if (Core.buyTicket(v, +el.dataset.n)) Audio8.play('item'); else Audio8.play('error'); break;
       case 'dusttk': if (Core.dustTicket(v)) Audio8.play('ticket'); else Audio8.play('error'); break;
       case 'shop': if (Core.buyShop(v)) Audio8.play('levelup'); break;
-      case 'dexdd': openDD(el, dexRegions(), dexFilter, val => { dexFilter = val; sig = ''; refresh(true); }); return;
-      case 'dextype': openDD(el, [['all', L('Todos los tipos', 'All types')]].concat(Object.keys(TYPE_NAMES).map(t => [t, TYPE_ES[t]])), dexType, val => { dexType = val; sig = ''; refresh(true); }); return;
-      case 'dexstate': openDD(el, dexStates(), dexState, val => { dexState = val; sig = ''; refresh(true); }); return;
-      case 'dexsort': openDD(el, dexSorts(), dexSort, val => { dexSort = val; sig = ''; refresh(true); }); return;
-      case 'dexreg': dexFilter = dexFilter === v ? 'all' : v; sig = ''; break;
+      case 'dexdd': openDD(el, dexRegions(), dexFilter, val => { dexFilter = val; saveDexUi(); sig = ''; refresh(true); }); return;
+      case 'dextype': openDD(el, [['all', L('Todos los tipos', 'All types')]].concat(Object.keys(TYPE_NAMES).map(t => [t, TYPE_ES[t]])), dexType, val => { dexType = val; saveDexUi(); sig = ''; refresh(true); }); return;
+      case 'dexstate': openDD(el, dexStates(), dexState, val => { dexState = val; saveDexUi(); sig = ''; refresh(true); }); return;
+      case 'dexsort': openDD(el, dexSorts(), dexSort, val => { dexSort = val; saveDexUi(); sig = ''; refresh(true); }); return;
+      case 'dexreg': dexFilter = dexFilter === v ? 'all' : v; saveDexUi(); sig = ''; break;
       case 'dexinfo': dexModal(+v); return;
       case 'mon': monModal(v); return;
       case 'seen': toast(DEX[v].name + L(': lo has visto, pero aún no lo tienes', ': you have seen it, but do not own it yet')); return;
@@ -744,7 +750,7 @@ const UI = (() => {
     $('#modal-box').classList.add('wide');
     $('#bag-x').onclick = closeModal;
     $$('[data-fuse]').forEach(b => b.onclick = () => { const [id, rar, type] = b.dataset.fuse.split('|'); const it = Core.fuseItem(id, +rar, type); if (it) { Audio8.play('legend'); banner(L('¡Fusión! ', 'Fusion! ') + itemName(it), ITEM_RAR[it.rar].name + ' · ' + itemDesc(it), ITEM_RAR[it.rar].color); Core.save(); bagModal(); refresh(true); } else Audio8.play('error'); });
-    $('#bag-craft').onclick = e => openDD(e.currentTarget, Object.keys(HELD).map(id => [id, HELD[id].name + ' · ' + HELD[id].desc(HELD[id].v, { type: 'normal' }).slice(0, 48)]), null, id => {
+    $('#bag-craft').onclick = e => openDD(e.currentTarget, Object.keys(HELD).filter(id => !HELD[id].excl).map(id => [id, HELD[id].name + ' · ' + HELD[id].desc(HELD[id].v, { type: 'normal' }).slice(0, 48)]), null, id => {
       const make = type => { const it = Core.craftItem(id, type); if (it) { Audio8.play('item'); toast(L('Fabricado: ', 'Crafted: ') + itemName(it)); Core.save(); bagModal(); refresh(true); } else Audio8.play('error'); };
       if (id === 'orbe') setTimeout(() => openDD($('#bag-craft'), Object.keys(TYPE_NAMES).map(t => [t, TYPE_NAMES[t]]), null, make), 30); else make();
     });
@@ -1116,6 +1122,31 @@ const UI = (() => {
     });
   }
 
+  // ---------------- consejos y perfil ----------------
+  function adviceModal() {
+    const list = Core.advice();
+    openModal(`<h2>${ico('star', 32)} ${L('¿Qué hago ahora?', 'What should I do now?')}</h2>
+      <p class="hint">${L('Lo más útil que puedes hacer ahora mismo, por orden de importancia.', 'The most useful things you can do right now, in order of importance.')}</p>
+      <div class="advlist">${list.map((a, i) => `<div class="adv"><span>${ico(a.icon, 28)}</span><p>${a.text}</p><button class="btn small primary" data-go="${a.tab}" data-i="${i}">${L('Ir', 'Go')}</button></div>`).join('')}</div>
+      <div class="row"><button class="btn" id="adv-x">${L('Cerrar', 'Close')}</button></div>`);
+    $('#adv-x').onclick = closeModal;
+    $$('[data-go]').forEach(b => b.onclick = () => { closeModal(); setTab(b.dataset.go); });
+  }
+  function profileModal() {
+    const s = S(), pr = s.profile, open = Core.titlesOpen().length;
+    const owned = Object.values(s.mons).sort((a, b) => Core.bst(Core.fdex(b)) - Core.bst(Core.fdex(a)) || b.lvl - a.lvl).slice(0, 48);
+    const av = pr.avatar && DEX[pr.avatar] ? pr.avatar : (s.team[0] ? Core.fdex(s.mons[s.team[0]]) : 25);
+    openModal(`<h2>${L('Perfil', 'Profile')}</h2>
+      <div class="profhead"><img class="dxpor" src="${por(av)}" alt=""><div><input class="search" id="pf-name" maxlength="14" placeholder="${L('Tu nombre', 'Your name')}" value="${pr.name.replace(/"/g, '')}" aria-label="${L('Tu nombre', 'Your name')}"><small>${(TITLES.find(t => t.id === pr.title) || TITLES[0]).name}</small></div></div>
+      <h4>${L('Avatar', 'Avatar')}</h4><div class="avgrid">${owned.map(m => `<button data-av="${Core.fdex(m)}" class="${pr.avatar === Core.fdex(m) ? 'on' : ''}" aria-label="${DEX[Core.fdex(m)].name}"><img src="${por(Core.fdex(m), m.shiny)}" alt=""></button>`).join('')}</div>
+      <h4>${L('Título', 'Title')} <small style="color:var(--dim)">${open}/${TITLES.length}</small></h4><div class="titlist">${TITLES.map(t => { const ok = Core.titleOpen(t); return `<button class="ttl ${pr.title === t.id ? 'on' : ''}" data-ttl="${t.id}" ${ok ? '' : 'disabled'}><b>${ok ? t.name : '???'}</b><small>${ok ? '' : t.hint}</small></button>`; }).join('')}</div>
+      <div class="row"><button class="btn" id="pf-x">${L('Volver', 'Back')}</button></div>`);
+    $('#pf-name').oninput = e => { Core.setName(e.target.value); };
+    $('#pf-name').onchange = () => { Core.save(); };
+    $$('[data-av]').forEach(b => b.onclick = () => { Core.setAvatar(+b.dataset.av); Core.save(); Audio8.play('swap'); profileModal(); });
+    $$('[data-ttl]').forEach(b => b.onclick = () => { if (Core.setTitle(b.dataset.ttl)) { Core.save(); Audio8.play('select'); profileModal(); } });
+    $('#pf-x').onclick = () => { Core.save(); settings(); };
+  }
   // ---------------- Ascensión ----------------
   function ascHtml() {
     const s = S(), a = s.asc;
@@ -1157,7 +1188,8 @@ const UI = (() => {
         ${tog('bgmute', L('Silenciar en segundo plano', 'Mute in the background'), L('Pausa la música cuando cambias de pestaña del navegador', 'Pauses the music when you switch browser tabs'))}
         ${tog('captions', L('Subtítulos de sonidos', 'Sound captions'), L('Muestra un aviso en pantalla con los sonidos importantes (jefes, premios, derrotas…)', 'Shows an on-screen caption for important sounds (bosses, rewards, defeats…)'))}
         <div class="row" style="margin:6px 0 0"><button class="btn primary" id="s-music">${ico('sound', 16)} ${L('Sala de música', 'Music room')} · ${Core.tracksUnlocked()}/${MUSIC_LIST.length}</button></div></div>
-      <div class="sset"><h4>${L('Combate', 'Combat')}</h4>${tog('nums', L('Números de daño', 'Damage numbers'), L('Muestra el daño y las monedas sobre el enemigo', 'Shows damage and coins over the enemy'))}${tog('bigNums', L('Números grandes', 'Big numbers'), L('Más tamaño para verlos mejor', 'Bigger size to see them better'))}${tog('shake', L('Temblor de pantalla', 'Screen shake'), L('En críticos y jefes', 'On crits and bosses'))}${tog('autoBoss', L('Reintentar jefes automáticamente', 'Auto-retry bosses'), L('Vuelve a retar al jefe cuando tu equipo tenga fuerza para vencerlo', 'Challenges the boss again when your team is strong enough to beat it'))}</div>
+      <div class="sset"><h4>${L('Perfil', 'Profile')}</h4><div class="setrow"><span class="sl"><b>${S().profile.name || L('Entrenador', 'Trainer')}</b><small>${(TITLES.find(t => t.id === S().profile.title) || TITLES[0]).name} · ${Core.titlesOpen().length}/${TITLES.length} ${L('títulos', 'titles')}</small></span><button class="btn small primary" id="s-prof">${L('Editar', 'Edit')}</button></div></div>
+      <div class="sset"><h4>${L('Combate', 'Combat')}</h4>${tog('nums', L('Números de daño', 'Damage numbers'), L('Muestra el daño y las monedas sobre el enemigo', 'Shows damage and coins over the enemy'))}${tog('bigNums', L('Números grandes', 'Big numbers'), L('Más tamaño para verlos mejor', 'Bigger size to see them better'))}${tog('shake', L('Temblor de pantalla', 'Screen shake'), L('En críticos y jefes', 'On crits and bosses'))}${tog('autoTactic', L('Táctica automática en jefes', 'Automatic boss tactic'), L('Si usas la táctica Equilibrada, usa Cazajefes contra jefes y retos y vuelve sola', 'If you use the Balanced tactic, uses Boss hunter against bosses and challenges and switches back by itself'))}${tog('autoBoss', L('Reintentar jefes automáticamente', 'Auto-retry bosses'), L('Vuelve a retar al jefe cuando tu equipo tenga fuerza para vencerlo', 'Challenges the boss again when your team is strong enough to beat it'))}</div>
       <div class="sset"><h4>${L('Accesibilidad', 'Accessibility')}</h4>
         <div class="setrow col"><span class="sl"><b>${L('Tamaño del texto', 'Text size')}</b></span><div class="seg a11y" role="group" aria-label="${L('Tamaño del texto', 'Text size')}">${[[1, L('Normal', 'Normal')], [1.15, L('Grande', 'Large')], [1.3, L('Muy grande', 'Extra large')]].map(([v, l]) => `<button data-ak="text" data-av="${v}" class="${+a11y.text === v ? 'on' : ''}" aria-pressed="${+a11y.text === v}">${l}</button>`).join('')}</div></div>
         <div class="setrow col"><span class="sl"><b>${L('Animaciones', 'Animations')}</b></span><div class="seg a11y" role="group" aria-label="${L('Animaciones', 'Animations')}">${[['auto', L('Según el sistema', 'System setting')], ['reduce', L('Reducidas', 'Reduced')], ['full', L('Todas', 'Full')]].map(([v, l]) => `<button data-ak="motion" data-av="${v}" class="${a11y.motion === v ? 'on' : ''}" aria-pressed="${a11y.motion === v}">${l}</button>`).join('')}</div></div>
@@ -1177,6 +1209,7 @@ const UI = (() => {
     $$('[data-a11y]').forEach(b => b.onclick = () => { a11y[b.dataset.a11y] = !a11y[b.dataset.a11y]; Core.save(); A11Y.apply(a11y); Audio8.play('click'); settings(); refresh(true); });
     $$('[data-sk]').forEach(b => b.onclick = () => { st[b.dataset.sk] = b.dataset.sv; Core.save(); Audio8.play('click'); if (b.dataset.sk === 'mstyle') Audio8.restyle(); else Audio8.remode(); settings(); });
     $('#s-music').onclick = musicModal;
+    $('#s-prof').onclick = profileModal;
     $$('[data-lang]').forEach(b => b.onclick = () => { S().settings.lang = b.dataset.lang; Core.save(); location.reload(); });
     $$('.slider').forEach(sl => {
       const k = sl.dataset.k, trk = sl.querySelector('.trk');
@@ -1257,6 +1290,7 @@ const UI = (() => {
 
   function bind() {
     $('#tab-body').addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && !el.disabled) act(el); });
+    loadDexUi();
     $('#tab-body').addEventListener('input', e => { if (e.target.id === 'dex-q') { dexQ = e.target.value; const g = $('#dexgrid'); if (g) g.innerHTML = dexGrid(); } });
     $$('#tabs button').forEach(b => b.onclick = () => { Audio8.play('click'); setTab(b.dataset.tab); });
     $$('[data-ico]').forEach(s => s.innerHTML = ico(s.dataset.ico, 24));
@@ -1267,6 +1301,8 @@ const UI = (() => {
     $('#i-coin').innerHTML = ico('coin', 24);
     $('#i-gem').innerHTML = ico('gem', 24);
     $('#btn-settings').innerHTML = ico('gear', 24);
+    $('#btn-advice').innerHTML = ico('star', 24); A11Y.label($('#btn-advice'), L('¿Qué hago ahora?', 'What should I do now?'));
+    $('#btn-advice').onclick = adviceModal;
     $('#btn-settings').onclick = settings;
     $('#modal').onclick = e => { if (e.target.id === 'modal') closeModal(); };
     $('#st-prev').onclick = () => { Core.goStage(S().stage - 1); S().auto = false; };

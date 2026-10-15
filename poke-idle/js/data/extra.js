@@ -147,7 +147,7 @@ const MASTER_TALK = [
 const masterEnc = t => ({ id: 'master', master: t, region: 9, meet: 1, types: RIVAL_TYPES[(t - 1) % RIVAL_TYPES.length], pre: L(MASTER_TALK[(t - 1) % 6][0], MASTER_TALK[(t - 1) % 6][1]), post: L(MASTER_TALK[(t - 1) % 6][2], MASTER_TALK[(t - 1) % 6][3]), hp: MASTER.hp * Math.pow(MASTER.g, t - 1), time: MASTER.time });
 const masterReward = t => {
   const r = { gems: 150 + 25 * t, dust: 100 + 20 * t, shards: 2, egg: 3, item: [0, 35, 65], tk: t % 5 === 0 ? { master: 1 } : { ultra: 1 } };
-  if (t % 5 === 0) r.ess = 1;
+  if (t % 5 === 0) { r.ess = 1; r.excl = 1; }
   return r;
 };
 for (const [stat, name, icon, tiers, tpl] of [
@@ -157,3 +157,60 @@ for (const [stat, name, icon, tiers, tpl] of [
 ]) {
   tiers.forEach(([goal, reward], i) => ACHIEVEMENTS.push({ id: stat + goal, stat, goal, reward, icon, name: name + ' ' + ['I', 'II', 'III', 'IV', 'V'][i], desc: tpl(abbr(goal)) }));
 }
+
+// ---------------- v17: misiones nuevas, auras, objetos exclusivos, títulos ----------------
+// misiones con requisito (solo salen si las puedes cumplir)
+QUEST_POOL.push(
+  { stat: 'trainers', goal: 4, reward: 22, text: n => L('Vence a ' + n + ' entrenadores', 'Beat ' + n + ' trainers'), req: () => Core.S.stats.maxStage >= TRAINER_MIN_STAGE },
+  { stat: 'fusions', goal: 1, reward: 25, text: n => L('Fusiona ' + n + ' vez objetos', 'Fuse items ' + n + ' time'), req: () => Core.fuseGroups().length > 0 },
+);
+WEEKLY_POOL.push(
+  { stat: 'trainers', goal: 40, reward: 130, text: n => L('Vence a ' + n + ' entrenadores', 'Beat ' + n + ' trainers'), req: () => Core.S.stats.maxStage >= TRAINER_MIN_STAGE },
+  { stat: 'ascends', goal: 1, reward: 160, text: n => L('Asciende ' + n + ' vez', 'Ascend ' + n + ' time'), req: () => Core.ascOpen() },
+  { stat: 'rivalMaster', goal: 2, reward: 150, text: n => L('Supera ' + n + ' niveles de los Duelos Maestros', 'Clear ' + n + ' levels of the Master Duels'), req: () => Core.masterOpen() },
+  { stat: 'fusions', goal: 4, reward: 110, text: n => L('Fusiona objetos ' + n + ' veces', 'Fuse items ' + n + ' times'), req: () => Core.S.stats.itemsFound > 6 },
+  { stat: 'tower', goal: 3, reward: 130, text: n => L('Sube ' + n + ' pisos nuevos de la Torre', 'Climb ' + n + ' new Tower floors'), req: () => Core.towerUnlocked() },
+);
+
+// auras: algunos enemigos salvajes (a partir de la etapa AURA.min) llevan una; dan +50 % de monedas
+const AURA = { min: 150, base: 0.08, slope: 1 / 2000, max: 0.35, coins: 1.5, regen: 0.02, thick: 0.8, ward: 0.5 };
+const AURAS = {
+  thick: { name: L('Aura férrea', 'Iron aura'), desc: L('−20% de daño recibido', '−20% damage taken'), w: 3 },
+  regen: { name: L('Aura vital', 'Vital aura'), desc: L('recupera 2% de vida por segundo', 'recovers 2% HP per second'), w: 3 },
+  ward: { name: L('Aura de protección', 'Ward aura'), desc: type => L('los Pokémon de tipo ' + TYPE_NAMES[type] + ' hacen −50% de daño', TYPE_NAMES[type] + '-type Pokémon deal −50% damage'), w: 4 },
+};
+const auraText = a => AURAS[a.id].name + (a.type ? ' · ' + TYPE_NAMES[a.type] : '') + ': ' + (typeof AURAS[a.id].desc === 'function' ? AURAS[a.id].desc(a.type) : AURAS[a.id].desc);
+
+// objetos exclusivos de los Duelos Maestros (siempre épicos; no caen al azar)
+Object.assign(HELD, {
+  insignia: { name: L('Insignia de Nico', "Nico's Badge"), icon: 'trophy', fx: 'chal', excl: true, v: 0.16, desc: v => L('+' + pctTxt(v) + ' de daño en duelos, Torre y eventos', '+' + pctTxt(v) + ' damage in duels, the Tower and events') },
+  cristal: { name: L('Cristal de Esencia', 'Essence Crystal'), icon: 'star', fx: 'rank', excl: true, v: 0.01, desc: v => L('+' + pctTxt(v) + ' de daño por Rango de Ascensión (máx. +100%)', '+' + pctTxt(v) + ' damage per Ascension Rank (max +100%)') },
+  eterno: { name: L('Reloj Eterno', 'Eternal Clock'), icon: 'boot', fx: 'time', excl: true, v: 1.2, desc: v => L('+' + v.toFixed(1) + ' s contra jefes y retos (equipo)', '+' + v.toFixed(1) + ' s against bosses and challenges (team)') },
+});
+
+// perfil: títulos que se desbloquean jugando
+const TITLES = (() => {
+  const T = [{ id: 'novato', name: L('Novato', 'Rookie'), hint: '', test: () => true }];
+  const stage = (id, name, ms, hint) => T.push({ id, name, hint: hint || L('Llega a la etapa ' + ms, 'Reach stage ' + ms), test: S => S.stats.maxStage >= ms });
+  stage('aprendiz', L('Aprendiz', 'Apprentice'), 50); stage('promesa', L('Promesa de la Liga', 'League hopeful'), 100);
+  REGIONS.forEach((r, i) => { if (r.gen) stage('camp' + r.gen, L('Campeón de ' + r.name, 'Champion of ' + r.name), r.first * 10 + 131, L('Vence al campeón de ' + r.name, 'Beat the champion of ' + r.name)); });
+  stage('viajero', L('Viajero de Más allá', 'Traveller of Beyond'), 1270, L('Llega a Más allá', 'Reach Beyond'));
+  const stat = (id, name, f, hint) => T.push({ id, name, hint, test: f });
+  stat('coleccionista', L('Coleccionista', 'Collector'), S => Object.keys(S.seen).length >= 100, L('Registra 100 Pokémon', 'Register 100 Pokémon'));
+  stat('sabio', L('Sabio de la Pokédex', 'Pokédex sage'), S => Object.keys(S.seen).length >= 500, L('Registra 500 Pokémon', 'Register 500 Pokémon'));
+  stat('maestrodex', L('Maestro de la Pokédex', 'Pokédex master'), S => Object.keys(S.seen).length >= POKEDEX.length, L('Completa la Pokédex', 'Complete the Pokédex'));
+  stat('brillante', L('Cazador de shinies', 'Shiny hunter'), S => S.stats.shinies >= 10, L('Consigue 10 shinies', 'Get 10 shinies'));
+  stat('criador', L('Criador', 'Breeder'), S => S.stats.hatched >= 50, L('Eclosiona 50 huevos', 'Hatch 50 eggs'));
+  stat('torre', L('Escalador de la Torre', 'Tower climber'), S => S.tower.best >= 50, L('Llega al piso 50 de la Torre', 'Reach Tower floor 50'));
+  stat('naturalista', L('Naturalista', 'Naturalist'), S => Object.keys(S.foes).length >= 500, L('Derrota a 500 especies', 'Defeat 500 species'));
+  stat('domador', L('Terror de entrenadores', 'Trainer terror'), S => S.stats.trainers >= 100, L('Vence a 100 entrenadores', 'Beat 100 trainers'));
+  stat('veterano', L('Veterano de la Liga', 'League veteran'), S => S.stats.prestiges >= 10, L('Entra 10 veces en la Liga', 'Enter the League 10 times'));
+  stat('mega', L('Megaevolucionista', 'Mega evolver'), S => S.stats.megas >= 15, L('Desbloquea 15 formas Mega', 'Unlock 15 Mega forms'));
+  stat('rival', L('Rival de Nico', "Nico's rival"), S => Object.keys(S.rival.won).length >= RIVAL_ENC.length, L('Gana los 20 duelos de Nico', "Win Nico's 20 duels"));
+  stat('maestronico', L('Maestro de Nico', "Nico's master"), S => S.rival.master >= 10, L('Supera el nivel 10 de los Duelos Maestros', 'Clear Master Duel level 10'));
+  stat('ascendido', L('Ascendido', 'Ascended'), S => S.asc.rank >= 1, L('Asciende una vez', 'Ascend once'));
+  stat('ascsup', L('Ascendido supremo', 'Supreme ascended'), S => S.asc.rank >= 10, L('Llega al Rango 10', 'Reach Rank 10'));
+  stat('melomano', L('Melómano', 'Music lover'), S => Core.tracksUnlocked() >= MUSIC_LIST.length, L('Desbloquea toda la sala de música', 'Unlock the whole music room'));
+  stat('leyenda', L('Leyenda viva', 'Living legend'), S => S.stats.maxStage >= 2000 || S.asc.rank >= 30, L('Llega a la etapa 2000 o al Rango 30', 'Reach stage 2000 or Rank 30'));
+  return T;
+})();

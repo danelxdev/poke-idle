@@ -15,6 +15,7 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
 - **Huevos, naturalezas, IVs y tipos eficaces**: incubadora con 4 tipos de huevo, 25 naturalezas, IVs entrenables con polvo estelar y ayudas visuales de eficacia en combate (ver más abajo).
 - **Eventos semanales y Torre de batalla**: un tipo protagonista cada semana con jefe, misiones y bola propia, y una torre infinita con pisos de reglas especiales.
 - **Rival, entrenadores y Pokédex completa**: el rival Nico te desafía dos veces por región (20 duelos con historia), aparecen entrenadores con varios Pokémon seguidos y cada Pokémon tiene una ficha con estadísticas, debilidades, evolución y dónde aparece.
+- **Guía «¿Qué hago ahora?»**, **auras** en los enemigos, **perfil con títulos y avatar**, favoritos en la Pokédex y objetos exclusivos de final de partida.
 - **Final de partida sin techo**: **Ascensión** (una segunda Liga con Rango, Esencia y multiplicadores permanentes que se acumulan) y **Duelos Maestros** de Nico, una escalera infinita cada vez más dura.
 - **Objetos, combos y tácticas**: 17 objetos con efectos distintos, fusión y taller, combos de objetos y 5 tácticas de equipo.
 - **Sonido y música**: volúmenes por categoría, 3 estilos de música, 20 pistas desbloqueables en una sala de música y subtítulos de sonidos.
@@ -157,6 +158,16 @@ El botón **Equipos** de la pestaña Equipo guarda hasta 4 equipos con nombre y 
 - La primera victoria da gemas, polvo y tickets (en los segundos duelos, además, fragmentos Mega, un huevo y un objeto) y **+1 % de daño permanente**. Después puedes pedir una **revancha** al día por duelo (polvo y gemas).
 - **Entrenadores**: de vez en cuando, en vez de un salvaje, aparece un entrenador con 2 Pokémon seguidos (3 desde la etapa 60). Al derrotar al último das un extra de monedas y, con suerte, gemas, tickets u objetos. Se ven en la tarjeta del enemigo (por ejemplo «Pescador Pablo 2/3»).
 
+## Guía, auras y perfil
+
+- **¿Qué hago ahora?** (botón de la estrella, arriba a la derecha): una lista corta, por orden de importancia, de lo más útil en este momento: recompensas por recoger, huevos listos, tirada gratis, huecos libres, si tu equipo está listo para el jefe (y qué hacer si no), el duelo de Nico, la Torre, objetos que fusionar o equipar, Megas desbloqueables y, sobre todo, **cuándo conviene entrar en la Liga o ascender**. Cada consejo tiene un botón «Ir» que te lleva a la pestaña.
+- **Auras**: a partir de la etapa 150, algunos enemigos salvajes (del 8 % al 35 % según la etapa) llevan una aura y dan **+50 % de monedas**: **férrea** (−20 % de daño recibido), **vital** (recupera 2 % de vida por segundo) o **de protección** (los Pokémon de un tipo concreto hacen −50 %). Se ven junto al nombre del enemigo (✦). Los jefes no tienen aura. Premian un equipo con tipos variados.
+- **Táctica automática en jefes** (Ajustes → Combate, desactivada por defecto): si usas la táctica Equilibrada, el juego usa Cazajefes contra jefes y retos y vuelve sola.
+- **Perfil** (Ajustes): nombre, avatar (uno de tus Pokémon) y **título**. Hay 29 títulos que se desbloquean jugando: etapas y campeones de cada región, Pokédex, shinies, crianza, Torre, bestiario, entrenadores, Liga, Megas, Nico, Ascensión, música… El nombre y el título salen en la pantalla de inicio.
+- **Favoritos** en la Pokédex (la estrella de la ficha) y un filtro «Favoritos». Los filtros y el orden de la Pokédex se **recuerdan** entre sesiones.
+- **Misiones nuevas** (solo salen si puedes cumplirlas): entrenadores, fusiones, ascensiones, Duelos Maestros y pisos de la Torre.
+- **Objetos exclusivos** (solo en los Duelos Maestros, cada 5 niveles, siempre épicos): **Insignia de Nico** (+40 % de daño en duelos, Torre y eventos), **Cristal de Esencia** (+2,5 % de daño por Rango de Ascensión, hasta +100 %) y **Reloj Eterno** (+3 s contra jefes y retos).
+
 ## Ascensión y Duelos Maestros (final de partida)
 
 Las medallas de la Liga suman de forma lineal (+3 % cada una), así que a partir de la etapa ~650 cada vuelta aporta cada vez menos. La Ascensión añade un multiplicador que crece sin techo, y la dificultad sube con ella.
@@ -166,7 +177,7 @@ Las medallas de la Liga suman de forma lineal (+3 % cada una), así que a partir
 - **Cada Rango** hace que todos los enemigos y retos tengan **×1,25 de vida**: la dificultad nunca deja de subir, pero la Esencia crece más rápido que ella. El Rango se ve en la etapa (por ejemplo «Rango 3»).
 - **Duelos Maestros**: al ganar los 20 duelos de Nico se abre una escalera sin fin. Cada nivel es un duelo de 3 Pokémon seguidos con el mejor de cada tipo, con ×15 de la vida de un jefe de tu mejor etapa (×1,16 más por nivel). Cada nivel superado da gemas, polvo, fragmentos Mega, un huevo legendario, un objeto y un ticket, **+0,5 % de daño permanente**, y cada 5 niveles un ticket Maestro y **1 de Esencia**.
 - Logros nuevos: Ascensión, Esencia y Maestro de Nico.
-- **Ritmo medido** (jugador activo 2 h al día): sin Ascensión el avance se frena hacia la etapa ~700 y apenas se mueve en semanas. Ascendiendo cada vez que la Esencia ganada es al menos el 30 % de la que ya tienes, se llega a la etapa ~590 el día 14, ~750 el día 18 y ~830 el día 21, y el avance sigue a unas 20–25 etapas al día (más despacio cuanto mayor es el Rango). No hay techo: pasada la etapa 1400 las rutas se repiten con enemigos más fuertes.
+- **Ritmo medido** (jugador activo 2 h al día): sin Ascensión el avance se frena hacia la etapa ~700 y apenas se mueve en semanas. Ascendiendo cada vez que la Esencia ganada es al menos el 30 % de la que ya tienes, se llega a la etapa ~590 el día 14, ~750 el día 18 y ~830 el día 21, y el avance sigue a unas 20–25 etapas al día (más despacio cuanto mayor es el Rango). No hay techo: pasada la etapa 1340 las rutas se repiten con enemigos más fuertes.
 
 ## Pokédex
 
@@ -199,7 +210,7 @@ Si te gusta, puedes invitarme a un café en [Ko-fi](https://ko-fi.com/danelalons
 ## Para volver cada día
 
 - Recompensa diaria con racha de 7 días, **4 misiones diarias** (de 21 posibles) y **3 misiones semanales** (de 12).
-- **286 logros** en 59 categorías (incluidos entrenadores, rival, bestiario, fusiones y pistas de música): etapas, Pokédex regional, colecciones por tipo, estrellas, niveles, críticos, rachas, mejoras al máximo…
+- **299 logros** en 62 categorías (incluidos entrenadores, rival, bestiario, fusiones y pistas de música): etapas, Pokédex regional, colecciones por tipo, estrellas, niveles, críticos, rachas, mejoras al máximo…
 - **Pokédex** con ficha, buscador y filtros: cada Pokémon registrado da +1% de daño.
 
 ## Liga Pokémon (prestigio)

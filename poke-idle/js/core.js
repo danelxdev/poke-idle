@@ -50,7 +50,7 @@ const Core = (() => {
   function fresh() {
     return {
       v: 1, started: false, coins: 0, gems: 50, dust: 0, tk: { poke: 5, super: 1, ultra: 0, master: 0 }, stage: 1, maxStage: 1, kills: 0, auto: true,
-      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, shards: 0, hist: [], presets: [1, 2, 3, 4].map(i => ({ name: 'Equipo ' + i, team: [] })), event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 }, rival: { won: {}, rem: {}, told: {}, master: 0 }, asc: { rank: 0, ess: 0 }, tactic: 'bal', foes: {},
+      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, shards: 0, hist: [], presets: [1, 2, 3, 4].map(i => ({ name: 'Equipo ' + i, team: [] })), event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 }, rival: { won: {}, rem: {}, told: {}, master: 0 }, asc: { rank: 0, ess: 0 }, tactic: 'bal', foes: {}, profile: { name: '', avatar: 0, title: 'novato' }, favs: {}, ui: {},
       up: { tap: 0, train: 0, coin: 0, crit: 0, critdmg: 0, speed: 0, catch: 0, golden: 0, bosstime: 0, type: 0, boss: 0, autotap: 0, alch: 0 },
       shop: { dmg: 0, coins: 0, lvl: 0, slots: 0, offline: 0, catch: 0, shiny: 0, gems: 0, skill: 0, dust: 0, tapd: 0, critb: 0, disc: 0, bt: 0, egg: 0 },
       medals: 0, mp: 0, badges: {}, bossFirst: {},
@@ -59,7 +59,7 @@ const Core = (() => {
       stats: { maxDps: 0, bestHit: 0, megas: 0, kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, eventTiers: 0, bred: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, trainers: 0, rivals: 0, fusions: 0, ascends: 0, freePulls: 0, streak: 0, itemsFound: 0 },
       bossFails: {}, retryT: 0, pity: 0, pityE: 0, bannerLost: 0, freeDay: '', autoAcc: 0, inv: [], uid: 1, tutDone: false, last: Date.now(),
       daily: { day: '', streak: 0, claimed: true, quests: [] }, weekly: { week: -1, quests: [] }, ach: {},
-      buyMul: 1, settings: { music: 0.35, sfx: 0.6, master: 1, combat: 0.8, mstyle: 'warm', mmode: 'region', mpin: 'r0', bgmute: true, captions: false, nums: true, shake: true, bigNums: true, autoBoss: true, notify: false, lang: null, a11y: { motion: 'auto', text: 1, nf: false, hc: false, cb: false } },
+      buyMul: 1, settings: { music: 0.35, sfx: 0.6, master: 1, combat: 0.8, mstyle: 'warm', mmode: 'region', mpin: 'r0', bgmute: true, captions: false, autoTactic: false, nums: true, shake: true, bigNums: true, autoBoss: true, notify: false, lang: null, a11y: { motion: 'auto', text: 1, nf: false, hc: false, cb: false } },
     };
   }
   function load() {
@@ -105,6 +105,12 @@ const Core = (() => {
     d.rival.won = Object.fromEntries(Object.keys(d.rival.won).filter(k => RIVAL_ENC.some(e => e.id === k)).map(k => [k, 1]));
     if (!TACTICS[d.tactic]) d.tactic = 'bal';
     if (!d.foes || typeof d.foes !== 'object' || Array.isArray(d.foes)) d.foes = {};
+    if (!d.profile || typeof d.profile !== 'object') d.profile = { name: '', avatar: 0, title: 'novato' };
+    d.profile.name = typeof d.profile.name === 'string' ? d.profile.name.slice(0, 14) : '';
+    if (!DEX[d.profile.avatar] || !d.mons[String(baseOf(d.profile.avatar))]) d.profile.avatar = 0;
+    if (!TITLES.some(t => t.id === d.profile.title)) d.profile.title = 'novato';
+    if (!d.favs || typeof d.favs !== 'object' || Array.isArray(d.favs)) d.favs = {};
+    if (!d.ui || typeof d.ui !== 'object' || Array.isArray(d.ui)) d.ui = {};
     if (!['warm', 'retro', 'dream'].includes(d.settings.mstyle)) d.settings.mstyle = 'warm';
     if (!['region', 'shuffle', 'pin'].includes(d.settings.mmode)) d.settings.mmode = 'region';
     if (!MUSIC_LIST.some(t => t.id === d.settings.mpin)) d.settings.mpin = 'r0';
@@ -154,7 +160,7 @@ const Core = (() => {
   const skillOn = id => S.skOn[id] > S.stats.time;
   const medalMult = () => 1 + 0.03 * S.medals;
   // táctica de equipo (se desbloquea en la etapa TACTIC_UNLOCK); la equilibrada no cambia nada
-  const tact = () => (S.stats.maxStage >= TACTIC_UNLOCK && TACTICS[S.tactic]) || TACTICS.bal;
+  const tact = () => (S.stats.maxStage < TACTIC_UNLOCK ? TACTICS.bal : S.settings.autoTactic && S.tactic === 'bal' && F.enemy && F.enemy.boss ? TACTICS.boss : TACTICS[S.tactic] || TACTICS.bal);
   const tacticOpen = () => S.stats.maxStage >= TACTIC_UNLOCK;
   function setTactic(id) { if (!TACTICS[id] || !tacticOpen()) return false; S.tactic = id; return true; }
   const rivalWins = () => Object.keys(S.rival.won).length;
@@ -187,6 +193,8 @@ const Core = (() => {
     const fx = HELD[it.id].fx, v = itemVal(it);
     if (fx === 'dmg' || fx === 'dmgslow') return v;
     if (fx === 'type') return DEX[fdex(m)].types.includes(it.type) ? v : v * 0.2;
+    if (fx === 'chal') return chal ? v : 0;
+    if (fx === 'rank') return Math.min(1, v * S.asc.rank);
     return 0;
   }
   function itemSpd(m) { const it = itemOf(m); if (!it) return 0; const fx = HELD[it.id].fx; return fx === 'spd' ? itemVal(it) : fx === 'dmgslow' ? -0.1 : 0; }
@@ -368,11 +376,18 @@ const Core = (() => {
     const golden = !boss && !F.trainer && rnd() < goldenChance();
     const hp = enemyHp(s) * (golden ? 3 : 1);
     const tr = F.trainer ? { name: F.trainer.name, cls: F.trainer.cls, i: F.trainer.n - F.trainer.left + 1, n: F.trainer.n } : null;
-    F.enemy = { dex, hp, max: hp, boss, golden, tier: boss ? r.boss.tier : 0, types: DEX[dex].types, stage: s, trainer: tr };
+    F.enemy = { dex, hp, max: hp, boss, golden, tier: boss ? r.boss.tier : 0, types: DEX[dex].types, stage: s, trainer: tr, aura: boss ? null : rollAura(s) };
     F.bossT = F.bossT0 = boss ? bossTime(s) : 0;
     F.timers = S.team.map((k, i) => 0.2 + i * 0.13);
     F.hits = [];
     emit('spawn', F.enemy);
+  }
+  function rollAura(s) {
+    if (s < AURA.min || !(rnd() < Math.min(AURA.max, AURA.base + (s - AURA.min) * AURA.slope))) return null;
+    const ids = Object.keys(AURAS), tw = ids.reduce((a, k) => a + AURAS[k].w, 0);
+    let r = rnd() * tw, id = ids[0];
+    for (const k of ids) { r -= AURAS[k].w; if (r < 0) { id = k; break; } }
+    return { id, type: id === 'ward' ? Object.keys(TYPE_NAMES)[Math.floor(rnd() * Object.keys(TYPE_NAMES).length)] : null };
   }
   function resetFight() { F.enemy = null; F.respawn = 0.3; F.hits = []; F.timers = []; F.trainer = null; }
   // entrenadores: varios Pokémon seguidos; al derrotar al último dan un extra
@@ -397,6 +412,10 @@ const Core = (() => {
   function deal(dmg, crit, src, ef) {
     const e = F.enemy;
     if (!e || e.hp <= 0) return;
+    if (e.aura) {
+      if (e.aura.id === 'thick') dmg *= AURA.thick;
+      else if (e.aura.id === 'ward' && src >= 0) { const m = S.mons[S.team[src]]; if (m && DEX[fdex(m)].types.includes(e.aura.type)) dmg *= AURA.ward; }
+    }
     e.hp -= dmg;
     if (dmg > S.stats.bestHit) S.stats.bestHit = dmg;
     if (crit) S.stats.crits++;
@@ -407,7 +426,7 @@ const Core = (() => {
     const e = F.enemy, s = e.stage;
     S.foes[e.dex] = (S.foes[e.dex] || 0) + 1;
     if (e.chal) return chalWin(e);
-    const coins = killCoins(s) * (e.golden ? 5 : 1);
+    const coins = killCoins(s) * (e.golden ? 5 : 1) * (e.aura ? AURA.coins : 1);
     S.coins += coins; S.stats.coinsTotal += coins; S.stats.kills++;
     let gems = e.golden ? 3 : 0, firstKill = false;
     if (e.golden) S.stats.goldens++;
@@ -484,6 +503,7 @@ const Core = (() => {
     if (S.up.autotap) { S.autoAcc += dt * 0.5 * S.up.autotap; while (S.autoAcc >= 1) { S.autoAcc -= 1; if (F.enemy) tap(true); } }
     if (!F.enemy) { F.respawn -= dt; if (F.respawn <= 0) spawn(); return; }
     const e = F.enemy;
+    if (e.aura && e.aura.id === 'regen' && e.hp > 0) e.hp = Math.min(e.max, e.hp + e.max * AURA.regen * dt);
     if (e.boss) { F.bossT -= dt; if (F.bossT <= 0 && e.hp > 0) { if (e.chal) chalFail(); else bossFail(); return; } }
     for (let i = 0; i < S.team.length; i++) {
       const m = S.mons[S.team[i]];
@@ -513,7 +533,7 @@ const Core = (() => {
   function dropItem(table) {
     let r = rnd() * 100, rar = 1;
     for (let k = 0; k < 3; k++) { r -= table[k]; if (r < 0) { rar = k + 1; break; } }
-    const ids = Object.keys(HELD), id = ids[Math.floor(rnd() * ids.length)];
+    const ids = Object.keys(HELD).filter(k => !HELD[k].excl), id = ids[Math.floor(rnd() * ids.length)];
     const it = { u: S.uid++, id, rar };
     if (id === 'orbe') { const ts = Object.keys(TYPE_NAMES); it.type = ts[Math.floor(rnd() * ts.length)]; }
     S.inv.push(it); invDirty = true; S.stats.itemsFound++;
@@ -719,6 +739,7 @@ const Core = (() => {
     if (r.egg !== undefined) giveEgg(r.egg);
     if (r.item) dropItem(r.item);
     if (r.ess) S.asc.ess += r.ess;
+    if (r.excl) { const ids = Object.keys(HELD).filter(k => HELD[k].excl), it = { u: S.uid++, id: ids[Math.floor(rnd() * ids.length)], rar: 3 }; S.inv.push(it); invDirty = true; S.stats.itemsFound++; emit('item', it); }
   }
   function towerReward(f) {
     const r = { gems: 3 + Math.floor(f / 2), dust: 5 + 2 * f };
@@ -854,6 +875,58 @@ const Core = (() => {
     if (q.prestige) return S.stats.prestiges >= q.prestige;
     if (q.hatched) return S.stats.hatched >= q.hatched;
     return false;
+  }
+  // ---------------- perfil: nombre, avatar y títulos ----------------
+  const titleOpen = t => { try { return !!t.test(S); } catch (e) { return false; } };
+  const titlesOpen = () => TITLES.filter(titleOpen);
+  function setTitle(id) { const t = TITLES.find(x => x.id === id); if (!t || !titleOpen(t)) return false; S.profile.title = id; return true; }
+  function setAvatar(dex) { if (!DEX[dex] || !S.mons[String(baseOf(dex))]) return false; S.profile.avatar = +dex; return true; }
+  function setName(n) { S.profile.name = String(n || '').replace(/[<>&"]/g, '').trim().slice(0, 14); }
+  const toggleFav = d => { if (S.favs[d]) delete S.favs[d]; else S.favs[d] = 1; return !!S.favs[d]; };
+
+  // ---------------- consejos: «¿qué hago ahora?» ----------------
+  // Devuelve, por prioridad, lo más útil que puedes hacer en este momento: { p, icon, tab, text }
+  function advice() {
+    const out = [], add = (p, icon, tab, text) => out.push({ p, icon, tab, text });
+    if (!S.started) return out;
+    const best = S.team.map(k => S.mons[k]).filter(Boolean);
+    if (!S.daily.claimed) add(1, 'gem', 'quests', _L('Recoge la recompensa diaria.', 'Claim your daily reward.'));
+    const pr = pendingRewards();
+    if (pr) add(2, 'trophy', 'quests', _L(`Tienes ${pr} recompensa${pr > 1 ? 's' : ''} de misiones o logros por recoger.`, `You have ${pr} quest or achievement reward${pr > 1 ? 's' : ''} to claim.`));
+    if (eggsReady()) add(2, 'egg0', 'gacha', _L(`Tienes ${eggsReady()} huevo${eggsReady() > 1 ? 's' : ''} listo${eggsReady() > 1 ? 's' : ''} para eclosionar.`, `You have ${eggsReady()} egg${eggsReady() > 1 ? 's' : ''} ready to hatch.`));
+    if (freePullReady()) add(3, 'ball', 'gacha', _L('Tienes una tirada diaria gratis.', 'You have a free daily pull.'));
+    if (best.length < S.slots) add(2, 'friends', 'team', _L('Tienes huecos de equipo libres: pon a combatir a más Pokémon.', 'You have free team slots: put more Pokémon to fight.'));
+    if (S.slots < 6 && S.coins >= SLOT_COST[S.slots]) add(3, 'friends', 'team', _L('Puedes desbloquear otro hueco de equipo.', 'You can unlock another team slot.'));
+    const waiting = !S.auto && S.kills >= 10 && !isBoss(S.stage) && isBoss(S.stage + 1);
+    if (waiting) {
+      const rd = bossReady(S.stage + 1);
+      if (rd < 0.95) {
+        add(2, 'fist', 'team', _L(`Tu equipo tiene el ${Math.round(rd * 100)}% del poder para el próximo jefe: sube de nivel, usa «Mejor equipo» o prueba la táctica Ofensiva.`, `Your team has ${Math.round(rd * 100)}% of the power needed for the next boss: level up, use “Best team” or try the Offensive tactic.`));
+        if (maxAffordable(S.mons[S.team[0]] || { dex: 1, lvl: 1 }).n > 0 && best.length) add(1, 'up', 'team', _L('Tienes monedas para subir niveles ahora mismo.', 'You have coins to level up right now.'));
+      } else add(1, 'crown', 'team', _L('Tu equipo está listo para el jefe: ¡púlsalo!', 'Your team is ready for the boss: challenge it!'));
+    } else if (best.length) {
+      const m = best.slice().sort((a, b) => levelCost(a, a.lvl) - levelCost(b, b.lvl))[0];
+      if (m && S.coins >= levelCost(m, m.lvl) * 5) add(4, 'up', 'team', _L('Tienes monedas de sobra: sube de nivel a tus Pokémon.', 'You have coins to spare: level up your Pokémon.'));
+    }
+    if (S.tk.poke + S.tk.super + S.tk.ultra + S.tk.master >= 10) add(4, 'ticket', 'gacha', _L('Tienes muchos tickets sin usar: abre Poké Balls.', 'You have lots of unused tickets: open Poké Balls.'));
+    const nx = rivalNext();
+    if (nx && rivalOpen(nx) && towerUnlocked()) add(3, 'crown', 'chal', _L(`Nico te espera en ${REGIONS[nx.region].name}: acepta el duelo.`, `Nico is waiting in ${REGIONS[nx.region].name}: accept the duel.`));
+    else if (!nx && masterOpen() && towerUnlocked() && chalReady(masterSpec(S.rival.master + 1)) >= 0.9) add(3, 'crown', 'chal', _L(`Puedes con el Duelo Maestro ${S.rival.master + 1}.`, `You can take Master Duel ${S.rival.master + 1}.`));
+    if (towerUnlocked()) {
+      if (S.event && !S.event.free) add(4, 'tkSuper', 'chal', _L('Tienes una tirada gratis del evento semanal.', 'You have a free weekly event pull.'));
+      if (chalReady(towerSpec(S.tower.best + 1)) >= 1.1) add(4, 'crown', 'chal', _L(`La Torre está a tu alcance: puedes superar el piso ${S.tower.best + 1}.`, `The Tower is within reach: you can clear floor ${S.tower.best + 1}.`));
+    }
+    if (fuseGroups().length) add(4, 'candy', 'team', _L('Tienes objetos iguales que puedes fusionar (Mochila).', 'You have identical items you can fuse (Bag).'));
+    const free = Object.values(S.mons).filter(m => !m.item).length, worn = wornSet(), spare = S.inv.filter(it => !worn.has(it.u)).length;
+    if (best.some(m => !m.item) && spare) add(3, 'choiceband', 'team', _L('Tienes objetos sin equipar y Pokémon del equipo sin objeto.', 'You have unequipped items and team Pokémon without one.'));
+    if (best.some(m => megaForms(m).some(f => megaCan(m, f.form)))) add(3, 'star', 'team', _L('Puedes desbloquear una forma Mega.', 'You can unlock a Mega form.'));
+    if (tacticOpen() && S.tactic === 'bal' && !S.settings.autoTactic && waiting) add(5, 'fist', 'team', _L('Prueba la táctica Ofensiva o Cazajefes para superar al jefe.', 'Try the Offensive or Boss hunter tactic to beat the boss.'));
+    // Liga y Ascensión
+    if (ascReady() && essGain() >= Math.max(2, 0.3 * S.asc.ess)) add(2, 'crown', 'league', _L(`Ascender ahora te da +${essGain()} de Esencia (×${Math.pow(ASC.dmgEss, essGain()).toFixed(2)} de daño).`, `Ascending now gives you +${essGain()} Essence (×${Math.pow(ASC.dmgEss, essGain()).toFixed(2)} damage).`));
+    else if (medalGain() >= Math.max(3, S.medals * 0.5) && S.maxStage >= 60) add(2, 'crown', 'league', _L(`Entrar en la Liga ahora te da +${medalGain()} medallas (${S.medals ? Math.round(medalGain() / S.medals * 100) + '% más de las que tienes' : 'tu primera vez'}).`, `Entering the League now gives you +${medalGain()} medals (${S.medals ? Math.round(medalGain() / S.medals * 100) + '% on top of what you have' : 'your first time'}).`));
+    else if (S.maxStage >= 60 && !S.stats.prestiges) add(3, 'crown', 'league', _L('Ya puedes entrar en la Liga: reinicias a cambio de medallas permanentes.', 'You can enter the League now: restart in exchange for permanent medals.'));
+    if (!out.length) add(9, 'sprout', 'team', _L('Todo al día. Deja que tu equipo siga combatiendo: vuelve más tarde.', 'All caught up. Let your team keep fighting and come back later.'));
+    return out.sort((a, b) => a.p - b.p).slice(0, 6);
   }
   const tracksUnlocked = () => MUSIC_LIST.filter(musicUnlocked).length;
   const musicIds = () => MUSIC_LIST.filter(musicUnlocked).map(t => t.id);
@@ -1039,7 +1112,7 @@ const Core = (() => {
 
   // ---------------- diarias, semanales y logros ----------------
   function makeQuests(pool, n) {
-    const p = pool.slice(), qs = [], stats = {};
+    const p = pool.filter(q => !q.req || q.req()), qs = [], stats = {};
     while (qs.length < n && p.length) {
       const q = p.splice(Math.floor(rnd() * p.length), 1)[0];
       if (stats[q.stat]) continue;
@@ -1183,6 +1256,7 @@ const Core = (() => {
     offlineCapSecs, nextEggEta, refreshEvent, eventDaysLeft, eventFeat, eventPool, evBonus, towerUnlocked, towerSpec, eventSpec, chalReady, towerStarts, towerReward, startTower, startEvent, abortChal, claimEventTask, eventFreePull,
     rankHp, ascDmg, ascCoin, ascOpen, ascReady, essGain, ascend, masterOpen, masterSpec, startMaster,
     tact, tacticOpen, setTactic, rivalWins, itemCombos, rivalTeam, rivalOpen, rivalNext, rivalSpec, startRival, fuseGroups, fuseItem, craftItem,
+    titleOpen, titlesOpen, setTitle, setAvatar, setName, toggleFav, advice,
     musicUnlocked, tracksUnlocked, musicIds, foeKills, appearsIn, wildPool,
     get ev() { return curEv; }, get chal() { return chal; }, inChal: () => !!chal,
   };
