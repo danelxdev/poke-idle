@@ -105,10 +105,11 @@ const Sprites = (() => {
     const n = m.d.length, dur = (m.d.reduce((x, y) => x + y, 0) / 60).toFixed(2), img = path(dex, shiny, a + '.png');
     const bb = typeof SPR_BOX !== 'undefined' ? SPR_BOX[dex] : null, play = animated && n > 1 ? 'play' : '';
     if (bb) {
-      // caja cuadrada de px: el dibujo del Pokémon (recuadro real, no el fotograma) queda centrado y ocupa ~88 % de la caja
-      const bw = bb[2] - bb[0], bh = bb[3] - bb[1], k = px * 0.88 / Math.max(bw, bh), fw = m.w * k;
+      // caja cuadrada de px: el dibujo del Pokémon (recuadro real, no el fotograma) queda centrado y ocupa ~88 % de la caja.
+      // El fotograma va en un elemento interior del tamaño exacto del fotograma (así no se cuelan los vecinos de la hoja)
+      const bw = bb[2] - bb[0], bh = bb[3] - bb[1], k = px * 0.88 / Math.max(bw, bh), fw = m.w * k, fh = m.h * k;
       const ox = (px / 2 - (bb[0] + bw / 2) * k).toFixed(2), oy = (px / 2 - (bb[1] + bh / 2) * k).toFixed(2);
-      return `<i class="spr ${play} ${cls || ''}" role="img" style="width:${px}px;height:${px}px;background-image:url('${img}');background-size:${(fw * n).toFixed(2)}px ${(m.h * k * 8).toFixed(2)}px;background-position:${ox}px ${oy}px;--ox:${ox}px;--sw:${(fw * n).toFixed(2)}px;--n:${n};--dur:${dur}s"></i>`;
+      return `<i class="spr ${play} ${cls || ''}" role="img" style="width:${px}px;height:${px}px;--sw:${(fw * n).toFixed(2)}px;--n:${n};--dur:${dur}s"><b style="left:${ox}px;top:${oy}px;width:${fw.toFixed(2)}px;height:${fh.toFixed(2)}px;background-image:url('${img}');background-size:${(fw * n).toFixed(2)}px ${(fh * 8).toFixed(2)}px"></b></i>`;
     }
     const k = px / m.h, w = Math.round(m.w * k);
     return `<i class="spr ${play} ${cls || ''}" role="img" style="width:${w}px;height:${px}px;background-image:url('${img}');background-size:${w * n}px ${px * 8}px;--ox:0px;--sw:${w * n}px;--n:${n};--dur:${dur}s"></i>`;

@@ -21,7 +21,7 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
 - **Perfil visible y editable**: el icono de la cabecera (y la tarjeta de la pantalla de inicio) muestra a tu Pokémon con su animación; al pulsarlo editas nombre, avatar, marco, fondo y título. Con la sesión iniciada **manda siempre la partida de la nube** (la local se guarda como copia).
 - **Consejos de novedades** (cada función se explica una sola vez, cuando se hace útil), **cosméticos** (marcos de retrato y fondos de arena) y un **resumen al volver** completo.
 - **Final de partida sin techo**: **Ascensión** (una segunda Liga con Rango, Esencia y multiplicadores permanentes que se acumulan) y **Duelos Maestros** de Nico, una escalera infinita cada vez más dura.
-- **Objetos, combos y tácticas**: 17 objetos con efectos distintos, fusión y taller, combos de objetos y 5 tácticas de equipo.
+- **Objetos y combos**: 17 objetos con efectos distintos, fusión y taller y combos de objetos.
 - **Sonido y música**: volúmenes por categoría, 3 estilos de música, 20 pistas desbloqueables en una sala de música y subtítulos de sonidos.
 - **Progresión lenta y constante**: cada etapa cuesta más que la anterior y los jefes son muros reales con límite de tiempo. Para avanzar mejoras a tu equipo, abres huecos, mejoras la banda y, sobre todo, repites el viaje en la **Liga**.
 
@@ -90,7 +90,6 @@ Se desbloquea al llegar a la etapa 10. Los retos sustituyen al combate normal (u
 - Bonus de la semana: shinies ×2, huevos ×2 de rápidos, +50 % monedas, ×2 polvo estelar o +50 % de tickets soltados.
 - **Jefe del evento** (uno de los Pokémon más fuertes de ese tipo) en 4 dificultades. Vida = vida de un Pokémon salvaje en tu etapa máxima × 3 / 7 / 16 / 40, con 45 / 50 / 55 / 60 s. La primera victoria de cada semana da gemas, tickets y huevos (hasta 160 gemas, 2 Ultra, 1 Maestro y un huevo épico). Cada botón muestra tu «Poder» (≥100 % = lo vences a tiempo).
 - **Misiones del evento**: derrotar 150 y 600 Pokémon del tipo de la semana y abrir 10 Bolas del Evento.
-- **Bola del Evento** (1 Ticket Super): solo Pokémon del tipo de la semana; al salir épico o legendario, la mitad de las veces es el destacado del evento. Una tirada gratis por semana.
 
 **Torre de batalla.** Pisos infinitos, cada uno contra un Pokémon de un tipo distinto. Piso *f*: vida = salvaje en tu etapa máxima × 2,5 × 1,07^(f−1) en 40 s. Sigues subiendo hasta que caes. Cada 5 pisos hay un guardián (×1,5 de vida) con una regla: sin objetos, sin sinergias, solo del tipo del piso (los demás hacen la mitad), sin críticos, contrarreloj (mitad de tiempo, −45 % de vida) o armadura (+60 % de vida, +40 % de tiempo). Las recompensas (gemas, polvo, tickets cada 5 pisos y huevos cada 10) se dan solo la primera vez que superas cada piso. Puedes empezar desde cualquier guardián superado. El récord da **+0,3 % de daño permanente por piso**.
 
@@ -143,7 +142,7 @@ Ajustes → **Accesibilidad**:
 
 El botón **Equipos** de la pestaña Equipo guarda hasta 4 equipos con nombre y los carga con un toque (uno para farmear, otro para el evento o la Torre…). Se guardan las especies, así que sobreviven a evoluciones y a la Liga; si el equipo tiene más Pokémon que huecos, se cargan los primeros.
 
-## Objetos, combos y tácticas
+## Objetos y combos
 
 - **Objetos equipables**: cada Pokémon lleva uno. Hay **17 tipos** en 3 rarezas (Común x1, Raro x1,6 y Épico x2,5):
   - Ataque: Cinta Elección (+20 % daño), Vidasfera (+35 % daño, −10 % velocidad), Pañuelo Elección (+10 % velocidad), Gafas Zoom (+6 % crítico), Orbe de tipo, **Cinta Experto** (+25 % en golpes súper eficaces), **Garra Remate** (+50 % a enemigos con menos del 30 % de vida) y **Banda Doble** (12 % de atacar dos veces).
@@ -152,7 +151,6 @@ El botón **Equipos** de la pestaña Equipo guarda hasta 4 equipos con nombre y 
 - Los sueltan los jefes (cuanto más difícil, mejor rareza), los duelos del rival y, con poca probabilidad, los Pokémon salvajes y los entrenadores.
 - **Mochila**: reciclar por polvo, comprar uno al azar (150 de polvo), **Taller** (elige el objeto común que quieras por 600) y **Fusión**: 3 objetos iguales sin usar → 1 de la rareza siguiente (40 de polvo de Común a Raro, 160 de Raro a Épico).
 - **Combos de objetos**: con 3 objetos distintos del mismo grupo en el equipo hay bonus. **Arsenal** (7 objetos de ataque): +10 % de daño con 3 y +20 % con 5. **Equipo de caza** (Banda Focus, Concha Impulso, Reloj de Arena, Cinta Experto, Garra Remate): +20 % de daño contra jefes con 3 y +35 % con 4. **Granja** (Moneda, Cascabel, Huevo Suerte, Colmillo, Polvo, Guante): +12 % monedas con 3 y +30 % con 5.
-- **Tácticas de equipo** (desde la etapa 20, en la pestaña Equipo): Equilibrada (sin cambios), **Ofensiva** (+25 % daño, −20 % monedas), **Economía** (+30 % monedas, −15 % daño), **Cazajefes** (+30 % daño a jefes y retos, −10 % contra salvajes) y **Rastreo** (+40 % tickets, huevos y polvo, −12 % daño). La equilibrada es la referencia del equilibrio del juego; las demás son decisiones para cada momento.
 - **Sinergias de equipo**: Afinidad de tipo (2 a 6 Pokémon del mismo tipo), Diversidad, Élite legendaria, Brillo compartido (shinies) y Equipo veterano (todos con ★3 o más).
 
 ## Rival y entrenadores
@@ -176,7 +174,7 @@ Se activa rellenando `js/cloud-config.js` (guía completa en `supabase/README.md
 
 ## Consejos, cosméticos y resumen al volver
 
-- **Consejos de novedades**: cada función nueva (guía, Retos, entrenadores, fichas de la Pokédex, objetos, fusión, tácticas, sala de música, perfil, Guardería, Megas, Liga, auras, Nico, Ascensión y Duelos Maestros) se explica **una sola vez**, en una ventana corta, cuando se hace relevante: nunca mientras haya otra ventana, un reto o el tutorial en pantalla, y con al menos 100 s de juego entre dos consejos. Se pueden desactivar o releer desde Ajustes → Consejos (con «Volver a mostrarlos todos»).
+- **Consejos de novedades**: cada función nueva (guía, Retos, entrenadores, fichas de la Pokédex, objetos, fusión, sala de música, perfil, Guardería, Megas, Liga, auras, Nico, Ascensión y Duelos Maestros) se explica **una sola vez**, en una ventana corta, cuando se hace relevante: nunca mientras haya otra ventana, un reto o el tutorial en pantalla, y con al menos 100 s de juego entre dos consejos. Se pueden desactivar o releer desde Ajustes → Consejos (con «Volver a mostrarlos todos»).
 - **Cosméticos** (Ajustes → Perfil): 9 **marcos de retrato** (Clásico, Oro, Hoja, Eléctrico, Arcoíris, Hielo, Llama, Estrellado y Corona) que se desbloquean con hitos (campeón de Kanto, 50 huevos, piso 50 de la Torre, 10 shinies, etapa 500, los 20 duelos de Nico, Rango 5 y Maestro 10) y se ven en las tarjetas del equipo, las fichas, el rival y la pantalla de inicio; y **fondos de arena**: los 17 paisajes del juego se desbloquean al pasar por rutas con ese paisaje y puedes fijar uno (o dejarlo en automático).
 - **Resumen al volver** (tras 1 minuto o más fuera): tiempo fuera (y si se alcanzó el límite de ausencia), monedas ganadas y por hora, progreso de cada huevo de las incubadoras, **tu última sesión** (etapas, jefes, entrenadores, Pokémon registrados, shinies, huevos, niveles, medallas, Esencia, Torre, Nico, logros, títulos, marcos y pistas nuevas), novedades de hoy (misiones diarias nuevas, semana de evento nueva, misiones y huevos listos), la recompensa diaria y los tres consejos principales de «¿Qué hago ahora?».
 
@@ -184,7 +182,6 @@ Se activa rellenando `js/cloud-config.js` (guía completa en `supabase/README.md
 
 - **¿Qué hago ahora?** (botón de la estrella, arriba a la derecha): una lista corta, por orden de importancia, de lo más útil en este momento: recompensas por recoger, huevos listos, tirada gratis, huecos libres, si tu equipo está listo para el jefe (y qué hacer si no), el duelo de Nico, la Torre, objetos que fusionar o equipar, Megas desbloqueables y, sobre todo, **cuándo conviene entrar en la Liga o ascender**. Cada consejo tiene un botón «Ir» que te lleva a la pestaña.
 - **Auras**: a partir de la etapa 150, algunos enemigos salvajes (del 8 % al 35 % según la etapa) llevan una aura y dan **+50 % de monedas**: **férrea** (−20 % de daño recibido), **vital** (recupera 2 % de vida por segundo) o **de protección** (los Pokémon de un tipo concreto hacen −50 %). Se ven junto al nombre del enemigo (✦). Los jefes no tienen aura. Premian un equipo con tipos variados.
-- **Táctica automática en jefes** (Ajustes → Combate, desactivada por defecto): si usas la táctica Equilibrada, el juego usa Cazajefes contra jefes y retos y vuelve sola.
 - **Perfil** (Ajustes): nombre, avatar (uno de tus Pokémon) y **título**. Hay 29 títulos que se desbloquean jugando: etapas y campeones de cada región, Pokédex, shinies, crianza, Torre, bestiario, entrenadores, Liga, Megas, Nico, Ascensión, música… El nombre y el título salen en la pantalla de inicio.
 - **Favoritos** en la Pokédex (la estrella de la ficha) y un filtro «Favoritos». Los filtros y el orden de la Pokédex se **recuerdan** entre sesiones.
 - **Misiones nuevas** (solo salen si puedes cumplirlas): entrenadores, fusiones, ascensiones, Duelos Maestros y pisos de la Torre.

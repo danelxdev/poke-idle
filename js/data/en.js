@@ -84,7 +84,7 @@ const EN_HELD = {
 const EN_NATURES = ['Hardy', 'Lonely', 'Adamant', 'Naughty', 'Brave', 'Bold', 'Docile', 'Impish', 'Lax', 'Relaxed', 'Modest', 'Mild', 'Bashful', 'Rash', 'Quiet', 'Calm', 'Gentle', 'Careful', 'Quirky', 'Sassy', 'Timid', 'Hasty', 'Jolly', 'Naive', 'Serious'];
 const EN_EGGS = [['Common Egg', 'Like a Poké Ball: mostly common or uncommon.'], ['Rare Egg', 'Never a common. IVs of at least 8.'], ['Epic Egg', 'Rare or better, IVs of at least 16.'], ['Legendary Egg', 'Epic or legendary, IVs of at least 24.']];
 const EN_EVENT_BONUS = { shiny: ['Shiny Week', 'Shinies are twice as common'], eggs: ['Breeding Week', 'Eggs advance twice as fast'], coins: ['Golden Week', '+50% coins'], dust: ['Stardust Week', 'Double stardust'], tickets: ['Ticket Week', '+50% dropped tickets'] };
-const EN_EVENT_TASKS = { k1: (n, t) => 'Defeat ' + n + ' ' + t + '-type Pokémon', k2: (n, t) => 'Defeat ' + n + ' ' + t + '-type Pokémon', p1: n => 'Open ' + n + ' Event Balls' };
+const EN_EVENT_TASKS = { k1: (n, t) => 'Defeat ' + n + ' ' + t + '-type Pokémon', k2: (n, t) => 'Defeat ' + n + ' ' + t + '-type Pokémon', k3: (n, t) => 'Defeat ' + n + ' ' + t + '-type Pokémon' };
 const EN_RULES = { noitems: ['No items', 'Equipped items do not work'], nosyn: ['No synergies', 'Team synergies are disabled'], only: ['Only type', 'Pokémon of other types deal half damage'], nocrit: ['No crits', 'No critical hits'], fast: ['Time trial', 'Half the time, but 45% less HP'], armor: ['Armor', '+60% HP and +40% time'] };
 
 const abbrEN = n => { const S = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi']; let i = 0; while (n >= 1000 && i < S.length - 1) { n /= 1000; i++; } return n + S[i]; };

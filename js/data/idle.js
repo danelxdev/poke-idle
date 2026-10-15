@@ -479,7 +479,7 @@ const EVENT_TIERS = [
 const EVENT_TASKS = [
   { id: 'k1', stat: 'kills', goal: 150, rew: { tk: { super: 2 } }, text: (n, t) => 'Derrota ' + n + ' Pokémon de tipo ' + t },
   { id: 'k2', stat: 'kills', goal: 600, rew: { tk: { ultra: 1 }, egg: 0 }, text: (n, t) => 'Derrota ' + n + ' Pokémon de tipo ' + t },
-  { id: 'p1', stat: 'pulls', goal: 10, rew: { tk: { ultra: 1 }, egg: 1 }, text: n => 'Abre ' + n + ' Bolas del Evento' },
+  { id: 'k3', stat: 'kills', goal: 1200, rew: { tk: { ultra: 1 }, egg: 1 }, text: (n, t) => 'Derrota ' + n + ' Pokémon de tipo ' + t },
 ];
 const TOWER_UNLOCK = 10;                                  // etapa máxima necesaria
 const TOWER_HP0 = 2.5, TOWER_G = 1.07, TOWER_TIME = 40, TOWER_BOSS_X = 1.5, TOWER_BONUS = 0.003;   // vida piso 1 (× salvaje), crecimiento por piso, segundos, guardián, daño por piso récord

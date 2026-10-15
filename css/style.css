@@ -1002,7 +1002,7 @@ html.a-rm .supportbtn::before, html.a-rm .supportbtn::after, html.a-rm .kofi.her
   .icobtn, .supportbtn, #btn-advice { width: 34px; height: 34px; min-width: 34px; min-height: 34px; }
   .pavatar.lg { width: 92px; height: 92px; }
 }
-.rk-av { display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; background: #0b1638; border-radius: 8px; flex: none; }
+.rk-av { border-radius: 50%; }
 
 .pull .dup img, .pull .dup .ico img, .pull .dup svg { width: 12px; height: 12px; vertical-align: -1px; }
 
@@ -1051,3 +1051,39 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; text-align: cent
 
 .soundhint { position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 45; background: #0a1430f0; color: #fff; border: 0; border-radius: 22px; padding: 9px 16px; font: inherit; font-size: 15px; box-shadow: inset 0 0 0 2px var(--yellow), 0 4px 0 #050a1c; animation: pulse 1.6s ease-in-out infinite; }
 html.a-rm .soundhint { animation: none; }
+.bar.egg.paused { opacity: .75; } .bar.egg.paused i { background: #8a92b8; }
+
+/* marcos de los jugadores del ranking (cada fila lleva el marco que eligió) */
+.pavatar[data-pf="gold"] { border-radius: 6px; box-shadow: 0 0 0 2px #ffd23f, 0 0 0 4px #7a4a00, 0 0 12px #ffd23f99; }
+.pavatar[data-pf="leaf"] { border-radius: 6px; box-shadow: 0 0 0 2px #5fe08a, 0 0 0 4px #1d5a30, 0 0 8px #5fe08a88; }
+.pavatar[data-pf="electric"] { border-radius: 6px; box-shadow: 0 0 0 2px #ffe14d, 0 0 0 4px #4a3a00, 0 0 12px #ffe14dcc; }
+.pavatar[data-pf="rainbow"] { border-radius: 6px; box-shadow: 0 0 0 2px #ff5a5a, 0 0 0 4px #ffd23f, 0 0 0 6px #5fe08a, 0 0 0 8px #4aa8ff; }
+.pavatar[data-pf="ice"] { border-radius: 6px; box-shadow: 0 0 0 2px #bff2ff, 0 0 0 4px #2a6aa8, 0 0 14px #8fe3ffcc; }
+.pavatar[data-pf="flame"] { border-radius: 6px; box-shadow: 0 0 0 2px #ffb22e, 0 0 0 4px #b3200a, 0 0 14px #ff6a1fcc; }
+.pavatar[data-pf="starry"] { border-radius: 6px; box-shadow: 0 0 0 2px #e0c8ff, 0 0 0 4px #5a3aa8, 0 0 14px #c47bffcc; }
+.pavatar[data-pf="crown"] { border-radius: 6px; box-shadow: 0 0 0 2px #ffd23f, 0 0 0 4px #8a2ae0, 0 0 0 6px #ffd23f, 0 0 16px #ffd23fcc; }
+
+/* mejoras: «ahora → siguiente» en una sola línea y ordenado, también en móvil */
+.upc .info > b { display: block; }
+.upline { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 2px; font-size: 13px; flex-wrap: nowrap; }
+.upline .uplbl { color: var(--dim); min-width: 0; flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.upline .upvals { display: inline-flex; align-items: center; gap: 5px; flex: none; white-space: nowrap; }
+.upline em { font-style: normal; font-weight: 700; color: #fff; }
+.upline em.nxt { color: #7ff0a0; }
+.upline i { color: var(--dim); font-style: normal; }
+.upline.sub { font-size: 12px; opacity: .9; }
+@media (max-width: 420px) { .upline { font-size: 12px; } .upc .btn { padding-left: 8px; padding-right: 8px; } }
+
+.spr { position: relative; overflow: hidden; }
+.spr > b { position: absolute; display: block; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
+.spr.play > b { animation: sprplay2 var(--dur, .8s) steps(var(--n, 1)) infinite; }
+@keyframes sprplay2 { from { background-position-x: 0; } to { background-position-x: calc(var(--sw) * -1); } }
+.spr.play:has(> b) { animation: none; }
+
+/* novedades: botón junto al idioma */
+.langsw .newsbtn { position: relative; color: #fff; display: inline-flex; align-items: center; gap: 5px; padding-right: 11px; }
+.langsw .newsbtn:hover, .langsw .newsbtn:focus-visible { color: var(--yellow); box-shadow: inset 0 0 0 2px var(--yellow); }
+.newdot { position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 2px #0a1430; animation: pulse 1.6s ease-in-out infinite; }
+html.a-rm .newdot { animation: none; }
+.newslist { text-align: left; margin: 8px 0 14px; padding-left: 20px; font-size: 15px; color: #c9d4ff; line-height: 1.5; }
+.newslist li { margin-bottom: 6px; }

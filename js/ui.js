@@ -51,13 +51,35 @@ const UI = (() => {
       <small>${n} Pokémon · Pokédex ${Core.regCount()}/${POKEDEX.length} · ${fmt(s.medals)} ${L('medallas', 'medals')} · ${hrs ? hrs + ' h ' : ''}${mins} min ${L('jugados', 'played')}</small></div>`;
     $('#ct-prof').onclick = () => profileModal('title');
   }
+  // ---------------- novedades (botón junto al idioma + ventana) ----------------
+  const NEWS_VER = 'v24';
+  const newsItems = () => [
+    L('Perfil con tu Pokémon animado: pulsa el icono de la cabecera (o la tarjeta del inicio) para editarlo.', 'Profile with your animated Pokémon: press the header icon (or the title card) to edit it.'),
+    L('Pokédex mucho más rápida en móvil y con los Pokémon en lugar de cartas; también en el mapa, retos y rankings.', 'Much faster Pokédex on mobile, with Pokémon instead of cards; also on the map, challenges and rankings.'),
+    L('Atajos de teclado en el ordenador: Espacio ataca, Q/W/E habilidades, ? muestra la lista.', 'Keyboard shortcuts on desktop: Space attacks, Q/W/E skills, ? shows the list.'),
+    L('Con Google, tu partida se guarda en la nube; si juegas como invitado y luego entras, no pierdes ese progreso.', 'With Google your game is saved in the cloud; if you play as a guest and sign in later, you do not lose that progress.'),
+    L('Ascensión y Duelos Maestros: un final de partida sin techo.', 'Ascension and Master Duels: an endgame with no ceiling.'),
+    L('Nico, tu rival: 20 duelos con historia, y entrenadores por las rutas.', 'Nico, your rival: 20 story duels, and trainers along the routes.'),
+    L('Sala de música, 3 estilos y subtítulos de sonidos; formas regionales, megaevoluciones y accesibilidad.', 'Music room, 3 styles and sound captions; regional forms, Mega evolutions and accessibility.'),
+  ];
+  function paintNewsBtn() {
+    const b = $('#btn-news'); if (!b) return;
+    const seen = S().ui.newsSeen === NEWS_VER;
+    b.innerHTML = `<span aria-hidden="true">🔔</span> ${L('Novedades', "What's new")}${seen ? '' : '<i class="newdot" aria-hidden="true"></i>'}`;
+    b.onclick = newsModal;
+  }
+  function newsModal() {
+    S().ui.newsSeen = NEWS_VER; Core.save(); paintNewsBtn();
+    openModal(`<h2>🔔 ${L('Novedades', "What's new")}</h2><ul class="newslist">${newsItems().map(t => `<li>${t}</li>`).join('')}</ul><div class="row"><button class="btn primary" id="nw-x">${L('Cerrar', 'Close')}</button></div>`);
+    $('#nw-x').onclick = closeModal;
+  }
   function title() {
     show('scr-title');
     const s = S(), k = $('#kofi-title');
     const so = $('#t-social'); if (so) so.innerHTML = '<small>' + L('Hecho por Danel · síguelo:', 'Made by Danel · follow:') + '</small>' + socialHtml();
     if (k) { k.href = KOFI_URL; k.innerHTML = ico('cup', 24) + '<span>' + L('Apoyar el proyecto en Ko-fi', 'Support the project on Ko-fi') + '</span><i class="kheart" aria-hidden="true">♥</i>'; }
     TitleFX.start($('#title-bg'));
-    $$('#langsw button').forEach(b => { b.classList.toggle('on', b.dataset.lang === I18N.lang); b.onclick = () => { if (b.dataset.lang === I18N.lang) return; s.settings.lang = b.dataset.lang; Core.save(); location.reload(); }; });
+    $$('#langsw button[data-lang]').forEach(b => { b.classList.toggle('on', b.dataset.lang === I18N.lang); b.onclick = () => { if (b.dataset.lang === I18N.lang) return; s.settings.lang = b.dataset.lang; Core.save(); location.reload(); }; });
     $('#logo-ball').innerHTML = ico('ball', 48);
     $('#t-badges').innerHTML = [['book', POKEDEX.length + ' Pokémon'], ['boot', REGIONS.filter(r => r.gen).length + ' ' + L('regiones', 'regions')], ['crown', ROUTES.length + ' ' + L('jefes', 'bosses')], ['ball', Object.keys(BALLS).length + ' Poké Balls'], ['trophy', ACHIEVEMENTS.length + ' ' + L('logros', 'achievements')]]
       .map(([i, t], n) => `<span style="animation-delay:${0.1 + n * 0.08}s">${ico(i, 20)}${t}</span>`).join('');
@@ -92,13 +114,7 @@ const UI = (() => {
       ['egg1', L('Huevos y crianza', 'Eggs and breeding'), L('Incuba huevos, hereda IVs y naturalezas y busca el Pokémon perfecto.', 'Hatch eggs, inherit IVs and natures and chase the perfect Pokémon.')],
       ['crown', L('Eventos y Torre', 'Events and Tower'), L('Un evento nuevo cada semana y una torre infinita con guardianes.', 'A new event every week and an endless tower with guardians.')],
     ].map(([i, t, d], n) => `<div class="tcard" style="animation-delay:${0.3 + n * 0.1}s">${ico(i, 36)}<b>${t}</b><small>${d}</small></div>`).join('');
-    $('#t-news').innerHTML = `<h3>${L('Novedades', "What's new")}</h3><ul>
-      <li>${L('Ascensión y Duelos Maestros: un final de partida sin techo.', 'Ascension and Master Duels: an endgame with no ceiling.')}</li>
-      <li>${L('Nico, tu rival: 20 duelos con historia, y entrenadores por las rutas.', 'Nico, your rival: 20 story duels, and trainers along the routes.')}</li>
-      <li>${L('Pokédex con ficha, buscador y bestiario.', 'Pokédex with entries, search and a bestiary.')}</li>
-      <li>${L('17 objetos, combos y tácticas de equipo.', '17 items, combos and team tactics.')}</li>
-      <li>${L('Sala de música, 3 estilos y subtítulos de sonidos.', 'Music room, 3 styles and sound captions.')}</li>
-      <li>${L('Formas regionales, megaevoluciones, estadísticas y accesibilidad.', 'Regional forms, Mega evolutions, statistics and accessibility.')}</li></ul>`;
+    paintNewsBtn();
   }
   function starter(cb) {
     show('scr-starter');
@@ -224,11 +240,7 @@ const UI = (() => {
       const p = Math.min(t.goal, s.event[t.stat]), got = s.event.claimed[t.id], ok = p >= t.goal;
       return `<div class="etask"><div class="qi"><b>${t.text(fmt(t.goal), TYPE_NAMES[ev.type])}</b><small>${fmt(p)} / ${fmt(t.goal)} · ${rewText(t.rew)}</small><div class="bar"><i style="width:${p / t.goal * 100}%"></i></div></div>${got ? '<button class="btn small" disabled>✓</button>' : `<button class="btn ${ok ? 'primary' : ''}" data-act="evtask" data-v="${i}" ${ok ? '' : 'disabled'}>${L('Recoger', 'Claim')}</button>`}</div>`;
     }).join('');
-    const fl = Core.eventFeat(5), fe = Core.eventFeat(4), feat = (dx, tag) => dx ? `<div class="feat"><span class="tagx">${tag}</span>${spb(dx, 66)}<div><b>${DEX[dx].name}</b><small>${RARITY[Core.RAR[dx]].name}</small><br>${typeTags(dx)}</div></div>` : '';
-    h += `<h3>${BALLS.event.name}</h3><p class="hint">${BALLS.event.desc}</p>${feat(fl, L('LEGENDARIO · EVENTO', 'LEGENDARY · EVENT'))}${feat(fe, L('ÉPICO · EVENTO', 'EPIC · EVENT'))}
-      <div class="btns row" style="margin-top:6px">${s.event.free ? '' : '<button class="btn primary" data-act="evfree">' + L('Tirada gratis', 'Free pull') + '</button>'}
-      <button class="btn primary" data-act="pull" data-v="event" data-n="1" data-cost="1" data-cur="tk:super">${L('Abrir', 'Open')} x1 ${ico('tkSuper', 14)} 1</button>
-      <button class="btn primary" data-act="pull" data-v="event" data-n="10" data-cost="${Core.ticketCost(10)}" data-cur="tk:super">${L('Abrir', 'Open')} x10 ${ico('tkSuper', 14)} ${Core.ticketCost(10)}</button></div></div>`;
+    h += '</div>';
     // Torre
     const starts = Core.towerStarts(), st = starts.includes(towerStart) ? towerStart : starts[starts.length - 1], sp = Core.towerSpec(st), nx = Core.towerSpec(s.tower.best + 1);
     h += `<h3>${L('Torre de batalla', 'Battle Tower')}</h3><div class="tower"><div class="hint" style="text-align:center">${L('Récord', 'Record')}</div><div class="big">${L('Piso', 'Floor')} ${s.tower.best}</div>
@@ -348,7 +360,7 @@ const UI = (() => {
     const eggRow = (e, i, active) => {
       const d = EGGS[e.t], ready = Core.eggReady(e);
       return `<div class="eggrow ${ready ? 'ready' : ''}" style="--ec:${d.color}"><span class="eico">${ico('egg' + e.t, 40)}</span><div class="info"><b>${d.name}${e.bred ? ' · ' + DEX[e.bred.base].name : ''}</b>
-        ${active ? `<div class="bar egg" data-egg="${i}"><i></i><span></span></div>` : '<small>' + L('En espera: no avanza hasta que tenga incubadora', 'Waiting: it will not progress until it has an incubator') + '</small>'}</div>
+        ${active ? `<div class="bar egg" data-egg="${i}"><i></i><span></span></div>` : (() => { const need = Core.eggNeed(e), pc = Math.min(100, e.p / need * 100); return `<div class="bar egg paused"><i style="width:${pc.toFixed(1)}%"></i><span>${fmt(Math.floor(Math.min(e.p, need)))} / ${fmt(need)}</span></div><small>${L('En espera: conserva su progreso y sigue cuando vuelva a una incubadora', 'Waiting: it keeps its progress and resumes when it gets an incubator back')}</small>`; })()}</div>
         ${ready ? `<button class="btn primary" data-act="hatch" data-v="${i}">${L('¡Eclosionar!', 'Hatch!')}</button>` : active ? '' : `<button class="btn small" data-act="eggfront" data-v="${i}">${L('Incubar', 'Incubate')}</button>`}</div>`;
     };
     for (let i = 0; i < s.inc; i++) h += s.eggs[i] ? eggRow(s.eggs[i], i, true) : `<div class="eggrow empty"><span class="eico">${ico('egg0', 40)}</span><div class="info"><b>${L('Incubadora libre', 'Free incubator')}</b><small>${L('Los huevos caen de los Pokémon derrotados, los jefes y las misiones', 'Eggs drop from defeated Pokémon, bosses and quests')}</small></div></div>`;
@@ -482,6 +494,22 @@ const UI = (() => {
     if ($('#dx-mon')) $('#dx-mon').onclick = () => { closeModal(); monModal(base); };
   }
 
+  // texto corto de cada mejora: etiqueta (ES, EN) y valor según el nivel, para ver «ahora → siguiente» en una sola línea
+  const UPV = {
+    tap: ['Toque (%DPS)', 'Tap (%DPS)', n => (15 + 2 * n) + '%'],
+    train: ['Daño equipo', 'Team damage', n => '+' + n * 10 + '%'],
+    coin: ['Monedas', 'Coins', n => '+' + n * 15 + '%'],
+    crit: ['Prob. crítico', 'Crit chance', n => (3 + n * 2) + '%'],
+    critdmg: ['Daño crítico', 'Critical damage', n => '×' + (3 + n * 0.25).toFixed(2)],
+    speed: ['Vel. ataque', 'Attack speed', n => '+' + n * 4 + '%'],
+    catch: ['Prob. ticket', 'Ticket chance', n => (1.5 + n * 0.5).toFixed(1) + '%'],
+    golden: ['Dorados', 'Golden', n => '1/' + Math.round(1 / (1 / 120 + n * 0.002))],
+    type: ['Súper eficaz', 'Super effective', n => '+' + n * 4 + '%'],
+    boss: ['Daño a jefes', 'Boss damage', n => '+' + n * 4 + '%'],
+    autotap: ['Toques auto', 'Auto taps', n => n * 0.5 + '/s'],
+    alch: ['Polvo estelar', 'Stardust', n => '+' + n * 10 + '%'],
+    bosstime: ['Tiempo jefes', 'Boss time', n => '+' + n * 3 + ' s'],
+  };
   const TABS = {
     team: {
       sig: () => { const s = S(); return JSON.stringify([s.team.map(k => [k, s.mons[k].lvl, s.mons[k].dex, s.mons[k].mf, s.mons[k].stars, s.mons[k].shiny, s.mons[k].item]), s.inv.length, s.tactic, Core.tacticOpen(), s.slots, s.buyMul, s.buyMul === 'max' ? Math.floor(Math.log(s.coins + 1) * 3) : 0, s.medals, s.up.train, Core.dexCount(), s.badges, s.team.map(k => [s.mons[k].nat, Core.ivSum(s.mons[k])]), Core.routeIdx(s.stage), Core.isBoss(s.stage), s.kills >= 10 && !s.auto]); },
@@ -490,7 +518,6 @@ const UI = (() => {
         let h = `<div class="teamhead"><div class="seg">${[1, 10, 25, 'max'].map(v => `<button data-act="mul" data-v="${v}" class="${s.buyMul === v ? 'on' : ''}">${v === 'max' ? L('Máx', 'Max') : 'x' + v}</button>`).join('')}</div><div class="rowbtns"><button class="btn small" data-act="presets" title="${L('Guarda y carga equipos', 'Save and load teams')}">${L('Equipos', 'Teams')}</button><button class="btn small" data-act="best" title="${L('Elige a tus Pokémon que mejor golpean a los enemigos de esta ruta', 'Picks your Pokémon that hit the enemies of this route best')}">${L('Mejor equipo', 'Best team')}</button><button class="btn small" data-act="bag">${L('Mochila', 'Bag')} · ${s.inv.length}</button></div></div>`;
         const tgt = s.kills >= 10 && !s.auto && !Core.isBoss(s.stage) ? s.stage + 1 : s.stage, strong = Core.strongTypes(tgt);
         if (strong.length) h += `<div class="foehint">${Core.isBoss(tgt) ? L('Contra el jefe', 'Against the boss') : L('En esta ruta', 'On this route')}: ${L('usa', 'use')} ${strong.map(o => `<span class="type" style="background:${TYPE_COLORS[o.t]}">${TYPE_ES[o.t]}</span>`).join('')}</div>`;
-        if (Core.tacticOpen()) h += `<div class="tactic" role="group" aria-label="${L('Táctica de equipo', 'Team tactic')}"><div class="seg">${Object.entries(TACTICS).map(([id, t]) => `<button data-act="tactic" data-v="${id}" class="${s.tactic === id ? 'on' : ''}" aria-pressed="${s.tactic === id}">${ico(t.icon, 14)} ${t.name}</button>`).join('')}</div><small>${TACTICS[s.tactic].desc}</small></div>`;
         for (let i = 0; i < 6; i++) {
           const k = s.team[i];
           if (i >= s.slots) {
@@ -527,14 +554,17 @@ const UI = (() => {
         let h = '<h3>' + L('Mejoras', 'Upgrades') + '</h3><p class="hint">' + L('Se pierden al entrar en la Liga, pero las medallas lo compensan con creces.', 'They are lost when you enter the League, but medals more than make up for it.') + '</p>';
         for (const [id, u] of Object.entries(UPGRADES)) {
           const n = s.up[id], maxed = n >= u.max;
-          h += `<div class="card"><span class="ico">${ico(u.icon, 36)}</span><div class="info"><b>${u.name} <small style="display:inline">${L('Nv.', 'Lv.')} ${n}</small></b><small>${u.desc(n)}</small><small style="color:#7ff0a0">${L('Siguiente', 'Next')}: ${u.desc(n + 1)}</small>${(() => { const pv = Core.previewUp(id); return pv ? `<small class="upv">${{ tap: L('Daño por toque', 'Tap damage'), coin: L('Monedas por derrota', 'Coins per kill'), train: L('Daño/s del equipo', 'Team damage/s') }[id]}: <b>${fmt(pv.a)}</b> → <b style="color:#7ff0a0">${fmt(pv.b)}</b></small>` : ''; })()}</div>
+          const uv = UPV[id], pv = Core.previewUp(id), arrow = (a, b) => `<span class="upvals"><em class="now">${a}</em><i aria-hidden="true">→</i><em class="nxt">${b}</em></span>`;
+          h += `<div class="card upc"><span class="ico">${ico(u.icon, 36)}</span><div class="info"><b>${u.name} <small style="display:inline">${L('Nv.', 'Lv.')} ${n}</small></b>
+            <div class="upline"><span class="uplbl">${L(uv[0], uv[1])}</span>${maxed ? `<span class="upvals"><em class="now">${uv[2](n)}</em></span>` : arrow(uv[2](n), uv[2](n + 1))}</div>
+            ${pv && !maxed ? `<div class="upline sub"><span class="uplbl">${{ tap: L('Tu toque', 'Your tap'), coin: L('Por derrota', 'Per kill'), train: L('Daño/s equipo', 'Team dmg/s') }[id]}</span>${arrow(fmt(pv.a), fmt(pv.b))}</div>` : ''}</div>
             ${maxed ? '<button class="btn small" disabled>' + L('Máx.', 'Max') + '</button>' : costBtn(Core.upCost(id), L('Mejorar', 'Upgrade'), 'up', `data-v="${id}"`)}</div>`;
         }
         return h;
       },
     },
     gacha: {
-      sig: () => { const s = S(); return JSON.stringify([s.pity, s.pityE, s.bannerLost, Core.ticketPrice('poke'), Core.featuredEpic(), Core.featuredLegend(), Core.unlockedGens(), Core.freePullReady(), s.tk, Math.floor(s.dust / 10), s.eggs.map(e => [e.t, Core.eggReady(e), e.bred ? e.bred.base : 0]), s.inc, Core.incCost(), brA, brB, brNat]); },
+      sig: () => { const s = S(); return JSON.stringify([s.pity, s.pityE, s.bannerLost, Core.ticketPrice('poke'), Core.featuredEpic(), Core.featuredLegend(), Core.unlockedGens(), Core.freePullReady(), s.tk, Math.floor(s.dust / 10), s.eggs.map((e, i) => [e.t, i >= s.inc ? Math.floor(e.p) : -1, Core.eggReady(e), e.bred ? e.bred.base : 0]), s.inc, Core.incCost(), brA, brB, brNat]); },
       html() {
         const s = S(), fe = Core.featuredEpic(), fl = Core.featuredLegend();
         let h = '<div class="tkgrid">' + Object.entries(TICKETS).map(([t, k]) => `<div class="tkbox" style="--tc:${k.color}">${ico(k.icon, 36)}<b>${s.tk[t]}</b><small>${k.name}</small>
@@ -695,13 +725,17 @@ const UI = (() => {
       case 'master': { const t = s.rival.master + 1, e = masterEnc(t); if (Core.masterOpen()) rivalTalk(e, 'pre'); return; }
       case 'evboss': if (Core.startEvent(+v)) Audio8.play('select'); else Audio8.play('error'); break;
       case 'evtask': { const t = EVENT_TASKS[+v]; if (Core.claimEventTask(+v)) { Audio8.play('ticket'); toast(L('¡Recompensa! ', 'Reward! ') + rewText(t.rew)); } break; }
-      case 'evfree': { const r = Core.eventFreePull(); if (r) { Core.save(); playReveal(r, BALLS.event.icon, TICKETS.super.icon, BALLS.event.name); return; } break; }
       case 'towerdd': openDD(el, Core.towerStarts().map(c => [c, L('Piso ', 'Floor ') + c + (c === 1 ? '' : L(' (guardián superado)', ' (guardian beaten)'))]), towerStart, val => { towerStart = +val; sig = ''; refresh(true); }); return;
       case 'breedpick': breedPickModal(v); return;
       case 'breednat': brNat = v; break;
       case 'breed': { const e = Core.breed(brA, brB, brNat); if (e) { Audio8.play('item'); toast(L('¡Huevo en camino!', 'Egg on the way!')); brA = brB = ''; } else Audio8.play('error'); break; }
       case 'hatch': { const r = Core.hatch(+v); if (r) { Core.save(); playReveal([r], 'egg' + r.egg, 'egg' + r.egg, EGGS[r.egg].name, r.genes ? () => genesModal(r) : null); return; } break; }
-      case 'eggfront': Core.moveEgg(+v); Audio8.play('swap'); break;
+      case 'eggfront': {
+        const s0 = S(), out = s0.eggs.length >= s0.inc ? s0.eggs[s0.inc - 1] : null;      // el huevo que deja la incubadora
+        Core.moveEgg(+v); Audio8.play('swap');
+        if (out && s0.eggs.indexOf(out) >= s0.inc) { const need = Core.eggNeed(out); toast(L(`${EGGS[out.t].name} pasa a la espera y conserva su progreso (${fmt(Math.floor(Math.min(out.p, need)))}/${fmt(need)})`, `${EGGS[out.t].name} goes to the waiting list and keeps its progress (${fmt(Math.floor(Math.min(out.p, need)))}/${fmt(need)})`)); }
+        break;
+      }
       case 'buyegg': if (Core.buyEgg(+v)) Audio8.play('item'); else Audio8.play('error'); break;
       case 'buyinc': if (Core.buyInc()) { Audio8.play('levelup'); toast(L('¡Nueva incubadora!', 'New incubator!')); } else Audio8.play('error'); break;
       case 'freepull': doPull('poke', 1, true); break;
@@ -1283,7 +1317,7 @@ const UI = (() => {
     try {
       const { rows, me } = await Cloud.board(want);
       if (rkBoard !== want || !$('#rk-body')) return;
-      $('#rk-body').innerHTML = rows.length ? rows.map(r => `<div class="rkrow ${r.is_me ? 'me' : ''}"><span class="rkn">#${r.rank}</span><span class="rk-av">${Sprites.html(DEX[r.avatar] ? r.avatar : 25, false, 40, false)}</span><div class="rki"><b>${String(r.nickname).replace(/[<>&"]/g, '')}</b><small>${((TITLES.find(t => t.id === r.title) || {}).name || '')}${sub(want, r) ? ' · ' + sub(want, r) : ''}</small></div><span class="rkv">${fmt(r.value)}<small>${unit[want]}</small></span>${Cloud.user && !r.is_me ? `<button class="rkflag" data-rp="${r.user_id}" aria-label="${L('Denunciar', 'Report')}" title="${L('Denunciar', 'Report')}">⚑</button>` : ''}</div>`).join('') : `<p class="hint">${L('Todavía no hay nadie en este ranking. ¡Sé el primero!', 'Nobody is in this ranking yet. Be the first!')}</p>`;
+      $('#rk-body').innerHTML = rows.length ? rows.map(r => `<div class="rkrow ${r.is_me ? 'me' : ''}"><span class="rkn">#${r.rank}</span><span class="pavatar sm rk-av" data-pf="${String(r.frame || 'classic').replace(/[^a-z]/g, '')}">${Sprites.html(DEX[r.avatar] ? r.avatar : 25, false, 34, true)}</span><div class="rki"><b>${String(r.nickname).replace(/[<>&"]/g, '')}</b><small>${((TITLES.find(t => t.id === r.title) || {}).name || '')}${sub(want, r) ? ' · ' + sub(want, r) : ''}</small></div><span class="rkv">${fmt(r.value)}<small>${unit[want]}</small></span>${Cloud.user && !r.is_me ? `<button class="rkflag" data-rp="${r.user_id}" aria-label="${L('Denunciar', 'Report')}" title="${L('Denunciar', 'Report')}">⚑</button>` : ''}</div>`).join('') : `<p class="hint">${L('Todavía no hay nadie en este ranking. ¡Sé el primero!', 'Nobody is in this ranking yet. Be the first!')}</p>`;
       if (me) $('#rk-me').innerHTML = `<b>${L('Tu puesto', 'Your rank')}: #${me.rank}</b> <small>${L('de', 'of')} ${me.total} · ${fmt(me.value)} ${unit[want]}</small>`;
       $$('[data-rp]').forEach(b => b.onclick = () => {
         openModal(`<h2>${L('Denunciar jugador', 'Report player')}</h2><p class="hint">${L('¿Por qué lo denuncias?', 'Why are you reporting this player?')}</p><div class="seg wrap">${[[L('Nombre inapropiado', 'Inappropriate name')], [L('Sospecho de trampas', 'I suspect cheating')], [L('Otro motivo', 'Other')]].map(([t]) => `<button data-why="${t}">${t}</button>`).join('')}</div><div class="row"><button class="btn" id="rp-x">${L('Cancelar', 'Cancel')}</button></div>`);
@@ -1428,7 +1462,7 @@ const UI = (() => {
         <div class="row" style="margin:6px 0 0"><button class="btn primary" id="s-music">${ico('sound', 16)} ${L('Sala de música', 'Music room')} · ${Core.tracksUnlocked()}/${MUSIC_LIST.length}</button></div></div>
       <div class="sset"><h4>${L('Perfil', 'Profile')}</h4><div class="setrow"><span class="sl"><b>${S().profile.name || L('Entrenador', 'Trainer')}</b><small>${(TITLES.find(t => t.id === S().profile.title) || TITLES[0]).name} · ${Core.titlesOpen().length}/${TITLES.length} ${L('títulos', 'titles')}</small></span><button class="btn small primary" id="s-prof">${L('Editar', 'Edit')}</button></div></div>
       <div class="sset"><h4>${L('Consejos', 'Tips')}</h4>${tog('tips', L('Consejos de novedades', 'Feature tips'), L('Te explica cada función nueva una sola vez, cuando se hace útil', 'Explains each new feature once, when it becomes useful'))}<div class="row" style="margin:4px 0 0"><button class="btn small" id="s-tips">${L('Ver consejos', 'View tips')} · ${TIPS.filter(t => S().ui.tips[t.id]).length}/${TIPS.length}</button></div></div>
-      <div class="sset"><h4>${L('Combate', 'Combat')}</h4>${tog('nums', L('Números de daño', 'Damage numbers'), L('Muestra el daño y las monedas sobre el enemigo', 'Shows damage and coins over the enemy'))}${tog('bigNums', L('Números grandes', 'Big numbers'), L('Más tamaño para verlos mejor', 'Bigger size to see them better'))}${tog('shake', L('Temblor de pantalla', 'Screen shake'), L('En críticos y jefes', 'On crits and bosses'))}${tog('autoTactic', L('Táctica automática en jefes', 'Automatic boss tactic'), L('Si usas la táctica Equilibrada, usa Cazajefes contra jefes y retos y vuelve sola', 'If you use the Balanced tactic, uses Boss hunter against bosses and challenges and switches back by itself'))}${tog('autoBoss', L('Reintentar jefes automáticamente', 'Auto-retry bosses'), L('Vuelve a retar al jefe cuando tu equipo tenga fuerza para vencerlo', 'Challenges the boss again when your team is strong enough to beat it'))}</div>
+      <div class="sset"><h4>${L('Combate', 'Combat')}</h4>${tog('nums', L('Números de daño', 'Damage numbers'), L('Muestra el daño y las monedas sobre el enemigo', 'Shows damage and coins over the enemy'))}${tog('bigNums', L('Números grandes', 'Big numbers'), L('Más tamaño para verlos mejor', 'Bigger size to see them better'))}${tog('shake', L('Temblor de pantalla', 'Screen shake'), L('En críticos y jefes', 'On crits and bosses'))}${tog('autoBoss', L('Reintentar jefes automáticamente', 'Auto-retry bosses'), L('Vuelve a retar al jefe cuando tu equipo tenga fuerza para vencerlo', 'Challenges the boss again when your team is strong enough to beat it'))}</div>
       <div class="sset"><h4>${L('Accesibilidad', 'Accessibility')}</h4>
         <div class="setrow col"><span class="sl"><b>${L('Tamaño del texto', 'Text size')}</b></span><div class="seg a11y" role="group" aria-label="${L('Tamaño del texto', 'Text size')}">${[[1, L('Normal', 'Normal')], [1.15, L('Grande', 'Large')], [1.3, L('Muy grande', 'Extra large')]].map(([v, l]) => `<button data-ak="text" data-av="${v}" class="${+a11y.text === v ? 'on' : ''}" aria-pressed="${+a11y.text === v}">${l}</button>`).join('')}</div></div>
         <div class="setrow col"><span class="sl"><b>${L('Animaciones', 'Animations')}</b></span><div class="seg a11y" role="group" aria-label="${L('Animaciones', 'Animations')}">${[['auto', L('Según el sistema', 'System setting')], ['reduce', L('Reducidas', 'Reduced')], ['full', L('Todas', 'Full')]].map(([v, l]) => `<button data-ak="motion" data-av="${v}" class="${a11y.motion === v ? 'on' : ''}" aria-pressed="${a11y.motion === v}">${l}</button>`).join('')}</div></div>

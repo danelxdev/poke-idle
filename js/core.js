@@ -136,7 +136,7 @@ const Core = (() => {
     if (!d.asc || typeof d.asc !== 'object') d.asc = { rank: 0, ess: 0 };
     d.asc.rank = Math.max(0, Math.floor(+d.asc.rank || 0)); d.asc.ess = Math.max(0, Math.floor(+d.asc.ess || 0));
     d.rival.won = Object.fromEntries(Object.keys(d.rival.won).filter(k => RIVAL_ENC.some(e => e.id === k)).map(k => [k, 1]));
-    if (!TACTICS[d.tactic]) d.tactic = 'bal';
+    d.tactic = 'bal'; d.settings.autoTactic = false;
     if (!d.foes || typeof d.foes !== 'object' || Array.isArray(d.foes)) d.foes = {};
     if (!d.profile || typeof d.profile !== 'object') d.profile = { name: '', avatar: 0, title: 'novato' };
     d.profile.name = cleanName(d.profile.name, 14);
@@ -218,8 +218,8 @@ const Core = (() => {
   const skillOn = id => S.skOn[id] > S.stats.time;
   const medalMult = () => 1 + 0.03 * S.medals;
   // táctica de equipo (se desbloquea en la etapa TACTIC_UNLOCK); la equilibrada no cambia nada
-  const tact = () => (S.stats.maxStage < TACTIC_UNLOCK ? TACTICS.bal : S.settings.autoTactic && S.tactic === 'bal' && F.enemy && F.enemy.boss ? TACTICS.boss : TACTICS[S.tactic] || TACTICS.bal);
-  const tacticOpen = () => S.stats.maxStage >= TACTIC_UNLOCK;
+  const tact = () => TACTICS.bal;                       // las tácticas de equipo se retiraron: siempre la equilibrada (sin efecto)
+  const tacticOpen = () => false;
   function setTactic(id) { if (!TACTICS[id] || !tacticOpen()) return false; S.tactic = id; return true; }
   const rivalWins = () => Object.keys(S.rival.won).length;
   // ascensión: el rango endurece a los enemigos y la Esencia da multiplicadores permanentes
@@ -1015,14 +1015,12 @@ const Core = (() => {
     if (nx && rivalOpen(nx) && towerUnlocked()) add(3, 'crown', 'chal', _L(`Nico te espera en ${REGIONS[nx.region].name}: acepta el duelo.`, `Nico is waiting in ${REGIONS[nx.region].name}: accept the duel.`));
     else if (!nx && masterOpen() && towerUnlocked() && chalReady(masterSpec(S.rival.master + 1)) >= 0.9) add(3, 'crown', 'chal', _L(`Puedes con el Duelo Maestro ${S.rival.master + 1}.`, `You can take Master Duel ${S.rival.master + 1}.`));
     if (towerUnlocked()) {
-      if (S.event && !S.event.free) add(4, 'tkSuper', 'chal', _L('Tienes una tirada gratis del evento semanal.', 'You have a free weekly event pull.'));
       if (chalReady(towerSpec(S.tower.best + 1)) >= 1.1) add(4, 'crown', 'chal', _L(`La Torre está a tu alcance: puedes superar el piso ${S.tower.best + 1}.`, `The Tower is within reach: you can clear floor ${S.tower.best + 1}.`));
     }
     if (fuseGroups().length) add(4, 'candy', 'team', _L('Tienes objetos iguales que puedes fusionar (Mochila).', 'You have identical items you can fuse (Bag).'));
     const free = Object.values(S.mons).filter(m => !m.item).length, worn = wornSet(), spare = S.inv.filter(it => !worn.has(it.u)).length;
     if (best.some(m => !m.item) && spare) add(3, 'choiceband', 'team', _L('Tienes objetos sin equipar y Pokémon del equipo sin objeto.', 'You have unequipped items and team Pokémon without one.'));
     if (best.some(m => megaForms(m).some(f => megaCan(m, f.form)))) add(3, 'star', 'team', _L('Puedes desbloquear una forma Mega.', 'You can unlock a Mega form.'));
-    if (tacticOpen() && S.tactic === 'bal' && !S.settings.autoTactic && waiting) add(5, 'fist', 'team', _L('Prueba la táctica Ofensiva o Cazajefes para superar al jefe.', 'Try the Offensive or Boss hunter tactic to beat the boss.'));
     // Liga y Ascensión
     if (ascReady() && essGain() >= Math.max(2, 0.3 * S.asc.ess)) add(2, 'crown', 'league', _L(`Ascender ahora te da +${essGain()} de Esencia (×${Math.pow(ASC.dmgEss, essGain()).toFixed(2)} de daño).`, `Ascending now gives you +${essGain()} Essence (×${Math.pow(ASC.dmgEss, essGain()).toFixed(2)} damage).`));
     else if (medalGain() >= Math.max(3, S.medals * 0.5) && S.maxStage >= 60) add(2, 'crown', 'league', _L(`Entrar en la Liga ahora te da +${medalGain()} medallas (${S.medals ? Math.round(medalGain() / S.medals * 100) + '% más de las que tienes' : 'tu primera vez'}).`, `Entering the League now gives you +${medalGain()} medals (${S.medals ? Math.round(medalGain() / S.medals * 100) + '% on top of what you have' : 'your first time'}).`));
