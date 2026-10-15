@@ -1,0 +1,9 @@
+// Publicación en Cloudflare (Workers con archivos estáticos). El juego no necesita build:
+// se sirve tal cual desde la raíz del repositorio. Qué se sube lo limita .assetsignore.
+{
+  "name": "pokeidlegame",
+  "compatibility_date": "2025-10-01",
+  "assets": {
+    "directory": "./"
+  }
+}

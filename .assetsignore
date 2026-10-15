@@ -1,0 +1,9 @@
+# No se publican: control de versiones, herramientas, base de datos y documentos de desarrollo
+.git
+.gitignore
+.assetsignore
+wrangler.jsonc
+supabase
+tools
+README.md
+README.en.md
