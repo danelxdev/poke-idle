@@ -34,7 +34,7 @@ const Cloud = (() => {
     return new Promise((res, rej) => {
       if (window.supabase && window.supabase.createClient) return res();
       const s = document.createElement('script');
-      s.src = LIB; s.async = true; s.onload = res; s.onerror = () => rej(new Error('lib'));
+      s.src = cfg.lib || LIB; s.async = true; s.onload = res; s.onerror = () => rej(new Error('lib'));
       document.head.appendChild(s);
     });
   }
