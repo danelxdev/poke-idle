@@ -45,12 +45,17 @@ const Cloud = (() => {
     try { await loadLib(); } catch (e) { st.ready = true; setStatus('offline'); return; }
     st.client = window.supabase.createClient(cfg.url, cfg.anonKey, { auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'pokeidle.auth' } });
     st.client.auth.onAuthStateChange((ev, session) => { if (ev === 'SIGNED_OUT') { st.user = null; st.profile = null; st.loginDone = ''; setStatus('guest'); notify('user'); } else if (session && session.user && st.loginDone !== session.user.id) setTimeout(() => onSession(session), 0); });
+    // si Google/Supabase devuelven un error en la dirección, lo guardamos para enseñarlo (antes de limpiarla)
+    let urlErr = '';
+    try { const q = new URLSearchParams(location.search), h = new URLSearchParams(location.hash.replace(/^#/, '')); urlErr = q.get('error_description') || h.get('error_description') || q.get('error') || h.get('error') || ''; } catch (e) { /* sin error en la URL */ }
     try {
-      const { data } = await st.client.auth.getSession();
-      if (data && data.session) await onSession(data.session); else setStatus('guest');
-    } catch (e) { setStatus('error', String(e && e.message || e)); }
+      const { data, error } = await st.client.auth.getSession();
+      if (data && data.session) await onSession(data.session);
+      else if (urlErr || error) setStatus('error', urlErr || String(error.message || error));
+      else setStatus('guest');
+    } catch (e) { setStatus('error', urlErr || String(e && e.message || e)); }
     st.ready = true; notify('ready');
-    if (/[?&]code=|access_token=|error_description=/.test(location.search + location.hash)) { try { history.replaceState({}, '', location.pathname); } catch (e) { /* nada */ } }
+    if (/[?&]code=|access_token=|error=|error_description=/.test(location.search + location.hash)) { try { history.replaceState({}, '', location.pathname); } catch (e) { /* nada */ } }
   }
   async function onSession(session) {
     if (st.loginDone === session.user.id) return;
