@@ -167,6 +167,10 @@
 
   // ---- inicio ----
   UI.title();
+  // música del título: los navegadores no dejan sonar nada hasta el primer gesto del jugador, así que se prepara ya y arranca al primer toque o tecla
+  Audio8.want('menu', 0);
+  { const kick = () => { Audio8.resume(); for (const ev of ['pointerdown', 'keydown', 'touchend']) document.removeEventListener(ev, kick, true); };
+    for (const ev of ['pointerdown', 'keydown', 'touchend']) document.addEventListener(ev, kick, true); }
   Cloud.on(() => UI.authChanged());
   Cloud.init().then(() => UI.authChanged());
   $('#btn-start').onclick = () => {

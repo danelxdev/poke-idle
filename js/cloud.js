@@ -35,12 +35,17 @@ const Cloud = (() => {
     return new Promise((res, rej) => {
       if (window.supabase && window.supabase.createClient) return res();
       const s = document.createElement('script');
+      const to = setTimeout(() => { s.remove(); rej(new Error('lib_timeout')); }, 10000);
       s.src = cfg.lib || LIB; s.async = true;
-      if (!cfg.lib) { s.integrity = LIB_SRI; s.crossOrigin = 'anonymous'; }       // la librería oficial se verifica; una URL propia (cfg.lib) no s.onload = res; s.onerror = () => rej(new Error('lib'));
+      if (!cfg.lib) { s.integrity = LIB_SRI; s.crossOrigin = 'anonymous'; }       // la librería oficial se verifica; una URL propia (cfg.lib) no
+      s.onload = () => { clearTimeout(to); res(); };
+      s.onerror = () => { clearTimeout(to); rej(new Error('lib')); };
       document.head.appendChild(s);
     });
   }
-  async function init() {
+  let initP = null;
+  function init() { if (!initP) initP = init0().then(r => { if (!st.client) initP = null; return r; }, e => { initP = null; throw e; }); return initP; }       // una sola vez a la vez; si falla (sin red) se puede reintentar
+  async function init0() {
     if (!enabled()) { st.ready = true; return; }
     if (navigator.onLine === false) { st.ready = true; setStatus('offline'); return; }
     setStatus('connecting');
@@ -55,7 +60,7 @@ const Cloud = (() => {
     // la sesión se recupera con un tope de tiempo: si Supabase no contesta, no dejamos el juego esperando
     const limit = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(L('Supabase no responde. Recarga la página.', 'Supabase is not responding. Reload the page.'))), ms))]);
     try {
-      const { data, error } = await limit(st.client.auth.getSession(), 15000);
+      const { data, error } = await limit(st.client.auth.getSession(), 8000);
       clean();
       if (data && data.session) { st.ready = true; notify('ready'); await onSession(data.session); }
       else if (urlErr || error) setStatus('error', urlErr || String(error.message || error));
