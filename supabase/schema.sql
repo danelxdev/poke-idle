@@ -239,6 +239,18 @@ begin
   return jsonb_build_object('ok', true, 'nickname', n);
 end $$;
 
+create or replace function public.nickname_available(p_nickname text) returns jsonb
+language plpgsql stable security definer set search_path = public as $$
+declare uid uuid := auth.uid(); n text := btrim(coalesce(p_nickname, ''));
+begin
+  if uid is null then raise exception 'not_authenticated' using errcode = '28000'; end if;
+  if not public.nickname_ok(n) then return jsonb_build_object('ok', false, 'reason', 'invalid'); end if;
+  if exists (select 1 from public.profiles where lower(nickname) = lower(n) and id <> uid) then
+    return jsonb_build_object('ok', false, 'reason', 'taken');
+  end if;
+  return jsonb_build_object('ok', true);
+end $$;
+
 create or replace function public.update_profile(p_avatar int, p_title text, p_frame text, p_show boolean default null, p_lang text default null) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare uid uuid := auth.uid();
@@ -449,12 +461,12 @@ end $$;
 -- Postgres da EXECUTE a todos por defecto: lo quitamos y damos solo lo necesario.
 revoke all on function public.touch_updated_at(), public.game_week(timestamptz), public.nickname_ok(text), public.new_nickname(text), public.new_friend_code(),
   public.handle_new_user(), public.board_rows(text) from public, anon, authenticated;
-revoke all on function public.ensure_profile(), public.set_nickname(text), public.update_profile(int, text, text, boolean, text),
+revoke all on function public.ensure_profile(), public.set_nickname(text), public.nickname_available(text), public.update_profile(int, text, text, boolean, text),
   public.save_game(text, text, bigint, jsonb, text, boolean), public.submit_score(jsonb), public.get_leaderboard(text, int, int), public.get_my_rank(text),
   public.get_weekly_board(int), public.add_friend(text), public.remove_friend(uuid), public.get_friends(), public.report_player(uuid, text), public.delete_my_account()
   from public, anon, authenticated;
 grant execute on function public.get_leaderboard(text, int, int), public.get_my_rank(text), public.get_weekly_board(int) to anon, authenticated;
-grant execute on function public.ensure_profile(), public.set_nickname(text), public.update_profile(int, text, text, boolean, text),
+grant execute on function public.ensure_profile(), public.set_nickname(text), public.nickname_available(text), public.update_profile(int, text, text, boolean, text),
   public.save_game(text, text, bigint, jsonb, text, boolean), public.submit_score(jsonb), public.add_friend(text), public.remove_friend(uuid),
   public.get_friends(), public.report_player(uuid, text), public.delete_my_account() to authenticated;
 

@@ -74,3 +74,5 @@ Si publicas el juego, añade una política de privacidad corta con esto.
 ## Ideas ya previstas en el esquema (sin interfaz todavía)
 
 Amigos por código (`add_friend`, `get_friends`, `friendships`) y denuncias (`report_player`: sí tiene interfaz, desde el ranking).
+
+> **Si ya habías ejecutado `schema.sql` antes de esta versión:** vuelve a pegarlo y ejecutarlo en el SQL Editor (es idempotente). Añade la función `nickname_available`, que usa el juego para comprobar si un nombre está libre mientras lo escribes.

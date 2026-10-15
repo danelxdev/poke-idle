@@ -1165,6 +1165,41 @@ const UI = (() => {
       $('#d-yes').onclick = async () => { const ok = await Cloud.deleteAccount(); settings(); toast(ok ? L('Cuenta borrada', 'Account deleted') : L('No se pudo borrar la cuenta', 'Could not delete the account')); };
     });
   }
+  // Comprobación en vivo del nombre público (formato + si está libre). Devuelve una función para forzar la comprobación.
+  function nickBind(inp, msg, btn) {
+    let t = 0, seq = 0;
+    const say = (txt, cls) => { msg.textContent = txt; msg.className = 'nickmsg ' + (cls || ''); };
+    const fmtMsg = L('Usa de 3 a 16 letras, números, espacios, «.», «_» o «-» (sin palabras prohibidas).', 'Use 3 to 16 letters, numbers, spaces, “.”, “_” or “-” (no banned words).');
+    const run = async () => {
+      const n = inp.value.trim(), me = ++seq;
+      if (!/^[A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ _.-]{3,16}$/.test(n)) { say(fmtMsg, 'bad'); if (btn) btn.disabled = true; return; }
+      say(L('Comprobando…', 'Checking…'), ''); if (btn) btn.disabled = true;
+      const r = await Cloud.checkNickname(n);
+      if (me !== seq) return;
+      if (r.ok === true) { say(L('✔ Disponible', '✔ Available'), 'ok'); if (btn) btn.disabled = false; }
+      else if (r.ok === false) { say(r.reason === 'taken' ? L('✖ Ese nombre ya está cogido.', '✖ That name is taken.') : fmtMsg, 'bad'); if (btn) btn.disabled = true; }
+      else { say(L('No se pudo comprobar ahora; se verificará al guardar.', 'Could not check right now; it will be verified on save.'), ''); if (btn) btn.disabled = false; }
+    };
+    inp.addEventListener('input', () => { clearTimeout(t); seq++; if (btn) btn.disabled = true; t = setTimeout(run, 350); });
+    return run;
+  }
+  function nameModal(done) {
+    const p = Cloud.profile; if (!p) return;
+    openModal(`<h2>${L('Elige tu nombre', 'Choose your name')}</h2><p class="hint">${L('Es el nombre que verán los demás en los rankings. Te hemos puesto uno automático; puedes cambiarlo ahora o más tarde en tu Perfil.', 'This is the name others will see in the rankings. We gave you an automatic one; you can change it now or later in your Profile.')}</p>
+      <input class="search" id="nm-in" maxlength="16" value="${String(p.nickname).replace(/"/g, '')}" aria-label="${L('Nombre público', 'Public name')}" autocomplete="off" spellcheck="false"><em id="nm-msg" class="nickmsg" role="status" aria-live="polite"></em>
+      <div class="row"><button class="btn" id="nm-later">${L('Más tarde', 'Later')}</button><button class="btn primary" id="nm-ok">${L('Guardar nombre', 'Save name')}</button></div>`);
+    const inp = $('#nm-in'), msg = $('#nm-msg'), ok = $('#nm-ok'), check = nickBind(inp, msg, ok);
+    check(); inp.focus(); inp.select();
+    $('#nm-later').onclick = () => { closeModal(); if (done) done(); };
+    const save = async () => {
+      if (ok.disabled) return; ok.disabled = true;
+      const r = await Cloud.setNickname(inp.value);
+      if (r.ok) { closeModal(); toast(L('¡Nombre guardado!', 'Name saved!')); authPanel(); accBind(); if (done) done(); }
+      else { msg.textContent = r.reason === 'taken' ? L('✖ Ese nombre ya está cogido.', '✖ That name is taken.') : r.reason === 'invalid' ? L('Usa de 3 a 16 letras, números, espacios, «.», «_» o «-».', 'Use 3 to 16 letters, numbers, spaces, “.”, “_” or “-”.') : L('No se pudo guardar. Inténtalo de nuevo.', 'Could not save. Try again.'); msg.className = 'nickmsg bad'; ok.disabled = false; }
+    };
+    ok.onclick = save;
+    inp.onkeydown = e => { if (e.key === 'Enter') save(); };
+  }
   function authChanged() { authPanel(); accBind(); }
   let rkBoard = 'stage';
   async function rankingModal(b) {
@@ -1265,6 +1300,7 @@ const UI = (() => {
       <h4>${L('Fondo de la arena', 'Arena background')} <small style="color:var(--dim)">${Core.biomesSeen().length}/${Tiles.THEMES.length}</small></h4><div class="bggrid"><button class="ttl ${s.cosm.bg === 'auto' ? 'on' : ''}" data-bg="auto"><b>${L('Automático', 'Automatic')}</b><small>${L('El de cada ruta', 'The one of each route')}</small></button>${Core.biomesSeen().map(i => `<button class="ttl ${String(s.cosm.bg) === String(i) ? 'on' : ''}" data-bg="${i}"><b><i class="sw" style="background:${Tiles.THEMES[i].floor}"></i>${biomeName(i)}</b></button>`).join('')}</div><p class="hint" style="margin:2px 0">${L('Los fondos se desbloquean al pasar por rutas con ese paisaje.', 'Backgrounds unlock when you travel through routes with that scenery.')}</p>
       <h4>${L('Título', 'Title')} <small style="color:var(--dim)">${open}/${TITLES.length}</small></h4><div class="titlist">${TITLES.map(t => { const ok = Core.titleOpen(t); return `<button class="ttl ${pr.title === t.id ? 'on' : ''}" data-ttl="${t.id}" ${ok ? '' : 'disabled'}><b>${ok ? t.name : '???'}</b><small>${ok ? '' : t.hint}</small></button>`; }).join('')}</div>
       <div class="row"><button class="btn" id="pf-x">${L('Volver', 'Back')}</button></div>`);
+    if ($('#pf-nick')) { const b = $('#pf-nick'); nickBind($('#pf-name'), $('#pf-nickmsg'), b); }
     if ($('#pf-nick')) $('#pf-nick').onclick = async () => {
       const r = await Cloud.setNickname($('#pf-name').value), m = $('#pf-nickmsg');
       m.textContent = r.ok ? L('¡Nombre guardado!', 'Name saved!') : r.reason === 'taken' ? L('Ese nombre ya está cogido.', 'That name is taken.') : r.reason === 'invalid' ? L('Usa de 3 a 16 letras, números, espacios, «.», «_» o «-» (sin palabras prohibidas).', 'Use 3 to 16 letters, numbers, spaces, “.”, “_” or “-” (no banned words).') : L('No se pudo guardar. Inténtalo de nuevo.', 'Could not save. Try again.');
@@ -1457,5 +1493,5 @@ const UI = (() => {
     $$('#skills .skill').forEach(b => b.onclick = e => { e.stopPropagation(); if (Core.useSkill(b.dataset.sk)) { Audio8.play(b.dataset.sk === 'rage' ? 'charge' : 'ticket'); banner(SKILLS[b.dataset.sk].name + '!', SKILLS[b.dataset.sk].desc, '#ff8040'); } });
   }
 
-  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, rewText, rivalTalk, cue, tipsTick, welcomeModal, authChanged, authPanel, rankingModal, tutStart, autoFill, monModal, mapModal };
+  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, rewText, rivalTalk, cue, tipsTick, welcomeModal, nameModal, authChanged, authPanel, rankingModal, tutStart, autoFill, monModal, mapModal };
 })();

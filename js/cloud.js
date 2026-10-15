@@ -70,8 +70,16 @@ const Cloud = (() => {
       await loadProfile();
       await reconcile();
       setStatus('ok');
+      askName();
     } catch (e) { console.error('[Cloud] onSession', e); setStatus('error', String(e && e.message || e)); }
     notify('user');
+  }
+  // primera vez con esta cuenta: dejamos elegir el nombre público (si no, se queda el automático y se cambia en Perfil)
+  function askName() {
+    const p = st.profile, k = 'pokeidle.nameask.' + (st.user && st.user.id);
+    if (!p || p.nickname_set) return;
+    try { if (localStorage.getItem(k)) return; } catch (e) { /* sin almacenamiento: se pregunta */ }
+    if (typeof UI.nameModal === 'function') UI.nameModal(() => { try { localStorage.setItem(k, '1'); } catch (e) { /* nada */ } });
   }
   async function signIn() {
     if (!st.client) { try { await init(); } catch (e) { /* ver estado */ } }
@@ -115,6 +123,11 @@ const Cloud = (() => {
     };
     if (now) return run();
     return new Promise(res => { ptimer = setTimeout(() => run().then(res), 1200); });
+  }
+  // ¿Está libre este nombre? ok:null = no se pudo comprobar (sin conexión o esquema antiguo): se decide al guardar
+  async function checkNickname(n) {
+    if (!st.user) return { ok: null, reason: 'login' };
+    try { const { data, error } = await st.client.rpc('nickname_available', { p_nickname: n }); if (error || !data) return { ok: null, reason: 'unknown' }; return data; } catch (e) { return { ok: null, reason: 'unknown' }; }
   }
   async function setNickname(n) {
     if (!st.user) return { ok: false, reason: 'login' };
@@ -231,7 +244,7 @@ const Cloud = (() => {
   window.addEventListener('online', () => { if (st.user) flush(); else if (enabled() && !st.client) init().then(() => notify('ready')); });
 
   return {
-    enabled, init, signIn, signOut, syncNow, soon, flush, pushProfile, setNickname, setShow, board, report, deleteAccount, submitScore,
+    enabled, init, signIn, signOut, syncNow, soon, flush, pushProfile, setNickname, checkNickname, setShow, board, report, deleteAccount, submitScore,
     on: f => subs.push(f),
     get status() { return st.status; }, get msg() { return st.msg; }, get user() { return st.user; }, get profile() { return st.profile; },
     get mode() { return !enabled() ? 'off' : st.user ? 'user' : 'guest'; }, get lastPush() { return st.lastPush; }, get ready() { return st.ready; },
