@@ -873,3 +873,18 @@ html.a-cb .rdy { color: #ffbf5a; }
 .rkflag:hover { color: #ff9a9a; }
 .rk-me { margin-top: 6px; font-size: 14px; }
 .rk-me small { color: var(--dim); }
+
+/* v20: botón de apoyo más visible */
+@keyframes beat { 0%, 60%, 100% { transform: scale(1); } 15% { transform: scale(1.35); } 30% { transform: scale(1); } 45% { transform: scale(1.2); } }
+@keyframes shine { 0% { transform: translateX(-120%) skewX(-20deg); } 35%, 100% { transform: translateX(260%) skewX(-20deg); } }
+.supportbtn { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 6px; flex: none; padding: 3px 12px 3px 8px; border-radius: 20px; background: linear-gradient(180deg, #4cc7f7, #1f93c9); color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; box-shadow: 0 2px 0 #0f5f86, inset 0 0 0 2px #9be5ff; }
+.supportbtn:hover { background: linear-gradient(180deg, #62d2fb, #2aa3dc); }
+.supportbtn::before { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 30%; background: linear-gradient(90deg, transparent, #ffffff88, transparent); animation: shine 4.5s ease-in-out infinite; }
+.supportbtn::after { content: '♥'; position: absolute; top: -2px; right: 3px; color: #ff5a7a; font-size: 12px; text-shadow: 0 1px 0 #7a0f2a; animation: beat 1.8s ease-in-out infinite; }
+.supportbtn span { white-space: nowrap; }
+.kofi.hero { position: relative; overflow: hidden; margin-top: 8px; font-size: 18px; padding: 10px 22px; border-radius: 28px; background: linear-gradient(180deg, #4cc7f7, #1f93c9); box-shadow: 0 4px 0 #0f5f86, inset 0 0 0 2px #9be5ff, 0 0 18px #29abe055; }
+.kofi.hero::before { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 25%; background: linear-gradient(90deg, transparent, #ffffff88, transparent); animation: shine 4.5s ease-in-out infinite; }
+.kofi.hero .kheart { font-style: normal; color: #ff5a7a; font-size: 20px; text-shadow: 0 1px 0 #7a0f2a; animation: beat 1.8s ease-in-out infinite; }
+.t-auth + .kofi.hero { align-self: center; }
+@media (max-width: 860px) { .supportbtn { padding: 3px 7px 3px 5px; } .supportbtn span { display: none; } }
+html.a-rm .supportbtn::before, html.a-rm .supportbtn::after, html.a-rm .kofi.hero::before, html.a-rm .kofi.hero .kheart { animation: none !important; }

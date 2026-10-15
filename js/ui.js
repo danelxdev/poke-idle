@@ -21,7 +21,7 @@ const UI = (() => {
   function title() {
     show('scr-title');
     const s = S(), k = $('#kofi-title');
-    if (k) { k.href = KOFI_URL; k.innerHTML = ico('cup', 24) + ' ' + L('Apoyar en Ko-fi', 'Support on Ko-fi'); }
+    if (k) { k.href = KOFI_URL; k.innerHTML = ico('cup', 24) + '<span>' + L('Apoyar el proyecto en Ko-fi', 'Support the project on Ko-fi') + '</span><i class="kheart" aria-hidden="true">♥</i>'; }
     TitleFX.start($('#title-bg'));
     $$('#langsw button').forEach(b => { b.classList.toggle('on', b.dataset.lang === I18N.lang); b.onclick = () => { if (b.dataset.lang === I18N.lang) return; s.settings.lang = b.dataset.lang; Core.save(); location.reload(); }; });
     $('#logo-ball').innerHTML = ico('ball', 48);
@@ -1436,6 +1436,7 @@ const UI = (() => {
     $('#i-coin').innerHTML = ico('coin', 24);
     $('#i-gem').innerHTML = ico('gem', 24);
     $('#btn-settings').innerHTML = ico('gear', 24);
+    $('#btn-support').href = KOFI_URL; $('#btn-support').innerHTML = ico('cup', 22) + '<span>' + L('Apoyar', 'Support') + '</span>'; A11Y.label($('#btn-support'), L('Apoyar el proyecto en Ko-fi', 'Support the project on Ko-fi'));
     $('#btn-advice').innerHTML = ico('star', 24); A11Y.label($('#btn-advice'), L('¿Qué hago ahora?', 'What should I do now?'));
     $('#btn-advice').onclick = adviceModal;
     $('#btn-settings').onclick = settings;

@@ -40,6 +40,7 @@ const Cloud = (() => {
   }
   async function init() {
     if (!enabled()) { st.ready = true; return; }
+    if (navigator.onLine === false) { st.ready = true; setStatus('offline'); return; }
     setStatus('connecting');
     try { await loadLib(); } catch (e) { st.ready = true; setStatus('offline'); return; }
     st.client = window.supabase.createClient(cfg.url, cfg.anonKey, { auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'pokeidle.auth' } });
