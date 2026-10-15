@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PokéIdle · Privacidad / Privacy</title>
+<meta name="robots" content="index,follow">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0a1430">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/pwa/icon-192.png">
+<style>
+  :root { --bg: #0a1430; --panel: #142356; --line: #2a3f8a; --ink: #f2f4ff; --dim: #9aa6d8; --yellow: #ffd23f; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Pixelify Sans', system-ui, sans-serif; line-height: 1.55; }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 60px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .logo { font-size: 30px; font-weight: 700; text-decoration: none; color: #fff; }
+  .logo span { color: var(--yellow); }
+  .lang button { background: #0b1638; color: var(--ink); border: 0; border-radius: 5px; padding: 6px 12px; font: inherit; box-shadow: inset 0 0 0 2px var(--line); cursor: pointer; }
+  .lang button.on { background: var(--yellow); color: #2a1600; box-shadow: none; }
+  h1 { font-size: 26px; margin: 22px 0 4px; color: var(--yellow); }
+  h2 { font-size: 19px; margin: 26px 0 6px; color: var(--yellow); }
+  p, li { color: #dfe5ff; font-size: 16px; }
+  li { margin: 4px 0; }
+  .upd, .note { color: var(--dim); font-size: 14px; }
+  .box { background: var(--panel); border-radius: 10px; padding: 12px 16px; box-shadow: inset 0 0 0 2px var(--line); margin: 14px 0; }
+  a { color: var(--yellow); }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 15px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--yellow); }
+  section[lang="en"] { display: none; }
+  html.en section[lang="es"] { display: none; }
+  html.en section[lang="en"] { display: block; }
+  footer { margin-top: 34px; color: var(--dim); font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <a class="logo" href="./">Poké<span>Idle</span></a>
+  <div class="lang"><button id="l-es" class="on">Español</button> <button id="l-en">English</button></div>
+</header>
+
+<section lang="es">
+  <h1>Política de privacidad</h1>
+  <p class="upd">Última actualización: 15 de octubre de 2026</p>
+  <p>PokéIdle es un juego gratuito de fans, sin ánimo de lucro, que funciona en tu navegador. Esta página explica qué datos se guardan, para qué y cómo puedes borrarlos. No hay publicidad ni analítica ni seguimiento.</p>
+
+  <h2>1. Si juegas como invitado</h2>
+  <div class="box"><p>Tu partida, tus ajustes y tus preferencias se guardan <b>solo en tu navegador</b> (almacenamiento local). No se envían a ningún servidor. Si borras los datos del navegador, los pierdes (puedes exportar un código de copia de seguridad desde Ajustes).</p></div>
+
+  <h2>2. Si inicias sesión con Google</h2>
+  <p>Solo si decides iniciar sesión se guardan en nuestra base de datos (gestionada por Supabase):</p>
+  <ul>
+    <li><b>Datos de la cuenta:</b> identificador de usuario y correo electrónico que te da Google (no recibimos tu contraseña ni otros datos de tu cuenta de Google).</li>
+    <li><b>Perfil público:</b> nombre elegido (o uno automático tipo «Entrenador1234»), avatar, título, marco y un código de amigo.</li>
+    <li><b>Tu partida</b> en la nube (copia comprimida) y hasta 3 copias de seguridad anteriores.</li>
+    <li><b>Marcas de los rankings:</b> etapa máxima, Rango, Esencia, piso de la Torre, nivel de los Duelos Maestros, Pokémon registrados, medallas, tiempo jugado y marcas del evento semanal.</li>
+    <li><b>Denuncias</b> que envíes o recibas sobre otros jugadores, y tu lista de amigos si la usas.</li>
+  </ul>
+  <p><b>Para qué:</b> permitirte jugar en varios dispositivos, mostrar los rankings, mantener la seguridad y moderar nombres o trampas. <b>No vendemos</b> tus datos ni los usamos para publicidad.</p>
+  <p><b>Qué ven los demás:</b> en los rankings se muestran tu nombre público, avatar, título y marcas. Puedes ocultarte en <i>Ajustes → Cuenta → Aparecer en los rankings</i>. Tu correo no lo ve nadie más.</p>
+
+  <h2>3. Almacenamiento en tu dispositivo</h2>
+  <p>Usamos el almacenamiento local del navegador solo para lo necesario: guardar la partida, los ajustes y la sesión. No usamos cookies de publicidad ni de seguimiento.</p>
+
+  <h2>4. Servicios de terceros</h2>
+  <table>
+    <tr><th>Servicio</th><th>Para qué</th></tr>
+    <tr><td>Supabase</td><td>Cuentas, base de datos y rankings (solo si inicias sesión).</td></tr>
+    <tr><td>Google</td><td>Inicio de sesión con tu cuenta de Google; tipografía (Google Fonts).</td></tr>
+    <tr><td>Cloudflare</td><td>Alojamiento y entrega de la web.</td></tr>
+    <tr><td>jsDelivr</td><td>Entrega de la biblioteca de Supabase al iniciar sesión.</td></tr>
+    <tr><td>Ko-fi</td><td>Enlace externo opcional para apoyar el proyecto; no compartimos datos con ellos.</td></tr>
+  </table>
+  <p>Estos servicios pueden ver tu dirección IP al servir sus archivos y tienen sus propias políticas de privacidad.</p>
+
+  <h2>5. Conservación y borrado</h2>
+  <p>Conservamos tus datos mientras tengas la cuenta. Puedes borrarlos tú mismo en cualquier momento desde <i>Ajustes → Cuenta → Borrar mi cuenta y mis datos</i>: se eliminan tu perfil, tu partida en la nube, tus copias de seguridad, tus marcas, tus amigos y tu cuenta. La partida de tu dispositivo no se toca.</p>
+
+  <h2>6. Tus derechos</h2>
+  <p>Puedes acceder a tus datos, corregirlos, pedir su borrado o su portabilidad y oponerte a su tratamiento escribiéndonos (ver contacto). Además, la partida se puede exportar desde Ajustes. Si crees que no tratamos tus datos correctamente, puedes reclamar ante la autoridad de protección de datos de tu país (en España, la AEPD).</p>
+
+  <h2>7. Menores</h2>
+  <p>El juego no está dirigido a menores de 14 años. Si eres menor, usa el juego como invitado o pide permiso a tu madre, padre o tutor antes de crear una cuenta.</p>
+
+  <h2>8. Contacto y cambios</h2>
+  <p>Escríbenos a través de <a href="https://ko-fi.com/danelalonso" target="_blank" rel="noopener noreferrer">Ko-fi (danelalonso)</a>. Si cambiamos esta política, actualizaremos la fecha de arriba.</p>
+
+  <div class="box note">PokéIdle es un proyecto de fans, sin ánimo de lucro y sin afiliación con Nintendo, Creatures ni GAME FREAK. Pokémon y los nombres de Pokémon son marcas de sus propietarios. Sprites: PMD SpriteCollab (CC BY-NC 4.0). Más en <a href="CREDITS.md">Créditos</a>.</div>
+</section>
+
+<section lang="en">
+  <h1>Privacy policy</h1>
+  <p class="upd">Last updated: October 15, 2026</p>
+  <p>PokéIdle is a free, non-profit fan game that runs in your browser. This page explains what data is stored, why, and how you can delete it. There is no advertising, analytics or tracking.</p>
+
+  <h2>1. If you play as a guest</h2>
+  <div class="box"><p>Your game, settings and preferences are saved <b>only in your browser</b> (local storage). They are not sent to any server. If you clear your browser data you lose them (you can export a backup code from Settings).</p></div>
+
+  <h2>2. If you sign in with Google</h2>
+  <p>Only if you choose to sign in, the following is stored in our database (managed by Supabase):</p>
+  <ul>
+    <li><b>Account data:</b> a user identifier and the email address provided by Google (we do not receive your password or other data from your Google account).</li>
+    <li><b>Public profile:</b> your chosen name (or an automatic one like “Entrenador1234”), avatar, title, frame and a friend code.</li>
+    <li><b>Your game</b> in the cloud (compressed copy) and up to 3 earlier backups.</li>
+    <li><b>Ranking scores:</b> max stage, Rank, Essence, Tower floor, Master Duel level, registered Pokémon, medals, play time and weekly event scores.</li>
+    <li><b>Reports</b> you send or receive about other players, and your friends list if you use it.</li>
+  </ul>
+  <p><b>Why:</b> to let you play on several devices, show the rankings, keep things secure and moderate names or cheating. We <b>do not sell</b> your data or use it for advertising.</p>
+  <p><b>What others see:</b> rankings show your public name, avatar, title and scores. You can hide yourself in <i>Settings → Account → Appear in the rankings</i>. Nobody else sees your email.</p>
+
+  <h2>3. Storage on your device</h2>
+  <p>We only use your browser’s local storage for what is necessary: saving your game, settings and session. We do not use advertising or tracking cookies.</p>
+
+  <h2>4. Third-party services</h2>
+  <table>
+    <tr><th>Service</th><th>Purpose</th></tr>
+    <tr><td>Supabase</td><td>Accounts, database and rankings (only if you sign in).</td></tr>
+    <tr><td>Google</td><td>Sign-in with your Google account; typography (Google Fonts).</td></tr>
+    <tr><td>Cloudflare</td><td>Hosting and delivery of the website.</td></tr>
+    <tr><td>jsDelivr</td><td>Delivery of the Supabase library when you sign in.</td></tr>
+    <tr><td>Ko-fi</td><td>Optional external link to support the project; we share no data with them.</td></tr>
+  </table>
+  <p>These services may see your IP address when serving their files and have their own privacy policies.</p>
+
+  <h2>5. Retention and deletion</h2>
+  <p>We keep your data while you have the account. You can delete it yourself at any time from <i>Settings → Account → Delete my account and data</i>: your profile, cloud game, backups, scores, friends and account are removed. The game on your device is not touched.</p>
+
+  <h2>6. Your rights</h2>
+  <p>You can access your data, correct it, ask for its deletion or portability and object to its processing by contacting us (see contact below). You can also export your game from Settings. If you believe we are not handling your data properly, you can complain to the data protection authority of your country.</p>
+
+  <h2>7. Children</h2>
+  <p>The game is not aimed at children under 14. If you are under 14, play as a guest or ask a parent or guardian before creating an account.</p>
+
+  <h2>8. Contact and changes</h2>
+  <p>Contact us through <a href="https://ko-fi.com/danelalonso" target="_blank" rel="noopener noreferrer">Ko-fi (danelalonso)</a>. If we change this policy, we will update the date above.</p>
+
+  <div class="box note">PokéIdle is a non-profit fan project, not affiliated with Nintendo, Creatures or GAME FREAK. Pokémon and Pokémon names are trademarks of their owners. Sprites: PMD SpriteCollab (CC BY-NC 4.0). More in <a href="CREDITS.md">Credits</a>.</div>
+</section>
+
+<footer><a href="./">← PokéIdle</a></footer>
+</main>
+<script>
+  (function () {
+    var lang = 'es';
+    try { var q = /[?&]lang=(es|en)/.exec(location.search); if (q) lang = q[1]; else { var d = JSON.parse(localStorage.getItem('pokeidle.save.v1')); lang = d && d.settings && d.settings.lang || (/^es\b/i.test(navigator.language || 'es') ? 'es' : 'en'); } } catch (e) { lang = /^es\b/i.test(navigator.language || 'es') ? 'es' : 'en'; }
+    function set(l) { document.documentElement.classList.toggle('en', l === 'en'); document.documentElement.lang = l; document.getElementById('l-es').classList.toggle('on', l === 'es'); document.getElementById('l-en').classList.toggle('on', l === 'en'); }
+    document.getElementById('l-es').onclick = function () { set('es'); }; document.getElementById('l-en').onclick = function () { set('en'); };
+    set(lang);
+  })();
+</script>
+</body>
+</html>

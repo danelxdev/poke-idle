@@ -277,6 +277,10 @@ Sin reiniciar, a partir de la etapa ~280 hay un muro de días: es el momento de 
 - Torre: pasado el piso 100 solo cada 10 pisos da un ticket Master y el resto da Ultra, para que los pisos profundos no desbalanceen la economía.
 - Las gemas salen sobre todo de logros y misiones (unos 190 al día de ritmo constante); los huevos, fragmentos Mega y premios de evento se calibraron para no apartar de la progresión principal.
 
+## Publicación
+
+El juego es una web estática: basta con publicar la raíz del repositorio (sin paso de build). Ejemplo con **Cloudflare Pages**: *Workers & Pages → Create → Pages → Connect to Git*, rama `main`, sin comando de build y con la carpeta de salida `/`; después se añade el dominio en *Custom domains*. El archivo `_headers` fija las cabeceras de seguridad y de caché (los sprites se guardan en caché una semana; el código y `sw.js` no). La política de privacidad está en `privacy.html` (en español e inglés) y se enlaza desde la pantalla de inicio y Ajustes → Cuenta.
+
 ## Créditos
 
 - Sprites y retratos: [PMD SpriteCollab](https://github.com/PMDCollab/SpriteCollab), licencia **CC BY-NC 4.0**. Los artistas aparecen en `CREDITS.md`. `tools/fetch_pokemon.py` descarga sprites y datos (por ejemplo `python3 tools/fetch_pokemon.py 1 1025`).

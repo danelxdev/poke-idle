@@ -1,0 +1,15 @@
+# Cabeceras para Cloudflare Pages (se ignora en otros alojamientos)
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+/index.html
+  Cache-Control: no-cache
+/sw.js
+  Cache-Control: no-cache
+/js/*
+  Cache-Control: no-cache
+/css/*
+  Cache-Control: no-cache
+/assets/*
+  Cache-Control: public, max-age=604800

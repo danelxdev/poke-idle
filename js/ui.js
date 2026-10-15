@@ -1148,9 +1148,11 @@ const UI = (() => {
     box.innerHTML = u ? `<div class="setrow"><span class="sl"><b>${p ? p.nickname : ''}</b><small>${u.email || ''} · ${cloudStatus()}</small></span></div>
         <div class="row tight" style="margin:4px 0"><button class="btn small primary" id="ac-sync">${L('Sincronizar ahora', 'Sync now')}</button><button class="btn small" id="ac-rank">${L('Rankings', 'Rankings')}</button><button class="btn small" id="ac-out">${L('Cerrar sesión', 'Sign out')}</button></div>
         <div class="setrow"><span class="sl"><b>${L('Aparecer en los rankings', 'Appear in the rankings')}</b><small>${L('Se muestra tu nombre público, avatar y título', 'Your public name, avatar and title are shown')}</small></span><button class="tog ${p && p.show_in_rankings ? 'on' : ''}" id="ac-show" role="switch" aria-checked="${!!(p && p.show_in_rankings)}" aria-label="${L('Aparecer en los rankings', 'Appear in the rankings')}"><i></i></button></div>
-        <div class="row tight" style="margin:4px 0 0"><button class="btn small danger" id="ac-del">${L('Borrar mi cuenta y mis datos', 'Delete my account and data')}</button></div>`
+        <div class="row tight" style="margin:4px 0 0"><button class="btn small danger" id="ac-del">${L('Borrar mi cuenta y mis datos', 'Delete my account and data')}</button></div>
+        <p class="hint" style="margin:6px 0 0"><a href="privacy.html" target="_blank" rel="noopener">${L('Política de privacidad', 'Privacy policy')}</a></p>`
       : `<p class="hint" style="margin:0 0 6px">${L('Juegas como invitado: tu partida solo se guarda en este dispositivo. Con Google la guardas en la nube, la usas en otros dispositivos y apareces en los rankings.', 'You are playing as a guest: your game is only saved on this device. With Google you save it in the cloud, use it on other devices and appear in the rankings.')}</p>
-        <div class="row tight" style="margin:0"><button class="gbtn" id="ac-google">${GOOGLE}<span>${L('Iniciar sesión con Google', 'Sign in with Google')}</span></button><button class="btn small" id="ac-rank">${L('Ver rankings', 'View rankings')}</button></div>`;
+        <div class="row tight" style="margin:0"><button class="gbtn" id="ac-google">${GOOGLE}<span>${L('Iniciar sesión con Google', 'Sign in with Google')}</span></button><button class="btn small" id="ac-rank">${L('Ver rankings', 'View rankings')}</button></div>
+        <p class="hint" style="margin:6px 0 0"><a href="privacy.html" target="_blank" rel="noopener">${L('Política de privacidad', 'Privacy policy')}</a></p>`;
     const on = (id, f) => { const e = $(id); if (e) e.onclick = f; };
     on('#ac-google', async () => { Audio8.play('select'); await Cloud.signIn(); });
     on('#ac-rank', () => rankingModal());

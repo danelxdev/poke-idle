@@ -20,6 +20,10 @@ Todo es **opcional**: mientras `js/cloud-config.js` tenga `url` y `anonKey` vac�
    - **Site URL**: tu dominio, p. ej. `https://tudominio.com/`
    - **Redirect URLs**: añade `https://tudominio.com/**` (y, si quieres probar en local, `http://localhost:8000/**`).
 
+> Con el dominio `pokeidlegame.com`: Site URL `https://pokeidlegame.com/` y Redirect URL `https://pokeidlegame.com/**`.
+> En la pantalla de consentimiento de Google, añade `pokeidlegame.com` como dominio autorizado, enlaza la política de
+> privacidad `https://pokeidlegame.com/privacy.html` y pon el estado en **En producción**.
+
 ## 3. Conectar el juego
 
 Rellena `js/cloud-config.js` con los datos de **Settings → API**:
