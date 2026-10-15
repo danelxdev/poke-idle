@@ -48,14 +48,19 @@ const Cloud = (() => {
     // si Google/Supabase devuelven un error en la dirección, lo guardamos para enseñarlo (antes de limpiarla)
     let urlErr = '';
     try { const q = new URLSearchParams(location.search), h = new URLSearchParams(location.hash.replace(/^#/, '')); urlErr = q.get('error_description') || h.get('error_description') || q.get('error') || h.get('error') || ''; } catch (e) { /* sin error en la URL */ }
+    const back = /[?&]code=|access_token=/.test(location.search + location.hash);
+    const clean = () => { if (/[?&]code=|access_token=|error=|error_description=/.test(location.search + location.hash)) { try { history.replaceState({}, '', location.pathname); } catch (e) { /* nada */ } } };
+    // la sesión se recupera con un tope de tiempo: si Supabase no contesta, no dejamos el juego esperando
+    const limit = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(L('Supabase no responde. Recarga la página.', 'Supabase is not responding. Reload the page.'))), ms))]);
     try {
-      const { data, error } = await st.client.auth.getSession();
-      if (data && data.session) await onSession(data.session);
+      const { data, error } = await limit(st.client.auth.getSession(), 15000);
+      clean();
+      if (data && data.session) { st.ready = true; notify('ready'); await onSession(data.session); }
       else if (urlErr || error) setStatus('error', urlErr || String(error.message || error));
+      else if (back) setStatus('error', L('No se pudo completar el inicio de sesión (falta la clave de seguridad de esta pestaña). Pulsa el botón de Google de nuevo, sin recargar la página de Google.', 'Could not complete sign-in (this tab’s security key is missing). Press the Google button again.'));
       else setStatus('guest');
-    } catch (e) { setStatus('error', urlErr || String(e && e.message || e)); }
+    } catch (e) { clean(); console.error('[Cloud] init', e); setStatus('error', urlErr || String(e && e.message || e)); }
     st.ready = true; notify('ready');
-    if (/[?&]code=|access_token=|error=|error_description=/.test(location.search + location.hash)) { try { history.replaceState({}, '', location.pathname); } catch (e) { /* nada */ } }
   }
   async function onSession(session) {
     if (st.loginDone === session.user.id) return;
@@ -65,7 +70,7 @@ const Cloud = (() => {
       await loadProfile();
       await reconcile();
       setStatus('ok');
-    } catch (e) { setStatus('error', String(e && e.message || e)); }
+    } catch (e) { console.error('[Cloud] onSession', e); setStatus('error', String(e && e.message || e)); }
     notify('user');
   }
   async function signIn() {
