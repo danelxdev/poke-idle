@@ -12,7 +12,7 @@ const UI = (() => {
   const starsHtml = n => `<span class="stars">${'★'.repeat(n)}<i>${'★'.repeat(5 - n)}</i></span>`;
   const por = (d, shiny) => Sprites.portrait(d, shiny);
 
-  let tab = 'team', sig = '', dexFilter = 'all', achShowAll = false;
+  let tab = 'team', sig = '', dexFilter = 'all', achShowAll = false, rivalAll = false;
 
   function show(id) { $$('.screen').forEach(s => s.classList.toggle('active', s.id === id)); }
 
@@ -62,10 +62,11 @@ const UI = (() => {
       ['crown', L('Eventos y Torre', 'Events and Tower'), L('Un evento nuevo cada semana y una torre infinita con guardianes.', 'A new event every week and an endless tower with guardians.')],
     ].map(([i, t, d], n) => `<div class="tcard" style="animation-delay:${0.3 + n * 0.1}s">${ico(i, 36)}<b>${t}</b><small>${d}</small></div>`).join('');
     $('#t-news').innerHTML = `<h3>${L('Novedades', "What's new")}</h3><ul>
-      <li>${L('Eventos semanales y Torre de batalla.', 'Weekly events and the Battle Tower.')}</li>
-      <li>${L('Huevos, crianza, naturalezas e IVs.', 'Eggs, breeding, natures and IVs.')}</li>
-      <li>${L('Equipos guardados y app instalable sin conexión.', 'Saved teams and an installable offline app.')}</li>
-      <li>${L('Ya disponible en inglés.', 'Now available in English.')}</li></ul>`;
+      <li>${L('Nico, tu rival: 20 duelos con historia, y entrenadores por las rutas.', 'Nico, your rival: 20 story duels, and trainers along the routes.')}</li>
+      <li>${L('Pokédex con ficha, buscador y bestiario.', 'Pokédex with entries, search and a bestiary.')}</li>
+      <li>${L('17 objetos, combos y tácticas de equipo.', '17 items, combos and team tactics.')}</li>
+      <li>${L('Sala de música, 3 estilos y subtítulos de sonidos.', 'Music room, 3 styles and sound captions.')}</li>
+      <li>${L('Formas regionales, megaevoluciones, estadísticas y accesibilidad.', 'Regional forms, Mega evolutions, statistics and accessibility.')}</li></ul>`;
   }
   function starter(cb) {
     show('scr-starter');
@@ -107,7 +108,7 @@ const UI = (() => {
       box.classList.remove('hidden');
       const eased = e.boss && !e.chal && Core.bossEase(e.stage) < 1 ? ' · −' + Math.round((1 - Core.bossEase(e.stage)) * 100) + '%' : '';
       const ch = Core.chal;
-      const name = e.chal && ch ? DEX[e.dex].name : e.boss ? (r.boss.who === DEX[e.dex].name ? r.boss.who : r.boss.who + ' · ' + DEX[e.dex].name) + eased : (e.golden ? '✨ ' : '') + DEX[e.dex].name + (e.golden ? L(' dorado', ' (golden)') : '');
+      const name = e.chal && ch ? DEX[e.dex].name + (e.part && e.part.n > 1 ? ' (' + e.part.i + '/' + e.part.n + ')' : '') : e.trainer ? DEX[e.dex].name + ' · ' + e.trainer.cls + ' ' + e.trainer.name + ' ' + e.trainer.i + '/' + e.trainer.n : e.boss ? (r.boss.who === DEX[e.dex].name ? r.boss.who : r.boss.who + ' · ' + DEX[e.dex].name) + eased : (e.golden ? '✨ ' : '') + DEX[e.dex].name + (e.golden ? L(' dorado', ' (golden)') : '');
       if ($('#enemy-name').textContent !== name) { $('#enemy-name').textContent = name; A11Y.label($('#cv'), L('Combate contra ', 'Battle against ') + name); }
       const ft = $('#foe-types'); if (ft.dataset.k !== String(e.dex)) { ft.dataset.k = e.dex; ft.innerHTML = typeTags(e.dex); }
       $('#enemy-hp').style.width = Math.max(0, e.hp / e.max * 100) + '%';
@@ -130,7 +131,8 @@ const UI = (() => {
     $('#dps').innerHTML = L('Daño/s', 'Damage/s') + ' <b>' + fmt(e ? Core.teamDps(e.types) : Core.teamDps()) + '</b> · ' + L('Toque', 'Tap') + ' <b>' + fmt(Core.tapDmg()) + '</b>' + (waitBoss ? ` · ${L('Poder vs jefe', 'Power vs boss')} <b style="color:${rd >= 0.95 ? '#7ff0a0' : '#ffd23f'}">${Math.round(rd * 100)}%</b>` : '');
     $('#quest-dot').classList.toggle('hidden', !Core.pendingRewards() && s.daily.claimed);
     $('#gacha-dot').classList.toggle('hidden', !Core.eggsReady());
-    $('#chal-dot').classList.toggle('hidden', !Core.towerUnlocked() || !(Core.ev && (!s.event.free || EVENT_TASKS.some(t => !s.event.claimed[t.id] && s.event[t.stat] >= t.goal))));
+    const rvNext = Core.rivalNext(), rvOpen = rvNext && Core.rivalOpen(rvNext);
+    $('#chal-dot').classList.toggle('hidden', !Core.towerUnlocked() || !(rvOpen || Core.ev && (!s.event.free || EVENT_TASKS.some(t => !s.event.claimed[t.id] && s.event[t.stat] >= t.goal))));
   }
 
   // ---------------- pestañas ----------------
@@ -153,7 +155,7 @@ const UI = (() => {
       if (c.className !== cl) c.className = cl;
     }
     for (const el of $$('#tab-body [data-rdy]')) {
-      const [k, v] = el.dataset.rdy.split(':'), r = Core.chalReady(k === 't' ? Core.towerSpec(+v) : Core.eventSpec(+v)), t = L('Poder ', 'Power ') + (r >= 10 ? '×' + Math.floor(r) : Math.round(r * 100) + '%'), cl = 'rdy' + (r >= 1 ? ' ok' : r >= 0.7 ? ' mid' : '');
+      const [k, v] = el.dataset.rdy.split(':'), r = Core.chalReady(k === 't' ? Core.towerSpec(+v) : k === 'r' ? Core.rivalSpec(v) : Core.eventSpec(+v)), t = L('Poder ', 'Power ') + (r >= 10 ? '×' + Math.floor(r) : Math.round(r * 100) + '%'), cl = 'rdy' + (r >= 1 ? ' ok' : r >= 0.7 ? ' mid' : '');
       if (el.textContent !== t) el.textContent = t;
       if (el.className !== cl) el.className = cl;
     }
@@ -171,14 +173,14 @@ const UI = (() => {
 
   const natTxt = m => { const n = Core.natOf(m); return n.up ? `${n.name} <em class="nu">▲${NAT_SHORT[n.up]}</em> <em class="nd">▼${NAT_SHORT[n.down]}</em>` : n.name + L(' (neutra)', ' (neutral)'); };
   let towerStart = 0;
-  const rewText = r => !r ? '' : [r.gems && '+' + r.gems + L(' gemas', ' gems'), r.shards && '+' + r.shards + L(' fragmentos Mega', ' Mega shards'), r.dust && '+' + r.dust + L(' polvo', ' stardust'), ...Object.entries(r.tk || {}).map(([t, n]) => n + '× ' + TICKETS[t].name), r.egg !== undefined && EGGS[r.egg].name].filter(Boolean).join(' · ');
+  const rewText = r => !r ? '' : [r.gems && '+' + r.gems + L(' gemas', ' gems'), r.shards && '+' + r.shards + L(' fragmentos Mega', ' Mega shards'), r.dust && '+' + r.dust + L(' polvo', ' stardust'), ...Object.entries(r.tk || {}).map(([t, n]) => n + '× ' + TICKETS[t].name), r.egg !== undefined && EGGS[r.egg].name, r.item && L('un objeto', 'an item')].filter(Boolean).join(' · ');
   const ruleTxt = r => r ? `<div class="rulebox"><b>${r.name}${r.only ? ' ' + TYPE_ES[r.only] : ''}</b>: ${r.desc}</div>` : '';
   function chalHtml() {
     const s = S();
     if (!Core.towerUnlocked()) return `<h3>${L('Retos', 'Challenges')}</h3><p class="hint">${L(`Derrota al primer jefe (etapa ${TOWER_UNLOCK}) para desbloquear el evento semanal y la Torre de batalla.`, `Beat the first boss (stage ${TOWER_UNLOCK}) to unlock the weekly event and the Battle Tower.`)}</p>`;
     const ev = Core.ev, col = TYPE_COLORS[ev.type], busy = Core.inChal() ? 'disabled' : '';
     const bonus = EVENT_BONUS[ev.bonus], d = Core.eventDaysLeft();
-    let h = `<div class="evcard" style="--ec:${col}"><div class="evhead"><span class="evtag">${L('EVENTO SEMANAL', 'WEEKLY EVENT')}</span><b>${L('Semana ' + TYPE_NAMES[ev.type], TYPE_NAMES[ev.type] + ' Week')}</b><small>${L(`Termina en ${d} día${d > 1 ? 's' : ''}`, `Ends in ${d} day${d > 1 ? 's' : ''}`)}</small></div>
+    let h = rivalHtml() + `<div class="evcard" style="--ec:${col}"><div class="evhead"><span class="evtag">${L('EVENTO SEMANAL', 'WEEKLY EVENT')}</span><b>${L('Semana ' + TYPE_NAMES[ev.type], TYPE_NAMES[ev.type] + ' Week')}</b><small>${L(`Termina en ${d} día${d > 1 ? 's' : ''}`, `Ends in ${d} day${d > 1 ? 's' : ''}`)}</small></div>
       <ul class="evfx"><li>${L(`Tus Pokémon de tipo ${TYPE_NAMES[ev.type]} hacen <b>+${Math.round(EVENT_DMG * 100)}%</b> de daño`, `Your ${TYPE_NAMES[ev.type]}-type Pokémon deal <b>+${Math.round(EVENT_DMG * 100)}%</b> damage`)}</li><li><b>${bonus.name}:</b> ${bonus.txt}</li></ul>
       <div class="evrow"><img src="${por(ev.boss)}"><div>${L('Jefe del evento', 'Event boss')}<br><b>${DEX[ev.boss].name}</b> ${typeTags(ev.boss)}</div></div>
       <div class="tiers">${EVENT_TIERS.map((t, i) => `<button class="tierbtn ${s.event.tiers[i] ? 'done' : ''}" data-act="evboss" data-v="${i}" ${busy}><b>${t.name}${s.event.tiers[i] ? '<span style="color:#7ff0a0">✓</span>' : ''}</b><span data-rdy="e:${i}" class="rdy"></span><small>${s.event.tiers[i] ? L('Recompensa ya recogida', 'Reward already claimed') : rewText(t.rew)}</small></button>`).join('')}</div>
@@ -202,6 +204,38 @@ const UI = (() => {
       <div class="row" style="margin-top:6px">${starts.length > 1 ? `<button class="dd" data-act="towerdd">${L('Empezar en el piso', 'Start at floor')} ${st}<i></i></button>` : ''}<button class="btn big primary" data-act="tower" data-v="${st}" ${busy}>${L('Subir a la Torre', 'Climb the Tower')}</button></div></div>
       <p class="hint">${L('Cada piso es un duelo contra un Pokémon de un tipo distinto con vida y tiempo fijos. Sigues subiendo hasta que caes; los pisos cada 5 son guardianes con una regla especial. Las recompensas se dan la primera vez que superas cada piso y puedes empezar desde cualquier guardián que ya hayas superado.', 'Each floor is a duel against a Pokémon of a different type with fixed HP and time. You keep climbing until you fall; every 5th floor is a guardian with a special rule. Rewards are given the first time you clear each floor and you can start from any guardian you have already beaten.')}</p>`;
     return h;
+  }
+  // ---------------- el rival: Nico ----------------
+  function rivalHtml() {
+    const s = S(), next = Core.rivalNext(), won = Core.rivalWins(), busy = Core.inChal() ? 'disabled' : '';
+    let h = `<h3>${L('Rival', 'Rival')}: ${RIVAL_NAME} <small style="color:var(--dim)">${won}/${RIVAL_ENC.length} · +${Math.round(won * RIVAL_BONUS * 100)}% ${L('de daño', 'damage')}</small></h3>`;
+    if (next) {
+      const open = Core.rivalOpen(next), team = Core.rivalTeam(next);
+      h += `<div class="rivalcard ${open ? 'open' : ''}"><div class="rvhead"><img src="${por(team[team.length - 1])}" alt=""><div><b>${RIVAL_NAME} · ${REGIONS[next.region].name} ${next.meet ? 'II' : 'I'}</b><small>${open ? L('Nico te espera para un duelo', 'Nico is waiting for a duel') : L(`Llega a la etapa ${next.stage} para encontrarte con Nico`, `Reach stage ${next.stage} to meet Nico`)}</small></div></div>
+        <div class="rvteam">${team.map(d => `<div class="rvm"><img src="${por(d)}" alt="${DEX[d].name}"><small>${DEX[d].name}</small>${typeTags(d)}</div>`).join('')}</div>
+        <div class="floorline">${L('3 Pokémon seguidos con un solo cronómetro', '3 Pokémon in a row on a single timer')} · <span data-rdy="r:${next.id}" class="rdy"></span></div>
+        <div class="floorline">${L('Recompensa', 'Reward')}: ${rewText(rivalReward(next))}</div>
+        <div class="row"><button class="btn big primary" data-act="rival" data-v="${next.id}" ${open && !busy ? '' : 'disabled'}>${L('Aceptar el duelo', 'Accept the duel')}</button></div></div>`;
+    } else h += `<p class="hint">${L('Has ganado todos los duelos contra Nico. ¡Eres el mejor rival que Nico podía pedir!', 'You won every duel against Nico. You are the best rival Nico could ask for!')}</p>`;
+    if (won) {
+      h += `<div class="row" style="margin:4px 0"><button class="btn small" data-act="rivalall">${rivalAll ? L('Ocultar duelos ganados', 'Hide won duels') : L('Ver duelos ganados', 'Show won duels')}</button></div>`;
+      if (rivalAll) h += RIVAL_ENC.filter(e => s.rival.won[e.id]).map(e => {
+        const done = s.rival.rem[e.id] === Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 864e5);
+        return `<div class="etask"><div class="qi"><b>${REGIONS[e.region].name} ${e.meet ? 'II' : 'I'} ✓</b><small>${L('Revancha: una vez al día', 'Rematch: once a day')} · ${done ? L('ya hecha hoy', 'done today') : L('+polvo y gemas', '+stardust and gems')}</small></div><button class="btn small" data-act="rivaltalk" data-v="${e.id}">${L('Historia', 'Story')}</button><button class="btn small primary" data-act="rival" data-v="${e.id}" ${busy}>${L('Revancha', 'Rematch')}</button></div>`;
+      }).join('');
+    }
+    return h + `<p class="hint">${L('Nico es tu rival a lo largo de todo el viaje: dos duelos por región. La primera vez dan recompensas y +1% de daño permanente; después puedes pedir la revancha cada día.', 'Nico is your rival throughout the whole journey: two duels per region. The first time they give rewards and +1% permanent damage; afterwards you can ask for a rematch every day.')}</p>`;
+  }
+  function rivalTalk(e, which, d) {
+    const team = Core.rivalTeam(e), won = which === 'post' && d;
+    openModal(`<div class="rvtalk"><img class="rvav" src="${por(team[team.length - 1])}" alt=""><div class="rvsay"><b>${RIVAL_NAME} · ${REGIONS[e.region].name} ${e.meet ? 'II' : 'I'}</b>${which === 'story' ? `<p>“${e.pre}”</p><p>“${e.post}”</p>` : `<p>“${which === 'pre' ? e.pre : e.post}”</p>`}</div></div>
+      ${won ? `<p class="hint" style="text-align:center">${d.first ? L('¡Primera victoria! ', 'First win! ') : L('Revancha: ', 'Rematch: ')}${d.rew ? rewText(d.rew) : L('Ya recogiste la recompensa de hoy', 'You already claimed today’s reward')}</p>` : ''}
+      <div class="row">${which === 'story' ? `<button class="btn primary" id="rv-x">${L('Cerrar', 'Close')}</button>` : which === 'pre' ? `<button class="btn" id="rv-x">${L('Ahora no', 'Not now')}</button><button class="btn primary" id="rv-go">${L('¡Vamos!', 'Let’s go!')}</button>` : `<button class="btn primary" id="rv-ok">${L('Seguir', 'Continue')}</button>`}</div>`);
+    if (which === 'story') $('#rv-x').onclick = closeModal;
+    else if (which === 'pre') {
+      $('#rv-x').onclick = closeModal;
+      $('#rv-go').onclick = () => { closeModal(); if (Core.startRival(e.id)) Audio8.play('select'); else Audio8.play('error'); };
+    } else { $('#rv-ok').onclick = () => { Core.save(); closeModal(); refresh(true); }; Core.save(); }
   }
   function presetModal() {
     const s = S();
@@ -295,14 +329,107 @@ const UI = (() => {
     return { n: bm, c: Core.levelCostN(m, bm) };
   }
 
+
+  // ---------------- Pokédex: filtros, cuadrícula y ficha ----------------
+  let dexQ = '', dexType = 'all', dexState = 'all', dexSort = 'num';
+  const dexRegions = () => [['all', L('Todas las regiones', 'All regions')], ['mine', L('Solo los míos', 'Mine only')]].concat(REGIONS.filter(r => r.gen).map(r => [String(r.gen), r.name]));
+  const dexStates = () => [['all', L('Todos', 'All')], ['seen', L('Registrados', 'Registered')], ['missing', L('Sin registrar', 'Not registered')], ['owned', L('Los tengo', 'Owned')], ['shiny', L('Con shiny', 'With shiny')], ['forms', L('Formas regionales', 'Regional forms')]];
+  const dexSorts = () => [['num', L('Número', 'Number')], ['name', L('Nombre', 'Name')], ['rar', L('Rareza', 'Rarity')], ['lvl', L('Nivel', 'Level')], ['bst', L('Estadísticas', 'Stats')]];
+  const dexNum = p => String(p.of || p.dex).padStart(4, '0');
+  function dexGrid() {
+    const s = S(), q = dexQ.trim().toLowerCase().replace(/^#/, '');
+    let list = POKEDEX.filter(p => {
+      const base = String(Core.baseOf(p.dex)), own = s.mons[base], seen = s.seen[p.dex], cur = own && own.dex === p.dex;
+      if (/^[1-9]$/.test(dexFilter) && p.gen !== +dexFilter) return false;
+      if (dexFilter === 'mine' && !(own && seen)) return false;
+      if (dexType !== 'all' && !(seen ? p.types.includes(dexType) : false)) return false;
+      if (dexState === 'seen' && !seen) return false;
+      if (dexState === 'missing' && seen) return false;
+      if (dexState === 'owned' && !cur) return false;
+      if (dexState === 'shiny' && !(cur && own.shinyOwned)) return false;
+      if (dexState === 'forms' && !p.form) return false;
+      if (q && !((seen && p.name.toLowerCase().includes(q)) || (p.dex < 10000 && String(p.dex) === q.replace(/^0+/, '')) || (p.dex < 10000 && dexNum(p).startsWith(q)))) return false;
+      return true;
+    });
+    const key = { num: p => (p.of || p.dex) * 10 + (p.of ? 1 : 0), name: p => 0, rar: p => -Core.RAR[p.dex] * 1e5 + (p.of || p.dex), lvl: p => { const o = s.mons[String(Core.baseOf(p.dex))]; return o && o.dex === p.dex ? -o.lvl : 1e6 + p.dex; }, bst: p => -Core.bst(p.dex) };
+    if (dexSort === 'name') list.sort((a, b) => (!!s.seen[b.dex] - !!s.seen[a.dex]) || a.name.localeCompare(b.name));
+    else list.sort((a, b) => key[dexSort](a) - key[dexSort](b));
+    if (!list.length) return `<p class="hint" style="grid-column:1/-1;text-align:center">${L('Ningún Pokémon coincide con los filtros.', 'No Pokémon match the filters.')}</p>`;
+    return list.map(p => {
+      const base = String(Core.baseOf(p.dex)), own = s.mons[base], seen = s.seen[p.dex], cur = own && own.dex === p.dex, locked = !Core.genUnlocked(p.gen);
+      const canStar = cur && own.stars < 5 && own.copies >= STAR_COPIES[own.stars];
+      return `<button class="${seen ? '' : 'unk'} ${cur && s.team.includes(base) ? 'inteam' : ''}" style="--rc:${cur ? RARITY[Core.RAR[p.dex]].color : seen ? '#2a3f8a' : '#1d2a5a'}" data-act="dexinfo" data-v="${p.dex}" aria-label="${seen ? p.name : (p.dex < 10000 ? '#' + p.dex : L('Forma sin registrar', 'Unregistered form'))}">
+        ${cur ? `<span class="lv">${own.lvl}</span>` : ''}${cur && own.shinyOwned ? '<span class="sh">✨</span>' : ''}${seen ? `<img src="${por(p.dex, cur && own.shiny)}" loading="lazy" alt="">` : `<span class="q">${locked ? '🔒' : '?'}</span>`}<span class="n">${seen ? (canStar ? '⬆ ' : '') + p.name : (p.dex < 10000 ? '#' + p.dex : '#???')}</span></button>`;
+    }).join('');
+  }
+  const STAT_NAMES = () => [['hp', 'HP', 'HP'], ['atk', 'Ataque', 'Attack'], ['def', 'Defensa', 'Defense'], ['spa', 'At. Esp.', 'Sp. Atk'], ['spd', 'Def. Esp.', 'Sp. Def'], ['spe', 'Velocidad', 'Speed']];
+  function evoTree(d, depth) {
+    const s = S(), seen = s.seen[d], p = DEX[d], kids = Core.CHILDREN[d] || [];
+    const node = `<button class="evn ${seen ? '' : 'unk'}" data-act="dexinfo" data-v="${d}" aria-label="${seen ? p.name : '???'}">${seen ? `<img src="${por(d)}" alt="">` : '<span class="q">?</span>'}<small>${seen ? p.name : '???'}</small></button>`;
+    if (!kids.length) return `<div class="evt">${node}</div>`;
+    return `<div class="evt">${node}<div class="eva">→<small>${L('Nv.', 'Lv.')} ${EVO_LVL[Math.min(depth, EVO_LVL.length - 1)]}</small></div><div class="evk">${kids.map(k => evoTree(k, depth + 1)).join('')}</div></div>`;
+  }
+  function dexModal(dex) {
+    const s = S(), p = DEX[dex]; if (!p) return;
+    const base = String(Core.baseOf(dex)), own = s.mons[base], seen = !!s.seen[dex], cur = own && own.dex === dex, rar = Core.RAR[dex], reg = REGIONS[p.gen - 1];
+    const num = p.dex < 10000 ? '#' + String(p.dex).padStart(4, '0') : L('Forma regional', 'Regional form');
+    let h = `<div class="dxm"><div class="dxhead"><img class="dxpor ${seen ? '' : 'sil'}" src="${por(dex, cur && own.shiny)}" alt=""><div><small>${num}</small><h2>${seen ? p.name : '???'}</h2>${seen ? typeTags(dex) : ''}${seen ? `<span class="rartag" style="color:${RARITY[rar].color}">${RARITY[rar].name}</span>` : ''}<small>${reg ? reg.name : ''} · ${L('Generación', 'Generation')} ${p.gen}</small></div></div>`;
+    if (!seen) {
+      h += `<p class="hint">${L('Aún no has registrado este Pokémon. Consíguelo en el gacha para ver su ficha completa.', 'You have not registered this Pokémon yet. Get it from the gacha to see its full entry.')}</p>${Core.genUnlocked(p.gen) ? '' : `<p class="hint">🔒 ${L('Llega a ' + reg.name + ' (etapa ' + (reg.first * 10 + 1) + ') para encontrarlo.', 'Reach ' + reg.name + ' (stage ' + (reg.first * 10 + 1) + ') to find it.')}</p>`}`;
+    } else {
+      const st = p.stats, tot = Core.bst(dex);
+      h += `<h4>${L('Estadísticas base', 'Base stats')} <small style="color:var(--dim)">${L('Total', 'Total')} ${tot}</small></h4><div class="dxstats">${STAT_NAMES().map(([k, es, en]) => `<div class="brow"><span class="bl">${L(es, en)}</span><div class="bt"><i style="width:${Math.min(100, st[k] / 160 * 100)}%;background:${st[k] >= 110 ? '#7ff0a0' : st[k] >= 70 ? '#ffd23f' : '#8aa0ff'}"></i></div><em>${st[k]}</em></div>`).join('')}</div>`;
+      // debilidades
+      const wk = [], rs = [], im = [];
+      for (const t of Object.keys(TYPE_NAMES)) { const m = Core.typeEff(t, p.types); if (m === 0) im.push([t]); else if (m >= 2) wk.push([t, m]); else if (m <= 0.5) rs.push([t, m]); }
+      const chips = (arr, f) => arr.length ? arr.map(o => `<span class="type" style="background:${TYPE_COLORS[o[0] || o]}">${TYPE_ES[o[0] || o]}${f ? ' ' + f(o) : ''}</span>`).join('') : '<small>—</small>';
+      h += `<h4>${L('Frente a los ataques', 'Against attacks')}</h4><div class="dxmatch"><div><b>${L('Débil', 'Weak')}</b>${chips(wk, o => '×' + o[1])}</div><div><b>${L('Resiste', 'Resists')}</b>${chips(rs, o => o[1] === 0.5 ? '×½' : '×¼')}</div>${im.length ? `<div><b>${L('Inmune', 'Immune')}</b>${chips(im)}</div>` : ''}</div>`;
+      // evolución
+      if (p.dex < 10000 || p.of) {
+        const tree = evoTree(+base, 0);
+        h += `<h4>${L('Línea evolutiva', 'Evolution line')}</h4><div class="dxevo">${tree}</div>`;
+      }
+      // formas
+      const regs = POKEDEX.filter(x => x.of === dex || (p.of && x.of === p.of)).concat(p.of ? [DEX[p.of]] : []).filter((x, i, a) => x && x.dex !== dex && a.findIndex(y => y && y.dex === x.dex) === i);
+      const megas = Core.MEGA_BY_BASE[dex] || [];
+      if (regs.length || megas.length) {
+        h += `<h4>${L('Otras formas', 'Other forms')}</h4><div class="dxforms">${regs.map(x => `<button class="evn ${s.seen[x.dex] ? '' : 'unk'}" data-act="dexinfo" data-v="${x.dex}">${s.seen[x.dex] ? `<img src="${por(x.dex)}" alt=""><small>${x.name}</small>` : '<span class="q">?</span><small>???</small>'}</button>`).join('')}${megas.map(x => `<div class="evn mega ${cur && own.megas.includes(x.form) ? '' : 'unk'}"><img src="${por(x.dex)}" alt=""><small>${x.form === 'primal' ? L('Primigenio', 'Primal') : 'Mega' + (x.form.length === 1 ? ' ' + x.form.toUpperCase() : '')}${cur && own.megas.includes(x.form) ? '' : ' 🔒'}</small></div>`).join('')}</div>`;
+      }
+      // ataques
+      const mt = MOVE_TIERS[p.types[0]], tier = cur ? Core.tierOf(own.lvl) : -1;
+      h += `<h4>${L('Ataques', 'Moves')} <small style="color:var(--dim)">${TYPE_ES[p.types[0]]}</small></h4><div class="dxmoves">${mt.map((id, i) => `<span class="mv ${i <= tier ? 'on' : ''}"><i style="background:${TYPE_COLORS[MOVES[id].type]}"></i>${MOVES[id].name}<small>${L('Nv.', 'Lv.')} ${TIER_LV[i]}</small></span>`).join('')}</div>`;
+      // dónde aparece
+      const ap = Core.appearsIn(dex);
+      let where = '';
+      if (p.leg) where = L('Pokémon legendario: solo aparece como jefe o en el gacha.', 'Legendary Pokémon: it only appears as a boss or from the gacha.');
+      else if (!ap.length) where = L('No aparece como enemigo salvaje en la primera vuelta.', 'It does not appear as a wild enemy in the first loop.');
+      else {
+        const byReg = {}; for (const ri of ap) { const r = REGIONS[Core.regionOfRoute(ri)].name; (byReg[r] = byReg[r] || []).push(ROUTES[ri].name); }
+        where = Object.entries(byReg).slice(0, 4).map(([r, l]) => `<b>${r}</b>: ${l.slice(0, 3).join(', ')}${l.length > 3 ? ' +' + (l.length - 3) : ''}`).join('<br>') + (Object.keys(byReg).length > 4 ? '<br>…' : '');
+      }
+      h += `<h4>${L('Dónde aparece', 'Where it appears')}</h4><p class="dxwhere">${where}</p><p class="hint">${L('Derrotado', 'Defeated')} <b>${fmt(Core.foeKills(dex))}</b> ${L('veces', 'times')}.</p>`;
+      // tu Pokémon
+      if (cur) {
+        const g = Core.ivGrade(own), need = own.stars < 5 ? STAR_COPIES[own.stars] : 0;
+        h += `<h4>${L('Tu Pokémon', 'Your Pokémon')}</h4><div class="dxown">${starsHtml(own.stars)} <b>${L('Nv.', 'Lv.')} ${own.lvl}</b>${own.shinyOwned ? ' ✨' : ''}${own.megas.length ? ' <span class="megatag">MEGA</span>' : ''}<br><small>${natTxt(own)} · <span class="gr" style="background:${g[2]}">IV ${Math.round(Core.ivPct(own) * 100)}% · ${g[1]}</span></small>${need ? `<br><small>${L('Copias', 'Copies')}: ${own.copies}/${need}</small>` : ''}</div><div class="row"><button class="btn primary" id="dx-mon">${L('Gestionar', 'Manage')}</button></div>`;
+      } else if (own) h += `<p class="hint">${L('Tu línea está ahora en ' + DEX[own.dex].name + '.', 'Your line is currently at ' + DEX[own.dex].name + '.')}</p>`;
+    }
+    h += `<div class="row"><button class="btn" id="dx-x">${L('Cerrar', 'Close')}</button></div></div>`;
+    openModal(h);
+    $('#modal-box').classList.add('wide');
+    $('#dx-x').onclick = closeModal;
+    if ($('#dx-mon')) $('#dx-mon').onclick = () => { closeModal(); monModal(base); };
+  }
+
   const TABS = {
     team: {
-      sig: () => { const s = S(); return JSON.stringify([s.team.map(k => [k, s.mons[k].lvl, s.mons[k].dex, s.mons[k].mf, s.mons[k].stars, s.mons[k].shiny, s.mons[k].item]), s.inv.length, s.slots, s.buyMul, s.buyMul === 'max' ? Math.floor(Math.log(s.coins + 1) * 3) : 0, s.medals, s.up.train, Core.dexCount(), s.badges, s.team.map(k => [s.mons[k].nat, Core.ivSum(s.mons[k])]), Core.routeIdx(s.stage), Core.isBoss(s.stage), s.kills >= 10 && !s.auto]); },
+      sig: () => { const s = S(); return JSON.stringify([s.team.map(k => [k, s.mons[k].lvl, s.mons[k].dex, s.mons[k].mf, s.mons[k].stars, s.mons[k].shiny, s.mons[k].item]), s.inv.length, s.tactic, Core.tacticOpen(), s.slots, s.buyMul, s.buyMul === 'max' ? Math.floor(Math.log(s.coins + 1) * 3) : 0, s.medals, s.up.train, Core.dexCount(), s.badges, s.team.map(k => [s.mons[k].nat, Core.ivSum(s.mons[k])]), Core.routeIdx(s.stage), Core.isBoss(s.stage), s.kills >= 10 && !s.auto]); },
       html() {
         const s = S();
         let h = `<div class="teamhead"><div class="seg">${[1, 10, 25, 'max'].map(v => `<button data-act="mul" data-v="${v}" class="${s.buyMul === v ? 'on' : ''}">${v === 'max' ? L('Máx', 'Max') : 'x' + v}</button>`).join('')}</div><div class="rowbtns"><button class="btn small" data-act="presets" title="${L('Guarda y carga equipos', 'Save and load teams')}">${L('Equipos', 'Teams')}</button><button class="btn small" data-act="best" title="${L('Elige a tus Pokémon que mejor golpean a los enemigos de esta ruta', 'Picks your Pokémon that hit the enemies of this route best')}">${L('Mejor equipo', 'Best team')}</button><button class="btn small" data-act="bag">${L('Mochila', 'Bag')} · ${s.inv.length}</button></div></div>`;
         const tgt = s.kills >= 10 && !s.auto && !Core.isBoss(s.stage) ? s.stage + 1 : s.stage, strong = Core.strongTypes(tgt);
         if (strong.length) h += `<div class="foehint">${Core.isBoss(tgt) ? L('Contra el jefe', 'Against the boss') : L('En esta ruta', 'On this route')}: ${L('usa', 'use')} ${strong.map(o => `<span class="type" style="background:${TYPE_COLORS[o.t]}">${TYPE_ES[o.t]}</span>`).join('')}</div>`;
+        if (Core.tacticOpen()) h += `<div class="tactic" role="group" aria-label="${L('Táctica de equipo', 'Team tactic')}"><div class="seg">${Object.entries(TACTICS).map(([id, t]) => `<button data-act="tactic" data-v="${id}" class="${s.tactic === id ? 'on' : ''}" aria-pressed="${s.tactic === id}">${ico(t.icon, 14)} ${t.name}</button>`).join('')}</div><small>${TACTICS[s.tactic].desc}</small></div>`;
         for (let i = 0; i < 6; i++) {
           const k = s.team[i];
           if (i >= s.slots) {
@@ -327,7 +454,7 @@ const UI = (() => {
         const sy = Core.synergies();
         h += '<h3>' + L('Sinergias de equipo', 'Team synergies') + '</h3>';
         h += sy.list.length ? sy.list.map(x => `<div class="syn on"><b>${x.name}</b><small>${x.txt}</small></div>`).join('') : '<p class="hint">' + L('Aún no tienes ninguna activa.', 'You have none active yet.') + '</p>';
-        h += '<p class="hint">' + L('Mismo tipo: 2 Pokémon +8%, 3 +20%, 4 +35%, 5 +55%, 6 +80% de daño a los de ese tipo. Diversidad: 4 tipos distintos +15%, 6 +30%. Legendarios: 2 +20%, 4 +50%. Shinies: 2 +10% monedas, 4 +25%. Veterano: todos con ★3 o más +25%.', 'Same type: 2 Pokémon +8%, 3 +20%, 4 +35%, 5 +55%, 6 +80% damage to those of that type. Diversity: 4 different types +15%, 6 +30%. Legendaries: 2 +20%, 4 +50%. Shinies: 2 +10% coins, 4 +25%. Veteran: all ★3 or more +25%.') + '</p>';
+        h += '<p class="hint">' + L('Mismo tipo: 2 Pokémon +8%, 3 +20%, 4 +35%, 5 +55%, 6 +80% de daño a los de ese tipo. Diversidad: 4 tipos distintos +15%, 6 +30%. Legendarios: 2 +20%, 4 +50%. Shinies: 2 +10% monedas, 4 +25%. Veterano: todos con ★3 o más +25%. Combos de objetos: con 3 objetos distintos del mismo grupo (Arsenal, Equipo de caza o Granja) el equipo gana un bonus.', 'Same type: 2 Pokémon +8%, 3 +20%, 4 +35%, 5 +55%, 6 +80% damage to those of that type. Diversity: 4 different types +15%, 6 +30%. Legendaries: 2 +20%, 4 +50%. Shinies: 2 +10% coins, 4 +25%. Veteran: all ★3 or more +25%. Item combos: with 3 different items of the same group (Arsenal, Hunting party or Farm) the team gets a bonus.') + '</p>';
         h += `<p class="hint">${L('Consejo: los Pokémon hacen x2 de daño cuando su tipo es eficaz contra el enemigo (lo ves en cada tarjeta) y la mitad si se resiste. Naturaleza e IVs mejoran a cada Pokémon: las copias repetidas tiran IVs nuevos y te quedas con los mejores. Cada 25 niveles su daño se duplica y cada cierto nivel aprenden un ataque más potente.', 'Tip: Pokémon deal x2 damage when their type is effective against the enemy (shown on each card) and half if resisted. Nature and IVs improve each Pokémon: duplicate copies roll new IVs and you keep the best. Every 25 levels their damage doubles and at certain levels they learn a stronger move.')}</p>`;
         return h;
       },
@@ -382,28 +509,24 @@ const UI = (() => {
       },
     },
     dex: {
-      sig: () => { const s = S(); return JSON.stringify([Object.keys(s.mons).length, Object.keys(s.seen).length, s.team, dexFilter, Core.unlockedGens(), Object.values(s.mons).map(m => m.dex + ':' + m.stars + ':' + m.lvl + ':' + (m.shiny ? 1 : 0) + (m.shinyOwned ? 1 : 0) + ':' + (m.copies >= STAR_COPIES[m.stars] ? 1 : 0))]); },
+      sig: () => { const s = S(); return JSON.stringify([Object.keys(s.mons).length, Object.keys(s.seen).length, s.team, dexFilter, dexType, dexState, dexSort, Core.unlockedGens(), Object.keys(s.foes).length, Object.values(s.mons).map(m => m.dex + ':' + m.stars + ':' + m.lvl + ':' + (m.shiny ? 1 : 0) + (m.shinyOwned ? 1 : 0) + ':' + (m.copies >= STAR_COPIES[m.stars] ? 1 : 0))]); },
       html() {
-        const s = S();
-        const n = Core.dexCount();
-        const filters = [['all', L('Todos', 'All')], ['mine', L('Solo los míos', 'Mine only')]].concat(REGIONS.filter(r => r.gen).map(r => [String(r.gen), r.name]));
-        let h = `<div class="dexhead"><span>${L('Registrados', 'Registered')} <b style="color:#fff">${n}/${POKEDEX.length}</b> · +${n}% ${L('de daño', 'damage')}</span></div>
-          <button class="dd" data-act="dexdd">${filters.find(f => f[0] === dexFilter)[1]}<i></i></button><div class="dexgrid">`;
-        for (const p of POKEDEX) {
-          if (/^[1-9]$/.test(dexFilter)) { if (p.gen !== +dexFilter) continue; }
-          const base = String(Core.baseOf(p.dex)), own = s.mons[base], seen = s.seen[p.dex];
-          const cur = own && own.dex === p.dex, locked = !Core.genUnlocked(p.gen);
-          if (dexFilter === 'mine' && !(own && seen)) continue;
-          const canStar = cur && own.stars < 5 && own.copies >= STAR_COPIES[own.stars];
-          const attr = own && seen ? `data-act="mon" data-v="${base}"` : seen ? `data-act="seen" data-v="${p.dex}"` : locked ? 'data-act="locked"' : 'data-act="noown"';
-          h += `<button class="${seen ? '' : 'unk'} ${cur && s.team.includes(base) ? 'inteam' : ''}" style="--rc:${cur ? RARITY[Core.RAR[p.dex]].color : seen ? '#2a3f8a' : '#1d2a5a'}" ${attr}>
-            ${cur ? `<span class="lv">${own.lvl}</span>` : ''}${cur && own.shinyOwned ? '<span class="sh">✨</span>' : ''}${seen ? `<img src="${por(p.dex, cur && own.shiny)}" loading="lazy">` : `<span class="q">${locked ? '🔒' : '?'}</span>`}<span class="n">${seen ? (canStar ? '⬆ ' : '') + p.name : (p.dex < 10000 ? '#' + p.dex : '#???')}</span></button>`;
-        }
-        return h + '</div><p class="hint">' + L('Los Pokémon que no tienes solo se consiguen en el gacha.', 'Pokémon you do not own can only be obtained from the gacha.') + '</p>';
+        const s = S(), n = Core.dexCount(), all = POKEDEX.length;
+        const owned = POKEDEX.filter(p => { const o = s.mons[String(Core.baseOf(p.dex))]; return o && o.dex === p.dex; }).length;
+        const shinies = Object.values(s.mons).filter(m => m.shinyOwned).length;
+        const forms = POKEDEX.filter(p => p.form), formsSeen = forms.filter(p => s.seen[p.dex]).length;
+        const regs = REGIONS.filter(r => r.gen).map(r => { const tot = POKEDEX.filter(p => p.gen === r.gen).length, got = Object.keys(s.seen).filter(d => DEX[d] && DEX[d].gen === r.gen).length; return { r, tot, got }; });
+        let h = `<div class="dexhead"><span>${L('Registrados', 'Registered')} <b style="color:#fff">${n}/${all}</b> · +${n}% ${L('de daño', 'damage')}</span></div>
+          <div class="dexsum"><div><b>${owned}</b><small>${L('Especies que tienes', 'Species owned')}</small></div><div><b>${shinies}</b><small>✨ Shiny</small></div><div><b>${formsSeen}/${forms.length}</b><small>${L('Formas regionales', 'Regional forms')}</small></div><div><b>${s.stats.megas}/${MEGA_DEX.length}</b><small>${L('Formas Mega', 'Mega forms')}</small></div><div><b>${Object.keys(s.foes).length}</b><small>${L('Bestiario', 'Bestiary')}</small></div></div>
+          <div class="regbars">${regs.map(o => `<button class="regbar ${dexFilter === String(o.r.gen) ? 'on' : ''}" data-act="dexreg" data-v="${o.r.gen}" aria-label="${o.r.name} ${o.got}/${o.tot}"><span>${o.r.name}</span><div class="bt"><i style="width:${o.got / o.tot * 100}%"></i></div><em>${o.got}/${o.tot}</em></button>`).join('')}</div>
+          <div class="dexfilters"><input class="search" id="dex-q" type="search" placeholder="${L('Buscar por nombre o número…', 'Search by name or number…')}" value="${dexQ.replace(/"/g, '&quot;')}" aria-label="${L('Buscar en la Pokédex', 'Search the Pokédex')}">
+          <button class="dd" data-act="dexdd">${dexRegions().find(f => f[0] === dexFilter)[1]}<i></i></button><button class="dd" data-act="dextype">${dexType === 'all' ? L('Todos los tipos', 'All types') : TYPE_ES[dexType]}<i></i></button><button class="dd" data-act="dexstate">${dexStates().find(f => f[0] === dexState)[1]}<i></i></button><button class="dd" data-act="dexsort">${L('Orden', 'Sort')}: ${dexSorts().find(f => f[0] === dexSort)[1]}<i></i></button></div>
+          <div class="dexgrid" id="dexgrid">${dexGrid()}</div>`;
+        return h + '<p class="hint">' + L('Toca un Pokémon para ver su ficha: estadísticas, debilidades, evolución, ataques y dónde aparece. Los Pokémon que no tienes solo se consiguen en el gacha.', 'Tap a Pokémon to see its entry: stats, weaknesses, evolution, moves and where it appears. Pokémon you do not own can only be obtained from the gacha.') + '</p>';
       },
     },
     chal: {
-      sig: () => { const s = S(); return JSON.stringify([Core.towerUnlocked(), Core.ev && Core.ev.w, s.event, s.tower.best, Core.inChal(), Core.towerStarts().length, towerStart, Core.eventDaysLeft()]); },
+      sig: () => { const s = S(); return JSON.stringify([Core.towerUnlocked(), Core.ev && Core.ev.w, s.event, s.tower.best, s.rival, rivalAll, Core.S.stats.maxStage >= 40, Core.inChal(), Core.towerStarts().length, towerStart, Core.eventDaysLeft()]); },
       html: chalHtml,
     },
     quests: {
@@ -502,6 +625,10 @@ const UI = (() => {
         break;
       }
       case 'tower': if (Core.startTower(+v)) Audio8.play('select'); else Audio8.play('error'); break;
+      case 'tactic': if (Core.setTactic(v)) Audio8.play('swap'); break;
+      case 'rival': { const e = RIVAL_ENC.find(x => x.id === v); if (e) { if (S().rival.won[v]) { if (Core.startRival(v)) Audio8.play('select'); else Audio8.play('error'); } else rivalTalk(e, 'pre'); } return; }
+      case 'rivaltalk': { const e = RIVAL_ENC.find(x => x.id === v); if (e) rivalTalk(e, 'story'); return; }
+      case 'rivalall': rivalAll = !rivalAll; break;
       case 'evboss': if (Core.startEvent(+v)) Audio8.play('select'); else Audio8.play('error'); break;
       case 'evtask': { const t = EVENT_TASKS[+v]; if (Core.claimEventTask(+v)) { Audio8.play('ticket'); toast(L('¡Recompensa! ', 'Reward! ') + rewText(t.rew)); } break; }
       case 'evfree': { const r = Core.eventFreePull(); if (r) { Core.save(); playReveal(r, BALLS.event.icon, TICKETS.super.icon, BALLS.event.name); return; } break; }
@@ -517,11 +644,12 @@ const UI = (() => {
       case 'buytk': if (Core.buyTicket(v, +el.dataset.n)) Audio8.play('item'); else Audio8.play('error'); break;
       case 'dusttk': if (Core.dustTicket(v)) Audio8.play('ticket'); else Audio8.play('error'); break;
       case 'shop': if (Core.buyShop(v)) Audio8.play('levelup'); break;
-      case 'dexdd': {
-        const filters = [['all', L('Todos', 'All')], ['mine', L('Solo los míos', 'Mine only')]].concat(REGIONS.filter(r => r.gen).map(r => [String(r.gen), r.name]));
-        openDD(el, filters, dexFilter, val => { dexFilter = val; sig = ''; refresh(true); });
-        return;
-      }
+      case 'dexdd': openDD(el, dexRegions(), dexFilter, val => { dexFilter = val; sig = ''; refresh(true); }); return;
+      case 'dextype': openDD(el, [['all', L('Todos los tipos', 'All types')]].concat(Object.keys(TYPE_NAMES).map(t => [t, TYPE_ES[t]])), dexType, val => { dexType = val; sig = ''; refresh(true); }); return;
+      case 'dexstate': openDD(el, dexStates(), dexState, val => { dexState = val; sig = ''; refresh(true); }); return;
+      case 'dexsort': openDD(el, dexSorts(), dexSort, val => { dexSort = val; sig = ''; refresh(true); }); return;
+      case 'dexreg': dexFilter = dexFilter === v ? 'all' : v; sig = ''; break;
+      case 'dexinfo': dexModal(+v); return;
       case 'mon': monModal(v); return;
       case 'seen': toast(DEX[v].name + L(': lo has visto, pero aún no lo tienes', ': you have seen it, but do not own it yet')); return;
       case 'noown': toast(L('Solo se consigue en el gacha', 'It can only be obtained from the gacha')); return;
@@ -594,14 +722,21 @@ const UI = (() => {
     $('#it-list').onclick = e => { const b = e.target.closest('.it'); if (!b) return; Core.equip(key, +b.dataset.u); Audio8.play('item'); Core.save(); closeModal(); refresh(true); };
   }
   function bagModal() {
-    const s = S(), list = s.inv.slice().sort((a, b) => b.rar - a.rar || a.id.localeCompare(b.id));
+    const s = S(), list = s.inv.slice().sort((a, b) => b.rar - a.rar || a.id.localeCompare(b.id)), fg = Core.fuseGroups();
     openModal(`<h2>${L('Mochila', 'Bag')} · ${list.length} ${L('objetos', 'items')}</h2>
       <div class="row" style="margin:0 0 8px"><button class="btn small" id="bag-spare">${L('Reciclar comunes sin usar', 'Recycle unused commons')}</button><button class="btn small primary" id="bag-buy" ${s.dust >= ITEM_DUST_COST ? '' : 'disabled'}>${L('Objeto al azar', 'Random item')} ${ico('dust', 12)} ${ITEM_DUST_COST}</button></div>
+      <div class="row" style="margin:0 0 8px"><button class="btn small" id="bag-craft" ${s.dust >= ITEM_CRAFT_COST ? '' : 'disabled'}>${L('Taller: elegir objeto', 'Workshop: pick an item')} ${ico('dust', 12)} ${ITEM_CRAFT_COST}</button></div>
+      ${fg.length ? `<div class="fuselist"><b>${L('Fusión', 'Fusion')}</b> <small>${L('3 objetos iguales sin usar → 1 de la rareza siguiente', '3 identical unused items → 1 of the next rarity')}</small>${fg.map(g => `<button class="btn small ${s.dust >= g.cost ? 'primary' : ''}" data-fuse="${g.id}|${g.rar}|${g.type}" ${s.dust >= g.cost ? '' : 'disabled'}>${ico(HELD[g.id].icon, 16)} ${itemName(g)} ${ITEM_RAR[g.rar].name}→${ITEM_RAR[g.rar + 1].name} · ${ico('dust', 12)} ${g.cost}</button>`).join('')}</div>` : ''}
       <p class="hint" style="margin:0 0 6px">${L('Polvo estelar', 'Stardust')}: ${ico('dust', 14)} ${fmt(s.dust)} · ${L('Toca un objeto para reciclarlo.', 'Tap an item to recycle it.')}</p>
       <div class="pickwrap itemlist2" id="bag-list">${list.length ? list.map(it => { const h = holderOf(it.u); return itemCard(it, `<em>${h ? L('Lo lleva ', 'Held by ') + DEX[h.dex].name : '+' + ITEM_RAR[it.rar].dust + L(' polvo', ' stardust')}</em>`); }).join('') : '<p class="hint">' + L('Aún no tienes objetos. Los sueltan los jefes y, con suerte, los Pokémon salvajes.', 'You have no items yet. Bosses drop them and, with luck, wild Pokémon.') + '</p>'}</div>
       <div class="row"><button class="btn" id="bag-x">${L('Cerrar', 'Close')}</button></div>`);
     $('#modal-box').classList.add('wide');
     $('#bag-x').onclick = closeModal;
+    $$('[data-fuse]').forEach(b => b.onclick = () => { const [id, rar, type] = b.dataset.fuse.split('|'); const it = Core.fuseItem(id, +rar, type); if (it) { Audio8.play('legend'); banner(L('¡Fusión! ', 'Fusion! ') + itemName(it), ITEM_RAR[it.rar].name + ' · ' + itemDesc(it), ITEM_RAR[it.rar].color); Core.save(); bagModal(); refresh(true); } else Audio8.play('error'); });
+    $('#bag-craft').onclick = e => openDD(e.currentTarget, Object.keys(HELD).map(id => [id, HELD[id].name + ' · ' + HELD[id].desc(HELD[id].v, { type: 'normal' }).slice(0, 48)]), null, id => {
+      const make = type => { const it = Core.craftItem(id, type); if (it) { Audio8.play('item'); toast(L('Fabricado: ', 'Crafted: ') + itemName(it)); Core.save(); bagModal(); refresh(true); } else Audio8.play('error'); };
+      if (id === 'orbe') setTimeout(() => openDD($('#bag-craft'), Object.keys(TYPE_NAMES).map(t => [t, TYPE_NAMES[t]]), null, make), 30); else make();
+    });
     $('#bag-spare').onclick = () => { const r = Core.recycleSpare(); Audio8.play(r.n ? 'ticket' : 'error'); if (r.n) toast(L(`${r.n} objeto${r.n > 1 ? 's reciclados' : ' reciclado'}: +${r.d} polvo`, `Recycled ${r.n} item${r.n > 1 ? 's' : ''}: +${r.d} stardust`)); Core.save(); bagModal(); refresh(true); };
     $('#bag-buy').onclick = () => { const it = Core.buyItem(); if (it) { Audio8.play('item'); banner(L('¡', '') + itemName(it) + '!', ITEM_RAR[it.rar].name + ' · ' + itemDesc(it), ITEM_RAR[it.rar].color); Core.save(); bagModal(); refresh(true); } };
     $('#bag-list').onclick = e => {
@@ -627,7 +762,7 @@ const UI = (() => {
     { sel: '[data-act="best"]', text: L('Cada Pokémon tiene tipo, naturaleza e IVs. Los golpes súper eficaces hacen x2: mira las etiquetas ▲ de cada tarjeta, y «Mejor equipo» elige solo a los más eficaces para la ruta.', 'Every Pokémon has a type, nature and IVs. Super effective hits deal x2: look at the ▲ tags on each card, and “Best team” picks only the most effective ones for the route.'), next: 1 },
     { sel: '.itemchip', text: L('Cada Pokémon puede llevar un objeto. Los jefes los sueltan y están en la Mochila.', 'Each Pokémon can hold an item. Bosses drop them and they are in the Bag.'), next: 1 },
     { sel: '#skills', text: L('Tres habilidades activas: Furia (más daño), Fiebre del Oro (más monedas) y Lluvia de Tickets. Úsalas cuando estén listas.', 'Three active skills: Rage (more damage), Gold Rush (more coins) and Ticket Rain. Use them when ready.'), next: 1 },
-    { sel: '#tabs [data-tab="chal"]', text: L('En Retos hay un evento cada semana con un tipo protagonista (bonus de daño, jefe, misiones y una bola propia) y la Torre de batalla, un duelo tras otro con reglas especiales.', 'Challenges has a weekly event with a featured type (damage bonus, boss, quests and its own ball) and the Battle Tower, one duel after another with special rules.'), next: 1 },
+    { sel: '#tabs [data-tab="chal"]', text: L('En Retos está Nico, tu rival (duelos con historia), un evento cada semana con un tipo protagonista (bonus de daño, jefe, misiones y una bola propia) y la Torre de batalla, un duelo tras otro con reglas especiales.', 'Challenges has Nico, your rival (story duels), a weekly event with a featured type (damage bonus, boss, quests and its own ball) and the Battle Tower, one duel after another with special rules.'), next: 1 },
     { sel: '#tabs [data-tab="quests"]', text: L('Las misiones diarias y semanales, los logros y la recompensa diaria te dan gemas y tickets. ¡Entra cada día!', 'Daily and weekly quests, achievements and the daily reward give you gems and tickets. Come back every day!'), next: 1 },
     { sel: '#tabs [data-tab="league"]', text: L('Al llegar a la etapa 60 podrás entrar en la Liga: reinicias el viaje a cambio de bonus permanentes y una tienda de mejoras.', 'At stage 60 you can enter the League: you restart the journey in exchange for permanent bonuses and an upgrade shop.'), next: 1 },
     { text: L('¡Listo! Ahora te toca a ti: llega lo más lejos que puedas, colecciona los ' + POKEDEX.length + ' Pokémon y completa la Pokédex. Puedes repetir este tutorial desde Ajustes.', 'All set! Now it is your turn: get as far as you can, collect all ' + POKEDEX.length + ' Pokémon and complete the Pokédex. You can repeat this tutorial from Settings.'), next: 1, last: 1 },
@@ -986,7 +1121,12 @@ const UI = (() => {
     const tog = (k, label, sub) => `<div class="setrow"><span class="sl"><b>${label}</b><small>${sub}</small></span><button class="tog ${st[k] ? 'on' : ''}" data-k="${k}"><i></i></button></div>`;
     openModal(`<div class="set"><h2>${ico('gear', 32)} ${L('Ajustes', 'Settings')}</h2>
       <div class="sset"><h4>${L('Idioma', 'Language')}</h4><div class="seg"><button data-lang="es" class="${I18N.lang === 'es' ? 'on' : ''}">Español</button><button data-lang="en" class="${I18N.lang === 'en' ? 'on' : ''}">English</button></div></div>
-      <div class="sset"><h4>${L('Sonido', 'Sound')}</h4>${slider('music', L('Música', 'Music'), 'sound')}${slider('sfx', L('Efectos', 'Effects'), 'ticket')}</div>
+      <div class="sset"><h4>${L('Sonido', 'Sound')}</h4>${slider('master', L('Volumen general', 'Master volume'), 'gear')}${slider('music', L('Música', 'Music'), 'sound')}${slider('sfx', L('Efectos', 'Effects'), 'ticket')}${slider('combat', L('Sonidos de combate', 'Combat sounds'), 'fist')}
+        <div class="setrow col"><span class="sl"><b>${L('Estilo de la música', 'Music style')}</b><small>${L('Cambia los instrumentos de todas las pistas', 'Changes the instruments of every track')}</small></span><div class="seg a11y" role="group">${[['warm', L('Cálido', 'Warm')], ['retro', L('Retro 8 bits', 'Retro 8-bit')], ['dream', L('Ensueño', 'Dreamy')]].map(([v, l]) => `<button data-sk="mstyle" data-sv="${v}" class="${st.mstyle === v ? 'on' : ''}" aria-pressed="${st.mstyle === v}">${l}</button>`).join('')}</div></div>
+        <div class="setrow col"><span class="sl"><b>${L('Qué suena', 'What plays')}</b><small>${st.mmode === 'pin' ? L('Siempre la misma pista (elígela en la sala de música)', 'Always the same track (choose it in the music room)') : st.mmode === 'shuffle' ? L('Cambia de pista cada dos vueltas; los jefes y duelos mantienen la suya', 'Switches track every two loops; bosses and duels keep theirs') : L('Una pista por región, y una propia para jefes, duelos, Torre y eventos', 'One track per region, plus their own for bosses, duels, the Tower and events')}</small></span><div class="seg a11y" role="group">${[['region', L('Por región', 'By region')], ['shuffle', L('Aleatorio', 'Shuffle')], ['pin', L('Pista fija', 'Pinned track')]].map(([v, l]) => `<button data-sk="mmode" data-sv="${v}" class="${st.mmode === v ? 'on' : ''}" aria-pressed="${st.mmode === v}">${l}</button>`).join('')}</div></div>
+        ${tog('bgmute', L('Silenciar en segundo plano', 'Mute in the background'), L('Pausa la música cuando cambias de pestaña del navegador', 'Pauses the music when you switch browser tabs'))}
+        ${tog('captions', L('Subtítulos de sonidos', 'Sound captions'), L('Muestra un aviso en pantalla con los sonidos importantes (jefes, premios, derrotas…)', 'Shows an on-screen caption for important sounds (bosses, rewards, defeats…)'))}
+        <div class="row" style="margin:6px 0 0"><button class="btn primary" id="s-music">${ico('sound', 16)} ${L('Sala de música', 'Music room')} · ${Core.tracksUnlocked()}/${MUSIC_LIST.length}</button></div></div>
       <div class="sset"><h4>${L('Combate', 'Combat')}</h4>${tog('nums', L('Números de daño', 'Damage numbers'), L('Muestra el daño y las monedas sobre el enemigo', 'Shows damage and coins over the enemy'))}${tog('bigNums', L('Números grandes', 'Big numbers'), L('Más tamaño para verlos mejor', 'Bigger size to see them better'))}${tog('shake', L('Temblor de pantalla', 'Screen shake'), L('En críticos y jefes', 'On crits and bosses'))}${tog('autoBoss', L('Reintentar jefes automáticamente', 'Auto-retry bosses'), L('Vuelve a retar al jefe cuando tu equipo tenga fuerza para vencerlo', 'Challenges the boss again when your team is strong enough to beat it'))}</div>
       <div class="sset"><h4>${L('Accesibilidad', 'Accessibility')}</h4>
         <div class="setrow col"><span class="sl"><b>${L('Tamaño del texto', 'Text size')}</b></span><div class="seg a11y" role="group" aria-label="${L('Tamaño del texto', 'Text size')}">${[[1, L('Normal', 'Normal')], [1.15, L('Grande', 'Large')], [1.3, L('Muy grande', 'Extra large')]].map(([v, l]) => `<button data-ak="text" data-av="${v}" class="${+a11y.text === v ? 'on' : ''}" aria-pressed="${+a11y.text === v}">${l}</button>`).join('')}</div></div>
@@ -1005,12 +1145,14 @@ const UI = (() => {
       <p class="fine">${L('Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Escenarios e iconos adaptados de pokesurvivor (MIT) · Pokémon © Nintendo/Creatures/GAME FREAK', 'Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Scenes and icons adapted from pokesurvivor (MIT) · Pokémon © Nintendo/Creatures/GAME FREAK')}</p></div>`);
     $$('[data-ak]').forEach(b => b.onclick = () => { a11y[b.dataset.ak] = b.dataset.ak === 'text' ? +b.dataset.av : b.dataset.av; Core.save(); A11Y.apply(a11y); Audio8.play('click'); settings(); });
     $$('[data-a11y]').forEach(b => b.onclick = () => { a11y[b.dataset.a11y] = !a11y[b.dataset.a11y]; Core.save(); A11Y.apply(a11y); Audio8.play('click'); settings(); refresh(true); });
+    $$('[data-sk]').forEach(b => b.onclick = () => { st[b.dataset.sk] = b.dataset.sv; Core.save(); Audio8.play('click'); if (b.dataset.sk === 'mstyle') Audio8.restyle(); else Audio8.remode(); settings(); });
+    $('#s-music').onclick = musicModal;
     $$('[data-lang]').forEach(b => b.onclick = () => { S().settings.lang = b.dataset.lang; Core.save(); location.reload(); });
     $$('.slider').forEach(sl => {
       const k = sl.dataset.k, trk = sl.querySelector('.trk');
       const set = e => { const r = trk.getBoundingClientRect(), v = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); st[k] = Math.round(v * 20) / 20; sl.style.setProperty('--v', st[k]); sl.querySelector('em').textContent = Math.round(st[k] * 100) + '%'; Audio8.setVolumes(); };
       sl.onpointerdown = e => { sl.setPointerCapture(e.pointerId); set(e); sl.onpointermove = set; };
-      sl.onpointerup = () => { sl.onpointermove = null; if (k === 'sfx') Audio8.play('coin'); Core.save(); };
+      sl.onpointerup = () => { sl.onpointermove = null; if (k === 'sfx' || k === 'master') Audio8.play('coin'); else if (k === 'combat') Audio8.play('boom'); Core.save(); };
     });
     $$('.tog[data-k]').forEach(t => t.onclick = () => { st[t.dataset.k] = !st[t.dataset.k]; t.classList.toggle('on', st[t.dataset.k]); Audio8.play('click'); Core.save(); applySettings(); });
     const paintNtf = () => {
@@ -1044,11 +1186,24 @@ const UI = (() => {
       $('#w-yes').onclick = () => { Core.wipe(); location.reload(); };
     };
   }
+  function musicModal() {
+    const st = S().settings, now = Audio8.auditioning;
+    openModal(`<h2>${ico('sound', 32)} ${L('Sala de música', 'Music room')} <small style="color:var(--dim)">${Core.tracksUnlocked()}/${MUSIC_LIST.length}</small></h2>
+      <p class="hint">${L('Escucha las pistas que has desbloqueado. La estrella fija una como música de fondo. Las demás se desbloquean jugando.', 'Listen to the tracks you have unlocked. The star pins one as your background music. The rest unlock as you play.')}${st.music <= 0 ? ' <b>' + L('La música está en 0%: súbela en Ajustes.', 'Music is at 0%: raise it in Settings.') + '</b>' : ''}</p>
+      <div class="trklist">${MUSIC_LIST.map(t => {
+        const ok = Core.musicUnlocked(t), pinned = st.mmode === 'pin' && st.mpin === t.id;
+        return `<div class="trk-row ${ok ? '' : 'lock'}"><span class="tn">${ok ? t.name : '???'}</span>${ok ? `<button class="btn small ${now === t.id ? 'primary' : ''}" data-play="${t.id}" aria-label="${now === t.id ? L('Parar', 'Stop') : L('Escuchar', 'Listen')} ${t.name}">${now === t.id ? '■' : '▶'}</button><button class="btn small ${pinned ? 'primary' : ''}" data-pin="${t.id}" aria-pressed="${pinned}" aria-label="${L('Fijar', 'Pin')} ${t.name}" title="${L('Fijar como música de fondo', 'Pin as background music')}">${ico('star', 12)}</button>` : `<small>${t.hint}</small>`}</div>`;
+      }).join('')}</div>
+      <div class="row"><button class="btn" id="mr-x">${L('Volver', 'Back')}</button></div>`);
+    $$('[data-play]').forEach(b => b.onclick = () => { if (Audio8.auditioning === b.dataset.play) Audio8.endAudition(); else Audio8.audition(b.dataset.play); musicModal(); });
+    $$('[data-pin]').forEach(b => b.onclick = () => { st.mmode = 'pin'; st.mpin = b.dataset.pin; Core.save(); Audio8.play('select'); Audio8.endAudition(); Audio8.remode(); musicModal(); });
+    $('#mr-x').onclick = () => { Audio8.endAudition(); settings(); };
+  }
   function applySettings() { const l = $('#dmg-layer'); if (l) { l.classList.toggle('big', S().settings.bigNums !== false); } }
 
   // ---------------- modales, avisos ----------------
   function openModal(html) { $('#modal-box').innerHTML = html; $('#modal').classList.remove('hidden'); A11Y.pass($('#modal-box')); }
-  function closeModal() { $('#modal').classList.add('hidden'); $('#modal-box').classList.remove('wide'); monCv = null; closeDD(); }
+  function closeModal() { Audio8.endAudition(); $('#modal').classList.add('hidden'); $('#modal-box').classList.remove('wide'); monCv = null; closeDD(); }
   let bannerT = null;
   function banner(title, sub, color) {
     const b = $('#banner');
@@ -1060,10 +1215,19 @@ const UI = (() => {
     clearTimeout(bannerT); bannerT = setTimeout(() => b.classList.add('hidden'), 2600);
   }
   let toastT = null;
+  const CUES = { boss: ['¡Jefe!', 'Boss!'], duel: ['¡Duelo!', 'Duel!'], legend: ['¡Legendario!', 'Legendary!'], rare: ['¡Raro!', 'Rare!'], item: ['Objeto', 'Item'], ticket: ['Tickets', 'Tickets'], levelup: ['Nivel', 'Level up'], evolve: ['Evolución', 'Evolution'], death: ['Derrota', 'Defeat'], win: ['Victoria', 'Victory'], trainer: ['Entrenador', 'Trainer'], unlock: ['Desbloqueado', 'Unlocked'], pop: ['Gacha', 'Gacha'] };
+  let cueT = 0;
+  function cue(name) {
+    const c = CUES[name]; if (!c || !S() || !S().settings.captions) return;
+    const el = $('#cue'); if (!el) return;
+    el.textContent = '♪ ' + L(c[0], c[1]); el.classList.remove('hidden');
+    clearTimeout(cueT); cueT = setTimeout(() => el.classList.add('hidden'), 1500);
+  }
   function toast(html) { const t = $('#toast'); t.innerHTML = html; t.classList.remove('hidden'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('hidden'), 2000); }
 
   function bind() {
     $('#tab-body').addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && !el.disabled) act(el); });
+    $('#tab-body').addEventListener('input', e => { if (e.target.id === 'dex-q') { dexQ = e.target.value; const g = $('#dexgrid'); if (g) g.innerHTML = dexGrid(); } });
     $$('#tabs button').forEach(b => b.onclick = () => { Audio8.play('click'); setTab(b.dataset.tab); });
     $$('[data-ico]').forEach(s => s.innerHTML = ico(s.dataset.ico, 24));
     $$('#tabs button').forEach(b => { b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', b.classList.contains('on')); });
@@ -1089,5 +1253,5 @@ const UI = (() => {
     $$('#skills .skill').forEach(b => b.onclick = e => { e.stopPropagation(); if (Core.useSkill(b.dataset.sk)) { Audio8.play(b.dataset.sk === 'rage' ? 'charge' : 'ticket'); banner(SKILLS[b.dataset.sk].name + '!', SKILLS[b.dataset.sk].desc, '#ff8040'); } });
   }
 
-  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, rewText, tutStart, autoFill, monModal, mapModal };
+  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, rewText, rivalTalk, cue, tutStart, autoFill, monModal, mapModal };
 })();

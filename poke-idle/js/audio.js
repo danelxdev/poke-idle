@@ -2,7 +2,10 @@
 'use strict';
 
 const Audio8 = (() => {
-  let ctx = null, master = null, sfxGain = null, musGain = null, noiseBuf = null;
+  let ctx = null, master = null, sfxGain = null, musGain = null, cbGain = null, out = null, noiseBuf = null;
+  let cueFn = null, unlockFn = () => [], wantName = null, wantPrio = 0, shuffleCur = null, audition_ = null;
+  const COMBAT = new Set(['shoot', 'beam', 'charge', 'hit', 'kill', 'slash', 'dash', 'zap', 'boom', 'explode', 'hurt', 'break']);
+  const cfg = () => (Save.d ? Save.d.settings : { sfx: 0.7, music: 0.4, master: 1, combat: 0.8, mstyle: 'warm', mmode: 'region', mpin: 'r0', bgmute: true });
   let musicTimer = null, musicStep = 0, musicNext = 0, track = null;
   const last = {};
 
@@ -13,6 +16,7 @@ const Audio8 = (() => {
     } catch (e) { return; }
     master = ctx.createGain(); master.gain.value = 0.8; master.connect(ctx.destination);
     sfxGain = ctx.createGain(); sfxGain.connect(master);
+    cbGain = ctx.createGain(); cbGain.connect(sfxGain);
     musGain = ctx.createGain(); musGain.connect(master);
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 0.6, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0);
@@ -22,8 +26,10 @@ const Audio8 = (() => {
   function resume() { init(); if (ctx && ctx.state === 'suspended') ctx.resume(); }
   function setVolumes() {
     if (!ctx) return;
-    const s = Save.d ? Save.d.settings : { sfx: 0.7, music: 0.4 };
+    const s = cfg();
+    master.gain.value = 0.8 * (s.master === undefined ? 1 : s.master);
     sfxGain.gain.value = s.sfx * 0.5;
+    cbGain.gain.value = s.combat === undefined ? 0.8 : s.combat;
     musGain.gain.value = s.music * 0.5;
   }
 
@@ -36,7 +42,7 @@ const Audio8 = (() => {
     if (f1) o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
     g.gain.setValueAtTime(vol, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-    o.connect(g); g.connect(dest || sfxGain);
+    o.connect(g); g.connect(dest || out || sfxGain);
     o.start(t); o.stop(t + dur + 0.02);
   }
   function noise(dur, vol, freq, when) {
@@ -46,13 +52,15 @@ const Audio8 = (() => {
     const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = freq || 2000;
     const g = ctx.createGain();
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-    s.connect(f); f.connect(g); g.connect(sfxGain);
+    s.connect(f); f.connect(g); g.connect(out || sfxGain);
     s.start(t); s.stop(t + dur);
   }
 
   // Limita la frecuencia de cada efecto para no saturar
   function play(name) {
+    if (cueFn) { try { cueFn(name); } catch (e) { /* subtítulos opcionales */ } }
     if (!ctx) return;
+    out = COMBAT.has(name) ? cbGain : sfxGain;
     const now = ctx.currentTime;
     const gap = { shoot: 0.07, hit: 0.05, xp: 0.04, coin: 0.05, kill: 0.04, beam: 0.2, slash: 0.07, zap: 0.08, boom: 0.06, step: 0.2 }[name] || 0;
     if (gap && last[name] && now - last[name] < gap) return;
@@ -99,6 +107,9 @@ const Audio8 = (() => {
       case 'boom': noise(0.3, 0.18, 900); tone('sawtooth', 140, 40, 0.25, 0.08); break;
       case 'zap': noise(0.12, 0.12, 6000); tone('square', 900, 200, 0.12, 0.05); break;
       case 'break': noise(0.12, 0.12, 2500); break;
+      case 'trainer': [392, 523, 659].forEach((f, i) => tone('square', f, 0, 0.1, 0.07, now + i * 0.07)); break;
+      case 'duel': [196, 196, 262, 330, 392].forEach((f, i) => tone('square', f, 0, 0.14, 0.09, now + i * 0.1)); tone('sawtooth', 98, 0, 0.7, 0.1, now); break;
+      case 'unlock': [659, 880, 1175, 1568].forEach((f, i) => tone('triangle', f, 0, 0.14, 0.09, now + i * 0.07)); break;
       case 'lose': [440, 370, 311, 220].forEach((f, i) => tone('square', f, 0, 0.3, 0.1, now + i * 0.22)); break;
       default: break;
     }
@@ -134,6 +145,13 @@ const Audio8 = (() => {
     r8: { bpm: 110, root: 62, scale: 'dorian', prog: [0, 3, 6, 0, 0, 3, 4, 6], seed: 109, mel: 'bounce', tone: 'soft', arp: 1, drums: 'soft' },
     r9: { bpm: 96, root: 54, scale: 'harm', prog: P_M3, seed: 120, mel: 'calm', tone: 'soft', arp: 1, drums: 'soft' },
     boss: { bpm: 138, root: 57, scale: 'harm', prog: [0, 5, 6, 4, 0, 5, 6, 4], seed: 131, mel: 'drive', tone: 'bright', arp: 1, drums: 'drive' },
+    rival: { bpm: 132, root: 55, scale: 'dorian', prog: [0, 3, 4, 0, 5, 3, 4, 4], seed: 153, mel: 'drive', tone: 'bright', arp: 1, drums: 'drive' },
+    rival2: { bpm: 152, root: 50, scale: 'harm', prog: [0, 3, 5, 4, 0, 6, 5, 4], seed: 164, mel: 'drive', tone: 'bright', arp: 1, drums: 'drive' },
+    trainer: { bpm: 118, root: 62, scale: 'mixo', prog: P_D, seed: 175, mel: 'bounce', tone: 'bright', arp: 1, drums: 'soft' },
+    tower: { bpm: 94, root: 57, scale: 'harm', prog: P_M3, seed: 186, mel: 'calm', tone: 'soft', arp: 1, drums: '' },
+    event: { bpm: 116, root: 64, scale: 'major', prog: P_A, seed: 197, mel: 'bounce', tone: 'soft', arp: 1, drums: 'soft' },
+    league: { bpm: 100, root: 62, scale: 'major', prog: P_C, seed: 208, mel: 'calm', tone: 'soft', arp: 1, drums: 'soft' },
+    nest: { bpm: 76, root: 65, scale: 'major', prog: P_B, seed: 219, mel: 'calm', tone: 'soft', arp: 1, drums: '' },
     boss2: { bpm: 146, root: 52, scale: 'harm', prog: [0, 1, 0, 5, 0, 6, 5, 4], seed: 142, mel: 'drive', tone: 'bright', arp: 1, drums: 'drive' },
   };
   const rngOf = seed => () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
@@ -243,6 +261,8 @@ const Audio8 = (() => {
     lp.connect(revIn); revIn.connect(conv); conv.connect(rlp); rlp.connect(master);
   }
   let cur = { bus: null, echoIn: null };
+  const styleOf = () => { const m = cfg().mstyle; return m === 'retro' || m === 'dream' ? m : 'warm'; };
+  const tempoOf = () => (styleOf() === 'dream' ? 0.82 : 1);
   function newTrack(bpm) {
     const bus = ctx.createGain(); bus.gain.setValueAtTime(0.0001, ctx.currentTime); bus.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.9); bus.connect(musGain);
     const echoIn = ctx.createGain(), dl = ctx.createDelay(1.5), fb = ctx.createGain(), elp = ctx.createBiquadFilter(), out = ctx.createGain();
@@ -263,43 +283,84 @@ const Audio8 = (() => {
     if (cur.bus) { const old = cur, t = ctx.currentTime; old.bus.gain.cancelScheduledValues(t); old.bus.gain.setValueAtTime(old.bus.gain.value, t); old.bus.gain.linearRampToValueAtTime(0.0001, t + 0.8); setTimeout(() => { try { old.bus.disconnect(); old.nodes.forEach(n => n.disconnect()); } catch (e) { /* ya desconectado */ } }, 2500); }
     cur = { bus: null, echoIn: null };
     if (!name) return;
-    const T = TRACKS[name], nt = newTrack(T.bpm);
+    const T = TRACKS[name], nt = newTrack(T.bpm * tempoOf());
+    revIn.gain.value = { warm: 0.3, retro: 0.05, dream: 0.6 }[styleOf()];
     cur = { bus: nt.bus, echoIn: nt.echoIn, nodes: nt.nodes };
     musicStep = 0;
     musicNext = ctx.currentTime + 0.15;
-    musicTimer = setInterval(schedule, 50);
+    musicTimer = setInterval(tickMusic, 50);
   }
+  function tickMusic() {
+    schedule();
+    if (cfg().mmode === 'shuffle' && !audition_ && shuffleCur && track === shuffleCur && musicStep >= 512) { shuffleCur = nextShuffle(); music(shuffleCur); }   // cambia de tema cada dos vueltas
+  }
+  // ---- elección de la pista según el modo (por región, aleatorio o fija) ----
+  function nextShuffle() {
+    const ok = unlockFn().filter(id => TRACKS[id] && !['menu', 'boss', 'boss2', 'rival', 'rival2'].includes(id) && id !== shuffleCur);
+    return ok.length ? ok[Math.floor(Math.random() * ok.length)] : (wantName || 'r0');
+  }
+  function applyMode() {
+    if (!ctx || audition_ || !wantName) return;
+    const s = cfg();
+    let t = wantName;
+    if (s.mmode === 'pin' && TRACKS[s.mpin] && unlockFn().includes(s.mpin)) t = s.mpin;
+    else if (s.mmode === 'shuffle' && wantPrio === 0 && wantName !== 'menu') { if (!shuffleCur || !unlockFn().includes(shuffleCur)) shuffleCur = nextShuffle(); t = shuffleCur; }
+    music(t);
+  }
+  function want(name, prio) { wantName = name; wantPrio = prio | 0; init(); applyMode(); }
+  function audition(id) { init(); if (!ctx || !TRACKS[id]) return; audition_ = id; track = null; music(id); }
+  function endAudition() { if (!audition_) return; audition_ = null; track = null; if (wantName) applyMode(); }
+  function restyle() { if (!ctx) return; const t = track; track = null; if (audition_) music(audition_); else if (t) music(t); }
+  function setHidden(h) { if (!ctx) return; if (h && cfg().bgmute) ctx.suspend(); else if (ctx.state === 'suspended') ctx.resume(); }
   function schedule(limit) {
     if (!ctx || !track || !cur.bus) return;
-    const C = compose(track), T = C.T, stepT = 60 / T.bpm / 4, dest = cur.bus, bright = T.tone === 'bright';
+    const C = compose(track), T = C.T, sty = styleOf(), stepT = 60 / (T.bpm * tempoOf()) / 4, dest = cur.bus, bright = T.tone === 'bright';
     while (musicNext < (limit !== undefined ? limit : ctx.currentTime + 0.3)) {
       const i = musicStep % 256, bar = Math.floor(i / 16), st = i % 16, when = musicNext, cd = C.chordRoot(bar);
       const dyn = 0.85 + 0.15 * Math.sin(bar / 16 * Math.PI * 2);               // el volumen respira a lo largo de la pieza
-      // colchón de acordes (cuerdas suaves): al inicio de cada compás
-      if (st === 0) {
-        const dur = stepT * 15.5;
-        for (const [k, off] of [[0, 0], [2, 0], [4, 0], [6, 0]]) {
-          if (k === 6 && T.scale !== 'major' && T.scale !== 'mixo') continue;
-          voice({ f: MID(C.deg(cd + k) - 12 + off), dur, vol: (k === 6 ? 0.018 : 0.034) * dyn, when, type: 'triangle', a: 0.45, rel: 0.7, lp: 1300, sus: 0.9, dest, det: k * 3 - 4 });
-        }
-      }
-      // melodía principal
       const n = C.mel[i];
-      if (n) {
-        const dur = n.len * stepT * 0.96, accent = st === 0 ? 1.12 : st === 8 ? 1.0 : 0.88;
-        if (bright) { voice({ f: MID(n.m), dur, vol: 0.1 * accent * dyn, when, type: 0.25, a: 0.012, lp: 2600, vib: 8, echo: 0.28, dest }); voice({ f: MID(n.m), dur, vol: 0.05 * accent * dyn, when, type: 'triangle', a: 0.02, lp: 2200, det: 5, dest }); }
-        else { voice({ f: MID(n.m), dur, vol: 0.14 * accent * dyn, when, type: 'triangle', a: 0.02, lp: 3200, vib: 7, echo: 0.3, dest, sus: 0.7 }); voice({ f: MID(n.m), dur, vol: 0.035 * accent * dyn, when, type: 'sine', a: 0.03, lp: 5000, det: 6, dest }); }
+      if (sty === 'retro') {
+        // consola de 8 bits: pulsos secos, bajo triangular, arpegio rápido y percusión de ruido, sin reverberación
+        if (n) voice({ f: MID(n.m), dur: n.len * stepT * 0.92, vol: 0.085 * (st === 0 ? 1.1 : 0.9) * dyn, when, type: bright ? 0.125 : 0.25, a: 0.004, lp: 6500, sus: 0.85, rel: 0.03, dest });
+        if (st % 4 === 0) voice({ f: MID(C.deg(cd) - 24), dur: stepT * 3.3, vol: 0.2 * dyn, when, type: 'triangle', a: 0.004, lp: 900, sus: 0.85, rel: 0.03, dest });
+        if (T.arp || bright) { const seq = [0, 2, 4, 2]; voice({ f: MID(C.deg(cd + seq[st % 4]) + 12), dur: stepT * 0.8, vol: 0.03 * dyn, when, type: 0.125, a: 0.003, lp: 5200, sus: 0.4, rel: 0.02, dest }); }
+        if (T.drums) { if (st === 0 || st === 8) kick(when, dest, 0.22); if (st === 4 || st === 12) noiseHit(when, dest, 0.09, 0.09, 'bandpass', 3200); if (st % 2 === 0) noiseHit(when, dest, 0.02, 0.03, 'highpass', 7000); }
+      } else if (sty === 'dream') {
+        // sueño: cuerdas anchas, melodía de seno con mucho eco y campanitas
+        if (st === 0) {
+          const dur = stepT * 15.7;
+          for (const k of [0, 2, 4, 6]) voice({ f: MID(C.deg(cd + k) - 12), dur, vol: 0.05 * dyn, when, type: k % 4 ? 'sine' : 'triangle', a: 0.9, rel: 1.1, lp: 1500, sus: 0.95, dest, det: k * 3 - 4 });
+        }
+        if (n) { const dur = n.len * stepT * 1.05, ac = st === 0 ? 1.1 : 0.9; voice({ f: MID(n.m), dur, vol: 0.12 * ac * dyn, when, type: 'sine', a: 0.05, rel: 0.3, lp: 3800, vib: 5, echo: 0.55, dest }); voice({ f: MID(n.m) * 2, dur: dur * 0.6, vol: 0.02 * ac * dyn, when, type: 'sine', a: 0.02, lp: 6000, echo: 0.6, dest }); }
+        if (st % 8 === 0) voice({ f: MID(C.deg(cd) - 24), dur: stepT * 7, vol: 0.2 * dyn, when, type: 'sine', a: 0.03, lp: 500, sus: 0.8, dest });
+        if (st % 4 === 2) { const seq = [0, 2, 4, 7, 4, 2], k = seq[Math.floor(i / 4) % seq.length]; voice({ f: MID(C.deg(cd + k) + 12), dur: stepT * 2.2, vol: 0.035 * dyn, when, type: 'sine', a: 0.003, lp: 6000, sus: 0.2, echo: 0.6, dest }); }
+        if (T.drums && st === 0) noiseHit(when, dest, 0.02, 0.4, 'highpass', 5000);
+      } else {
+        // colchón de acordes (cuerdas suaves): al inicio de cada compás
+        if (st === 0) {
+          const dur = stepT * 15.5;
+          for (const [k, off] of [[0, 0], [2, 0], [4, 0], [6, 0]]) {
+            if (k === 6 && T.scale !== 'major' && T.scale !== 'mixo') continue;
+            voice({ f: MID(C.deg(cd + k) - 12 + off), dur, vol: (k === 6 ? 0.018 : 0.034) * dyn, when, type: 'triangle', a: 0.45, rel: 0.7, lp: 1300, sus: 0.9, dest, det: k * 3 - 4 });
+          }
+        }
+        // melodía principal
+        if (n) {
+          const dur = n.len * stepT * 0.96, accent = st === 0 ? 1.12 : st === 8 ? 1.0 : 0.88;
+          if (bright) { voice({ f: MID(n.m), dur, vol: 0.1 * accent * dyn, when, type: 0.25, a: 0.012, lp: 2600, vib: 8, echo: 0.28, dest }); voice({ f: MID(n.m), dur, vol: 0.05 * accent * dyn, when, type: 'triangle', a: 0.02, lp: 2200, det: 5, dest }); }
+          else { voice({ f: MID(n.m), dur, vol: 0.14 * accent * dyn, when, type: 'triangle', a: 0.02, lp: 3200, vib: 7, echo: 0.3, dest, sus: 0.7 }); voice({ f: MID(n.m), dur, vol: 0.035 * accent * dyn, when, type: 'sine', a: 0.03, lp: 5000, det: 6, dest }); }
+        }
+        // bajo
+        if (st % 4 === 0 && (st !== 4 && st !== 12 || bright)) voice({ f: MID(C.deg(cd) - 24 + (st === 8 ? 7 * 0 : 0)), dur: stepT * (st === 0 ? 7 : 3.4), vol: 0.2 * dyn, when, type: 'sine', a: 0.012, lp: 600, sus: 0.7, dest });
+        if (st === 8 && !bright) voice({ f: MID(C.deg(cd + 4) - 24), dur: stepT * 3, vol: 0.12 * dyn, when, type: 'sine', a: 0.012, lp: 600, dest });
+        if (bright && st % 2 === 0) voice({ f: MID(C.deg(cd) - 24 + (st % 8 === 4 ? 12 : st % 8 === 6 ? 7 : 0)), dur: stepT * 1.6, vol: 0.16 * dyn, when, type: 'triangle', a: 0.008, lp: 700, dest });
+        // arpegio de caja de música
+        if (T.arp && st % 2 === 0) { const seq = [0, 2, 4, 7, 4, 2], k = seq[(st / 2) % seq.length]; voice({ f: MID(C.deg(cd + k) + 12), dur: stepT * 1.8, vol: 0.04 * dyn, when, type: 'sine', a: 0.004, lp: 5200, sus: 0.3, echo: 0.35, dest }); }
+        // percusión suave
+        const dr = T.drums;
+        if (dr === 'soft') { if (st === 0 || st === 8) kick(when, dest, 0.26); if (st === 4 || st === 12) noiseHit(when, dest, 0.07, 0.14, 'bandpass', 2600); if (st % 2 === 0) noiseHit(when, dest, st % 4 === 2 ? 0.032 : 0.018, 0.04, 'highpass', 6500); }
+        else if (dr === 'drive') { if (st % 4 === 0) kick(when, dest, 0.3); if (st === 4 || st === 12) noiseHit(when, dest, 0.11, 0.13, 'bandpass', 2000); if (st % 2 === 0) noiseHit(when, dest, st % 4 === 2 ? 0.045 : 0.025, 0.04, 'highpass', 6000); }
       }
-      // bajo
-      if (st % 4 === 0 && (st !== 4 && st !== 12 || bright)) voice({ f: MID(C.deg(cd) - 24 + (st === 8 ? 7 * 0 : 0)), dur: stepT * (st === 0 ? 7 : 3.4), vol: 0.2 * dyn, when, type: 'sine', a: 0.012, lp: 600, sus: 0.7, dest });
-      if (st === 8 && !bright) voice({ f: MID(C.deg(cd + 4) - 24), dur: stepT * 3, vol: 0.12 * dyn, when, type: 'sine', a: 0.012, lp: 600, dest });
-      if (bright && st % 2 === 0) voice({ f: MID(C.deg(cd) - 24 + (st % 8 === 4 ? 12 : st % 8 === 6 ? 7 : 0)), dur: stepT * 1.6, vol: 0.16 * dyn, when, type: 'triangle', a: 0.008, lp: 700, dest });
-      // arpegio de caja de música
-      if (T.arp && st % 2 === 0) { const seq = [0, 2, 4, 7, 4, 2], k = seq[(st / 2) % seq.length]; voice({ f: MID(C.deg(cd + k) + 12), dur: stepT * 1.8, vol: 0.04 * dyn, when, type: 'sine', a: 0.004, lp: 5200, sus: 0.3, echo: 0.35, dest }); }
-      // percusión suave
-      const dr = T.drums;
-      if (dr === 'soft') { if (st === 0 || st === 8) kick(when, dest, 0.26); if (st === 4 || st === 12) noiseHit(when, dest, 0.07, 0.14, 'bandpass', 2600); if (st % 2 === 0) noiseHit(when, dest, st % 4 === 2 ? 0.032 : 0.018, 0.04, 'highpass', 6500); }
-      else if (dr === 'drive') { if (st % 4 === 0) kick(when, dest, 0.3); if (st === 4 || st === 12) noiseHit(when, dest, 0.11, 0.13, 'bandpass', 2000); if (st % 2 === 0) noiseHit(when, dest, st % 4 === 2 ? 0.045 : 0.025, 0.04, 'highpass', 6000); }
       musicStep++;
       musicNext += stepT;
     }
@@ -308,11 +369,13 @@ const Audio8 = (() => {
   // Renderiza una pista a un buffer (para pruebas y para generar vistas previas)
   function preview(name, secs) {
     init(); buildFx();
-    const T = TRACKS[name], nt = newTrack(T.bpm);
+    const T = TRACKS[name], nt = newTrack(T.bpm * tempoOf());
     track = name; cur = { bus: nt.bus, echoIn: nt.echoIn, nodes: nt.nodes }; musicStep = 0; musicNext = 0.05;
     schedule(secs);
     return ctx.startRendering();
   }
 
-  return { init, resume, play, music, setVolumes, compose, TRACKS, preview };
+  function setCue(f) { cueFn = f; }
+  function setUnlock(f) { unlockFn = f; }
+  return { init, resume, play, music, want, remode: applyMode, audition, endAudition, restyle, setHidden, setCue, setUnlock, setVolumes, compose, TRACKS, preview, get track() { return track; }, get auditioning() { return audition_; } };
 })();

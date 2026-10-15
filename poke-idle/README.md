@@ -14,6 +14,9 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
   - **Jefes finales:** 8, como Rojo, Rayquaza, Giratina, Eternatus, Calyrex y Arceus.
 - **Huevos, naturalezas, IVs y tipos eficaces**: incubadora con 4 tipos de huevo, 25 naturalezas, IVs entrenables con polvo estelar y ayudas visuales de eficacia en combate (ver más abajo).
 - **Eventos semanales y Torre de batalla**: un tipo protagonista cada semana con jefe, misiones y bola propia, y una torre infinita con pisos de reglas especiales.
+- **Rival, entrenadores y Pokédex completa**: el rival Nico te desafía dos veces por región (20 duelos con historia), aparecen entrenadores con varios Pokémon seguidos y cada Pokémon tiene una ficha con estadísticas, debilidades, evolución y dónde aparece.
+- **Objetos, combos y tácticas**: 17 objetos con efectos distintos, fusión y taller, combos de objetos y 5 tácticas de equipo.
+- **Sonido y música**: volúmenes por categoría, 3 estilos de música, 20 pistas desbloqueables en una sala de música y subtítulos de sonidos.
 - **Progresión lenta y constante**: cada etapa cuesta más que la anterior y los jefes son muros reales con límite de tiempo. Para avanzar mejoras a tu equipo, abres huecos, mejoras la banda y, sobre todo, repites el viaje en la **Liga**.
 
 ## Cómo se juega
@@ -134,26 +137,44 @@ Ajustes → **Accesibilidad**:
 
 El botón **Equipos** de la pestaña Equipo guarda hasta 4 equipos con nombre y los carga con un toque (uno para farmear, otro para el evento o la Torre…). Se guardan las especies, así que sobreviven a evoluciones y a la Liga; si el equipo tiene más Pokémon que huecos, se cargan los primeros.
 
-## Objetos y sinergias
+## Objetos, combos y tácticas
 
-- **Objetos equipables**: cada Pokémon lleva uno. Hay 9 tipos (Cinta Elección, Vidasfera, Pañuelo Elección, Gafas Zoom, Banda Focus, Orbe de tipo, Moneda Amuleto, Cascabel Fortuna y Guante de Entrenador) en 3 rarezas (Común, Raro y Épico).
-- Los sueltan los jefes (cuanto más difícil, mejor rareza) y, con poca probabilidad, los Pokémon salvajes. En la **Mochila** puedes reciclarlos por polvo estelar o comprar uno al azar.
+- **Objetos equipables**: cada Pokémon lleva uno. Hay **17 tipos** en 3 rarezas (Común x1, Raro x1,6 y Épico x2,5):
+  - Ataque: Cinta Elección (+20 % daño), Vidasfera (+35 % daño, −10 % velocidad), Pañuelo Elección (+10 % velocidad), Gafas Zoom (+6 % crítico), Orbe de tipo, **Cinta Experto** (+25 % en golpes súper eficaces), **Garra Remate** (+50 % a enemigos con menos del 30 % de vida) y **Banda Doble** (12 % de atacar dos veces).
+  - Jefes: Banda Focus (+30 % a jefes), **Concha Impulso** (+60 % en los primeros 10 s de un jefe) y **Reloj de Arena** (+1 s contra jefes y retos, de todo el equipo).
+  - Economía (afectan a todo el equipo): Moneda Amuleto (+8 % monedas), Cascabel Fortuna (+10 % tickets), Guante de Entrenador (+10 % toque), **Huevo Suerte** (+15 % eclosión), **Colmillo Gema** (+10 % gemas de jefes) y **Polvo Brillo** (+12 % polvo).
+- Los sueltan los jefes (cuanto más difícil, mejor rareza), los duelos del rival y, con poca probabilidad, los Pokémon salvajes y los entrenadores.
+- **Mochila**: reciclar por polvo, comprar uno al azar (150 de polvo), **Taller** (elige el objeto común que quieras por 600) y **Fusión**: 3 objetos iguales sin usar → 1 de la rareza siguiente (40 de polvo de Común a Raro, 160 de Raro a Épico).
+- **Combos de objetos**: con 3 objetos distintos del mismo grupo en el equipo hay bonus. **Arsenal** (7 objetos de ataque): +10 % de daño con 3 y +20 % con 5. **Equipo de caza** (Banda Focus, Concha Impulso, Reloj de Arena, Cinta Experto, Garra Remate): +20 % de daño contra jefes con 3 y +35 % con 4. **Granja** (Moneda, Cascabel, Huevo Suerte, Colmillo, Polvo, Guante): +12 % monedas con 3 y +30 % con 5.
+- **Tácticas de equipo** (desde la etapa 20, en la pestaña Equipo): Equilibrada (sin cambios), **Ofensiva** (+25 % daño, −20 % monedas), **Economía** (+30 % monedas, −15 % daño), **Cazajefes** (+30 % daño a jefes y retos, −10 % contra salvajes) y **Rastreo** (+40 % tickets, huevos y polvo, −12 % daño). La equilibrada es la referencia del equilibrio del juego; las demás son decisiones para cada momento.
 - **Sinergias de equipo**: Afinidad de tipo (2 a 6 Pokémon del mismo tipo), Diversidad, Élite legendaria, Brillo compartido (shinies) y Equipo veterano (todos con ★3 o más).
 
-## Música
+## Rival y entrenadores
 
-La música es **original** y se genera con código, en un estilo relajado y cálido. Cada pista usa una progresión de acordes conocida, melodías de frases de 4 compases (motivo, respuesta, repetición y cadencia) y estos instrumentos:
+- **Nico, el rival**: te desafía **dos veces en cada región** (a mitad de camino y justo antes del campeón), 20 duelos en total con diálogos que cuentan una pequeña historia. Se abren al alcanzar su etapa y se aceptan desde la pestaña Retos.
+- Cada duelo son **3 Pokémon seguidos con un solo cronómetro**; su equipo de cada región usa tipos distintos, así que importan los tipos de tu equipo. Se muestra el **Poder** del equipo (≥100 % = lo vences a tiempo).
+- La primera victoria da gemas, polvo y tickets (en los segundos duelos, además, fragmentos Mega, un huevo y un objeto) y **+1 % de daño permanente**. Después puedes pedir una **revancha** al día por duelo (polvo y gemas).
+- **Entrenadores**: de vez en cuando, en vez de un salvaje, aparece un entrenador con 2 Pokémon seguidos (3 desde la etapa 60). Al derrotar al último das un extra de monedas y, con suerte, gemas, tickets u objetos. Se ven en la tarjeta del enemigo (por ejemplo «Pescador Pablo 2/3»).
 
-- **Melodía:** voz suave con un ligero vibrato y eco.
-- **Colchón de cuerdas:** acordes largos que suenan de fondo.
-- **Bajo:** redondo y discreto.
-- **Caja de música:** arpegios que se repiten sobre cada acorde.
-- **Percusión:** suave, con bombo discreto y escobillas, solo en algunas pistas.
-- **Efectos:** reverberación y fundido entre pistas.
+## Pokédex
 
-Hay una pista para el menú, una para cada región (con su propia tonalidad y tempo), una para los jefes y otra para los jefes finales. No usa ninguna melodía de los juegos de Pokémon.
+- **Ficha de cada Pokémon**: estadísticas base, debilidades y resistencias (con los multiplicadores x4, x2, ×½, ×¼ e inmunidades), línea evolutiva completa (con niveles), formas regionales y Mega, los 5 ataques de su tipo, **dónde aparece** como enemigo salvaje, cuántas veces lo has derrotado y los datos de tu Pokémon (nivel, estrellas, naturaleza, IVs, copias). Los no registrados se ven como silueta.
+- **Buscador y filtros**: por nombre o número, región, tipo y estado (registrados, sin registrar, los tengo, con shiny, formas regionales), y orden por número, nombre, rareza, nivel o estadísticas.
+- **Resumen**: progreso por región, especies que tienes, shinies, formas regionales, Megas y **bestiario** (especies distintas derrotadas).
+- Cada Pokémon registrado da +1 % de daño.
 
-La calidad se comprueba con números: en todas las pistas los tiempos fuertes caen en notas del acorde, el 80% de los movimientos de la melodía son de un paso, los saltos grandes son menos del 10% y el volumen no satura.
+## Música y sonido
+
+La música es **original** y se genera con código, en un estilo relajado y cálido. Cada pista usa una progresión de acordes conocida y melodías de frases de 4 compases (motivo, respuesta, repetición y cadencia). No usa ninguna melodía de los juegos de Pokémon.
+
+- **3 estilos** (Ajustes → Sonido): **Cálido** (cuerdas suaves, melodía con vibrato, eco, caja de música y escobillas), **Retro 8 bits** (pulsos secos, bajo triangular, arpegios rápidos y percusión de ruido, sin reverberación) y **Ensueño** (más lento, cuerdas anchas, melodía de seno con mucho eco y campanitas).
+- **20 pistas**: título, una por región (con su tonalidad y tempo), jefes, jefe final, **Nico** (y su duelo final), entrenadores, Torre, evento semanal, Liga y Guardería.
+- **Sala de música** (Ajustes): escucha cada pista, que se **desbloquea jugando** (llegar a una región, vencer un jefe, ganar a Nico, usar la Torre, el evento, la Liga o la crianza), y fija la que quieras como música de fondo.
+- **Qué suena**: por región (una pista por región y otra para jefes, duelos, Torre y eventos), aleatorio (cambia cada dos vueltas con las pistas desbloqueadas) o pista fija.
+- **Volúmenes**: general, música, efectos y sonidos de combate por separado. La música puede **silenciarse en segundo plano** al cambiar de pestaña del navegador.
+- **Subtítulos de sonidos** (accesibilidad): muestran en pantalla los sonidos importantes (jefe, duelo, objeto, tickets, evolución, derrota…).
+
+La calidad de la composición se comprueba con números: en todas las pistas los tiempos fuertes caen en notas del acorde, el 80% de los movimientos de la melodía son de un paso, los saltos grandes son menos del 10% y el volumen no satura.
 
 ## Tutorial
 
@@ -166,8 +187,8 @@ Si te gusta, puedes invitarme a un café en [Ko-fi](https://ko-fi.com/danelalons
 ## Para volver cada día
 
 - Recompensa diaria con racha de 7 días, **4 misiones diarias** (de 21 posibles) y **3 misiones semanales** (de 12).
-- **226 logros** en 54 categorías: etapas, Pokédex regional, colecciones por tipo, estrellas, niveles, críticos, rachas, mejoras al máximo…
-- **Pokédex** con filtros por región: cada Pokémon registrado da +1% de daño.
+- **286 logros** en 59 categorías (incluidos entrenadores, rival, bestiario, fusiones y pistas de música): etapas, Pokédex regional, colecciones por tipo, estrellas, niveles, críticos, rachas, mejoras al máximo…
+- **Pokédex** con ficha, buscador y filtros: cada Pokémon registrado da +1% de daño.
 
 ## Liga Pokémon (prestigio)
 

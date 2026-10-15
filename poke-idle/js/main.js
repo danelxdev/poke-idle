@@ -21,7 +21,10 @@
 
   // música: una pista por región; los jefes y los jefes finales tienen la suya
   const musicFor = st => Core.isBoss(st) ? (Core.routeData(st).boss.tier >= 4 ? 'boss2' : 'boss') : 'r' + Core.regionOf(st);
-  let lastCoinSfx = 0, lastHitSfx = 0, hidden = false, running = false, last = 0, uiT = 0;
+  const wantMusic = st => Audio8.want(musicFor(st), Core.isBoss(st) ? 1 : 0);
+  Audio8.setUnlock(() => Core.musicIds());
+  Audio8.setCue(n => UI.cue(n));
+  let lastCoinSfx = 0, lastHitSfx = 0, hidden = false, running = false, last = 0, uiT = 0, trkT = 0, trkN = -1;
   function coinSfx() { const n = performance.now(); if (n - lastCoinSfx > 90) { lastCoinSfx = n; Audio8.play('coin'); } }
 
   // ---- avisos de eventos del juego ----
@@ -48,17 +51,22 @@
   });
   Core.on('eggReady', e => { Audio8.play('rare'); UI.banner(L('¡Un ' + EGGS[e.t].name + ' está listo!', 'A ' + EGGS[e.t].name + ' is ready!'), L('Ve a la pestaña Gacha para eclosionarlo', 'Go to the Gacha tab to hatch it'), EGGS[e.t].color); });
   Core.on('chalStart', c => {
-    Audio8.music(c.kind === 'tower' && c.boss || c.kind === 'event' ? 'boss2' : 'boss');
-    UI.banner(c.label, c.rule ? c.rule.name + (c.rule.only ? ' ' + TYPE_ES[c.rule.only] : '') + ': ' + c.rule.desc : L('Vence al rival antes de que se acabe el tiempo', 'Beat the rival before time runs out'), '#ff8040');
+    Audio8.want(c.kind === 'rival' ? (c.enc.meet ? 'rival2' : 'rival') : c.kind === 'event' ? 'event' : c.kind === 'tower' ? (c.boss ? 'boss2' : 'tower') : 'boss', 1);
+    if (c.kind === 'rival') Audio8.play('duel');
+    UI.banner(c.label, c.rule ? c.rule.name + (c.rule.only ? ' ' + TYPE_ES[c.rule.only] : '') + ': ' + c.rule.desc : c.kind === 'rival' ? L('Tres Pokémon seguidos y un solo cronómetro', 'Three Pokémon in a row and a single timer') : L('Vence al rival antes de que se acabe el tiempo', 'Beat the rival before time runs out'), '#ff8040');
   });
   Core.on('chalWin', d => {
+    if (d.kind === 'rival') { Audio8.play('legend'); setTimeout(() => UI.rivalTalk(d.enc, 'post', d), 700); return; }
     Audio8.play(d.kind === 'event' || d.floor % 5 === 0 ? 'legend' : 'win');
     if (d.kind === 'event') UI.banner(L('¡Jefe del evento vencido!', 'Event boss beaten!'), d.first ? UI.rewText(d.rew) : L('Ya habías recogido esta recompensa', 'You had already claimed this reward'), '#ffd23f');
     else if (d.first && d.floor % 5 === 0) UI.banner(L('¡Piso ' + d.floor + ' superado!', 'Floor ' + d.floor + ' cleared!'), UI.rewText(d.rew), '#ffd23f');
     else UI.toast(L('Piso ', 'Floor ') + d.floor + (d.first ? ' · ' + UI.rewText(d.rew) : L(' superado', ' cleared')));
   });
-  Core.on('chalFail', d => { Audio8.play('death'); UI.banner(d.kind === 'tower' ? L('La Torre te frena en el piso ' + d.floor, 'The Tower stops you at floor ' + d.floor) : L('El jefe del evento resistió', 'The event boss held out'), d.kind === 'tower' ? L('Récord: piso ', 'Record: floor ') + d.best : L('Mejora a tu equipo y vuelve a intentarlo', 'Improve your team and try again'), '#ff5050'); });
-  Core.on('chalEnd', () => { Audio8.music(musicFor(Core.S.stage)); UI.refresh(true); });
+  Core.on('chalFail', d => { Audio8.play('death'); if (d.kind === 'rival') { UI.banner(L('Nico gana esta vez', 'Nico wins this time'), L('Mejora a tu equipo, usa los tipos que más daño le hacen y vuelve a retar a Nico', 'Improve your team, use the types that hurt most and challenge Nico again'), '#ff5050'); return; } UI.banner(d.kind === 'tower' ? L('La Torre te frena en el piso ' + d.floor, 'The Tower stops you at floor ' + d.floor) : L('El jefe del evento resistió', 'The event boss held out'), d.kind === 'tower' ? L('Récord: piso ', 'Record: floor ') + d.best : L('Mejora a tu equipo y vuelve a intentarlo', 'Improve your team and try again'), '#ff5050'); });
+  Core.on('chalEnd', () => { wantMusic(Core.S.stage); UI.refresh(true); });
+  Core.on('trainerStart', t => { if (Core.S.started) { Audio8.play('trainer'); UI.toast(Icons.html('friends', 18) + ' ' + L(t.cls + ' ' + t.name + ' te desafía (' + t.n + ' Pokémon)', t.cls + ' ' + t.name + ' challenges you (' + t.n + ' Pokémon)')); } });
+  Core.on('trainerWin', d => { Audio8.play('win'); UI.toast(Icons.html('friends', 18) + ' ' + L('¡' + d.trainer.cls + ' ' + d.trainer.name + ' vencido! ', d.trainer.cls + ' ' + d.trainer.name + ' beaten! ') + '+' + Core.fmt(d.coins) + ' ' + L('monedas', 'coins') + (d.gems ? ' · +' + d.gems + ' ' + L('gemas', 'gems') : '') + (d.tickets ? ' · +1 ticket' : '') + (d.item ? ' · ' + L('¡objeto!', 'item!') : '')); });
+  Core.on('rivalReady', e => { Audio8.play('rare'); UI.banner(L('Nico quiere un duelo', 'Nico wants a duel'), REGIONS[e.region].name + L(' · pestaña Retos', ' · Challenges tab'), '#ff8040'); UI.refresh(true); });
   Core.on('tickets', t => { if (Core.S.started) UI.refresh(false); });
   Core.on('kill', k => {
     if (k.enemy.golden) UI.toast(Icons.html('gem', 18) + ' ' + L('¡Pokémon dorado! +' + k.gems + ' gemas', 'Golden Pokémon! +' + k.gems + ' gems'));
@@ -72,7 +80,7 @@
   Core.on('bossWait', st => { const r = Core.routeData(st); if (!ligaTip && Core.medalGain() > 0) { ligaTip = true; setTimeout(() => UI.toast(L('Consejo: si te atascas, entra en la Liga (pestaña Liga) para ganar medallas permanentes', 'Tip: if you get stuck, enter the League (League tab) to earn permanent medals')), 3200); } UI.banner(L('Aún no estás listo para ' + r.boss.who, 'You are not ready for ' + r.boss.who + ' yet'), L('Sigue combatiendo: lo retarás solo cuando tengas fuerza suficiente', 'Keep fighting: the boss will be challenged only when you are strong enough'), '#ffd23f'); });
   Core.on('bossFail', () => { Audio8.play('death'); UI.banner(L('¡El jefe era demasiado fuerte!', 'The boss was too strong!'), L('Sigue combatiendo: lo retarás de nuevo cuando estés listo', 'Keep fighting: the boss will be challenged again when you are ready'), '#ff5050'); });
   Core.on('stage', s => {
-    Audio8.music(musicFor(s));
+    wantMusic(s);
     const r = Core.routeData(s);
     if (Core.isBoss(s)) UI.banner(L(r.boss.who + ' te desafía', r.boss.who + ' challenges you'), r.boss.title + ' · ' + Core.bossTime(s) + L(' segundos para vencerle', ' seconds to beat them'), '#ff8040');
     else if (s % 10 === 1) UI.banner(r.name, REGIONS[Core.regionOf(s)].name + (Core.loopOf(s) ? L(' · ciclo +', ' · loop +') + Core.loopOf(s) : ''), '#9fe0ff');
@@ -99,6 +107,8 @@
       UI.drawPv(dt);
       uiT += dt;
       if (uiT > 0.25) { uiT = 0; UI.refresh(false); }
+      trkT += dt;
+      if (trkT > 3) { trkT = 0; const n = Core.tracksUnlocked(); if (trkN >= 0 && n > trkN) { Audio8.play('unlock'); UI.toast(Icons.html('sound', 18) + ' ' + L('Nueva pista en la sala de música (Ajustes)', 'New track in the music room (Settings)')); } trkN = n; }
     }
     requestAnimationFrame(loop);
   }
@@ -108,7 +118,7 @@
     for (const k of Core.S.team) Sprites.preload(Core.fdex(Core.S.mons[k]), Core.S.mons[k].shiny);
     UI.setTab('team');
     if (Core.S.stats.taps > 30) $('#tap-hint').classList.add('hidden');
-    Audio8.music(musicFor(Core.S.stage));
+    wantMusic(Core.S.stage);
     if (!running) { running = true; requestAnimationFrame(t => { last = t; loop(t); }); }
     welcome();
   }
@@ -134,8 +144,8 @@
   // ---- guardado ----
   setInterval(() => { if (!hidden && Core.S.started) Core.save(); }, 5000);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { hidden = true; if (Core.S.started) Core.save(); PWA.schedule(); }
-    else { hidden = false; PWA.clear(); last = performance.now(); if (Core.S.started && $('#scr-game').classList.contains('active')) welcome(); }
+    if (document.hidden) { hidden = true; Audio8.setHidden(true); if (Core.S.started) Core.save(); PWA.schedule(); }
+    else { hidden = false; Audio8.setHidden(false); PWA.clear(); last = performance.now(); if (Core.S.started && $('#scr-game').classList.contains('active')) welcome(); }
   });
   window.addEventListener('pagehide', () => { if (Core.S.started) Core.save(); });
 

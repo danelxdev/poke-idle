@@ -10,9 +10,13 @@ A browser idle game for Pokémon fans, with a ticket-based gacha. It is a non-pr
 - **Eggs and breeding**: four egg types hatched with victories (also offline), natures (25), IVs, and a Nursery where parents pass IVs and nature to the offspring.
 - **Type effectiveness** made visible: enemy types, ▲/▼ tags on every card, route recommendations and a “Best team” button.
 - **Weekly events** (a featured type each week with a damage bonus, boss in 4 difficulties, quests and its own ball) and the infinite **Battle Tower** with guardian rules.
-- **Held items, team synergies, saved teams, daily/weekly quests and 247+ achievements**.
+- **Rival and trainers**: Nico challenges you twice in every region (20 duels with a short story, three Pokémon in a row on one timer, permanent +1% damage for each first win and a daily rematch), and trainers show up mid-route with several Pokémon in a row.
+- **Complete Pokédex**: an entry for every Pokémon (base stats, weaknesses and resistances, full evolution line, regional and Mega forms, moves, where it appears, times defeated and your own Pokémon), search, filters by region, type and status, sorting, completion by region and a bestiary.
+- **17 held items** (super-effective, finisher, boss opener, double strike, egg, gem, time and stardust effects on top of the classics), item **fusion**, a **workshop**, item **combos** (Arsenal, Hunting party, Farm) and five **team tactics** (Balanced, Offensive, Economy, Boss hunter, Scavenger) from stage 20.
+- **Team synergies, saved teams, daily/weekly quests and 286 achievements**.
 - **League (prestige)** with permanent bonuses and a shop.
-- **Original procedural music**, a tutorial, offline mode and local notifications.
+- **Original procedural music** in three styles (Warm, Retro 8-bit, Dreamy), 20 tracks unlocked by playing and a **music room** to listen to them or pin one, separate volumes (master, music, effects, combat), shuffle mode, mute-in-background and **sound captions** for accessibility.
+- A tutorial, offline mode and local notifications.
 
 ## Credits
 
