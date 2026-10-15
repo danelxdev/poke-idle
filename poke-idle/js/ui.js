@@ -1122,6 +1122,57 @@ const UI = (() => {
     });
   }
 
+  // ---------------- consejos de novedades ----------------
+  let lastTip = -1;
+  function tipModal(t, replay) {
+    openModal(`<div class="tipbox"><span class="tipico">${ico(t.icon, 48)}</span><h2>${t.title}</h2><p>${t.text}</p></div>
+      <div class="row">${replay ? '' : `<button class="btn small" id="tip-off">${L('No más consejos', 'No more tips')}</button>`}${t.tab ? `<button class="btn" id="tip-go">${L('Verlo', 'Show me')}</button>` : ''}<button class="btn primary" id="tip-ok">${L('Entendido', 'Got it')}</button></div>`);
+    $('#tip-ok').onclick = closeModal;
+    if ($('#tip-go')) $('#tip-go').onclick = () => { closeModal(); setTab(t.tab); };
+    if ($('#tip-off')) $('#tip-off').onclick = () => { S().settings.tips = false; Core.save(); closeModal(); toast(L('Consejos desactivados. Puedes reactivarlos en Ajustes.', 'Tips turned off. You can turn them back on in Settings.')); };
+  }
+  function tipsTick() {
+    const s = S(); if (!s || !s.started) return;
+    if (!$('#modal').classList.contains('hidden') || !$('#evo').classList.contains('hidden') || !$('#gacha-fx').classList.contains('hidden') || Core.inChal() || tutEl || !$('#scr-game').classList.contains('active')) return;
+    if (lastTip < 0) lastTip = s.stats.time - TIP_GAP + 25;
+    if (s.stats.time - lastTip < TIP_GAP) return;
+    const t = Core.nextTip(); if (!t) return;
+    lastTip = s.stats.time; Core.seenTip(t.id); Core.save(); Audio8.play('unlock'); tipModal(t);
+  }
+  function tipsModal() {
+    const s = S();
+    openModal(`<h2>${L('Consejos de novedades', 'Feature tips')} <small style="color:var(--dim)">${TIPS.filter(t => s.ui.tips[t.id]).length}/${TIPS.length}</small></h2>
+      <p class="hint">${L('Cada novedad te la explicamos una sola vez, cuando se hace útil. Aquí puedes releerlas.', 'We explain each feature only once, when it becomes useful. You can re-read them here.')}</p>
+      <div class="trklist">${TIPS.map(t => `<div class="trk-row ${s.ui.tips[t.id] ? '' : 'lock'}"><span>${ico(t.icon, 20)}</span><span class="tn">${s.ui.tips[t.id] ? t.title : '???'}</span>${s.ui.tips[t.id] ? `<button class="btn small" data-tip="${t.id}">${L('Leer', 'Read')}</button>` : ''}</div>`).join('')}</div>
+      <div class="row"><button class="btn small" id="tips-reset">${L('Volver a mostrarlos todos', 'Show them all again')}</button><button class="btn" id="tips-x">${L('Volver', 'Back')}</button></div>`);
+    $$('[data-tip]').forEach(b => b.onclick = () => tipModal(TIPS.find(t => t.id === b.dataset.tip), true));
+    $('#tips-reset').onclick = () => { Core.resetTips(); S().settings.tips = true; Core.save(); Audio8.play('select'); tipsModal(); };
+    $('#tips-x').onclick = settings;
+  }
+  // ---------------- resumen al volver ----------------
+  function welcomeModal(o) {
+    const s = S(), parts = [], fmtT = secs => { const h = Math.floor(secs / 3600), m = Math.floor(secs / 60) % 60; return (h ? h + ' h ' : '') + m + ' min'; };
+    const off = o.off;
+    parts.push(`<h2>${off ? L('¡Bienvenido de nuevo!', 'Welcome back!') : L('Novedades', 'News')}</h2>`);
+    if (off) {
+      parts.push(`<div class="wsec"><b>${L('Mientras no estabas', 'While you were away')} (${fmtT(off.away)})</b><p>${L(`Tu equipo derrotó <b>${Core.fmt(off.kills)}</b> Pokémon y ganó`, `Your team defeated <b>${Core.fmt(off.kills)}</b> Pokémon and earned`)}</p><p style="font-size:26px;color:var(--yellow);margin:2px 0">${ico('coin', 24)} ${Core.fmt(off.coins)}</p><small>≈ ${Core.fmt(off.perHour)} ${L('monedas por hora', 'coins per hour')}</small>${off.capped ? `<p class="hint">${L(`Tu equipo solo trabaja ${Math.round(off.cap / 3600)} h seguidas sin ti: el resto no cuenta. Amplía el límite con el Campamento de la tienda de la Liga.`, `Your team only works ${Math.round(off.cap / 3600)} h in a row without you: the rest does not count. Extend the limit with the Camp in the League shop.`)}</p>` : ''}
+        ${off.eggs.length ? `<div class="weggs">${off.eggs.map(e => { const w0 = Math.min(100, e.from / e.need * 100), w1 = Math.min(100, e.to / e.need * 100); return `<div class="wegg">${ico('egg' + e.t, 20)}<div class="bt"><i style="width:${w0}%"></i><i class="gain" style="left:${w0}%;width:${Math.max(0, w1 - w0)}%"></i></div><em>${w1 >= 100 ? '✓' : Math.round(w1) + '%'}</em></div>`; }).join('')}</div><small>${L('Progreso de tus huevos', 'Your eggs’ progress')}</small>` : ''}</div>`);
+    }
+    if (o.rc && o.rc.rows.length) parts.push(`<div class="wsec"><b>${L('Tu última sesión', 'Your last session')}${o.rc.time ? ' (' + fmtT(o.rc.time) + ')' : ''}</b><div class="wchips">${o.rc.rows.map(r => `<span><b>+${Core.fmt(r.v)}</b> ${r.name}</span>`).join('')}${o.rc.kills ? `<span><b>+${Core.fmt(o.rc.kills)}</b> ${L('Pokémon derrotados', 'Pokémon defeated')}</span>` : ''}</div></div>`);
+    const news = [];
+    if (o.rc && o.rc.weekChanged && Core.ev) news.push(L(`Semana nueva de evento: <b>${TYPE_NAMES[Core.ev.type]}</b> con jefe ${DEX[Core.ev.boss].name}.`, `New event week: <b>${TYPE_NAMES[Core.ev.type]}</b> with boss ${DEX[Core.ev.boss].name}.`));
+    if (o.newDay) news.push(L('Hay <b>misiones diarias nuevas</b>.', 'There are <b>new daily quests</b>.'));
+    const ready = s.daily.quests.concat(s.weekly.quests).filter(q => !q.claimed && Core.questProg(q) >= q.goal).length;
+    if (ready) news.push(L(`Tienes <b>${ready}</b> misión${ready > 1 ? 'es' : ''} lista${ready > 1 ? 's' : ''} para recoger.`, `You have <b>${ready}</b> quest${ready > 1 ? 's' : ''} ready to claim.`));
+    if (Core.eggsReady()) news.push(L(`Tienes <b>${Core.eggsReady()}</b> huevo${Core.eggsReady() > 1 ? 's' : ''} listo${Core.eggsReady() > 1 ? 's' : ''} para eclosionar en la pestaña Gacha.`, `You have <b>${Core.eggsReady()}</b> egg${Core.eggsReady() > 1 ? 's' : ''} ready to hatch in the Gacha tab.`));
+    if (news.length) parts.push(`<div class="wsec"><b>${L('Hoy', 'Today')}</b><ul class="wlist">${news.map(n => `<li>${n}</li>`).join('')}</ul></div>`);
+    if (o.daily && !s.daily.claimed) parts.push(`<div class="wsec"><b>${L('Recompensa diaria', 'Daily reward')}</b><p>${L(`Día <b>${s.daily.streak}</b> de racha`, `Day <b>${s.daily.streak}</b> streak`)}</p><p style="font-size:26px;color:#9fe8ff;margin:2px 0">${ico('gem', 24)} ${Core.dailyReward()}</p><small>${L('Vuelve mañana: la recompensa crece hasta el día 7.', 'Come back tomorrow: the reward grows until day 7.')}</small></div>`);
+    const adv = Core.advice().filter(a => a.p > 1 || a.tab !== 'quests').slice(0, 3);
+    if (adv.length && o.advice) parts.push(`<div class="wsec"><b>${L('Qué hacer ahora', 'What to do now')}</b><div class="advlist">${adv.map(a => `<div class="adv"><span>${ico(a.icon, 24)}</span><p>${a.text}</p><button class="btn small" data-go="${a.tab}">${L('Ir', 'Go')}</button></div>`).join('')}</div></div>`);
+    openModal(`<div class="welc">${parts.join('')}</div><div class="row"><button class="btn big primary" id="w-ok">${o.daily && !s.daily.claimed ? L('Recoger', 'Claim') : L('Seguir', 'Continue')}</button></div>`);
+    $$('[data-go]').forEach(b => b.onclick = () => { const g = Core.claimDaily(); if (g) Audio8.play('ticket'); Core.save(); closeModal(); setTab(b.dataset.go); });
+    $('#w-ok').onclick = () => { const g = Core.claimDaily(); if (g) Audio8.play('ticket'); Core.save(); closeModal(); refresh(true); if (o.done) o.done(); };
+  }
   // ---------------- consejos y perfil ----------------
   function adviceModal() {
     const list = Core.advice();
@@ -1139,11 +1190,15 @@ const UI = (() => {
     openModal(`<h2>${L('Perfil', 'Profile')}</h2>
       <div class="profhead"><img class="dxpor" src="${por(av)}" alt=""><div><input class="search" id="pf-name" maxlength="14" placeholder="${L('Tu nombre', 'Your name')}" value="${pr.name.replace(/"/g, '')}" aria-label="${L('Tu nombre', 'Your name')}"><small>${(TITLES.find(t => t.id === pr.title) || TITLES[0]).name}</small></div></div>
       <h4>${L('Avatar', 'Avatar')}</h4><div class="avgrid">${owned.map(m => `<button data-av="${Core.fdex(m)}" class="${pr.avatar === Core.fdex(m) ? 'on' : ''}" aria-label="${DEX[Core.fdex(m)].name}"><img src="${por(Core.fdex(m), m.shiny)}" alt=""></button>`).join('')}</div>
+      <h4>${L('Marco del retrato', 'Portrait frame')} <small style="color:var(--dim)">${Core.framesOpen().length}/${FRAMES.length}</small></h4><div class="frgrid">${FRAMES.map(f => { const ok = Core.frameOpen(f); return `<button class="frprev ${s.cosm.frame === f.id ? 'on' : ''}" data-fr="${f.id}" data-frame-pick="${f.id}" ${ok ? '' : 'disabled'} aria-label="${f.name}" title="${ok ? f.name : f.hint}"><img src="${ok ? por(av) : por(av)}" alt="" style="${ok ? '' : 'filter:brightness(0) opacity(.5)'}"><small>${ok ? f.name : '???'}</small></button>`; }).join('')}</div>
+      <h4>${L('Fondo de la arena', 'Arena background')} <small style="color:var(--dim)">${Core.biomesSeen().length}/${Tiles.THEMES.length}</small></h4><div class="bggrid"><button class="ttl ${s.cosm.bg === 'auto' ? 'on' : ''}" data-bg="auto"><b>${L('Automático', 'Automatic')}</b><small>${L('El de cada ruta', 'The one of each route')}</small></button>${Core.biomesSeen().map(i => `<button class="ttl ${String(s.cosm.bg) === String(i) ? 'on' : ''}" data-bg="${i}"><b><i class="sw" style="background:${Tiles.THEMES[i].floor}"></i>${biomeName(i)}</b></button>`).join('')}</div><p class="hint" style="margin:2px 0">${L('Los fondos se desbloquean al pasar por rutas con ese paisaje.', 'Backgrounds unlock when you travel through routes with that scenery.')}</p>
       <h4>${L('Título', 'Title')} <small style="color:var(--dim)">${open}/${TITLES.length}</small></h4><div class="titlist">${TITLES.map(t => { const ok = Core.titleOpen(t); return `<button class="ttl ${pr.title === t.id ? 'on' : ''}" data-ttl="${t.id}" ${ok ? '' : 'disabled'}><b>${ok ? t.name : '???'}</b><small>${ok ? '' : t.hint}</small></button>`; }).join('')}</div>
       <div class="row"><button class="btn" id="pf-x">${L('Volver', 'Back')}</button></div>`);
     $('#pf-name').oninput = e => { Core.setName(e.target.value); };
     $('#pf-name').onchange = () => { Core.save(); };
     $$('[data-av]').forEach(b => b.onclick = () => { Core.setAvatar(+b.dataset.av); Core.save(); Audio8.play('swap'); profileModal(); });
+    $$('[data-frame-pick]').forEach(b => b.onclick = () => { if (Core.setFrame(b.dataset.framePick)) { document.documentElement.dataset.frame = S().cosm.frame; Core.save(); Audio8.play('select'); profileModal(); } });
+    $$('[data-bg]').forEach(b => b.onclick = () => { if (Core.setBg(b.dataset.bg)) { Core.save(); Audio8.play('swap'); profileModal(); } });
     $$('[data-ttl]').forEach(b => b.onclick = () => { if (Core.setTitle(b.dataset.ttl)) { Core.save(); Audio8.play('select'); profileModal(); } });
     $('#pf-x').onclick = () => { Core.save(); settings(); };
   }
@@ -1189,6 +1244,7 @@ const UI = (() => {
         ${tog('captions', L('Subtítulos de sonidos', 'Sound captions'), L('Muestra un aviso en pantalla con los sonidos importantes (jefes, premios, derrotas…)', 'Shows an on-screen caption for important sounds (bosses, rewards, defeats…)'))}
         <div class="row" style="margin:6px 0 0"><button class="btn primary" id="s-music">${ico('sound', 16)} ${L('Sala de música', 'Music room')} · ${Core.tracksUnlocked()}/${MUSIC_LIST.length}</button></div></div>
       <div class="sset"><h4>${L('Perfil', 'Profile')}</h4><div class="setrow"><span class="sl"><b>${S().profile.name || L('Entrenador', 'Trainer')}</b><small>${(TITLES.find(t => t.id === S().profile.title) || TITLES[0]).name} · ${Core.titlesOpen().length}/${TITLES.length} ${L('títulos', 'titles')}</small></span><button class="btn small primary" id="s-prof">${L('Editar', 'Edit')}</button></div></div>
+      <div class="sset"><h4>${L('Consejos', 'Tips')}</h4>${tog('tips', L('Consejos de novedades', 'Feature tips'), L('Te explica cada función nueva una sola vez, cuando se hace útil', 'Explains each new feature once, when it becomes useful'))}<div class="row" style="margin:4px 0 0"><button class="btn small" id="s-tips">${L('Ver consejos', 'View tips')} · ${TIPS.filter(t => S().ui.tips[t.id]).length}/${TIPS.length}</button></div></div>
       <div class="sset"><h4>${L('Combate', 'Combat')}</h4>${tog('nums', L('Números de daño', 'Damage numbers'), L('Muestra el daño y las monedas sobre el enemigo', 'Shows damage and coins over the enemy'))}${tog('bigNums', L('Números grandes', 'Big numbers'), L('Más tamaño para verlos mejor', 'Bigger size to see them better'))}${tog('shake', L('Temblor de pantalla', 'Screen shake'), L('En críticos y jefes', 'On crits and bosses'))}${tog('autoTactic', L('Táctica automática en jefes', 'Automatic boss tactic'), L('Si usas la táctica Equilibrada, usa Cazajefes contra jefes y retos y vuelve sola', 'If you use the Balanced tactic, uses Boss hunter against bosses and challenges and switches back by itself'))}${tog('autoBoss', L('Reintentar jefes automáticamente', 'Auto-retry bosses'), L('Vuelve a retar al jefe cuando tu equipo tenga fuerza para vencerlo', 'Challenges the boss again when your team is strong enough to beat it'))}</div>
       <div class="sset"><h4>${L('Accesibilidad', 'Accessibility')}</h4>
         <div class="setrow col"><span class="sl"><b>${L('Tamaño del texto', 'Text size')}</b></span><div class="seg a11y" role="group" aria-label="${L('Tamaño del texto', 'Text size')}">${[[1, L('Normal', 'Normal')], [1.15, L('Grande', 'Large')], [1.3, L('Muy grande', 'Extra large')]].map(([v, l]) => `<button data-ak="text" data-av="${v}" class="${+a11y.text === v ? 'on' : ''}" aria-pressed="${+a11y.text === v}">${l}</button>`).join('')}</div></div>
@@ -1210,6 +1266,7 @@ const UI = (() => {
     $$('[data-sk]').forEach(b => b.onclick = () => { st[b.dataset.sk] = b.dataset.sv; Core.save(); Audio8.play('click'); if (b.dataset.sk === 'mstyle') Audio8.restyle(); else Audio8.remode(); settings(); });
     $('#s-music').onclick = musicModal;
     $('#s-prof').onclick = profileModal;
+    $('#s-tips').onclick = tipsModal;
     $$('[data-lang]').forEach(b => b.onclick = () => { S().settings.lang = b.dataset.lang; Core.save(); location.reload(); });
     $$('.slider').forEach(sl => {
       const k = sl.dataset.k, trk = sl.querySelector('.trk');
@@ -1319,5 +1376,5 @@ const UI = (() => {
     $$('#skills .skill').forEach(b => b.onclick = e => { e.stopPropagation(); if (Core.useSkill(b.dataset.sk)) { Audio8.play(b.dataset.sk === 'rage' ? 'charge' : 'ticket'); banner(SKILLS[b.dataset.sk].name + '!', SKILLS[b.dataset.sk].desc, '#ff8040'); } });
   }
 
-  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, rewText, rivalTalk, cue, tutStart, autoFill, monModal, mapModal };
+  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, rewText, rivalTalk, cue, tipsTick, welcomeModal, tutStart, autoFill, monModal, mapModal };
 })();

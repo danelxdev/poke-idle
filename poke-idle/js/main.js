@@ -7,6 +7,7 @@
   Core.load();
   let pendingOffline = Core.S.started ? Core.offline() : null;
   A11Y.apply(Core.S.settings.a11y);
+  document.documentElement.dataset.frame = Core.S.cosm.frame;
   UI.bind();
   A11Y.init({
     close: () => { if (!document.querySelector('#modal').classList.contains('hidden')) UI.closeModal(); },
@@ -24,7 +25,7 @@
   const wantMusic = st => Audio8.want(musicFor(st), Core.isBoss(st) ? 1 : 0);
   Audio8.setUnlock(() => Core.musicIds());
   Audio8.setCue(n => UI.cue(n));
-  let lastCoinSfx = 0, lastHitSfx = 0, hidden = false, running = false, last = 0, uiT = 0, trkT = 0, trkN = -1;
+  let lastCoinSfx = 0, lastHitSfx = 0, hidden = false, running = false, last = 0, uiT = 0, trkT = 0, trkN = -1, tipT = 0;
   function coinSfx() { const n = performance.now(); if (n - lastCoinSfx > 90) { lastCoinSfx = n; Audio8.play('coin'); } }
 
   // ---- avisos de eventos del juego ----
@@ -87,7 +88,6 @@
   });
   Core.on('spawn', e => {
     if (e.boss) Audio8.play('boss');
-    if (e.aura && !Core.S.ui.auraTip) { Core.S.ui.auraTip = 1; UI.banner(L('¡Un enemigo con aura!', 'An enemy with an aura!'), auraText(e.aura) + L(' · da +50% de monedas', ' · gives +50% coins'), '#c47bff'); }
   });
   Core.on('hit', h => { const n = performance.now(); if (n - lastHitSfx > 70) { lastHitSfx = n; Audio8.play('hit'); } });
 
@@ -110,6 +110,7 @@
       UI.drawPv(dt);
       uiT += dt;
       if (uiT > 0.25) { uiT = 0; UI.refresh(false); }
+      tipT += dt; if (tipT > 2) { tipT = 0; UI.tipsTick(); }
       trkT += dt;
       if (trkT > 3) { trkT = 0; const n = Core.tracksUnlocked(); if (trkN >= 0 && n > trkN) { Audio8.play('unlock'); UI.toast(Icons.html('sound', 18) + ' ' + L('Nueva pista en la sala de música (Ajustes)', 'New track in the music room (Settings)')); } trkN = n; }
     }
@@ -129,19 +130,12 @@
   function welcome() {
     const off = pendingOffline || Core.offline();
     pendingOffline = null;
-    const daily = Core.checkDaily() || !Core.S.daily.claimed;
-    const parts = [];
-    if (off) {
-      const h = Math.floor(off.secs / 3600), m = Math.floor(off.secs / 60) % 60;
-      parts.push(`<h2>${L('¡Bienvenido de nuevo!', 'Welcome back!')}</h2><p>${L(`Mientras no estabas (${h ? h + 'h ' : ''}${m}m) tu equipo derrotó <b>${Core.fmt(off.kills)}</b> Pokémon y ganó`, `While you were away (${h ? h + 'h ' : ''}${m}m) your team defeated <b>${Core.fmt(off.kills)}</b> Pokémon and earned`)}</p><p style="font-size:28px;color:var(--yellow)">${Icons.html('coin', 24)} ${Core.fmt(off.coins)}</p>`);
-    }
-    if (Core.eggsReady()) parts.push(`<h2>${L('¡Huevos listos!', 'Eggs ready!')}</h2><p>${L(`Tienes <b>${Core.eggsReady()}</b> huevo${Core.eggsReady() > 1 ? 's' : ''} listo${Core.eggsReady() > 1 ? 's' : ''} para eclosionar en la pestaña Gacha.`, `You have <b>${Core.eggsReady()}</b> egg${Core.eggsReady() > 1 ? 's' : ''} ready to hatch in the Gacha tab.`)}</p>`);
-    if (daily && !Core.S.daily.claimed) {
-      parts.push(`<h2>${L('Recompensa diaria', 'Daily reward')}</h2><p>${L(`Día <b>${Core.S.daily.streak}</b> de racha`, `Day <b>${Core.S.daily.streak}</b> streak`)}</p><p style="font-size:28px;color:#9fe8ff">${Icons.html('gem', 24)} ${Core.dailyReward()}</p><p class="hint">${L('Vuelve mañana: la recompensa crece hasta el día 7. Tienes misiones nuevas.', 'Come back tomorrow: the reward grows until day 7. You have new quests.')}</p>`);
-    }
-    if (!parts.length) { if (!Core.S.tutDone) setTimeout(() => UI.tutStart(), 700); return; }
-    UI.openModal(parts.join('<hr style="border-color:#2a3f8a">') + `<div class="row"><button class="btn big primary" id="w-ok">${daily && !Core.S.daily.claimed ? L('Recoger', 'Claim') : L('Seguir', 'Continue')}</button></div>`);
-    $('#w-ok').onclick = () => { const g = Core.claimDaily(); if (g) Audio8.play('ticket'); Core.save(); UI.closeModal(); UI.refresh(true); if (!Core.S.tutDone) setTimeout(() => UI.tutStart(), 500); };
+    const newDay = Core.checkDaily(), daily = newDay || !Core.S.daily.claimed;
+    if (!Core.S.ui.snap) Core.S.ui.snap = Core.snap();
+    const rc = off ? Core.recap() : null;
+    const hasNews = off || Core.eggsReady() || (daily && !Core.S.daily.claimed) || (rc && rc.rows.length);
+    if (!hasNews) { if (!Core.S.tutDone) setTimeout(() => UI.tutStart(), 700); return; }
+    UI.welcomeModal({ off, rc, newDay, daily, advice: !!off, done: () => { if (!Core.S.tutDone) setTimeout(() => UI.tutStart(), 500); } });
   }
 
   // ---- guardado ----

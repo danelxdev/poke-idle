@@ -50,7 +50,7 @@ const Core = (() => {
   function fresh() {
     return {
       v: 1, started: false, coins: 0, gems: 50, dust: 0, tk: { poke: 5, super: 1, ultra: 0, master: 0 }, stage: 1, maxStage: 1, kills: 0, auto: true,
-      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, shards: 0, hist: [], presets: [1, 2, 3, 4].map(i => ({ name: 'Equipo ' + i, team: [] })), event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 }, rival: { won: {}, rem: {}, told: {}, master: 0 }, asc: { rank: 0, ess: 0 }, tactic: 'bal', foes: {}, profile: { name: '', avatar: 0, title: 'novato' }, favs: {}, ui: {},
+      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, shards: 0, hist: [], presets: [1, 2, 3, 4].map(i => ({ name: 'Equipo ' + i, team: [] })), event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 }, rival: { won: {}, rem: {}, told: {}, master: 0 }, asc: { rank: 0, ess: 0 }, tactic: 'bal', foes: {}, profile: { name: '', avatar: 0, title: 'novato' }, favs: {}, ui: {}, cosm: { frame: 'classic', bg: 'auto' },
       up: { tap: 0, train: 0, coin: 0, crit: 0, critdmg: 0, speed: 0, catch: 0, golden: 0, bosstime: 0, type: 0, boss: 0, autotap: 0, alch: 0 },
       shop: { dmg: 0, coins: 0, lvl: 0, slots: 0, offline: 0, catch: 0, shiny: 0, gems: 0, skill: 0, dust: 0, tapd: 0, critb: 0, disc: 0, bt: 0, egg: 0 },
       medals: 0, mp: 0, badges: {}, bossFirst: {},
@@ -59,7 +59,7 @@ const Core = (() => {
       stats: { maxDps: 0, bestHit: 0, megas: 0, kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, eventTiers: 0, bred: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, trainers: 0, rivals: 0, fusions: 0, ascends: 0, freePulls: 0, streak: 0, itemsFound: 0 },
       bossFails: {}, retryT: 0, pity: 0, pityE: 0, bannerLost: 0, freeDay: '', autoAcc: 0, inv: [], uid: 1, tutDone: false, last: Date.now(),
       daily: { day: '', streak: 0, claimed: true, quests: [] }, weekly: { week: -1, quests: [] }, ach: {},
-      buyMul: 1, settings: { music: 0.35, sfx: 0.6, master: 1, combat: 0.8, mstyle: 'warm', mmode: 'region', mpin: 'r0', bgmute: true, captions: false, autoTactic: false, nums: true, shake: true, bigNums: true, autoBoss: true, notify: false, lang: null, a11y: { motion: 'auto', text: 1, nf: false, hc: false, cb: false } },
+      buyMul: 1, settings: { music: 0.35, sfx: 0.6, master: 1, combat: 0.8, mstyle: 'warm', mmode: 'region', mpin: 'r0', bgmute: true, captions: false, autoTactic: false, tips: true, nums: true, shake: true, bigNums: true, autoBoss: true, notify: false, lang: null, a11y: { motion: 'auto', text: 1, nf: false, hc: false, cb: false } },
     };
   }
   function load() {
@@ -111,6 +111,11 @@ const Core = (() => {
     if (!TITLES.some(t => t.id === d.profile.title)) d.profile.title = 'novato';
     if (!d.favs || typeof d.favs !== 'object' || Array.isArray(d.favs)) d.favs = {};
     if (!d.ui || typeof d.ui !== 'object' || Array.isArray(d.ui)) d.ui = {};
+    if (!d.ui.tips || typeof d.ui.tips !== 'object') d.ui.tips = {};
+    if (!d.ui.biomes || typeof d.ui.biomes !== 'object') d.ui.biomes = {};
+    if (!d.cosm || typeof d.cosm !== 'object') d.cosm = { frame: 'classic', bg: 'auto' };
+    if (!FRAMES.some(f => f.id === d.cosm.frame)) d.cosm.frame = 'classic';
+    if (d.cosm.bg !== 'auto' && !d.ui.biomes[d.cosm.bg]) d.cosm.bg = 'auto';
     if (!['warm', 'retro', 'dream'].includes(d.settings.mstyle)) d.settings.mstyle = 'warm';
     if (!['region', 'shuffle', 'pin'].includes(d.settings.mmode)) d.settings.mmode = 'region';
     if (!MUSIC_LIST.some(t => t.id === d.settings.mpin)) d.settings.mpin = 'r0';
@@ -123,6 +128,7 @@ const Core = (() => {
     if (d.stats.maxStage < d.maxStage) d.stats.maxStage = d.maxStage;
     if (legacy) d.tutDone = true;
     if (!Array.isArray(d.inv)) d.inv = [];
+    if (d.started && !Object.keys(d.ui.biomes).length) { const top = Math.min(ROUTES.length - 1, Math.floor((Math.max(d.stats.maxStage, d.maxStage) - 1) / 10)); for (let i = 0; i <= top; i++) d.ui.biomes[ROUTES[i].biome] = 1; }
     invDirty = true;
     S = d;
     chal = null;
@@ -461,18 +467,19 @@ const Core = (() => {
       if (S.kills >= 10 && S.auto) { if (isBoss(S.stage + 1) && bossReady(S.stage + 1) < K.gate) { S.auto = false; S.retryT = 0; emit('bossWait', S.stage + 1); } else advance(false); }
     }
   }
+  const trackBiome = () => { const b = routeData(S.stage).biome; if (!S.ui.biomes[b]) S.ui.biomes[b] = 1; };
   function advance(force) {
     if (!force && S.stage >= S.maxStage && S.kills < 10) return;
     S.stage++; S.kills = 0; S.stats.stages++;
     if (S.stage > S.maxStage) { S.maxStage = S.stage; S.stats.maxStage = Math.max(S.stats.maxStage, S.maxStage); }
     if (!S.auto && !force) S.auto = true;
-    F.enemy = null; F.respawn = 0.6; F.trainer = null;
+    F.enemy = null; F.respawn = 0.6; F.trainer = null; trackBiome();
     for (const e of RIVAL_ENC) if (e.stage === S.stats.maxStage && !S.rival.won[e.id] && !S.rival.told[e.id]) { S.rival.told[e.id] = 1; emit('rivalReady', e); }
     emit('stage', S.stage);
   }
   function goStage(s) {
     if (chal || s < 1 || s > S.maxStage) return;
-    S.stage = s; S.kills = 0; S.retryT = 0; F.enemy = null; F.respawn = 0.3; F.trainer = null;
+    S.stage = s; S.kills = 0; S.retryT = 0; F.enemy = null; F.respawn = 0.3; F.trainer = null; trackBiome();
     emit('stage', S.stage);
   }
   function bossFail() {
@@ -884,6 +891,38 @@ const Core = (() => {
   function setName(n) { S.profile.name = String(n || '').replace(/[<>&"]/g, '').trim().slice(0, 14); }
   const toggleFav = d => { if (S.favs[d]) delete S.favs[d]; else S.favs[d] = 1; return !!S.favs[d]; };
 
+  // ---------------- cosméticos ----------------
+  const frameOpen = f => { try { return !!f.test(S); } catch (e) { return false; } };
+  const framesOpen = () => FRAMES.filter(frameOpen);
+  function setFrame(id) { const f = FRAMES.find(x => x.id === id); if (!f || !frameOpen(f)) return false; S.cosm.frame = id; return true; }
+  const biomesSeen = () => Object.keys(S.ui.biomes).map(Number).filter(i => Tiles.THEMES[i]).sort((a, b) => a - b);
+  function setBg(v) { if (v !== 'auto' && !S.ui.biomes[v]) return false; S.cosm.bg = v === 'auto' ? 'auto' : String(v); return true; }
+  const biomeOverride = () => (S.cosm.bg !== 'auto' && S.ui.biomes[S.cosm.bg] ? +S.cosm.bg : null);
+
+  // ---------------- consejos de novedades (una sola vez cada uno) ----------------
+  function nextTip() {
+    if (!S.started || !S.tutDone || S.settings.tips === false) return null;
+    return TIPS.find(t => !S.ui.tips[t.id] && t.when(S)) || null;
+  }
+  function seenTip(id) { S.ui.tips[id] = 1; }
+  function resetTips() { S.ui.tips = {}; }
+
+  // ---------------- resumen al volver ----------------
+  // Foto de contadores: al volver se compara con la de la visita anterior
+  function snap() {
+    return { maxStage: S.stats.maxStage, bosses: S.stats.bosses, dex: dexCount(), mons: Object.keys(S.mons).length, shinies: S.stats.shinies, hatched: S.stats.hatched, medals: S.medals, ess: S.asc.ess, rank: S.asc.rank, tower: S.tower.best,
+      rivals: rivalWins(), master: S.rival.master, trainers: S.stats.trainers, levels: S.stats.levels, kills: S.stats.kills, ach: Object.keys(S.ach).length, items: S.stats.itemsFound, evolutions: S.stats.evolutions, pulls: S.stats.pulls, time: Math.floor(S.stats.time), titles: titlesOpen().length, frames: framesOpen().length, tracks: tracksUnlocked(), week: S.event.week };
+  }
+  function recap() {
+    const now = snap(), old = S.ui.snap;
+    S.ui.snap = now;
+    if (!old) return null;
+    const d = k => (now[k] || 0) - (old[k] || 0);
+    const rows = [['maxStage', _L('Etapa máxima', 'Max stage')], ['bosses', _L('Jefes vencidos', 'Bosses beaten')], ['trainers', _L('Entrenadores vencidos', 'Trainers beaten')], ['dex', _L('Pokémon registrados', 'Pokémon registered')], ['shinies', 'Shinies'], ['hatched', _L('Huevos eclosionados', 'Eggs hatched')], ['evolutions', _L('Evoluciones', 'Evolutions')], ['levels', _L('Niveles subidos', 'Levels gained')], ['medals', _L('Medallas', 'Medals')], ['ess', _L('Esencia', 'Essence')], ['rank', _L('Rango', 'Rank')], ['tower', _L('Pisos de la Torre', 'Tower floors')], ['rivals', _L('Duelos de Nico', 'Duels vs Nico')], ['master', _L('Niveles maestros', 'Master levels')], ['ach', _L('Logros', 'Achievements')], ['items', _L('Objetos', 'Items')], ['titles', _L('Títulos', 'Titles')], ['frames', _L('Marcos', 'Frames')], ['tracks', _L('Pistas de música', 'Music tracks')]]
+      .map(([k, name]) => ({ k, name, v: d(k) })).filter(r => r.v > 0);
+    return { rows, kills: d('kills'), time: d('time'), weekChanged: old.week !== undefined && old.week !== now.week };
+  }
+
   // ---------------- consejos: «¿qué hago ahora?» ----------------
   // Devuelve, por prioridad, lo más útil que puedes hacer en este momento: { p, icon, tab, text }
   function advice() {
@@ -1218,19 +1257,20 @@ const Core = (() => {
     return best;
   }
   function offline() {
-    const secs = Math.min((8 + 2 * S.shop.offline) * 3600, (Date.now() - (S.last || Date.now())) / 1000);
+    const away = (Date.now() - (S.last || Date.now())) / 1000, cap = (8 + 2 * S.shop.offline) * 3600, secs = Math.min(cap, away);
     S.last = Date.now();
     if (secs < 60 || !S.team.length) return null;
     const s = isBoss(S.stage) ? S.stage - 1 : S.stage;
     const kills = Math.floor(secs * offlineKps());
     const coins = kills * killCoins(s);
     S.coins += coins; S.stats.coinsTotal += coins;
+    const eggsBefore = S.eggs.map(e => e.p);
     eggProgress(kills);
-    return { secs, kills, coins };
+    return { secs, away, capped: away > cap, cap, kills, coins, perHour: coins / (secs / 3600), eggs: S.eggs.slice(0, S.inc).map((e, i) => ({ t: e.t, from: eggsBefore[i], to: e.p, need: eggNeed(e) })) };
   }
 
   function start(starter) {
-    S.started = true;
+    S.started = true; trackBiome();
     addMon(starter, false);
     S.team = [String(starter)];
     S.coins = 20;
@@ -1256,6 +1296,7 @@ const Core = (() => {
     offlineCapSecs, nextEggEta, refreshEvent, eventDaysLeft, eventFeat, eventPool, evBonus, towerUnlocked, towerSpec, eventSpec, chalReady, towerStarts, towerReward, startTower, startEvent, abortChal, claimEventTask, eventFreePull,
     rankHp, ascDmg, ascCoin, ascOpen, ascReady, essGain, ascend, masterOpen, masterSpec, startMaster,
     tact, tacticOpen, setTactic, rivalWins, itemCombos, rivalTeam, rivalOpen, rivalNext, rivalSpec, startRival, fuseGroups, fuseItem, craftItem,
+    frameOpen, framesOpen, setFrame, biomesSeen, setBg, biomeOverride, nextTip, seenTip, resetTips, snap, recap,
     titleOpen, titlesOpen, setTitle, setAvatar, setName, toggleFav, advice,
     musicUnlocked, tracksUnlocked, musicIds, foeKills, appearsIn, wildPool,
     get ev() { return curEv; }, get chal() { return chal; }, inChal: () => !!chal,

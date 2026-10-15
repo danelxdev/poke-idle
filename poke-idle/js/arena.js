@@ -67,8 +67,9 @@ const Arena = (() => {
 
   // ---------------- fondo de la ruta ----------------
   function background(ri) {
-    if (bgCache.has(ri)) return bgCache.get(ri);
-    const r = ROUTES[ri], bi = r.biome, seed = 7 + ri * 31;
+    const ov = Core.biomeOverride(), key = ri + '/' + (ov === null ? 'a' : ov);
+    if (bgCache.has(key)) return bgCache.get(key);
+    const r = ROUTES[ri], bi = ov === null ? r.biome : ov, seed = 7 + ri * 31;
     const cols = W / TS + 0, rows = H / TS;
     const water = r.top === 'water';
     const liquid = new Set();
@@ -107,7 +108,7 @@ const Arena = (() => {
     g.fillStyle = grd; g.fillRect(0, 0, W, H);
     const cells = [...liquid].map(k => k.split(',').map(Number));
     const out = { img: c, cells, bi };
-    bgCache.set(ri, out);
+    bgCache.set(key, out);
     return out;
   }
 

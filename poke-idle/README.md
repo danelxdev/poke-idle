@@ -16,6 +16,7 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
 - **Eventos semanales y Torre de batalla**: un tipo protagonista cada semana con jefe, misiones y bola propia, y una torre infinita con pisos de reglas especiales.
 - **Rival, entrenadores y Pokédex completa**: el rival Nico te desafía dos veces por región (20 duelos con historia), aparecen entrenadores con varios Pokémon seguidos y cada Pokémon tiene una ficha con estadísticas, debilidades, evolución y dónde aparece.
 - **Guía «¿Qué hago ahora?»**, **auras** en los enemigos, **perfil con títulos y avatar**, favoritos en la Pokédex y objetos exclusivos de final de partida.
+- **Consejos de novedades** (cada función se explica una sola vez, cuando se hace útil), **cosméticos** (marcos de retrato y fondos de arena) y un **resumen al volver** completo.
 - **Final de partida sin techo**: **Ascensión** (una segunda Liga con Rango, Esencia y multiplicadores permanentes que se acumulan) y **Duelos Maestros** de Nico, una escalera infinita cada vez más dura.
 - **Objetos, combos y tácticas**: 17 objetos con efectos distintos, fusión y taller, combos de objetos y 5 tácticas de equipo.
 - **Sonido y música**: volúmenes por categoría, 3 estilos de música, 20 pistas desbloqueables en una sala de música y subtítulos de sonidos.
@@ -157,6 +158,12 @@ El botón **Equipos** de la pestaña Equipo guarda hasta 4 equipos con nombre y 
 - Cada duelo son **3 Pokémon seguidos con un solo cronómetro**; su equipo de cada región usa tipos distintos, así que importan los tipos de tu equipo. Se muestra el **Poder** del equipo (≥100 % = lo vences a tiempo).
 - La primera victoria da gemas, polvo y tickets (en los segundos duelos, además, fragmentos Mega, un huevo y un objeto) y **+1 % de daño permanente**. Después puedes pedir una **revancha** al día por duelo (polvo y gemas).
 - **Entrenadores**: de vez en cuando, en vez de un salvaje, aparece un entrenador con 2 Pokémon seguidos (3 desde la etapa 60). Al derrotar al último das un extra de monedas y, con suerte, gemas, tickets u objetos. Se ven en la tarjeta del enemigo (por ejemplo «Pescador Pablo 2/3»).
+
+## Consejos, cosméticos y resumen al volver
+
+- **Consejos de novedades**: cada función nueva (guía, Retos, entrenadores, fichas de la Pokédex, objetos, fusión, tácticas, sala de música, perfil, Guardería, Megas, Liga, auras, Nico, Ascensión y Duelos Maestros) se explica **una sola vez**, en una ventana corta, cuando se hace relevante: nunca mientras haya otra ventana, un reto o el tutorial en pantalla, y con al menos 100 s de juego entre dos consejos. Se pueden desactivar o releer desde Ajustes → Consejos (con «Volver a mostrarlos todos»).
+- **Cosméticos** (Ajustes → Perfil): 9 **marcos de retrato** (Clásico, Oro, Hoja, Eléctrico, Arcoíris, Hielo, Llama, Estrellado y Corona) que se desbloquean con hitos (campeón de Kanto, 50 huevos, piso 50 de la Torre, 10 shinies, etapa 500, los 20 duelos de Nico, Rango 5 y Maestro 10) y se ven en las tarjetas del equipo, las fichas, el rival y la pantalla de inicio; y **fondos de arena**: los 17 paisajes del juego se desbloquean al pasar por rutas con ese paisaje y puedes fijar uno (o dejarlo en automático).
+- **Resumen al volver** (tras 1 minuto o más fuera): tiempo fuera (y si se alcanzó el límite de ausencia), monedas ganadas y por hora, progreso de cada huevo de las incubadoras, **tu última sesión** (etapas, jefes, entrenadores, Pokémon registrados, shinies, huevos, niveles, medallas, Esencia, Torre, Nico, logros, títulos, marcos y pistas nuevas), novedades de hoy (misiones diarias nuevas, semana de evento nueva, misiones y huevos listos), la recompensa diaria y los tres consejos principales de «¿Qué hago ahora?».
 
 ## Guía, auras y perfil
 

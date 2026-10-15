@@ -799,3 +799,41 @@ html.a-cb .rdy { color: #ffbf5a; }
 .dexgrid .fv { position: absolute; left: 3px; bottom: 14px; font-size: 11px; color: var(--yellow); text-shadow: 0 1px 0 #000; }
 .favbtn { background: none; border: 0; font-size: 24px; color: #4a5688; padding: 0 4px; vertical-align: middle; }
 .favbtn.on { color: var(--yellow); }
+
+/* v18: marcos de retrato y fondos */
+:root[data-frame="gold"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="gold"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ffd23f, 0 0 0 4px #7a4a00, 0 0 12px #ffd23f99; }
+:root[data-frame="leaf"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="leaf"] img { border-radius: 6px; box-shadow: 0 0 0 2px #5fe08a, 0 0 0 4px #1d5a30, 0 0 8px #5fe08a88; }
+:root[data-frame="electric"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="electric"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ffe14d, 0 0 0 4px #4a3a00, 0 0 12px #ffe14dcc; }
+:root[data-frame="rainbow"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="rainbow"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ff5a5a, 0 0 0 4px #ffd23f, 0 0 0 6px #5fe08a, 0 0 0 8px #4aa8ff; }
+:root[data-frame="ice"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="ice"] img { border-radius: 6px; box-shadow: 0 0 0 2px #bff2ff, 0 0 0 4px #2a6aa8, 0 0 14px #8fe3ffcc; }
+:root[data-frame="flame"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="flame"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ffb22e, 0 0 0 4px #b3200a, 0 0 14px #ff6a1fcc; }
+:root[data-frame="starry"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="starry"] img { border-radius: 6px; box-shadow: 0 0 0 2px #e0c8ff, 0 0 0 4px #5a3aa8, 0 0 14px #c47bffcc; }
+:root[data-frame="crown"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="crown"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ffd23f, 0 0 0 4px #8a2ae0, 0 0 0 6px #ffd23f, 0 0 16px #ffd23fcc; }
+.frgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px 8px; padding: 6px 4px 4px; }
+.frprev { background: none; border: 0; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.frprev img { width: 44px; height: 44px; image-rendering: pixelated; background: #0b1638; border-radius: 6px; }
+.frprev small { font-size: 10px; color: var(--dim); }
+.frprev.on small { color: var(--yellow); font-weight: 700; }
+.frprev.on img { outline: 2px solid var(--yellow); outline-offset: 6px; }
+.frprev:disabled { opacity: .6; }
+.bggrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 4px; max-height: 24vh; overflow-y: auto; }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; box-shadow: 0 0 0 1px #fff6; }
+.tipbox { text-align: center; }
+.tipbox p { font-size: 15px; line-height: 1.4; }
+.tipico { display: block; margin-bottom: 4px; }
+.welc { max-height: 66vh; overflow-y: auto; text-align: left; }
+.welc h2 { text-align: center; }
+.wsec { background: #0b1638; border-radius: 10px; padding: 8px 10px; margin: 0 0 8px; box-shadow: inset 0 0 0 2px var(--line); }
+.wsec > b { display: block; color: var(--yellow); font-size: 14px; margin-bottom: 4px; }
+.wsec p { margin: 4px 0; }
+.wsec small { color: var(--dim); }
+.wlist { margin: 4px 0 0; padding-left: 18px; font-size: 14px; }
+.wchips { display: flex; flex-wrap: wrap; gap: 5px; }
+.wchips span { background: #142356; border-radius: 12px; padding: 3px 9px; font-size: 13px; }
+.wchips b { color: #7ff0a0; }
+.weggs { display: flex; flex-direction: column; gap: 4px; margin: 6px 0 2px; }
+.wegg { display: grid; grid-template-columns: 24px 1fr 38px; gap: 6px; align-items: center; }
+.wegg .bt { position: relative; height: 8px; background: #050c24; border-radius: 4px; overflow: hidden; }
+.wegg .bt i { position: absolute; top: 0; bottom: 0; left: 0; background: #4aa8ff; }
+.wegg .bt i.gain { background: #7ff0a0; }
+.wegg em { font-style: normal; font-size: 12px; text-align: right; }
