@@ -889,3 +889,38 @@ html.a-cb .rdy { color: #ffbf5a; }
 @media (max-width: 860px) { .supportbtn { padding: 3px 7px 3px 5px; } .supportbtn span { display: none; } }
 html.a-rm .supportbtn::before, html.a-rm .supportbtn::after, html.a-rm .kofi.hero::before, html.a-rm .kofi.hero .kheart { animation: none !important; }
 .autherr { color: #ff9a9a !important; max-width: 340px; }
+
+/* v21: aviso de partida abierta en otra pestaña */
+#stalebar { position: fixed; left: 0; right: 0; top: 0; z-index: 400; display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; padding: 8px 12px; background: #5a1d1d; color: #fff; border-bottom: 2px solid #ff8a8a; font-size: 14px; text-align: center; }
+.upv { color: var(--dim); font-size: 12px; }
+.upv b { color: #fff; }
+
+/* ---- v21: correcciones de la auditoría de interfaz ---- */
+/* texto grande: el zoom también multiplica los límites del modal, así que se compensan */
+.modal-box { max-height: calc(94vh / var(--tz, 1)); max-width: calc(min(860px, 96vw) / var(--tz, 1)); }
+/* las tarjetas no cortan el nombre: pasa a otra línea */
+.card .info b { white-space: normal; overflow-wrap: anywhere; text-overflow: clip; }
+/* panel de etapa en una sola línea (antes se partía en dos y tapaba el nombre del enemigo) */
+.a-top { width: max-content; max-width: calc(100% - 8px); }
+.st-mid span { white-space: nowrap; }
+/* el aviso no bloquea los botones de la ventana que hay debajo */
+.toast { pointer-events: none; }
+/* resumen de la tirada x10: se puede desplazar hasta arriba aunque no quepa */
+.gacha-fx { justify-content: flex-start; }
+.gacha-fx > :first-child { margin-top: auto; }
+.gacha-fx > :last-child { margin-bottom: auto; }
+/* cabecera en móvil: monedas, gemas y tickets nunca se encogen por debajo de su contenido */
+.cur { flex: 0 0 auto; }
+.cur b { white-space: nowrap; }
+@media (max-width: 860px) {
+  .top { gap: 4px; padding: 5px 6px; }
+  .cur { padding: 2px 7px 2px 3px; gap: 3px; }
+  .cur b { font-size: 14px; }
+  .logo.tiny { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 0 1 auto; }
+  .st-arrow, #btn-advice, #btn-settings, #btn-map { min-width: 36px; min-height: 36px; }
+  .btn.small { min-height: 34px; }
+}
+@media (max-width: 520px) { .logo.tiny { display: none; } .top { justify-content: flex-end; flex-wrap: wrap; } }
+.slider:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; border-radius: 6px; }
+@media (max-width: 860px) { .enemy-box { top: 23%; } }
+@media (min-width: 1500px) { .layout { grid-template-columns: 1fr clamp(440px, 27vw, 640px); } .tab-body { font-size: 1.08em; } }

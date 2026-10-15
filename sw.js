@@ -35,7 +35,8 @@ self.addEventListener('fetch', e => {
     return;
   }
   e.respondWith(fetch(req).then(res => {
-    if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); }
+    if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); return res; }
+    if (res.status >= 500) return caches.match(req, { ignoreSearch: true }).then(r => r || res);       // si el servidor falla, mejor la copia guardada
     return res;
   }).catch(() => caches.match(req, { ignoreSearch: true }).then(r => r || (req.mode === 'navigate' ? caches.match('index.html') : Response.error()))));
 });

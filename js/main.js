@@ -100,11 +100,15 @@
     if (r) { $('#tap-hint').classList.add('hidden'); }
   });
 
+  let loopErrs = 0;
   function loop(now) {
-    const dt = Math.min(0.1, Math.max(0, (now - last) / 1000 || 0));
+    requestAnimationFrame(loop);            // se reprograma antes de nada: un fallo puntual no puede parar el juego
+    const real = Math.max(0, (now - last) / 1000 || 0), dt = Math.min(0.1, real);
     last = now;
-    if (!hidden) {
-      Core.tick(dt);
+    if (hidden) return;
+    try {
+      // si el navegador va lento (menos de 10 fps) no se pierde tiempo de juego: se simula en pasos de 0,1 s (hasta 2 s por fotograma)
+      for (let rem = Math.min(real, 2); rem > 1e-6; rem -= 0.1) Core.tick(Math.min(0.1, rem));
       Arena.frame(dt);
       UI.hud(dt);
       UI.drawMonCv(now / 1000);
@@ -114,8 +118,7 @@
       tipT += dt; if (tipT > 2) { tipT = 0; UI.tipsTick(); }
       trkT += dt;
       if (trkT > 3) { trkT = 0; const n = Core.tracksUnlocked(); if (trkN >= 0 && n > trkN) { Audio8.play('unlock'); UI.toast(Icons.html('sound', 18) + ' ' + L('Nueva pista en la sala de música (Ajustes)', 'New track in the music room (Settings)')); } trkN = n; }
-    }
-    requestAnimationFrame(loop);
+    } catch (e) { if (loopErrs++ < 5) console.error('[PokéIdle] error en el bucle', e); }
   }
 
   function enterGame() {
@@ -141,10 +144,25 @@
 
   // ---- guardado ----
   setInterval(() => { if (!hidden && Core.S.started) Core.save(); }, 5000);
+  let hiddenAt = 0;
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { hidden = true; Cloud.flush(); Audio8.setHidden(true); if (Core.S.started) Core.save(); PWA.schedule(); }
-    else { hidden = false; Audio8.setHidden(false); PWA.clear(); last = performance.now(); if (Core.S.started && $('#scr-game').classList.contains('active')) welcome(); }
+    if (document.hidden) { hidden = true; hiddenAt = Date.now(); Cloud.flush(); Audio8.setHidden(true); if (Core.S.started) Core.save(); PWA.schedule(); }
+    else {
+      hidden = false; Audio8.setHidden(false); PWA.clear(); last = performance.now();
+      // el resumen solo sale tras una ausencia de verdad (≥ 1 min) y nunca encima de otra ventana
+      if (Core.S.started && !Core.isStale() && Date.now() - hiddenAt >= 60000 && $('#scr-game').classList.contains('active') && $('#modal').classList.contains('hidden')) welcome();
+    }
   });
+  // otra pestaña abrió la partida: esta deja de guardar para no pisarla
+  Core.on('stale', () => {
+    if ($('#stalebar')) return;
+    const b = document.createElement('div'); b.id = 'stalebar'; b.setAttribute('role', 'alert');
+    b.innerHTML = '<span>' + L('Esta partida se ha abierto en otra pestaña o ventana. Aquí ya no se guarda.', 'This game was opened in another tab or window. Nothing is saved here anymore.') + '</span><button class="btn small primary" id="stale-reload">' + L('Recargar aquí', 'Reload here') + '</button>';
+    document.body.appendChild(b); $('#stale-reload').onclick = () => location.reload();
+  });
+  window.addEventListener('storage', e => { if (e.key === 'pokeidle.owner') Core.ownerCheck(); });
+  Core.on('saveFail', () => UI.banner(L('No se puede guardar la partida', 'Cannot save the game'), L('Almacenamiento lleno o bloqueado (¿modo privado?). Exporta tu partida desde Ajustes para no perderla.', 'Storage is full or blocked (private mode?). Export your game from Settings so you do not lose it.'), '#ff5050'));
+  Core.on('newDay', () => { if (Core.S.started) { UI.toast(L('¡Nuevo día! Misiones y recompensa diaria renovadas', 'New day! Quests and daily reward renewed')); UI.refresh(true); } });
   window.addEventListener('pagehide', () => { if (Core.S.started) Core.save(); });
 
   // ---- inicio ----

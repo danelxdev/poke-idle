@@ -36,7 +36,7 @@ const UI = (() => {
       const n = Object.keys(s.mons).length, hrs = Math.floor(s.stats.time / 3600), mins = Math.floor(s.stats.time / 60) % 60;
       $('#t-cont').innerHTML = `<div class="ct-team">${s.team.slice(0, 6).map(kk => `<img class="px" src="${por(Core.fdex(s.mons[kk]), s.mons[kk].shiny)}" alt="">`).join('')}</div>
         <div class="ct-info"><b>${s.profile.name ? s.profile.name + ' · ' : ''}${(TITLES.find(t => t.id === s.profile.title) || TITLES[0]).name}</b><span>${REGIONS[Core.regionOf(s.stage)].name} · ${L('etapa', 'stage')} ${s.stage} <small>(${L('máx.', 'max')} ${s.stats.maxStage})</small></span>
-        <small>${n} Pokémon · Pokédex ${Core.dexCount()}/${POKEDEX.length} · ${s.medals} ${L('medallas', 'medals')} · ${hrs ? hrs + ' h ' : ''}${mins} min ${L('jugados', 'played')}</small></div>`;
+        <small>${n} Pokémon · Pokédex ${Core.regCount()}/${POKEDEX.length} · ${fmt(s.medals)} ${L('medallas', 'medals')} · ${hrs ? hrs + ' h ' : ''}${mins} min ${L('jugados', 'played')}</small></div>`;
       $('#t-new').onclick = e => {
         e.preventDefault();
         openModal(`<h2>${L('¿Empezar de nuevo?', 'Start over?')}</h2><p>${L('Se borrará tu partida actual: Pokémon, progreso y objetos.', 'Your current game will be erased: Pokémon, progress and items.')}</p><div class="row"><button class="btn" id="n-no">${L('Cancelar', 'Cancel')}</button><button class="btn danger" id="n-yes">${L('Sí, borrar todo', 'Yes, erase everything')}</button></div>`);
@@ -176,7 +176,7 @@ const UI = (() => {
 
   const natTxt = m => { const n = Core.natOf(m); return n.up ? `${n.name} <em class="nu">▲${NAT_SHORT[n.up]}</em> <em class="nd">▼${NAT_SHORT[n.down]}</em>` : n.name + L(' (neutra)', ' (neutral)'); };
   let towerStart = 0;
-  const rewText = r => !r ? '' : [r.ess && '+' + r.ess + L(' Esencia', ' Essence'), r.gems && '+' + r.gems + L(' gemas', ' gems'), r.shards && '+' + r.shards + L(' fragmentos Mega', ' Mega shards'), r.dust && '+' + r.dust + L(' polvo', ' stardust'), ...Object.entries(r.tk || {}).map(([t, n]) => n + '× ' + TICKETS[t].name), r.egg !== undefined && EGGS[r.egg].name, r.item && L('un objeto', 'an item'), r.excl && L('un objeto exclusivo', 'an exclusive item')].filter(Boolean).join(' · ');
+  const rewText = r => !r ? '' : [r.ess && '+' + r.ess + L(' Esencia', ' Essence'), r.gems && '+' + r.gems + L(' gemas', ' gems'), r.shards && '+' + r.shards + L(r.shards === 1 ? ' fragmento Mega' : ' fragmentos Mega', r.shards === 1 ? ' Mega shard' : ' Mega shards'), r.dust && '+' + r.dust + L(' polvo', ' stardust'), ...Object.entries(r.tk || {}).map(([t, n]) => n + '× ' + TICKETS[t].name), r.egg !== undefined && EGGS[r.egg].name, r.item && L('un objeto', 'an item'), r.excl && L('un objeto exclusivo', 'an exclusive item')].filter(Boolean).join(' · ');
   const ruleTxt = r => r ? `<div class="rulebox"><b>${r.name}${r.only ? ' ' + TYPE_ES[r.only] : ''}</b>: ${r.desc}</div>` : '';
   function chalHtml() {
     const s = S();
@@ -474,13 +474,13 @@ const UI = (() => {
       },
     },
     up: {
-      sig: () => JSON.stringify(S().up),
+      sig: () => JSON.stringify([S().up, S().stage, Math.round(Math.log2(Core.teamDps() + 1) * 4)]),
       html() {
         const s = S();
         let h = '<h3>' + L('Mejoras', 'Upgrades') + '</h3><p class="hint">' + L('Se pierden al entrar en la Liga, pero las medallas lo compensan con creces.', 'They are lost when you enter the League, but medals more than make up for it.') + '</p>';
         for (const [id, u] of Object.entries(UPGRADES)) {
           const n = s.up[id], maxed = n >= u.max;
-          h += `<div class="card"><span class="ico">${ico(u.icon, 36)}</span><div class="info"><b>${u.name} <small style="display:inline">${L('Nv.', 'Lv.')} ${n}</small></b><small>${u.desc(n)}</small><small style="color:#7ff0a0">${L('Siguiente', 'Next')}: ${u.desc(n + 1)}</small></div>
+          h += `<div class="card"><span class="ico">${ico(u.icon, 36)}</span><div class="info"><b>${u.name} <small style="display:inline">${L('Nv.', 'Lv.')} ${n}</small></b><small>${u.desc(n)}</small><small style="color:#7ff0a0">${L('Siguiente', 'Next')}: ${u.desc(n + 1)}</small>${(() => { const pv = Core.previewUp(id); return pv ? `<small class="upv">${{ tap: L('Daño por toque', 'Tap damage'), coin: L('Monedas por derrota', 'Coins per kill'), train: L('Daño/s del equipo', 'Team damage/s') }[id]}: <b>${fmt(pv.a)}</b> → <b style="color:#7ff0a0">${fmt(pv.b)}</b></small>` : ''; })()}</div>
             ${maxed ? '<button class="btn small" disabled>' + L('Máx.', 'Max') + '</button>' : costBtn(Core.upCost(id), L('Mejorar', 'Upgrade'), 'up', `data-v="${id}"`)}</div>`;
         }
         return h;
@@ -525,12 +525,12 @@ const UI = (() => {
     dex: {
       sig: () => { const s = S(); return JSON.stringify([Object.keys(s.mons).length, Object.keys(s.seen).length, s.team, dexFilter, dexType, dexState, dexSort, Core.unlockedGens(), Object.keys(s.foes).length, Object.keys(s.favs).length, Object.values(s.mons).map(m => m.dex + ':' + m.stars + ':' + m.lvl + ':' + (m.shiny ? 1 : 0) + (m.shinyOwned ? 1 : 0) + ':' + (m.copies >= STAR_COPIES[m.stars] ? 1 : 0))]); },
       html() {
-        const s = S(), n = Core.dexCount(), all = POKEDEX.length;
+        const s = S(), n = Core.regCount(), dn = Core.dexCount(), all = POKEDEX.length;
         const owned = POKEDEX.filter(p => { const o = s.mons[String(Core.baseOf(p.dex))]; return o && o.dex === p.dex; }).length;
         const shinies = Object.values(s.mons).filter(m => m.shinyOwned).length;
         const forms = POKEDEX.filter(p => p.form), formsSeen = forms.filter(p => s.seen[p.dex]).length;
-        const regs = REGIONS.filter(r => r.gen).map(r => { const tot = POKEDEX.filter(p => p.gen === r.gen).length, got = Object.keys(s.seen).filter(d => DEX[d] && DEX[d].gen === r.gen).length; return { r, tot, got }; });
-        let h = `<div class="dexhead"><span>${L('Registrados', 'Registered')} <b style="color:#fff">${n}/${all}</b> · +${n}% ${L('de daño', 'damage')}</span></div>
+        const regs = REGIONS.filter(r => r.gen).map(r => { const tot = POKEDEX.filter(p => p.gen === r.gen).length, got = POKEDEX.filter(p => p.gen === r.gen && Core.isReg(p.dex)).length; return { r, tot, got }; });
+        let h = `<div class="dexhead"><span>${L('Registrados', 'Registered')} <b style="color:#fff">${n}/${all}</b> · +${dn}% ${L('de daño (por especies obtenidas)', 'damage (from species you own)')}</span></div>
           <div class="dexsum"><div><b>${owned}</b><small>${L('Especies que tienes', 'Species owned')}</small></div><div><b>${shinies}</b><small>✨ Shiny</small></div><div><b>${formsSeen}/${forms.length}</b><small>${L('Formas regionales', 'Regional forms')}</small></div><div><b>${s.stats.megas}/${MEGA_DEX.length}</b><small>${L('Formas Mega', 'Mega forms')}</small></div><div><b>${Object.keys(s.foes).length}</b><small>${L('Bestiario', 'Bestiary')}</small></div></div>
           <div class="regbars">${regs.map(o => `<button class="regbar ${dexFilter === String(o.r.gen) ? 'on' : ''}" data-act="dexreg" data-v="${o.r.gen}" aria-label="${o.r.name} ${o.got}/${o.tot}"><span>${o.r.name}</span><div class="bt"><i style="width:${o.got / o.tot * 100}%"></i></div><em>${o.got}/${o.tot}</em></button>`).join('')}</div>
           <div class="dexfilters"><input class="search" id="dex-q" type="search" placeholder="${L('Buscar por nombre o número…', 'Search by name or number…')}" value="${dexQ.replace(/"/g, '&quot;')}" aria-label="${L('Buscar en la Pokédex', 'Search the Pokédex')}">
@@ -578,7 +578,7 @@ const UI = (() => {
       html() {
         const s = S(), g = Core.medalGain();
         let h = `<div class="league"><h3>${L('Liga Pokémon', 'Pokémon League')}</h3>
-          <div>${ico('crown', 48)}</div><div class="big">${s.medals}</div><p class="hint">${L(`Medallas de la Liga · +${s.medals * 3}% de daño y de monedas para siempre`, `League medals · +${s.medals * 3}% damage and coins forever`)}</p>`;
+          <div>${ico('crown', 48)}</div><div class="big">${fmt(s.medals)}</div><p class="hint">${L(`Medallas de la Liga · +${fmt(s.medals * 3)}% de daño y de monedas para siempre`, `League medals · +${s.medals * 3}% damage and coins forever`)}</p>`;
         if (g) h += `<p>${L(`Si entras ahora en la Liga ganas <b style="color:var(--yellow)">+${g} medallas</b> y ${g} Puntos de Liga.`, `If you enter the League now you earn <b style="color:var(--yellow)">+${g} medals</b> and ${g} League Points.`)}</p><p class="hint">${L('Vuelves a la etapa 1 y pierdes monedas, niveles y mejoras. Conservas tus Pokémon, estrellas, gemas, polvo y la Pokédex.', 'You go back to stage 1 and lose coins, levels and upgrades. You keep your Pokémon, stars, gems, stardust and the Pokédex.')}</p><button class="btn big primary" data-act="prestige">${L('Entrar en la Liga', 'Enter the League')}</button>`;
         else h += `<p class="hint">${L(`Llega a la <b>etapa 60</b> para poder entrar. Cuanto más lejos llegues, más medallas: en la etapa 100 son ${Core.medalFor(100)} y en la 200, ${Core.medalFor(200)}.`, `Reach <b>stage 60</b> to be able to enter. The further you get, the more medals: at stage 100 it is ${Core.medalFor(100)} and at 200, ${Core.medalFor(200)}.`)}</p>`;
         h += ascHtml();
@@ -599,7 +599,8 @@ const UI = (() => {
 
   // ---------------- desplegables propios ----------------
   let ddEl = null;
-  function closeDD() { if (ddEl) { ddEl.remove(); ddEl = null; } }
+  const ddKey = e => { if (e.key === 'Escape' && ddEl) { e.stopPropagation(); e.preventDefault(); closeDD(); } };
+  function closeDD() { if (ddEl) { ddEl.remove(); ddEl = null; } document.removeEventListener('keydown', ddKey, true); }
   function openDD(anchor, options, value, onPick) {
     closeDD();
     const r = anchor.getBoundingClientRect(), pop = document.createElement('div');
@@ -607,7 +608,7 @@ const UI = (() => {
     pop.style.left = r.left + 'px'; pop.style.top = (r.bottom + 4) + 'px'; pop.style.minWidth = r.width + 'px';
     pop.innerHTML = options.map(([v, l]) => `<button data-v="${v}" class="${String(v) === String(value) ? 'on' : ''}">${l}</button>`).join('');
     pop.onclick = e => { const b = e.target.closest('button'); if (b) { closeDD(); onPick(b.dataset.v); } };
-    document.body.appendChild(pop); ddEl = pop;
+    document.body.appendChild(pop); ddEl = pop; document.addEventListener('keydown', ddKey, true);
     const pr = pop.getBoundingClientRect();
     if (pr.bottom > innerHeight - 8) pop.style.top = Math.max(8, r.top - pr.height - 4) + 'px';
     if (pr.right > innerWidth - 8) pop.style.left = Math.max(8, innerWidth - pr.width - 8) + 'px';
@@ -1389,6 +1390,17 @@ const UI = (() => {
       const set = e => { const r = trk.getBoundingClientRect(), v = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); st[k] = Math.round(v * 20) / 20; sl.style.setProperty('--v', st[k]); sl.querySelector('em').textContent = Math.round(st[k] * 100) + '%'; Audio8.setVolumes(); };
       sl.onpointerdown = e => { sl.setPointerCapture(e.pointerId); set(e); sl.onpointermove = set; };
       sl.onpointerup = () => { sl.onpointermove = null; if (k === 'sfx' || k === 'master') Audio8.play('coin'); else if (k === 'combat') Audio8.play('boom'); Core.save(); };
+      // teclado y lectores de pantalla: flechas ±5 %, Inicio/Fin
+      const nm = sl.closest('.setrow') && sl.closest('.setrow').querySelector('b');
+      sl.tabIndex = 0; sl.setAttribute('role', 'slider'); sl.setAttribute('aria-valuemin', '0'); sl.setAttribute('aria-valuemax', '100'); if (nm) sl.setAttribute('aria-label', nm.textContent);
+      const paint = () => { sl.style.setProperty('--v', st[k]); sl.querySelector('em').textContent = Math.round(st[k] * 100) + '%'; sl.setAttribute('aria-valuenow', String(Math.round(st[k] * 100))); Audio8.setVolumes(); };
+      paint();
+      sl.onkeydown = e => {
+        const d = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 0.05 : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -0.05 : 0;
+        if (!d && e.key !== 'Home' && e.key !== 'End') return;
+        e.preventDefault(); st[k] = e.key === 'Home' ? 0 : e.key === 'End' ? 1 : Math.max(0, Math.min(1, Math.round((st[k] + d) * 20) / 20));
+        paint(); Core.save();
+      };
     });
     $$('.tog[data-k]').forEach(t => t.onclick = () => { st[t.dataset.k] = !st[t.dataset.k]; t.classList.toggle('on', st[t.dataset.k]); Audio8.play('click'); Core.save(); applySettings(); });
     const paintNtf = () => {
@@ -1412,7 +1424,7 @@ const UI = (() => {
       openModal(`<h2>${L('Importar partida', 'Import save')}</h2><p class="hint">${L('Pega aquí el código exportado. Sustituirá tu partida actual.', 'Paste the exported code here. It will replace your current game.')}</p><textarea class="search area" id="code" placeholder="${L('Pega el código…', 'Paste the code…')}"></textarea><p class="hint" id="imp-err" style="color:#ff8080"></p><div class="row"><button class="btn" id="i-no">${L('Cancelar', 'Cancel')}</button><button class="btn primary" id="i-yes">${L('Importar', 'Import')}</button></div>`);
       $('#i-no').onclick = settings;
       $('#i-yes').onclick = () => {
-        try { const d = JSON.parse(decodeURIComponent(escape(atob($('#code').value.trim())))); if (!d || d.v !== 1 || !d.mons) throw 0; Core.freezeSave(true); localStorage.setItem('pokeidle.save.v1', JSON.stringify(d)); location.reload(); }
+        try { const d = JSON.parse(decodeURIComponent(escape(atob($('#code').value.trim())))); if (!d || d.v !== 1 || !d.mons || typeof d.mons !== 'object') throw 0; const old = localStorage.getItem('pokeidle.save.v1'); if (old) localStorage.setItem('pokeidle.save.v1.bak', old); localStorage.setItem('pokeidle.save.v1', JSON.stringify(d)); Core.freezeSave(true); location.reload(); }
         catch (e) { $('#imp-err').textContent = L('Ese código no es válido.', 'That code is not valid.'); }
       };
     };

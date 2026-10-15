@@ -19,7 +19,7 @@ const EN_BALLS = {
 };
 const EN_TICKETS = { poke: 'Poké Ticket', super: 'Great Ticket', ultra: 'Ultra Ticket', master: 'Master Ticket' };
 const EN_UPGRADES = {
-  tap: ['Trainer Strike', n => 'Each tap deals ' + (15 + n) + '% of the team damage/s' + (n ? ' +' + n * 3 : '')],
+  tap: ['Trainer Strike', n => 'Each tap deals ' + (15 + 2 * n) + '% of the team damage/s' + (n ? ' +' + n * 3 : '')],
   train: ['Training', n => '+' + (n * 10) + '% team damage'],
   coin: ['Piggy Bank', n => '+' + (n * 15) + '% coins'],
   crit: ['Scope Lens', n => (3 + n * 2) + '% critical hits (x3 damage)'],
@@ -61,8 +61,8 @@ const EN_ACH = {
   maxStage: ['League Road', n => 'Reach stage ' + n], kills: ['Hunter', n => 'Defeat ' + n + ' Pokémon'], taps: ['Quick Finger', n => 'Tap ' + n + ' times'], pulls: ['Ball Rain', n => 'Open ' + n + ' Poké Balls'],
   dex: ['Pokédex', n => 'Register ' + n + ' Pokémon'], evolutions: ['Evolution', n => 'Evolve ' + n + ' times'], shinies: ['Shiny', n => 'Get ' + n + ' shinies'], maxStars: ['Stars', n => 'Take a Pokémon to ★' + n],
   prestiges: ['New Journey', n => 'Enter the League ' + n + ' times'], bosses: ['Leader Breaker', n => 'Beat ' + n + ' bosses'], catches: ['Ticket Collector', n => 'Get ' + n + ' tickets in battle'], legends: ['Legends', n => 'Own ' + n + ' legendaries'],
-  levels: ['Training', n => 'Gain ' + n + ' levels in total'], coinsTotal: ['Millionaire', n => 'Earn ' + n + ' coins in total'], skills: ['Skilled', n => 'Use ' + n + ' skills'], itemsFound: ['Item Hunter', n => 'Get ' + n + ' items'],
-  dust: ['Stardust', n => 'Collect ' + n + ' stardust'], crits: ['Sure Shot', n => 'Land ' + n + ' critical hits'], goldens: ['Gold Rush', n => 'Defeat ' + n + ' golden Pokémon'], dustBuys: ['Barter', n => 'Trade stardust for ' + n + ' tickets'],
+  levels: ['Training', n => 'Gain ' + n + ' levels in total'], coinsTotal: ['Millionaire', n => 'Earn ' + n + ' coins in total'], skills: ['Skilled', n => 'Use ' + n + ' skills'], itemsFound: ['Item Hunter', n => 'Get ' + n + (n === 1 ? ' item' : ' items')],
+  dust: ['Stardust', n => 'Collect ' + n + ' stardust'], crits: ['Sure Shot', n => 'Land ' + n + ' critical hits'], goldens: ['Gold Rush', n => 'Defeat ' + n + ' golden Pokémon'], dustBuys: ['Barter', n => 'Trade stardust for ' + n + (n === 1 ? ' ticket' : ' tickets')],
   freePulls: ['Consistency', n => 'Open ' + n + ' free daily pulls'], streak: ['Streak', n => 'Play ' + n + ' days in a row'], stars5: ['Constellation', n => 'Own ' + n + ' Pokémon with ★5'], maxLvl: ['Max Level', n => 'Take a Pokémon to Lv. ' + n],
   upMax: ['Maxed Out', n => 'Max out ' + n + ' upgrades'], shopLvl: ['League Veteran', n => 'Buy ' + n + ' levels in the League shop'], regions: ['Traveler', n => 'Open ' + n + ' regions'],
   hatched: ['Breeder', n => 'Hatch ' + n + ' eggs'], eggsFound: ['Egg Collector', n => 'Find ' + n + ' eggs'], ivGood: ['Good Potential', n => 'Own ' + n + ' Pokémon with IVs of 90% or more'],

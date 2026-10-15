@@ -28,12 +28,16 @@ const Core = (() => {
   // ---------------- utilidades ----------------
   const SUF = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
   function fmt(n) {
+    if (n !== n) return '0';
     if (!isFinite(n)) return '∞';
     if (n < 1000) return n < 10 && n % 1 ? n.toFixed(1) : String(Math.floor(n));
-    const e = Math.floor(Math.log10(n) / 3);
+    let e = Math.floor(Math.log10(n) / 3), v = n / Math.pow(1000, e);
+    let t = v < 10 ? v.toFixed(2) : v < 100 ? v.toFixed(1) : String(Math.round(v));
+    if (+t >= 1000) { e++; v /= 1000; t = v.toFixed(2); }              // 999999.5 → 1.00M
+    else if (v < 100 && +t >= 100) t = '100';                          // 99.99 → 100
+    else if (v < 10 && +t >= 10) t = '10.0';
     const suf = e < SUF.length ? SUF[e] : String.fromCharCode(97 + Math.floor((e - SUF.length) / 26)) + String.fromCharCode(97 + (e - SUF.length) % 26);
-    const v = n / Math.pow(1000, e);
-    return (v < 10 ? v.toFixed(2) : v < 100 ? v.toFixed(1) : Math.floor(v)) + suf;
+    return t + suf;
   }
   const today = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
   const dayIndex = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 864e5);
@@ -45,7 +49,7 @@ const Core = (() => {
   const emit = (e, d) => { for (const f of subs[e] || []) f(d); };
 
   // ---------------- estado ----------------
-  const KEY = 'pokeidle.save.v1';
+  const KEY = 'pokeidle.save.v1', MAX_STAGE = 20000, MAX_LVL = 3000;
   let S = null, invDirty = true, invMap = new Map();
   function fresh() {
     return {
@@ -62,21 +66,50 @@ const Core = (() => {
       buyMul: 1, settings: { music: 0.35, sfx: 0.6, master: 1, combat: 0.8, mstyle: 'warm', mmode: 'region', mpin: 'r0', bgmute: true, captions: false, autoTactic: false, tips: true, nums: true, shake: true, bigNums: true, autoBoss: true, notify: false, lang: null, a11y: { motion: 'auto', text: 1, nf: false, hc: false, cb: false } },
     };
   }
+  const TAB = Math.random().toString(36).slice(2), OWN = 'pokeidle.owner';
+  const isObj = x => !!x && typeof x === 'object' && !Array.isArray(x);
+  const clampN = (x, def, lo, hi) => Number.isFinite(+x) ? Math.min(hi, Math.max(lo, +x)) : def;
+  const cleanName = (x, n) => typeof x === 'string' ? x.replace(/[<>&"'`\\]/g, '').slice(0, n) : '';
+  // si la partida guardada está dañada no dejamos la página en blanco: se guarda una copia y se empieza limpio
   function load() {
+    let raw = null;
+    try { raw = localStorage.getItem(KEY); } catch (e) { raw = null; }
+    try { return loadFrom(raw); } catch (e) {
+      try { if (raw) localStorage.setItem(KEY + '.corrupt', raw); } catch (e2) { /* sin espacio */ }
+      if (typeof console !== 'undefined') console.error('[PokéIdle] partida dañada; copia en ' + KEY + '.corrupt', e);
+      return loadFrom(null);
+    } finally { claim(); }
+  }
+  function loadFrom(raw) {
     let d = null;
-    try { d = JSON.parse(localStorage.getItem(KEY)); } catch (e) { d = null; }
+    try { d = JSON.parse(raw); } catch (e) { d = null; if (raw) { try { localStorage.setItem(KEY + '.corrupt', raw); } catch (e2) { /* sin espacio */ } } }
     const f = fresh();
     const legacy = !!(d && typeof d === 'object' && d.started && d.tutDone === undefined);
     const giftEgg = !!(d && typeof d === 'object' && d.started && d.eggs === undefined);
     if (!d || typeof d !== 'object' || d.v !== 1) d = f;
     for (const k of Object.keys(f)) if (d[k] === undefined) d[k] = f[k];
+    // tipos y rangos: un guardado manipulado o antiguo no puede romper el arranque
+    for (const g of ['up', 'stats', 'settings', 'shop', 'sk', 'skOn', 'tk', 'mons', 'seen', 'badges', 'bossFails']) if (!isObj(d[g])) d[g] = JSON.parse(JSON.stringify(f[g]));
+    for (const g of ['up', 'stats', 'shop', 'sk', 'skOn', 'tk']) for (const k of Object.keys(f[g])) d[g][k] = clampN(d[g][k], f[g][k], 0, 1e300);
+    for (const k of ['coins', 'gems', 'dust', 'shards', 'mp', 'medals', 'kills', 'pity', 'pityE', 'uid']) d[k] = clampN(d[k], f[k] === undefined ? 0 : f[k], 0, 1e300);
+    d.maxStage = Math.floor(clampN(d.maxStage, 1, 1, MAX_STAGE)); d.stage = Math.floor(clampN(d.stage, 1, 1, d.maxStage));
+    d.slots = Math.floor(clampN(d.slots, 1, 1, 6)); d.last = clampN(d.last, Date.now(), 0, Date.now() + 864e5);
+    if (!Array.isArray(d.team)) d.team = [];
+    for (const k of Object.keys(d.mons)) {
+      const m = d.mons[k];
+      if (!/^\d+$/.test(k) || !isObj(m) || !DEX[m.dex]) { delete d.mons[k]; continue; }
+      m.lvl = Math.floor(clampN(m.lvl, 1, 1, MAX_LVL)); m.stars = Math.floor(clampN(m.stars, 0, 0, 5)); m.copies = Math.floor(clampN(m.copies, 0, 0, 1e9));
+    }
+    for (const k of Object.keys(d.seen)) if (!/^\d+$/.test(k) || !DEX[k]) delete d.seen[k];
+    if (!Array.isArray(d.inv)) d.inv = [];
+    d.inv = d.inv.filter(it => isObj(it) && HELD[it.id] && ITEM_RAR[it.rar] && Number.isFinite(+it.u));
+    { const ids = new Set(d.inv.map(it => it.u)); for (const m of Object.values(d.mons)) if (m.item && !ids.has(m.item)) m.item = null; }
     if (!d.settings.a11y || typeof d.settings.a11y !== 'object') d.settings.a11y = Object.assign({}, f.settings.a11y);
     for (const k of Object.keys(f.settings.a11y)) if (d.settings.a11y[k] === undefined) d.settings.a11y[k] = f.settings.a11y[k];
     for (const g of ['up', 'stats', 'settings', 'shop', 'sk', 'skOn', 'tk']) for (const k of Object.keys(f[g])) if (d[g][k] === undefined) d[g][k] = f[g][k];
     if (typeof d.badges !== 'object' || d.badges === null) d.badges = {};
     if (typeof d.bossFails !== 'object' || d.bossFails === null) d.bossFails = {};
-    for (const k of Object.keys(d.mons)) if (!DEX[d.mons[k].dex]) delete d.mons[k];
-    for (const m of Object.values(d.mons)) if (m.shinyOwned === undefined) m.shinyOwned = !!m.shiny;
+        for (const m of Object.values(d.mons)) if (m.shinyOwned === undefined) m.shinyOwned = !!m.shiny;
     // partidas anteriores a las naturalezas, los IVs y los huevos: tiran sus datos una vez y reciben un huevo de regalo
     for (const m of Object.values(d.mons)) {
       if (!Array.isArray(m.megas)) m.megas = [];
@@ -92,7 +125,7 @@ const Core = (() => {
     if (!Array.isArray(d.hist)) d.hist = [];
     d.hist = d.hist.filter(h => Array.isArray(h) && h.length >= 5).slice(-HIST_MAX);
     if (!Array.isArray(d.presets)) d.presets = f.presets;
-    d.presets = [0, 1, 2, 3].map(i => { const p = d.presets[i] || {}; return { name: typeof p.name === 'string' && p.name ? p.name.slice(0, 16) : 'Equipo ' + (i + 1), team: Array.isArray(p.team) ? p.team.map(String).filter(k => d.mons[k]) : [] }; });
+    d.presets = [0, 1, 2, 3].map(i => { const p = d.presets[i] || {}; return { name: typeof p.name === 'string' && cleanName(p.name, 16) ? cleanName(p.name, 16) : 'Equipo ' + (i + 1), team: Array.isArray(p.team) ? p.team.map(String).filter(k => d.mons[k]) : [] }; });
     if (!d.event || typeof d.event !== 'object') d.event = f.event;
     if (!d.tower || typeof d.tower.best !== 'number') d.tower = { best: 0 };
     if (!d.rival || typeof d.rival !== 'object') d.rival = { won: {}, rem: {}, told: {}, master: 0 };
@@ -106,10 +139,12 @@ const Core = (() => {
     if (!TACTICS[d.tactic]) d.tactic = 'bal';
     if (!d.foes || typeof d.foes !== 'object' || Array.isArray(d.foes)) d.foes = {};
     if (!d.profile || typeof d.profile !== 'object') d.profile = { name: '', avatar: 0, title: 'novato' };
-    d.profile.name = typeof d.profile.name === 'string' ? d.profile.name.slice(0, 14) : '';
+    d.profile.name = cleanName(d.profile.name, 14);
     if (!DEX[d.profile.avatar] || !d.mons[String(baseOf(d.profile.avatar))]) d.profile.avatar = 0;
     if (!TITLES.some(t => t.id === d.profile.title)) d.profile.title = 'novato';
     if (!d.favs || typeof d.favs !== 'object' || Array.isArray(d.favs)) d.favs = {};
+    for (const k of Object.keys(d.favs)) if (!/^\d+$/.test(k) || !DEX[k]) delete d.favs[k];
+    for (const k of Object.keys(d.foes)) if (!/^\d+$/.test(k) || !DEX[k]) delete d.foes[k];
     if (!d.ui || typeof d.ui !== 'object' || Array.isArray(d.ui)) d.ui = {};
     if (!d.cloud || typeof d.cloud !== 'object') d.cloud = { uid: '', rev: 0 };
     d.cloud.uid = typeof d.cloud.uid === 'string' ? d.cloud.uid : ''; d.cloud.rev = Math.max(0, Math.floor(+d.cloud.rev || 0));
@@ -129,10 +164,10 @@ const Core = (() => {
     d.team = d.team.map(String).filter((k, i, a) => d.mons[k] && a.indexOf(k) === i);
     if (d.stats.maxStage < d.maxStage) d.stats.maxStage = d.maxStage;
     if (legacy) d.tutDone = true;
-    if (!Array.isArray(d.inv)) d.inv = [];
     if (d.started && !Object.keys(d.ui.biomes).length) { const top = Math.min(ROUTES.length - 1, Math.floor((Math.max(d.stats.maxStage, d.maxStage) - 1) / 10)); for (let i = 0; i <= top; i++) d.ui.biomes[ROUTES[i].biome] = 1; }
     invDirty = true;
     S = d;
+    stale = false;
     chal = null;
     refreshEvent();
     resetFight();
@@ -140,7 +175,20 @@ const Core = (() => {
   }
   let frozen = false;
   const freezeSave = b => { frozen = !!b; };           // para que, al cargar otra partida, el guardado de salida no la pise
-  function save() { if (!S || frozen) return; S.last = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* sin espacio */ } }
+  // una sola pestaña manda sobre la partida: la última que se abre toma el relevo y las anteriores dejan de guardar
+  let stale = false, saveFails = 0;
+  function claim() { stale = false; try { localStorage.setItem(OWN, TAB); } catch (e) { /* sin almacenamiento */ } }
+  function ownerCheck() {
+    if (stale) return false;
+    try { const o = localStorage.getItem(OWN); if (o && o !== TAB) { stale = true; paused = true; emit('stale'); return false; } } catch (e) { /* sin almacenamiento */ }
+    return true;
+  }
+  function save() {
+    if (!S || frozen || !ownerCheck()) return;
+    S.last = Date.now();
+    try { localStorage.setItem(KEY, JSON.stringify(S)); saveFails = 0; }
+    catch (e) { if (++saveFails === 3) emit('saveFail'); }
+  }
   function wipe() { S = fresh(); chal = null; refreshEvent(); resetFight(); save(); }
 
   // ---------------- fórmulas ----------------
@@ -185,7 +233,9 @@ const Core = (() => {
   // las monedas por vida bajan con la etapa; pasada la etapa cdS bajan más despacio para que el tramo largo no se estanque
   const coinDecay = s => Math.pow(K.cd, Math.min(s, K.cdS)) * Math.pow(K.cd2, Math.max(0, s - K.cdS));
   const killCoins = s => Math.ceil(((hpBase(s) + K.hpL * s) * K.coinR * coinDecay(s) + K.cf + s * K.cs) * coinMult() * (isBoss(s) ? 6 : 1));
-  const dexCount = () => Object.keys(S.seen).length;
+  const dexCount = () => Object.keys(S.seen).length;                                   // especies obtenidas (dan +1% de daño cada una)
+  const isReg = d => !!(S.seen[d] || S.foes[d]);
+  const regCount = () => { const u = new Set(Object.keys(S.seen)); for (const k of Object.keys(S.foes)) if (DEX[k]) u.add(k); return u.size; };      // registradas: obtenidas o vistas en combate
   const badgeCount = () => Object.keys(S.badges).length;
   const gemMult = () => 1 + 0.1 * S.shop.gems;
   const globalDmg = () => (1 + 0.1 * S.up.train) * (1 + TOWER_BONUS * S.tower.best) * medalMult() * (1 + 0.06 * S.shop.dmg) * (1 + 0.01 * dexCount()) * (1 + 0.03 * badgeCount()) * (1 + RIVAL_BONUS * rivalWins()) * (1 + MASTER.bonus * S.rival.master) * ascDmg() * (skillOn('rage') ? 3 : 1);
@@ -346,7 +396,15 @@ const Core = (() => {
     return d;
   }
   const bossBonus = (e, m) => (e && e.boss ? (1 + 0.04 * S.up.boss) * (1 + (m ? itemBoss(m) + natVal(m, 'boss') : 0)) * (1 + synergies().boss) * (1 + tact().boss) : 1 + tact().wild);
-  const tapDmg = () => (1 + 3 * S.up.tap + teamDps() * (0.15 + 0.01 * S.up.tap)) * (1 + 0.1 * S.shop.tapd) * (1 + teamItemSum('tap'));
+  const tapDmg = () => (1 + 3 * S.up.tap + teamDps() * (0.15 + 0.02 * S.up.tap)) * (1 + 0.1 * S.shop.tapd) * (1 + teamItemSum('tap'));
+  // vista previa del efecto de la siguiente mejora (toque, monedas, daño del equipo) para que se vea cuánto sube de verdad
+  function previewUp(id) {
+    if (!['tap', 'coin', 'train'].includes(id) || S.up[id] >= UPGRADES[id].max) return null;
+    const f = id === 'tap' ? tapDmg : id === 'coin' ? () => killCoins(Math.max(1, S.stage - (isBoss(S.stage) ? 1 : 0))) : () => teamDps();
+    const o = S.up[id], a = f(); S.up[id] = o + 1;
+    let b; try { b = f(); } finally { S.up[id] = o; }
+    return { a, b };
+  }
   const medalFor = ms => ms < 60 ? 0 : Math.max(1, Math.floor(Math.pow((ms - 45) / 12, 1.4)));
   const medalGain = () => medalFor(S.maxStage);
   const genUnlocked = g => g <= 1 || S.stats.maxStage > REGIONS[g - 1].first * 10;
@@ -484,6 +542,7 @@ const Core = (() => {
   function goStage(s) {
     if (chal || s < 1 || s > S.maxStage) return;
     S.stage = s; S.kills = 0; S.retryT = 0; F.enemy = null; F.respawn = 0.3; F.trainer = null; trackBiome();
+    if (s >= S.maxStage) S.auto = true;           // al volver a la etapa más alta, el juego sigue avanzando solo
     emit('stage', S.stage);
   }
   function bossFail() {
@@ -508,7 +567,7 @@ const Core = (() => {
   function tick(dt) {
     if (!S || !S.started || paused) return;
     S.stats.time += dt;
-    evT += dt; if (evT > 20) { evT = 0; refreshEvent(); }
+    evT += dt; if (evT > 20) { evT = 0; refreshEvent(); if (checkDaily()) emit('newDay'); }
     histT += dt; if (histT >= HIST_STEP) { histT = 0; sample(); }
     if (S.retryT >= 0 && !S.auto) { S.retryT += dt; if (S.settings.autoBoss && S.kills >= 10 && !isBoss(S.stage) && isBoss(S.stage + 1) && S.retryT >= 12 && (bossReady(S.stage + 1) >= K.ready || S.retryT >= K.retryMax)) fightBoss(); }
     if (S.up.autotap) { S.autoAcc += dt * 0.5 * S.up.autotap; while (S.autoAcc >= 1) { S.autoAcc -= 1; if (F.enemy) tap(true); } }
@@ -641,7 +700,7 @@ const Core = (() => {
     const m = S.mons[key];
     const st = stageOf(m.dex), kids = CHILDREN[m.dex];
     if (kids && kids.length && st < EVO_LVL.length && m.lvl >= EVO_LVL[st]) {
-      const from = m.dex, to = kids[Math.floor(rnd() * kids.length)];
+      const from = m.dex, fresh = kids.filter(k => !S.seen[k] && !S.foes[k]), pool = fresh.length ? fresh : kids, to = pool[Math.floor(rnd() * pool.length)];
       m.dex = to; m.mf = null; m.megas = []; S.seen[to] = 1; S.stats.evolutions++;
       emit('evolve', { key, from, to });
       checkEvo(key);
@@ -725,10 +784,10 @@ const Core = (() => {
   // poder del equipo contra el reto (≥1: lo vence a tiempo)
   function chalReady(spec) {
     const prev = chal; chal = spec;
-    let r;
-    if (spec.party) { let need = 0.8 * spec.party.length; for (const p of spec.party) need += p.hp / Math.max(1e-9, teamDps(DEX[p.dex].types)); r = spec.time / need; }
-    else r = teamDps(DEX[spec.dex].types) * spec.time / spec.hp;
-    chal = prev; return r;
+    try {
+      if (spec.party) { let need = 0.8 * spec.party.length; for (const p of spec.party) need += p.hp / Math.max(1e-9, teamDps(DEX[p.dex].types)); return spec.time / need; }
+      return teamDps(DEX[spec.dex].types) * spec.time / spec.hp;
+    } finally { chal = prev; }
   }
   const towerStarts = () => { const out = []; for (let c = 1; c - 1 <= S.tower.best; c += 5) out.push(c); return out; };
   function startChal(spec) {
@@ -1164,7 +1223,7 @@ const Core = (() => {
     }
     return qs;
   }
-  const weekIdx = () => Math.floor((dayIndex() + 3) / 7);
+  const weekIdx = () => Math.floor((Date.now() / 864e5 + 3) / 7);      // semana en UTC (lunes 00:00 UTC): igual para todos y coincide con la del ranking semanal
   function checkDaily() {
     let changed = false;
     const d = today();
@@ -1194,7 +1253,7 @@ const Core = (() => {
   const legendsOwned = () => Object.values(S.mons).filter(m => RAR[m.dex] === 5).length;
   function achStat(a) {
     const st = a.stat;
-    if (st === 'dex') return dexCount();
+    if (st === 'dex') return regCount();
     if (st === 'legends') return legendsOwned();
     if (st === 'tower') return S.tower.best;
     if (st === 'megas') return S.stats.megas;
@@ -1212,11 +1271,17 @@ const Core = (() => {
     if (st === 'regions') return unlockedGens().length;
     if (st === 'slots') return S.slots;
     if (st.startsWith('type:')) { const t = st.slice(5); return Object.values(S.mons).filter(m => DEX[m.dex].types.includes(t)).length; }
-    if (st.startsWith('regionDex:')) { const g = +st.slice(10); return Object.keys(S.seen).filter(d => DEX[d] && DEX[d].gen === g).length; }
+    if (st.startsWith('regionDex:')) { const g = +st.slice(10); return POKEDEX.filter(p => p.gen === g && isReg(p.dex)).length; }
     return S.stats[st] || 0;
   }
   function claimAch(id) { const a = ACHIEVEMENTS.find(x => x.id === id); if (!a || S.ach[id] || achStat(a) < a.goal) return 0; S.ach[id] = 1; S.gems += a.reward; giveTickets({ poke: Math.ceil(a.reward / 50) }); return a.reward; }
+  let prT = 0, prV = 0;
   function pendingRewards() {
+    const now = Date.now();
+    if (now - prT < 500) return prV;
+    prT = now; prV = pendingRewards0(); return prV;
+  }
+  function pendingRewards0() {
     let n = S.daily.quests.filter(q => !q.claimed && questProg(q) >= q.goal).length;
     n += S.weekly.quests.filter(q => !q.claimed && questProg(q) >= q.goal).length;
     n += ACHIEVEMENTS.filter(a => !S.ach[a.id] && achStat(a) >= a.goal).length;
@@ -1262,8 +1327,9 @@ const Core = (() => {
   }
   function offline() {
     const away = (Date.now() - (S.last || Date.now())) / 1000, cap = (8 + 2 * S.shop.offline) * 3600, secs = Math.min(cap, away);
+    if (secs < 60 || !S.team.length) { if (secs < 0 || !S.team.length) S.last = Date.now(); return null; }       // las ausencias cortas se acumulan hasta llegar a 1 minuto
     S.last = Date.now();
-    if (secs < 60 || !S.team.length) return null;
+    S.skOn.rage = S.skOn.gold = S.skOn.lure = 0;          // las habilidades no cuentan sin conexión (el reloj de juego no avanzó)
     const s = isBoss(S.stage) ? S.stage - 1 : S.stage;
     const kills = Math.floor(secs * offlineKps());
     const coins = kills * killCoins(s);
@@ -1287,6 +1353,7 @@ const Core = (() => {
     K, hpTab, DEX, CHILDREN, RAR, POOLG, BASES, bst, baseOf, stageOf, fmt, on, emit, F,
     get S() { return S; }, load, save, freezeSave, eventWeek: () => weekIdx(), wipe, fresh, setRng(f) { rnd = f; },
     route, routeIdx, routeData, regionOf, regionOfRoute, loopOf, isBoss, bossTier, bossTime, enemyHp, killCoins, coinMult, globalDmg, monDmg, monRate, eff,
+    previewUp, regCount, isReg, ownerCheck, isStale: () => stale, claim,
     levelCost, levelCostN, maxAffordable, upCost, shopCost, pokeBallPrice, critChance, critMult, catchChance, teamDps, tapDmg, medalGain, medalFor, dexCount, badgeCount,
     genUnlocked, unlockedGens, skillOn, skillReady, useSkill, goldenChance, gemMult,
     tick, tap, advance, goStage, fightBoss, bossEase, bossReady, levelUp, starUp, setTeam, buySlot, buyUp, buyShop, addMon,

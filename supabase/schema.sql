@@ -38,7 +38,9 @@ create or replace function public.nickname_ok(p text) returns boolean language s
   select p is not null
      and p ~ '^[A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ _.-]{3,16}$'
      and p = btrim(p)
-     and not exists (select 1 from public.blocked_words w where lower(p) like '%' || w.word || '%')
+     and not exists (select 1 from public.blocked_words w where case
+           when w.word in ('puta', 'puto', 'rape', 'coño') then lower(p) ~ ('(^|[^[:alnum:]])' || w.word || '($|[^[:alnum:]])')     -- como palabra suelta («puta» ≠ «Computadora», «rape» ≠ «Grape»)
+           else lower(p) like '%' || w.word || '%' end)
 $$;
 
 -- ------------------------------------------------------------------ perfiles
@@ -342,6 +344,13 @@ begin
   if reason is null and n_master > 10 + n_time / 300.0 then reason := 'master_vs_time'; end if;
   if reason is null and n_rank > 3 + n_time / 120.0 then reason := 'rank_vs_time'; end if;
   if reason is null and n_dex > 1100 then reason := 'dex_too_high'; end if;
+  -- topes absolutos y relación con el tiempo jugado (valen también en el primer envío, cuando aún no hay fila anterior)
+  if reason is null and n_stage > 6000 then reason := 'stage_abs'; end if;
+  if reason is null and n_tower > 1500 then reason := 'tower_abs'; end if;
+  if reason is null and n_rank > 2000 then reason := 'rank_abs'; end if;
+  if reason is null and n_master > 2000 then reason := 'master_abs'; end if;
+  if reason is null and w_kills > 300000 then reason := 'kills_abs'; end if;
+  if reason is null and w_kills > 100 + 3 * n_time then reason := 'kills_vs_time'; end if;
   if reason is null and had_old then
     elapsed := extract(epoch from now() - old.last_submit);
     if n_time - old.play_time > elapsed + 300 then reason := 'time_jump'; end if;

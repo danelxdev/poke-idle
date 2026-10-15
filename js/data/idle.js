@@ -214,7 +214,7 @@ const TICKETS = {
   ultra: { name: 'Ticket Ultra', icon: 'tkUltra', cur: 'gems', gems: 90, color: '#ffd23f' },
   master: { name: 'Ticket Maestro', icon: 'tkMaster', cur: 'gems', gems: 250, color: '#c47bff' },
 };
-const TICKET_DUST = { poke: 40, super: 150, ultra: 500, master: 2200 };   // polvo estelar por ticket
+const TICKET_DUST = { poke: 70, super: 150, ultra: 500, master: 2200 };   // polvo estelar por ticket
 const BOSS_TICKETS = [null, { poke: 2, super: 1 }, { poke: 3, super: 2 }, { super: 3, ultra: 1 }, { super: 2, ultra: 2 }, { ultra: 3, master: 1 }];
 const DAILY_TICKETS = [{ poke: 2 }, { poke: 2 }, { poke: 3 }, { poke: 3, super: 1 }, { poke: 4 }, { poke: 4, super: 1 }, { super: 2, ultra: 1 }];
 const PITY = 90;       // tiradas con gemas hasta un legendario garantizado
@@ -223,7 +223,7 @@ const SHINY_RATE = 1 / 100;
 
 // Mejoras que se compran con monedas (se pierden al entrar en la Liga)
 const UPGRADES = {
-  tap: { name: 'Golpe de Entrenador', icon: 'fist', base: 25, mul: 1.2, max: 999, desc: n => 'Cada toque hace un ' + (15 + n) + '% del daño/s del equipo' + (n ? ' +' + n * 3 : '') },
+  tap: { name: 'Golpe de Entrenador', icon: 'fist', base: 25, mul: 1.2, max: 999, desc: n => 'Cada toque hace un ' + (15 + 2 * n) + '% del daño/s del equipo' + (n ? ' +' + n * 3 : '') },
   train: { name: 'Entrenamiento', icon: 'up', base: 400, mul: 1.5, max: 999, desc: n => '+' + (n * 10) + '% de daño del equipo' },
   coin: { name: 'Hucha', icon: 'amuletcoin', base: 350, mul: 1.62, max: 999, desc: n => '+' + (n * 15) + '% de monedas' },
   crit: { name: 'Lente Zoom', icon: 'zoom', base: 1500, mul: 2.2, max: 20, desc: n => (3 + n * 2) + '% de críticos (x3 de daño)' },
@@ -300,7 +300,7 @@ const WEEKLY_POOL = [
   { stat: 'catches', goal: 25, reward: 120, text: n => 'Consigue ' + n + ' tickets en combate' },
   { stat: 'skills', goal: 20, reward: 90, text: n => 'Usa ' + n + ' habilidades activas' },
   { stat: 'crits', goal: 5000, reward: 110, text: n => 'Haz ' + n + ' golpes críticos' },
-  { stat: 'goldens', goal: 10, reward: 130, text: n => 'Derrota ' + n + ' Pokémon dorados' },
+  { stat: 'goldens', goal: 10, reward: 130, text: n => 'Derrota ' + n + (n === 1 ? ' Pokémon dorado' : ' Pokémon dorados') },
   { stat: 'evolutions', goal: 12, reward: 110, text: n => 'Evoluciona ' + n + ' Pokémon' },
   { stat: 'dust', goal: 800, reward: 100, text: n => 'Consigue ' + n + ' de polvo estelar' },
 ];
@@ -322,11 +322,11 @@ const ACH_DEFS = [
   ['levels', 'Entrenamiento', 'up', [[100, 15], [1000, 35], [1e4, 80], [1e5, 200], [1e6, 400]], n => 'Sube ' + n + ' niveles en total'],
   ['coinsTotal', 'Millonario', 'coin', [[1e6, 20], [1e9, 50], [1e12, 100], [1e15, 200], [1e18, 400]], n => 'Gana ' + n + ' monedas en total'],
   ['skills', 'Habilidoso', 'fist', [[10, 15], [100, 50], [500, 120]], n => 'Usa ' + n + ' habilidades'],
-  ['itemsFound', 'Buscaobjetos', 'choiceband', [[1, 15], [10, 40], [50, 100], [200, 250]], n => 'Consigue ' + n + ' objetos'],
+  ['itemsFound', 'Buscaobjetos', 'choiceband', [[1, 15], [10, 40], [50, 100], [200, 250]], n => 'Consigue ' + n + (n === 1 ? ' objeto' : ' objetos')],
   ['dust', 'Polvo de estrellas', 'dust', [[100, 15], [1000, 50], [10000, 150], [1e5, 400]], n => 'Consigue ' + n + ' de polvo estelar'],
   ['crits', 'Golpe certero', 'zoom', [[1e3, 20], [1e4, 50], [1e5, 120], [1e6, 300]], n => 'Haz ' + n + ' críticos'],
-  ['goldens', 'Fiebre del oro', 'amuletcoin', [[1, 20], [10, 50], [50, 120], [200, 300]], n => 'Derrota ' + n + ' Pokémon dorados'],
-  ['dustBuys', 'Trueque', 'dust', [[1, 20], [10, 60], [50, 200]], n => 'Canjea polvo estelar por ' + n + ' tickets'],
+  ['goldens', 'Fiebre del oro', 'amuletcoin', [[1, 20], [10, 50], [50, 120], [200, 300]], n => 'Derrota ' + n + (n === 1 ? ' Pokémon dorado' : ' Pokémon dorados')],
+  ['dustBuys', 'Trueque', 'dust', [[1, 20], [10, 60], [50, 200]], n => 'Canjea polvo estelar por ' + n + (n === 1 ? ' ticket' : ' tickets')],
   ['freePulls', 'Constancia', 'ball', [[7, 30], [30, 100], [100, 300]], n => 'Abre ' + n + ' tiradas diarias gratis'],
   ['streak', 'Racha', 'clock', [[7, 40], [14, 80], [30, 200], [60, 400], [100, 800]], n => 'Racha de ' + n + ' días seguidos'],
   ['stars5', 'Constelación', 'star', [[1, 60], [5, 150], [20, 400], [50, 900]], n => 'Ten ' + n + ' Pokémon con ★5'],

@@ -6,6 +6,7 @@
 const Cloud = (() => {
   const cfg = window.CLOUD_CONFIG || {};
   const LIB = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
+  const LIB_SRI = 'sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug';   // supabase-js@2.45.4 (sha384 del fichero publicado en jsDelivr)
   const KEY = 'pokeidle.save.v1';
   const PUSH_EVERY = 120, SCORE_EVERY = 180;                 // segundos
   const st = { client: null, user: null, profile: null, status: 'off', msg: '', lastPush: 0, lastScore: 0, lastTime: -1, busy: false, loginDone: '', paused: false, ready: false };
@@ -34,7 +35,8 @@ const Cloud = (() => {
     return new Promise((res, rej) => {
       if (window.supabase && window.supabase.createClient) return res();
       const s = document.createElement('script');
-      s.src = cfg.lib || LIB; s.async = true; s.onload = res; s.onerror = () => rej(new Error('lib'));
+      s.src = cfg.lib || LIB; s.async = true;
+      if (!cfg.lib) { s.integrity = LIB_SRI; s.crossOrigin = 'anonymous'; }       // la librería oficial se verifica; una URL propia (cfg.lib) no s.onload = res; s.onerror = () => rej(new Error('lib'));
       document.head.appendChild(s);
     });
   }
@@ -71,7 +73,7 @@ const Cloud = (() => {
       await reconcile();
       setStatus('ok');
       askName();
-    } catch (e) { console.error('[Cloud] onSession', e); setStatus('error', String(e && e.message || e)); }
+    } catch (e) { console.error('[Cloud] onSession', e); st.loginDone = ''; setStatus('error', String(e && e.message || e)); }       // loginDone vacío: el siguiente evento de sesión lo reintenta
     notify('user');
   }
   // primera vez con esta cuenta: dejamos elegir el nombre público (si no, se queda el automático y se cambia en Perfil)
@@ -146,7 +148,7 @@ const Cloud = (() => {
   const meta = () => { const s = S(); return { max_stage: s.stats.maxStage, medals: s.medals, asc_rank: s.asc.rank, essence: s.asc.ess, dex_count: Core.dexCount(), play_time: Math.floor(s.stats.time) }; };
   const device = () => { const ua = navigator.userAgent || ''; const b = /Edg\//.test(ua) ? 'Edge' : /Chrome\//.test(ua) ? 'Chrome' : /Firefox\//.test(ua) ? 'Firefox' : /Safari\//.test(ua) ? 'Safari' : 'Web'; const o = /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : /Windows/.test(ua) ? 'Windows' : /Mac/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : ''; return (b + (o ? ' · ' + o : '')).slice(0, 40); };
   async function push(force) {
-    if (!st.user || !S().started || st.busy || (st.paused && !force)) return false;
+    if (!st.user || !S().started || st.busy || Core.isStale() || (st.paused && !force)) return false;
     st.busy = true; setStatus('syncing');
     let conflict = null;
     try {
@@ -207,7 +209,7 @@ const Cloud = (() => {
     if (!st.user || !S().started || st.profile && st.profile.banned) return false;
     if (!force && Date.now() - st.lastScore < SCORE_EVERY * 1000) return false;
     st.lastScore = Date.now();
-    const s = S(), wk = Math.floor((Date.now() / 864e5 + 3) / 7), curWeek = s.event && s.event.week === Core.eventWeek();
+    const s = S(), wk = Core.eventWeek(), curWeek = s.event && s.event.week === Core.eventWeek();
     const tiers = s.event ? s.event.tiers.filter(Boolean).length : 0;
     const { error } = await st.client.rpc('submit_score', { p: { max_stage: s.stats.maxStage, asc_rank: s.asc.rank, essence: s.asc.ess, tower_best: s.tower.best, master_level: s.rival.master, dex_count: Core.dexCount(), rivals: Core.rivalWins(), medals: s.medals, play_time: Math.floor(s.stats.time), week_id: wk, event_kills: curWeek ? s.event.kills : 0, event_tiers: curWeek ? tiers : 0 } });
     return !error;
