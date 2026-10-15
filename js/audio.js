@@ -377,5 +377,6 @@ const Audio8 = (() => {
 
   function setCue(f) { cueFn = f; }
   function setUnlock(f) { unlockFn = f; }
-  return { init, resume, play, music, want, remode: applyMode, audition, endAudition, restyle, setHidden, setCue, setUnlock, setVolumes, compose, TRACKS, preview, get track() { return track; }, get auditioning() { return audition_; } };
+  const state = () => ctx ? ctx.state : 'none';
+  return { init, resume, state, play, music, want, remode: applyMode, audition, endAudition, restyle, setHidden, setCue, setUnlock, setVolumes, compose, TRACKS, preview, get track() { return track; }, get auditioning() { return audition_; } };
 })();

@@ -11,6 +11,8 @@ const UI = (() => {
   const typeTags = d => `<span class="types">${DEX[d].types.map(t => `<span class="type" style="background:${TYPE_COLORS[t]}">${TYPE_ES[t]}</span>`).join('')}</span>`;
   const starsHtml = n => `<span class="stars">${'★'.repeat(n)}<i>${'★'.repeat(5 - n)}</i></span>`;
   const por = (d, shiny) => Sprites.portrait(d, shiny);
+  // el Pokémon animado dentro de una cajita (en lugar de su retrato/carta)
+  const spb = (dex, px, shiny) => `<span class="spb" style="width:${px + 8}px;height:${px + 8}px">${Sprites.html(dex, !!shiny, px, true)}</span>`;
 
   let tab = 'team', sig = '', dexFilter = 'all', achShowAll = false, rivalAll = false;
 
@@ -215,14 +217,14 @@ const UI = (() => {
     const bonus = EVENT_BONUS[ev.bonus], d = Core.eventDaysLeft();
     let h = rivalHtml() + `<div class="evcard" style="--ec:${col}"><div class="evhead"><span class="evtag">${L('EVENTO SEMANAL', 'WEEKLY EVENT')}</span><b>${L('Semana ' + TYPE_NAMES[ev.type], TYPE_NAMES[ev.type] + ' Week')}</b><small>${L(`Termina en ${d} día${d > 1 ? 's' : ''}`, `Ends in ${d} day${d > 1 ? 's' : ''}`)}</small></div>
       <ul class="evfx"><li>${L(`Tus Pokémon de tipo ${TYPE_NAMES[ev.type]} hacen <b>+${Math.round(EVENT_DMG * 100)}%</b> de daño`, `Your ${TYPE_NAMES[ev.type]}-type Pokémon deal <b>+${Math.round(EVENT_DMG * 100)}%</b> damage`)}</li><li><b>${bonus.name}:</b> ${bonus.txt}</li></ul>
-      <div class="evrow"><img src="${por(ev.boss)}"><div>${L('Jefe del evento', 'Event boss')}<br><b>${DEX[ev.boss].name}</b> ${typeTags(ev.boss)}</div></div>
+      <div class="evrow">${spb(ev.boss, 52)}<div>${L('Jefe del evento', 'Event boss')}<br><b>${DEX[ev.boss].name}</b> ${typeTags(ev.boss)}</div></div>
       <div class="tiers">${EVENT_TIERS.map((t, i) => `<button class="tierbtn ${s.event.tiers[i] ? 'done' : ''}" data-act="evboss" data-v="${i}" ${busy}><b>${t.name}${s.event.tiers[i] ? '<span style="color:#7ff0a0">✓</span>' : ''}</b><span data-rdy="e:${i}" class="rdy"></span><small>${s.event.tiers[i] ? L('Recompensa ya recogida', 'Reward already claimed') : rewText(t.rew)}</small></button>`).join('')}</div>
       <h3 style="margin-top:8px">${L('Misiones del evento', 'Event quests')}</h3>`;
     h += EVENT_TASKS.map((t, i) => {
       const p = Math.min(t.goal, s.event[t.stat]), got = s.event.claimed[t.id], ok = p >= t.goal;
       return `<div class="etask"><div class="qi"><b>${t.text(fmt(t.goal), TYPE_NAMES[ev.type])}</b><small>${fmt(p)} / ${fmt(t.goal)} · ${rewText(t.rew)}</small><div class="bar"><i style="width:${p / t.goal * 100}%"></i></div></div>${got ? '<button class="btn small" disabled>✓</button>' : `<button class="btn ${ok ? 'primary' : ''}" data-act="evtask" data-v="${i}" ${ok ? '' : 'disabled'}>${L('Recoger', 'Claim')}</button>`}</div>`;
     }).join('');
-    const fl = Core.eventFeat(5), fe = Core.eventFeat(4), feat = (dx, tag) => dx ? `<div class="feat"><span class="tagx">${tag}</span><img src="${por(dx)}"><div><b>${DEX[dx].name}</b><small>${RARITY[Core.RAR[dx]].name}</small><br>${typeTags(dx)}</div></div>` : '';
+    const fl = Core.eventFeat(5), fe = Core.eventFeat(4), feat = (dx, tag) => dx ? `<div class="feat"><span class="tagx">${tag}</span>${spb(dx, 66)}<div><b>${DEX[dx].name}</b><small>${RARITY[Core.RAR[dx]].name}</small><br>${typeTags(dx)}</div></div>` : '';
     h += `<h3>${BALLS.event.name}</h3><p class="hint">${BALLS.event.desc}</p>${feat(fl, L('LEGENDARIO · EVENTO', 'LEGENDARY · EVENT'))}${feat(fe, L('ÉPICO · EVENTO', 'EPIC · EVENT'))}
       <div class="btns row" style="margin-top:6px">${s.event.free ? '' : '<button class="btn primary" data-act="evfree">' + L('Tirada gratis', 'Free pull') + '</button>'}
       <button class="btn primary" data-act="pull" data-v="event" data-n="1" data-cost="1" data-cur="tk:super">${L('Abrir', 'Open')} x1 ${ico('tkSuper', 14)} 1</button>
@@ -244,15 +246,15 @@ const UI = (() => {
     let h = `<h3>${L('Rival', 'Rival')}: ${RIVAL_NAME} <small style="color:var(--dim)">${won}/${RIVAL_ENC.length} · +${Math.round(won * RIVAL_BONUS * 100)}% ${L('de daño', 'damage')}</small></h3>`;
     if (next) {
       const open = Core.rivalOpen(next), team = Core.rivalTeam(next);
-      h += `<div class="rivalcard ${open ? 'open' : ''}"><div class="rvhead"><img src="${por(team[team.length - 1])}" alt=""><div><b>${RIVAL_NAME} · ${REGIONS[next.region].name} ${next.meet ? 'II' : 'I'}</b><small>${open ? L('Nico te espera para un duelo', 'Nico is waiting for a duel') : L(`Llega a la etapa ${next.stage} para encontrarte con Nico`, `Reach stage ${next.stage} to meet Nico`)}</small></div></div>
-        <div class="rvteam">${team.map(d => `<div class="rvm"><img src="${por(d)}" alt="${DEX[d].name}"><small>${DEX[d].name}</small>${typeTags(d)}</div>`).join('')}</div>
+      h += `<div class="rivalcard ${open ? 'open' : ''}"><div class="rvhead">${spb(team[team.length - 1], 52)}<div><b>${RIVAL_NAME} · ${REGIONS[next.region].name} ${next.meet ? 'II' : 'I'}</b><small>${open ? L('Nico te espera para un duelo', 'Nico is waiting for a duel') : L(`Llega a la etapa ${next.stage} para encontrarte con Nico`, `Reach stage ${next.stage} to meet Nico`)}</small></div></div>
+        <div class="rvteam">${team.map(d => `<div class="rvm">${spb(d, 44)}<small>${DEX[d].name}</small>${typeTags(d)}</div>`).join('')}</div>
         <div class="floorline">${L('3 Pokémon seguidos con un solo cronómetro', '3 Pokémon in a row on a single timer')} · <span data-rdy="r:${next.id}" class="rdy"></span></div>
         <div class="floorline">${L('Recompensa', 'Reward')}: ${rewText(rivalReward(next))}</div>
         <div class="row"><button class="btn big primary" data-act="rival" data-v="${next.id}" ${open && !busy ? '' : 'disabled'}>${L('Aceptar el duelo', 'Accept the duel')}</button></div></div>`;
     } else if (Core.masterOpen()) {
       const t = s.rival.master + 1, e = masterEnc(t), team = Core.rivalTeam(e);
-      h += `<div class="rivalcard open master"><div class="rvhead"><img src="${por(team[team.length - 1])}" alt=""><div><b>${RIVAL_NAME} · ${L('Duelo Maestro', 'Master Duel')} ${t}</b><small>${L('La escalera no se acaba: cada nivel es más duro', 'The ladder never ends: every level is tougher')}</small></div></div>
-        <div class="rvteam">${team.map(d => `<div class="rvm"><img src="${por(d)}" alt="${DEX[d].name}"><small>${DEX[d].name}</small>${typeTags(d)}</div>`).join('')}</div>
+      h += `<div class="rivalcard open master"><div class="rvhead">${spb(team[team.length - 1], 52)}<div><b>${RIVAL_NAME} · ${L('Duelo Maestro', 'Master Duel')} ${t}</b><small>${L('La escalera no se acaba: cada nivel es más duro', 'The ladder never ends: every level is tougher')}</small></div></div>
+        <div class="rvteam">${team.map(d => `<div class="rvm">${spb(d, 44)}<small>${DEX[d].name}</small>${typeTags(d)}</div>`).join('')}</div>
         <div class="floorline">${L('Vida', 'HP')} ×${Math.round(e.hp * 10) / 10} ${L('de un jefe', 'of a boss')} · <span data-rdy="r:master" class="rdy"></span></div>
         <div class="floorline">${L('Recompensa', 'Reward')}: ${rewText(masterReward(t))}</div>
         <div class="row"><button class="btn big primary" data-act="master" ${busy}>${L('Aceptar el duelo', 'Accept the duel')}</button></div></div>`;
@@ -268,7 +270,7 @@ const UI = (() => {
   }
   function rivalTalk(e, which, d) {
     const team = Core.rivalTeam(e), won = which === 'post' && d;
-    openModal(`<div class="rvtalk"><img class="rvav" src="${por(team[team.length - 1])}" alt=""><div class="rvsay"><b>${RIVAL_NAME} · ${e.master ? L('Duelo Maestro ', 'Master Duel ') + e.master : REGIONS[e.region].name + ' ' + (e.meet ? 'II' : 'I')}</b>${which === 'story' ? `<p>“${e.pre}”</p><p>“${e.post}”</p>` : `<p>“${which === 'pre' ? e.pre : e.post}”</p>`}</div></div>
+    openModal(`<div class="rvtalk"><span class="rvav spb">${Sprites.html(team[team.length - 1], false, 76, true)}</span><div class="rvsay"><b>${RIVAL_NAME} · ${e.master ? L('Duelo Maestro ', 'Master Duel ') + e.master : REGIONS[e.region].name + ' ' + (e.meet ? 'II' : 'I')}</b>${which === 'story' ? `<p>“${e.pre}”</p><p>“${e.post}”</p>` : `<p>“${which === 'pre' ? e.pre : e.post}”</p>`}</div></div>
       ${won ? `<p class="hint" style="text-align:center">${d.first ? L('¡Primera victoria! ', 'First win! ') : L('Revancha: ', 'Rematch: ')}${d.rew ? rewText(d.rew) : L('Ya recogiste la recompensa de hoy', 'You already claimed today’s reward')}</p>` : ''}
       <div class="row">${which === 'story' ? `<button class="btn primary" id="rv-x">${L('Cerrar', 'Close')}</button>` : which === 'pre' ? `<button class="btn" id="rv-x">${L('Ahora no', 'Not now')}</button><button class="btn primary" id="rv-go">${L('¡Vamos!', 'Let’s go!')}</button>` : `<button class="btn primary" id="rv-ok">${L('Seguir', 'Continue')}</button>`}</div>`);
     if (which === 'story') $('#rv-x').onclick = closeModal;
@@ -539,7 +541,7 @@ const UI = (() => {
           <button class="btn small primary" data-act="buytk" data-v="${t}" data-n="1" data-cost="${Core.ticketPrice(t)}" data-cur="${k.cur}">+1 ${ico(k.cur === 'gems' ? 'gem' : 'coin', 10)} ${fmt(Core.ticketPrice(t))}</button></div>`).join('') + '</div>';
         h += incubatorHtml() + nurseryHtml();
         if (Core.freePullReady()) h += `<div class="feat free"><span>${ico('tkPoke', 48)}</span><div><b>${L('¡Tirada diaria gratis!', 'Free daily pull!')}</b><small>${L('Una Poké Ball gratis cada día, sin ticket', 'A free Poké Ball every day, no ticket needed')}</small></div><button class="btn primary" data-act="freepull">${L('Abrir', 'Open')}</button></div>`;
-        const feat = (d, tag) => `<div class="feat"><span class="tagx">${tag}</span><img src="${por(d)}"><div><b>${DEX[d].name}</b><small>${RARITY[Core.RAR[d]].name}</small><br>${typeTags(d)}</div></div>`;
+        const feat = (d, tag) => `<div class="feat"><span class="tagx">${tag}</span>${spb(d, 66)}<div><b>${DEX[d].name}</b><small>${RARITY[Core.RAR[d]].name}</small><br>${typeTags(d)}</div></div>`;
         h += `<h3>${L('Destacados de la Bola Destacada', 'Featured Ball highlights')}</h3>` + feat(fl, L('LEGENDARIO · SEMANA', 'LEGENDARY · WEEK')) + feat(fe, L('ÉPICO · 3 DÍAS', 'EPIC · 3 DAYS'));
         h += `<div class="pity">${L('Épico garantizado en', 'Epic guaranteed in')} <b>${Math.max(0, PITY_EPIC - s.pityE)}</b> ${L('tiradas', 'pulls')} · ${L('Legendario en', 'Legendary in')} <b>${Math.max(0, PITY - s.pity)}</b> ${L('(con tickets Super, Ultra o Maestro)', '(with Great, Ultra or Master tickets)')}${s.bannerLost ? '<br><b style="color:#ffd23f">' + L('¡El próximo legendario de la Bola Destacada será el destacado!', 'The next legendary from the Featured Ball will be the featured one!') + '</b>' : ''}<div class="bar"><i style="width:${s.pity / PITY * 100}%"></i></div></div>`;
         const ballCard = ([id, b]) => {
@@ -1170,6 +1172,24 @@ const UI = (() => {
     });
   }
 
+  // ---------------- atajos de teclado ----------------
+  function keysModal() {
+    const rows = [
+      [['Espacio', 'F'], L('Atacar (tocar al enemigo)', 'Attack (tap the enemy)')],
+      [['Q', 'W', 'E'], L('Habilidades: Furia · Fiebre del Oro · Lluvia de Tickets', 'Skills: Rage · Gold Rush · Ticket Rain')],
+      [['1', '…', '7'], L('Pestañas: Equipo · Mejoras · Gacha · Pokédex · Retos · Misiones · Liga', 'Tabs: Team · Upgrades · Gacha · Pokédex · Challenges · Quests · League')],
+      [['←', '→'], L('Etapa anterior / siguiente', 'Previous / next stage')],
+      [['B'], L('Retar al jefe / Avanzar etapa', 'Challenge the boss / Next stage')],
+      [['X'], L('Cambiar el multiplicador de compra (×1, ×10, ×25, Máx)', 'Change the buy multiplier (×1, ×10, ×25, Max)')],
+      [['M'], L('Mapa del mundo', 'World map')], [['P'], L('Perfil', 'Profile')], [['O'], L('Ajustes', 'Settings')], [['H'], L('¿Qué hago ahora?', 'What should I do now?')],
+      [['Intro', 'Espacio'], L('En las animaciones de gacha y evolución: continuar', 'In gacha and evolution animations: continue')],
+      [['Esc'], L('Cerrar la ventana abierta', 'Close the open window')], [['?', 'K'], L('Esta lista de atajos', 'This list of shortcuts')],
+    ];
+    openModal(`<h2>⌨ ${L('Atajos de teclado', 'Keyboard shortcuts')}</h2><p class="hint">${L('Alternativa al ratón en el ordenador. No funcionan mientras escribes en un campo de texto.', 'A mouse alternative on desktop. They do not work while you type in a text field.')}</p>
+      <div class="keylist">${rows.map(([ks, d]) => `<div class="keyrow"><span class="keys">${ks.map(k => k === '…' ? '<i>…</i>' : `<kbd>${k}</kbd>`).join('')}</span><span>${d}</span></div>`).join('')}</div>
+      <div class="row"><button class="btn primary" id="kb-x">${L('Entendido', 'Got it')}</button></div>`);
+    $('#kb-x').onclick = closeModal;
+  }
   // ---------------- cuenta y nube ----------------
   const GOOGLE = '<svg class="gsvg" viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.3 5.7c4.3-4 6.8-9.9 6.8-17.1z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-2.9-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.3 0 11.7-2.1 15.6-5.7l-7.3-5.7c-2 1.4-4.7 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>';
   function cloudStatus() {
@@ -1416,6 +1436,7 @@ const UI = (() => {
         ${a11yTog('hc', L('Alto contraste', 'High contrast'), L('Texto más claro y bordes marcados', 'Lighter text and stronger borders'))}
         ${a11yTog('cb', L('Paleta para daltonismo', 'Color-blind palette'), L('Rarezas y avisos con colores distinguibles (azul/naranja en lugar de rojo/verde)', 'Distinguishable rarity and alert colors (blue/orange instead of red/green)'))}
         <p class="hint" style="margin:6px 0 0">${L('Atajos: 1–7 cambian de pestaña, Esc cierra ventanas y Tab recorre los botones.', 'Shortcuts: 1–7 switch tabs, Esc closes windows and Tab moves between buttons.')}</p></div>
+      <div class="sset"><h4>${L('Teclado', 'Keyboard')}</h4><div class="row" style="margin:0"><button class="btn" id="s-keys">⌨ ${L('Atajos de teclado', 'Keyboard shortcuts')}</button></div></div>
       <div class="sset"><h4>${L('Aplicación', 'App')}</h4>${PWA.standalone() ? '<p class="hint" style="margin:0 0 6px">' + L('Estás usando la app instalada.', 'You are using the installed app.') + '</p>' : PWA.canInstall() ? '<div class="row" style="margin:0 0 6px"><button class="btn primary" id="s-inst">' + L('Instalar la app', 'Install the app') + '</button></div>' : '<p class="hint" style="margin:0 0 6px">' + L('Puedes instalarla desde el menú del navegador («Instalar app»). En iPhone: Compartir → Añadir a pantalla de inicio.', 'You can install it from the browser menu (“Install app”). On iPhone: Share → Add to Home Screen.') + '</p>'}
         <div class="setrow"><span class="sl"><b>${L('Avisos', 'Notifications')}</b><small id="ntf-sub"></small></span><button class="tog" id="s-notif"><i></i></button></div></div>
       <div class="sset"><h4>${L('Estadísticas', 'Statistics')}</h4><div class="row" style="margin:0"><button class="btn" id="s-stats">${L('Ver estadísticas y gráficas', 'View statistics and charts')}</button></div></div>
@@ -1459,6 +1480,7 @@ const UI = (() => {
     $('#s-notif').onclick = async () => { if (PWA.notifOn()) { st.notify = false; } else await PWA.enableNotify(); Audio8.play('click'); Core.save(); paintNtf(); };
     if ($('#s-inst')) $('#s-inst').onclick = async () => { await PWA.install(); settings(); };
     $('#s-stats').onclick = () => statsModal(false);
+    $('#s-keys').onclick = keysModal;
     $('#s-ok').onclick = () => { Core.save(); closeModal(); };
     $('#s-tut').onclick = () => { closeModal(); setTab('team'); tutStart(true); };
     $('#s-exp').onclick = () => {
@@ -1539,6 +1561,9 @@ const UI = (() => {
     $('#btn-advice').onclick = adviceModal;
     $('#btn-settings').onclick = settings;
     $('#btn-profile').onclick = () => { Audio8.play('click'); profileModal('game'); };
+    $('#btn-keys').onclick = () => { Audio8.play('click'); keysModal(); };
+    $('#btn-keys').innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="currentColor"><path d="M3 6h18a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V7a1 1 0 011-1zm2 2v2h2V8H5zm4 0v2h2V8H9zm4 0v2h2V8h-2zm4 0v2h2V8h-2zM5 12v2h2v-2H5zm4 0v2h2v-2H9zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2zM7 15v2h10v-2H7z"/></svg>';
+    A11Y.label($('#btn-keys'), L('Atajos de teclado', 'Keyboard shortcuts'));
     $('#modal').onclick = e => { if (e.target.id === 'modal') closeModal(); };
     $('#st-prev').onclick = () => { Core.goStage(S().stage - 1); S().auto = false; };
     $('#st-next').onclick = () => { Core.goStage(S().stage + 1); };
@@ -1554,5 +1579,5 @@ const UI = (() => {
     $$('#skills .skill').forEach(b => b.onclick = e => { e.stopPropagation(); if (Core.useSkill(b.dataset.sk)) { Audio8.play(b.dataset.sk === 'rage' ? 'charge' : 'ticket'); banner(SKILLS[b.dataset.sk].name + '!', SKILLS[b.dataset.sk].desc, '#ff8040'); } });
   }
 
-  return { show, title, starter, hud, refresh, setTab, profileModal, paintProf, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, rewText, rivalTalk, cue, tipsTick, welcomeModal, nameModal, authChanged, authPanel, rankingModal, tutStart, autoFill, monModal, mapModal };
+  return { show, title, starter, hud, refresh, setTab, profileModal, paintProf, keysModal, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, rewText, rivalTalk, cue, tipsTick, welcomeModal, nameModal, authChanged, authPanel, rankingModal, tutStart, autoFill, monModal, mapModal };
 })();

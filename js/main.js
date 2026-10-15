@@ -153,6 +153,46 @@
       if (Core.S.started && !Core.isStale() && Date.now() - hiddenAt >= 60000 && $('#scr-game').classList.contains('active') && $('#modal').classList.contains('hidden')) welcome();
     }
   });
+  // ---- atajos de teclado (alternativa al ratón en el ordenador) ----
+  let lastKeyTap = 0;
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
+    const t = e.target, typing = t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable);
+    if (typing || !Core.S.started) return;
+    const vis = sel => { const el = $(sel); return el && !el.classList.contains('hidden'); };
+    const go = e.code === 'Space' || e.key === 'Enter';
+    // animaciones a pantalla completa: continuar
+    if (vis('#gacha-fx')) { if (go) { const b = $('#pull-ok') || $('#gx-skip'); if (b) { e.preventDefault(); b.click(); } } return; }
+    if (vis('#evo')) { if (go && vis('#evo-ok')) { e.preventDefault(); $('#evo-ok').click(); } return; }
+    if (!$('#scr-game').classList.contains('active')) return;
+    const modalOpen = !$('#modal').classList.contains('hidden');
+    if (e.key === '?' || (e.code === 'KeyK' && !e.shiftKey)) { e.preventDefault(); if (modalOpen && $('#kb-x')) UI.closeModal(); else if (!modalOpen) UI.keysModal(); return; }
+    if (modalOpen) return;
+    const onCtl = t && (/^(BUTTON|A)$/.test(t.tagName) || t.getAttribute('role') === 'button');
+    const click = sel => { const b = $(sel); if (b && !b.disabled && !b.classList.contains('hidden')) { e.preventDefault(); b.click(); return true; } return false; };
+    switch (e.code) {
+      case 'Space': case 'KeyF':
+        if (onCtl && e.code === 'Space') return;                         // con un botón enfocado, Espacio lo pulsa (accesibilidad)
+        e.preventDefault();
+        { const n = performance.now(); if (e.repeat && n - lastKeyTap < 90) return; lastKeyTap = n; }
+        Audio8.resume(); if (Core.tap()) $('#tap-hint').classList.add('hidden');
+        return;
+      case 'KeyQ': click('#sk-rage'); return;
+      case 'KeyW': click('#sk-gold'); return;
+      case 'KeyE': click('#sk-lure'); return;
+      case 'ArrowLeft': click('#st-prev'); return;
+      case 'ArrowRight': click('#st-next'); return;
+      case 'KeyB': click('#btn-boss'); return;
+      case 'KeyM': click('#btn-map'); return;
+      case 'KeyP': click('#btn-profile'); return;
+      case 'KeyO': click('#btn-settings'); return;
+      case 'KeyH': click('#btn-advice'); return;
+      case 'KeyX': { const o = [1, 10, 25, 'max'], s = Core.S; s.buyMul = o[(Math.max(0, o.indexOf(s.buyMul)) + 1) % o.length]; Audio8.play('click'); UI.refresh(true); e.preventDefault(); return; }
+    }
+  });
+  // tras un clic con el ratón el botón no se queda enfocado (si no, Espacio lo volvería a pulsar en vez de atacar)
+  document.addEventListener('pointerup', e => { if (e.pointerType === 'mouse') setTimeout(() => { const a = document.activeElement; if (a && a.tagName === 'BUTTON' && $('#modal').classList.contains('hidden')) a.blur(); }, 0); });
+
   // otra pestaña abrió la partida: esta deja de guardar para no pisarla
   Core.on('stale', () => {
     if ($('#stalebar')) return;
@@ -167,10 +207,19 @@
 
   // ---- inicio ----
   UI.title();
-  // música del título: los navegadores no dejan sonar nada hasta el primer gesto del jugador, así que se prepara ya y arranca al primer toque o tecla
+  // música del título: se prepara al cargar. Si el navegador deja sonar sin que el jugador haga nada (sitio visitado a menudo,
+  // app instalada), suena sola. Si no (la mayoría de los navegadores exigen un gesto), arranca con el primer toque, clic o tecla
+  // y mientras tanto sale un aviso discreto.
   Audio8.want('menu', 0);
-  { const kick = () => { Audio8.resume(); for (const ev of ['pointerdown', 'keydown', 'touchend']) document.removeEventListener(ev, kick, true); };
-    for (const ev of ['pointerdown', 'keydown', 'touchend']) document.addEventListener(ev, kick, true); }
+  Audio8.resume();
+  { const evs = ['pointerdown', 'pointerup', 'click', 'keydown', 'touchstart', 'touchend'];
+    const hint = document.createElement('button'); hint.id = 'soundhint'; hint.className = 'soundhint hidden'; hint.type = 'button';
+    hint.textContent = '🔊 ' + L('Toca para activar la música', 'Tap to turn the music on'); document.body.appendChild(hint);
+    const done = () => { for (const ev of evs) document.removeEventListener(ev, kick, true); hint.remove(); };
+    const kick = () => { Audio8.resume(); setTimeout(() => { if (Audio8.state() === 'running') done(); }, 60); };
+    for (const ev of evs) document.addEventListener(ev, kick, true);
+    setTimeout(() => { if (Audio8.state() === 'running') done(); else if (Core.S.settings.music > 0 && Core.S.settings.master > 0) hint.classList.remove('hidden'); }, 700);
+    const poll = setInterval(() => { if (Audio8.state() === 'running') { clearInterval(poll); done(); } }, 500); setTimeout(() => clearInterval(poll), 120000); }
   Cloud.on(() => UI.authChanged());
   Cloud.init().then(() => { UI.authChanged(); try { if (sessionStorage.getItem('pokeidle.pulled')) { sessionStorage.removeItem('pokeidle.pulled'); UI.toast(L('Partida cargada desde tu cuenta', 'Game loaded from your account')); } } catch (e) { /* nada */ } });
   $('#btn-start').onclick = () => {

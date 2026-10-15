@@ -696,7 +696,7 @@ html.a-cb .rdy { color: #ffbf5a; }
 .rivalcard { background: linear-gradient(160deg, #2a1230, #0b1638); border-radius: 10px; padding: 8px; margin: 6px 0 10px; box-shadow: inset 0 0 0 2px #ff8040aa; }
 .rivalcard:not(.open) { opacity: .75; box-shadow: inset 0 0 0 2px var(--line); }
 .rvhead { display: flex; align-items: center; gap: 10px; }
-.rvhead img, .rvav { width: 56px; height: 56px; image-rendering: pixelated; background: #0b1638; border-radius: 8px; box-shadow: inset 0 0 0 2px #ff8040; }
+.rvhead .spb, .rvav { width: 56px; height: 56px; image-rendering: pixelated; background: #0b1638; border-radius: 8px; box-shadow: inset 0 0 0 2px #ff8040; }
 .rvhead b { display: block; font-size: 16px; }
 .rvhead small { color: var(--dim); font-size: 12px; }
 .rvteam { display: flex; gap: 6px; margin: 8px 0 4px; }
@@ -1032,3 +1032,22 @@ html.a-rm .supportbtn::before, html.a-rm .supportbtn::after, html.a-rm .kofi.her
 .socrow { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
 .socrow > div { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .socrow small { color: var(--dim); font-size: 12px; }
+
+/* retos y destacados: el Pokémon en su cajita (en vez del retrato) */
+.spb { display: inline-flex; align-items: center; justify-content: center; flex: none; background: radial-gradient(circle at 50% 35%, #1d2f6a, #0b1638 80%); border-radius: 10px; box-shadow: inset 0 0 0 2px var(--line); }
+.feat .spb { background: radial-gradient(circle at 50% 35%, #4a2a8a, #1a1040 80%); box-shadow: inset 0 0 0 2px #c47bff; }
+.rvhead .spb, .rvav.spb { box-shadow: inset 0 0 0 2px #ff8040; }
+.rvav.spb { width: 84px; height: 84px; }
+.rvm .spb { box-shadow: inset 0 0 0 2px #ff804066; border-radius: 8px; }
+
+/* atajos de teclado */
+.keybtn { display: none; }
+@media (hover: hover) and (pointer: fine) { .keybtn { display: flex; } }
+.keylist { text-align: left; display: flex; flex-direction: column; gap: 4px; margin: 6px 0 10px; }
+.keyrow { display: grid; grid-template-columns: 130px 1fr; gap: 10px; align-items: center; background: #0b1638; border-radius: 8px; padding: 6px 10px; font-size: 14px; }
+.keys { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+kbd { display: inline-block; min-width: 26px; padding: 2px 7px; text-align: center; font: inherit; font-size: 13px; font-weight: 700; color: #fff; background: #1d2f6a; border-radius: 6px; box-shadow: inset 0 0 0 2px var(--line), 0 2px 0 #050a1c; }
+@media (max-width: 520px) { .keyrow { grid-template-columns: 1fr; gap: 4px; } }
+
+.soundhint { position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 45; background: #0a1430f0; color: #fff; border: 0; border-radius: 22px; padding: 9px 16px; font: inherit; font-size: 15px; box-shadow: inset 0 0 0 2px var(--yellow), 0 4px 0 #050a1c; animation: pulse 1.6s ease-in-out infinite; }
+html.a-rm .soundhint { animation: none; }
