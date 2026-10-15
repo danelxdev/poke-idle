@@ -12,8 +12,7 @@ const RAR_MULT = [0, 1, 1.25, 1.6, 2.2, 3.2];   // daño
 const RAR_COST = [0, 1, 1.2, 1.45, 1.8, 2.4];   // coste de subir nivel
 const STAR_MULT = [1, 1.6, 2.5, 4, 6.5, 10];    // ★0..★5
 const STAR_COPIES = [1, 2, 4, 6, 10];           // copias para pasar a la siguiente estrella
-const DUST_GAIN = [0, 3, 8, 20, 60, 150];       // polvo estelar por copia repetida
-const DUST_COST = [0, 60, 150, 400, 1200, 3500];// polvo para canjear un Pokémon concreto
+const DUST_GAIN = [0, 3, 8, 20, 60, 150];       // «unidades» por copia repetida: se pagan en monedas (ver coinsPerDust en core.js)
 const EVO_LVL = [16, 36];                       // niveles de evolución (1.ª y 2.ª)
 const RARITY_FIX = {};
 const RAR_CUT = [485, 505, 530];                // BST final de la línea para poder ser poco común, rara o épica
@@ -214,7 +213,6 @@ const TICKETS = {
   ultra: { name: 'Ticket Ultra', icon: 'tkUltra', cur: 'gems', gems: 90, color: '#ffd23f' },
   master: { name: 'Ticket Maestro', icon: 'tkMaster', cur: 'gems', gems: 250, color: '#c47bff' },
 };
-const TICKET_DUST = { poke: 70, super: 150, ultra: 500, master: 2200 };   // polvo estelar por ticket
 const BOSS_TICKETS = [null, { poke: 2, super: 1 }, { poke: 3, super: 2 }, { super: 3, ultra: 1 }, { super: 2, ultra: 2 }, { ultra: 3, master: 1 }];
 const DAILY_TICKETS = [{ poke: 2 }, { poke: 2 }, { poke: 3 }, { poke: 3, super: 1 }, { poke: 4 }, { poke: 4, super: 1 }, { super: 2, ultra: 1 }];
 const PITY = 90;       // tiradas con gemas hasta un legendario garantizado
@@ -234,7 +232,6 @@ const UPGRADES = {
   type: { name: 'Afinidad de Tipo', icon: 'stone', base: 15000, mul: 2.6, max: 20, desc: n => 'Los golpes súper eficaces hacen +' + n * 4 + '% más de daño' },
   boss: { name: 'Cazajefes', icon: 'rockyhelmet', base: 6000, mul: 2.2, max: 25, desc: n => '+' + n * 4 + '% de daño contra jefes' },
   autotap: { name: 'Toque Automático', icon: 'up', base: 8000, mul: 2.3, max: 20, desc: n => n ? n * 0.5 + ' toques por segundo sin tocar' : 'Toques automáticos' },
-  alch: { name: 'Alquimia', icon: 'dust', base: 20000, mul: 2.5, max: 15, desc: n => '+' + n * 10 + '% de polvo estelar' },
   bosstime: { name: 'Cronómetro', icon: 'clock', base: 20000, mul: 2.4, max: 10, desc: n => '+' + n * 3 + ' s para vencer a los jefes' },
 };
 const SLOT_COST = [0, 150, 3e3, 1e5, 2e7, 1.5e10];
@@ -257,7 +254,6 @@ const LEAGUE_SHOP = {
   shiny: { name: 'Brillo Eterno', icon: 'shiny', base: 6, mul: 1.9, max: 10, desc: n => 'Shinies x' + (1 + n * 0.2).toFixed(1) + ' más frecuentes' },
   gems: { name: 'Buscagemas', icon: 'gem', base: 4, mul: 1.7, max: 10, desc: n => '+' + n * 10 + '% de gemas de jefes y misiones' },
   skill: { name: 'Maestro de Habilidades', icon: 'fist', base: 4, mul: 1.8, max: 10, desc: n => 'Habilidades: -' + n * 4 + '% de enfriamiento y +' + n * 2 + ' s de duración' },
-  dust: { name: 'Alquimista', icon: 'dust', base: 4, mul: 1.7, max: 10, desc: n => '+' + n * 15 + '% de polvo estelar' },
   tapd: { name: 'Puño de Hierro', icon: 'fist', base: 3, mul: 1.6, max: 20, desc: n => '+' + n * 10 + '% de daño por toque' },
   critb: { name: 'Ojo de Águila', icon: 'zoom', base: 5, mul: 1.9, max: 10, desc: n => '+' + n + '% de probabilidad de crítico' },
   egg: { name: 'Calor de Incubación', icon: 'egg0', base: 3, mul: 1.6, max: 10, desc: n => 'Los huevos necesitan un ' + n * 5 + '% menos de victorias' },
@@ -287,7 +283,6 @@ const QUEST_POOL = [
   { stat: 'crits', goal: 150, reward: 15, text: n => 'Haz ' + n + ' golpes críticos' },
   { stat: 'crits', goal: 800, reward: 30, text: n => 'Haz ' + n + ' golpes críticos' },
   { stat: 'goldens', goal: 1, reward: 20, text: n => 'Derrota ' + n + ' Pokémon dorado' },
-  { stat: 'dustBuys', goal: 1, reward: 25, text: n => 'Canjea polvo estelar por ' + n + ' ticket' },
   { stat: 'coinsTotal', goal: 1e4, reward: 12, text: n => 'Gana ' + n + ' monedas' },
 ];
 const WEEKLY_POOL = [
@@ -302,7 +297,6 @@ const WEEKLY_POOL = [
   { stat: 'crits', goal: 5000, reward: 110, text: n => 'Haz ' + n + ' golpes críticos' },
   { stat: 'goldens', goal: 10, reward: 130, text: n => 'Derrota ' + n + (n === 1 ? ' Pokémon dorado' : ' Pokémon dorados') },
   { stat: 'evolutions', goal: 12, reward: 110, text: n => 'Evoluciona ' + n + ' Pokémon' },
-  { stat: 'dust', goal: 800, reward: 100, text: n => 'Consigue ' + n + ' de polvo estelar' },
 ];
 
 // Logros generados por escalones: [estadística, nombre, icono, [[objetivo, gemas], ...], plantilla]
@@ -323,10 +317,8 @@ const ACH_DEFS = [
   ['coinsTotal', 'Millonario', 'coin', [[1e6, 20], [1e9, 50], [1e12, 100], [1e15, 200], [1e18, 400]], n => 'Gana ' + n + ' monedas en total'],
   ['skills', 'Habilidoso', 'fist', [[10, 15], [100, 50], [500, 120]], n => 'Usa ' + n + ' habilidades'],
   ['itemsFound', 'Buscaobjetos', 'choiceband', [[1, 15], [10, 40], [50, 100], [200, 250]], n => 'Consigue ' + n + (n === 1 ? ' objeto' : ' objetos')],
-  ['dust', 'Polvo de estrellas', 'dust', [[100, 15], [1000, 50], [10000, 150], [1e5, 400]], n => 'Consigue ' + n + ' de polvo estelar'],
   ['crits', 'Golpe certero', 'zoom', [[1e3, 20], [1e4, 50], [1e5, 120], [1e6, 300]], n => 'Haz ' + n + ' críticos'],
   ['goldens', 'Fiebre del oro', 'amuletcoin', [[1, 20], [10, 50], [50, 120], [200, 300]], n => 'Derrota ' + n + (n === 1 ? ' Pokémon dorado' : ' Pokémon dorados')],
-  ['dustBuys', 'Trueque', 'dust', [[1, 20], [10, 60], [50, 200]], n => 'Canjea polvo estelar por ' + n + (n === 1 ? ' ticket' : ' tickets')],
   ['freePulls', 'Constancia', 'ball', [[7, 30], [30, 100], [100, 300]], n => 'Abre ' + n + ' tiradas diarias gratis'],
   ['streak', 'Racha', 'clock', [[7, 40], [14, 80], [30, 200], [60, 400], [100, 800]], n => 'Racha de ' + n + ' días seguidos'],
   ['stars5', 'Constelación', 'star', [[1, 60], [5, 150], [20, 400], [50, 900]], n => 'Ten ' + n + ' Pokémon con ★5'],
@@ -460,12 +452,11 @@ const INC_COST = [0, 0, 150, 600, 2400];                                        
 // ---------------- eventos semanales y Torre de batalla ----------------
 // Cada semana cambia el tipo protagonista (18 semanas por ciclo) y un bonus general (cada 5 semanas se repite).
 const EVENT_TYPES = ['fire', 'water', 'grass', 'electric', 'ice', 'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy', 'normal'];
-const EVENT_BONUS_ORDER = ['shiny', 'eggs', 'coins', 'dust', 'tickets'];
+const EVENT_BONUS_ORDER = ['shiny', 'eggs', 'coins', 'tickets'];
 const EVENT_BONUS = {
   shiny: { name: 'Semana brillante', txt: 'Los shinies son el doble de frecuentes' },
   eggs: { name: 'Semana de cría', txt: 'Los huevos avanzan el doble de rápido' },
   coins: { name: 'Semana dorada', txt: '+50% de monedas' },
-  dust: { name: 'Semana estelar', txt: 'El doble de polvo estelar' },
   tickets: { name: 'Semana de tickets', txt: '+50% de tickets soltados' },
 };
 const EVENT_DMG = 0.25;                                   // daño extra de los Pokémon del tipo de la semana

@@ -12,7 +12,7 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
   - **Campeones:** 9, de Azul a Geeta.
   - **Legendarios:** 9, de Mewtwo a Koraidon.
   - **Jefes finales:** 8, como Rojo, Rayquaza, Giratina, Eternatus, Calyrex y Arceus.
-- **Huevos, naturalezas, IVs y tipos eficaces**: incubadora con 4 tipos de huevo, 25 naturalezas, IVs entrenables con polvo estelar y ayudas visuales de eficacia en combate (ver más abajo).
+- **Huevos, naturalezas, IVs y tipos eficaces**: incubadora con 4 tipos de huevo, 25 naturalezas, IVs entrenables con monedas y ayudas visuales de eficacia en combate (ver más abajo).
 - **Eventos semanales y Torre de batalla**: un tipo protagonista cada semana con jefe, misiones y bola propia, y una torre infinita con pisos de reglas especiales.
 - **Rival, entrenadores y Pokédex completa**: el rival Nico te desafía dos veces por región (20 duelos con historia), aparecen entrenadores con varios Pokémon seguidos y cada Pokémon tiene una ficha con estadísticas, debilidades, evolución y dónde aparece.
 - **Guía «¿Qué hago ahora?»**, **auras** en los enemigos, **perfil con títulos y avatar**, favoritos en la Pokédex y objetos exclusivos de final de partida.
@@ -40,7 +40,7 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
 
 Los Pokémon **solo se consiguen en el gacha** (aparte de tu primer compañero). Las Poké Balls se abren con **tickets**:
 
-- **4 tipos de ticket**: Poké (se compra con monedas), Super, Ultra y Maestro (se compran con gemas). También se cambian por **polvo estelar** en el Taller.
+- **4 tipos de ticket**: Poké (se compra con monedas), Super, Ultra y Maestro (se compran con gemas).
 - Los tickets **caen** de los Pokémon derrotados, de los jefes, de las misiones diarias y semanales, de los logros y de la recompensa diaria.
 - **14 tipos de Poké Ball**: Poké, Super, Ultra, **Bola Destacada**, **Bola Maestra** y **9 bolas regionales** (solo Pokémon de esa región).
 - 5 rarezas según la línea evolutiva: un Pidgey es común, un Charmander es épico y los legendarios son legendarios. La tirada x10 cuesta 9 tickets y garantiza un Pokémon raro o mejor.
@@ -48,7 +48,7 @@ Los Pokémon **solo se consiguen en el gacha** (aparte de tu primer compañero).
 - **Destacados rotativos**: un épico cada 3 días y un legendario cada semana. En la Bola Destacada la mitad de los épicos y legendarios son los destacados, y si pierdes el 50/50 el siguiente legendario es el destacado seguro.
 - **Garantías**: épico a las 25 tiradas y legendario a las 90 (con tickets Super o mejores).
 - **Tirada diaria gratis** sin ticket.
-- **Estrellas**: las copias repetidas suben las estrellas del Pokémon (★5 = x10 de daño) y dan polvo estelar.
+- **Estrellas**: las copias repetidas suben las estrellas del Pokémon (★5 = x10 de daño) y dan monedas.
 - La animación de apertura crece según la rareza: ticket, Poké Ball que se agita con un halo del color del mejor premio, destello y reveladas una a una, con efectos especiales para épicos, legendarios y shinies.
 - Las regiones nuevas del gacha se desbloquean al llegar a ellas.
 
@@ -77,7 +77,7 @@ Caen de los Pokémon derrotados (0,08 % por victoria, ×10 si es dorado), de la 
 
 **Naturalezas (25).** Como en los juegos: una sube un eje y baja otro (las 5 neutras no cambian nada). Ejes: Ataque→Daño (+10 % / −5 %), Velocidad (+8 % / −4 %), At. Esp.→Crítico (+3 % / −1,5 % de probabilidad), Defensa→Botín (+4 % / −2 % de monedas por Pokémon del equipo) y Def. Esp.→Jefes (+10 % / −5 % de daño a jefes).
 
-**IVs.** Cada Pokémon tiene tres IVs de 0 a 31: Daño (hasta +10 %), Velocidad (hasta +5 %) y Crítico (hasta +2 %). Al conseguir un Pokémon que ya tienes, la copia tira IVs nuevos y **te quedas con los mejores** (además de dar polvo y estrellas). El polvo estelar también sirve para entrenar un IV (+3 por 15 + 3·IV de polvo), cambiar la naturaleza al azar (60) o elegirla (450). Nivel de potencial: Bajo < 35 %, Normal, Bueno (55 %), Muy bueno (75 %), Excelente (90 %) y Perfecto (31/31/31). Medido en la simulación de equilibrio, el efecto medio de IVs y naturalezas acelera la partida un ~5 % (dentro del margen de variación entre ejecuciones).
+**IVs.** Cada Pokémon tiene tres IVs de 0 a 31: Daño (hasta +10 %), Velocidad (hasta +5 %) y Crítico (hasta +2 %). Al conseguir un Pokémon que ya tienes, la copia tira IVs nuevos y **te quedas con los mejores** (además de dar monedas y estrellas). Con monedas también puedes entrenar un IV, cambiar la naturaleza al azar o elegirla; el precio sube con tu progreso. Nivel de potencial: Bajo < 35 %, Normal, Bueno (55 %), Muy bueno (75 %), Excelente (90 %) y Perfecto (31/31/31). Medido en la simulación de equilibrio, el efecto medio de IVs y naturalezas acelera la partida un ~5 % (dentro del margen de variación entre ejecuciones).
 
 **Tipos.** Cada Pokémon pega con su mejor tipo contra los tipos del enemigo: súper eficaz ×2 (más con la mejora «Afinidad de tipo»), resistido ×0,5 e inmune ×0,35 (nunca bloquea del todo). Ahora se ve: el enemigo muestra sus tipos, cada tarjeta del equipo indica ▲×2 / ▼×½ contra el enemigo actual, el mapa lista los tipos de cada ruta y cuáles les pegan más, y el botón **Mejor equipo** coloca a los Pokémon más eficaces para la ruta (o el jefe).
 
@@ -87,7 +87,7 @@ Se desbloquea al llegar a la etapa 10. Los retos sustituyen al combate normal (u
 
 **Evento semanal.** Cambia cada semana (el calendario es el mismo para todos): el tipo protagonista rota por los 18 tipos y un bonus general rota cada 5 semanas.
 - Tus Pokémon del tipo de la semana hacen **+25 %** de daño.
-- Bonus de la semana: shinies ×2, huevos ×2 de rápidos, +50 % monedas, ×2 polvo estelar o +50 % de tickets soltados.
+- Bonus de la semana: shinies ×2, huevos ×2 de rápidos, +50 % monedas, o +50 % de tickets soltados.
 - **Jefe del evento** (uno de los Pokémon más fuertes de ese tipo) en 4 dificultades. Vida = vida de un Pokémon salvaje en tu etapa máxima × 3 / 7 / 16 / 40, con 45 / 50 / 55 / 60 s. La primera victoria de cada semana da gemas, tickets y huevos (hasta 160 gemas, 2 Ultra, 1 Maestro y un huevo épico). Cada botón muestra tu «Poder» (≥100 % = lo vences a tiempo).
 - **Misiones del evento**: derrotar 150 y 600 Pokémon del tipo de la semana y abrir 10 Bolas del Evento.
 
@@ -97,7 +97,7 @@ Con la simulación de equilibrio: en el techo de cada etapa un jugador supera si
 
 ## Crianza (Guardería)
 
-En la pestaña Gacha, bajo la incubadora: eliges un Pokémon **principal** (da la especie) y una **pareja**, y pagas polvo estelar (30 / 60 / 120 / 300 / 700 según la rareza más alta de la pareja). Obtienes un huevo del tipo que corresponde a esa rareza (común hasta rareza 2, raro, épico o legendario), que tarda las mismas victorias que un huevo normal.
+En la pestaña Gacha, bajo la incubadora: eliges un Pokémon **principal** (da la especie) y una **pareja**, y pagas monedas (el precio depende de la rareza más alta de la pareja y de tu progreso). Obtienes un huevo del tipo que corresponde a esa rareza (común hasta rareza 2, raro, épico o legendario), que tarda las mismas victorias que un huevo normal.
 
 - **IVs de la cría**: cada IV hereda el mejor de los dos padres con un 70 % (el peor con un 30 %) más un bonus aleatorio de 0 a 2. Repetir generaciones tiende a los IVs perfectos.
 - **Naturaleza**: eliges si hereda la del principal o la de la pareja.
@@ -273,7 +273,6 @@ Sin reiniciar, a partir de la etapa ~280 hay un muro de días: es el momento de 
 
 **Otros recursos**
 
-- Polvo estelar: los tickets caros cuestan más (Poké 40, Super 150, Ultra 500, Master 2200) para que el polvo no los regale.
 - Torre: pasado el piso 100 solo cada 10 pisos da un ticket Master y el resto da Ultra, para que los pisos profundos no desbalanceen la economía.
 - Las gemas salen sobre todo de logros y misiones (unos 190 al día de ritmo constante); los huevos, fragmentos Mega y premios de evento se calibraron para no apartar de la progresión principal.
 

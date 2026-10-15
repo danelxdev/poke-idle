@@ -77,7 +77,7 @@ const UI = (() => {
     show('scr-title');
     const s = S(), k = $('#kofi-title');
     const so = $('#t-social'); if (so) so.innerHTML = '<small>' + L('Hecho por Danel · síguelo:', 'Made by Danel · follow:') + '</small>' + socialHtml();
-    if (k) { k.href = KOFI_URL; k.innerHTML = ico('cup', 24) + '<span>' + L('Apoyar el proyecto en Ko-fi', 'Support the project on Ko-fi') + '</span><i class="kheart" aria-hidden="true">♥</i>'; }
+    if (k) { k.href = KOFI_URL; k.innerHTML = ico('cup', 24) + '<span>' + L('Apoyar el proyecto en Ko-fi', 'Support the project on Ko-fi') + '</span>'; }
     TitleFX.start($('#title-bg'));
     $$('#langsw button[data-lang]').forEach(b => { b.classList.toggle('on', b.dataset.lang === I18N.lang); b.onclick = () => { if (b.dataset.lang === I18N.lang) return; s.settings.lang = b.dataset.lang; Core.save(); location.reload(); }; });
     $('#logo-ball').innerHTML = ico('ball', 48);
@@ -129,7 +129,6 @@ const UI = (() => {
     paintProf();
     $('#coins').textContent = fmt(s.coins);
     $('#gems').textContent = fmt(s.gems);
-    $('#dust').textContent = fmt(s.dust);
     $('#tks').textContent = fmt(Object.values(s.tk).reduce((a, b) => a + b, 0));
     cpsT += dt;
     if (s.coins > lastCoins) cpsAcc += s.coins - lastCoins;
@@ -224,7 +223,7 @@ const UI = (() => {
 
   const natTxt = m => { const n = Core.natOf(m); return n.up ? `${n.name} <em class="nu">▲${NAT_SHORT[n.up]}</em> <em class="nd">▼${NAT_SHORT[n.down]}</em>` : n.name + L(' (neutra)', ' (neutral)'); };
   let towerStart = 0;
-  const rewText = r => !r ? '' : [r.ess && '+' + r.ess + L(' Esencia', ' Essence'), r.gems && '+' + r.gems + L(' gemas', ' gems'), r.shards && '+' + r.shards + L(r.shards === 1 ? ' fragmento Mega' : ' fragmentos Mega', r.shards === 1 ? ' Mega shard' : ' Mega shards'), r.dust && '+' + r.dust + L(' polvo', ' stardust'), ...Object.entries(r.tk || {}).map(([t, n]) => n + '× ' + TICKETS[t].name), r.egg !== undefined && EGGS[r.egg].name, r.item && L('un objeto', 'an item'), r.excl && L('un objeto exclusivo', 'an exclusive item')].filter(Boolean).join(' · ');
+  const rewText = r => !r ? '' : [r.ess && '+' + r.ess + L(' Esencia', ' Essence'), r.gems && '+' + r.gems + L(' gemas', ' gems'), r.shards && '+' + r.shards + L(r.shards === 1 ? ' fragmento Mega' : ' fragmentos Mega', r.shards === 1 ? ' Mega shard' : ' Mega shards'), r.dust && '+' + fmt(Core.srcCoins(r.dust)) + L(' monedas', ' coins'), ...Object.entries(r.tk || {}).map(([t, n]) => n + '× ' + TICKETS[t].name), r.egg !== undefined && EGGS[r.egg].name, r.item && L('un objeto', 'an item'), r.excl && L('un objeto exclusivo', 'an exclusive item')].filter(Boolean).join(' · ');
   const ruleTxt = r => r ? `<div class="rulebox"><b>${r.name}${r.only ? ' ' + TYPE_ES[r.only] : ''}</b>: ${r.desc}</div>` : '';
   function chalHtml() {
     const s = S();
@@ -275,7 +274,7 @@ const UI = (() => {
       h += `<div class="row" style="margin:4px 0"><button class="btn small" data-act="rivalall">${rivalAll ? L('Ocultar duelos ganados', 'Hide won duels') : L('Ver duelos ganados', 'Show won duels')}</button></div>`;
       if (rivalAll) h += RIVAL_ENC.filter(e => s.rival.won[e.id]).map(e => {
         const done = s.rival.rem[e.id] === Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 864e5);
-        return `<div class="etask"><div class="qi"><b>${REGIONS[e.region].name} ${e.meet ? 'II' : 'I'} ✓</b><small>${L('Revancha: una vez al día', 'Rematch: once a day')} · ${done ? L('ya hecha hoy', 'done today') : L('+polvo y gemas', '+stardust and gems')}</small></div><button class="btn small" data-act="rivaltalk" data-v="${e.id}">${L('Historia', 'Story')}</button><button class="btn small primary" data-act="rival" data-v="${e.id}" ${busy}>${L('Revancha', 'Rematch')}</button></div>`;
+        return `<div class="etask"><div class="qi"><b>${REGIONS[e.region].name} ${e.meet ? 'II' : 'I'} ✓</b><small>${L('Revancha: una vez al día', 'Rematch: once a day')} · ${done ? L('ya hecha hoy', 'done today') : L('+monedas y gemas', '+coins and gems')}</small></div><button class="btn small" data-act="rivaltalk" data-v="${e.id}">${L('Historia', 'Story')}</button><button class="btn small primary" data-act="rival" data-v="${e.id}" ${busy}>${L('Revancha', 'Rematch')}</button></div>`;
       }).join('');
     }
     return h + `<p class="hint">${L('Nico es tu rival a lo largo de todo el viaje: dos duelos por región. La primera vez dan recompensas y +1% de daño permanente; después puedes pedir la revancha cada día.', 'Nico is your rival throughout the whole journey: two duels per region. The first time they give rewards and +1% permanent damage; afterwards you can ask for a rematch every day.')}</p>`;
@@ -323,7 +322,7 @@ const UI = (() => {
       h += `<div class="nfx"><div>${L('Huevo', 'Egg')}: <b style="color:${EGGS[t].color}">${EGGS[t].name}</b> (${fmt(EGGS[t].need)} ${L('victorias', 'victories')})</div>
         <div>${L('IVs esperados de la cría', 'Expected offspring IVs')}: <b>≈ ${Math.round(Core.breedExpect(brA, brB) * 100)}%</b></div>
         <div class="seg"><button data-act="breednat" data-v="a" class="${brNat === 'a' ? 'on' : ''}">${L('Naturaleza', 'Nature')}: ${Core.natOf(s.mons[brA]).name}</button><button data-act="breednat" data-v="b" class="${brNat === 'b' ? 'on' : ''}">${L('Naturaleza', 'Nature')}: ${Core.natOf(s.mons[brB]).name}</button></div>
-        <button class="btn primary buy" data-act="breed" data-cost="${cost}" data-cur="dust" ${full ? 'data-off="1"' : ''}><span>${L('Criar', 'Breed')}</span><small>${ico('dust', 12)}${fmt(cost)}</small></button>${full ? '<small class="hint">' + L('Tienes el máximo de huevos', 'You have the maximum number of eggs') + '</small>' : ''}</div>`;
+        <button class="btn primary buy" data-act="breed" data-cost="${cost}" data-cur="coins" ${full ? 'data-off="1"' : ''}><span>${L('Criar', 'Breed')}</span><small>${ico('coin', 12)}${fmt(cost)}</small></button>${full ? '<small class="hint">' + L('Tienes el máximo de huevos', 'You have the maximum number of eggs') + '</small>' : ''}</div>`;
     }
     return h;
   }
@@ -347,7 +346,7 @@ const UI = (() => {
     const line = (k, n) => `<div class="ivrow"><span>${IV_NAMES[k]}</span><b>${m.iv[k]}</b><span class="arrow">→</span><b style="color:${g.iv[k] > m.iv[k] ? '#7ff0a0' : g.iv[k] < m.iv[k] ? '#ff8c9a' : 'inherit'}">${g.iv[k]}</b></div>`;
     const pct = iv => Math.round((iv.d + iv.s + iv.c) / (3 * IV_MAX) * 100);
     const better = pct(g.iv) > pct(m.iv);
-    openModal(`<h2>${L('Genes de la cría', 'Offspring genes')}</h2><p class="hint">${L(`${DEX[m.dex].name} ya tenía copia: la cría sumó una copia y polvo. ¿Con qué genes te quedas?`, `You already had ${DEX[m.dex].name}: the offspring added a copy and stardust. Which genes do you keep?`)}</p>
+    openModal(`<h2>${L('Genes de la cría', 'Offspring genes')}</h2><p class="hint">${L(`${DEX[m.dex].name} ya tenía copia: la cría sumó una copia y monedas. ¿Con qué genes te quedas?`, `You already had ${DEX[m.dex].name}: the offspring added a copy and coins. Which genes do you keep?`)}</p>
       <div class="genes cmp"><div class="genehead"><span>${L('Naturaleza', 'Nature')}</span><span>${Core.natOf(m).name} → <b>${NATURES[g.nat].name}</b></span></div>
       ${['d', 's', 'c'].map(k => line(k)).join('')}<div class="genehead"><span>${L('Potencial', 'Potential')}</span><b>${pct(m.iv)}% → ${pct(g.iv)}%</b></div></div>
       <div class="row"><button class="btn ${better ? '' : 'primary'}" id="g-keep">${L('Mantener los míos', 'Keep mine')}</button><button class="btn ${better ? 'primary' : ''}" id="g-take">${L('Quedarme con los de la cría', 'Take the offspring genes')}</button></div>`);
@@ -507,7 +506,6 @@ const UI = (() => {
     type: ['Súper eficaz', 'Super effective', n => '+' + n * 4 + '%'],
     boss: ['Daño a jefes', 'Boss damage', n => '+' + n * 4 + '%'],
     autotap: ['Toques auto', 'Auto taps', n => n * 0.5 + '/s'],
-    alch: ['Polvo estelar', 'Stardust', n => '+' + n * 10 + '%'],
     bosstime: ['Tiempo jefes', 'Boss time', n => '+' + n * 3 + ' s'],
   };
   const TABS = {
@@ -564,15 +562,15 @@ const UI = (() => {
       },
     },
     gacha: {
-      sig: () => { const s = S(); return JSON.stringify([s.pity, s.pityE, s.bannerLost, Core.ticketPrice('poke'), Core.featuredEpic(), Core.featuredLegend(), Core.unlockedGens(), Core.freePullReady(), s.tk, Math.floor(s.dust / 10), s.eggs.map((e, i) => [e.t, i >= s.inc ? Math.floor(e.p) : -1, Core.eggReady(e), e.bred ? e.bred.base : 0]), s.inc, Core.incCost(), brA, brB, brNat]); },
+      sig: () => { const s = S(); return JSON.stringify([s.pity, s.pityE, s.bannerLost, Core.ticketPrice('poke'), Core.featuredEpic(), Core.featuredLegend(), Core.unlockedGens(), Core.freePullReady(), s.tk, s.eggs.map((e, i) => [e.t, i >= s.inc ? Math.floor(e.p) : -1, Core.eggReady(e), e.bred ? e.bred.base : 0]), s.inc, Core.incCost(), brA, brB, brNat]); },
       html() {
         const s = S(), fe = Core.featuredEpic(), fl = Core.featuredLegend();
         let h = '<div class="tkgrid">' + Object.entries(TICKETS).map(([t, k]) => `<div class="tkbox" style="--tc:${k.color}">${ico(k.icon, 36)}<b>${s.tk[t]}</b><small>${k.name}</small>
           <button class="btn small primary" data-act="buytk" data-v="${t}" data-n="1" data-cost="${Core.ticketPrice(t)}" data-cur="${k.cur}">+1 ${ico(k.cur === 'gems' ? 'gem' : 'coin', 10)} ${fmt(Core.ticketPrice(t))}</button></div>`).join('') + '</div>';
         h += incubatorHtml() + nurseryHtml();
         if (Core.freePullReady()) h += `<div class="feat free"><span>${ico('tkPoke', 48)}</span><div><b>${L('¡Tirada diaria gratis!', 'Free daily pull!')}</b><small>${L('Una Poké Ball gratis cada día, sin ticket', 'A free Poké Ball every day, no ticket needed')}</small></div><button class="btn primary" data-act="freepull">${L('Abrir', 'Open')}</button></div>`;
-        const feat = (d, tag) => `<div class="feat"><span class="tagx">${tag}</span>${spb(d, 66)}<div><b>${DEX[d].name}</b><small>${RARITY[Core.RAR[d]].name}</small><br>${typeTags(d)}</div></div>`;
-        h += `<h3>${L('Destacados de la Bola Destacada', 'Featured Ball highlights')}</h3>` + feat(fl, L('LEGENDARIO · SEMANA', 'LEGENDARY · WEEK')) + feat(fe, L('ÉPICO · 3 DÍAS', 'EPIC · 3 DAYS'));
+        const feat = (d, tag, cls) => `<div class="feat ${cls || ''}"><span class="tagx">${tag}</span>${spb(d, 66)}<div><b>${DEX[d].name}</b><small>${RARITY[Core.RAR[d]].name}</small><br>${typeTags(d)}</div></div>`;
+        h += `<h3>${L('Destacados de la Bola Destacada', 'Featured Ball highlights')}</h3>` + feat(fl, L('LEGENDARIO · SEMANA', 'LEGENDARY · WEEK'), 'leg') + feat(fe, L('ÉPICO · 3 DÍAS', 'EPIC · 3 DAYS'), 'epic');
         h += `<div class="pity">${L('Épico garantizado en', 'Epic guaranteed in')} <b>${Math.max(0, PITY_EPIC - s.pityE)}</b> ${L('tiradas', 'pulls')} · ${L('Legendario en', 'Legendary in')} <b>${Math.max(0, PITY - s.pity)}</b> ${L('(con tickets Super, Ultra o Maestro)', '(with Great, Ultra or Master tickets)')}${s.bannerLost ? '<br><b style="color:#ffd23f">' + L('¡El próximo legendario de la Bola Destacada será el destacado!', 'The next legendary from the Featured Ball will be the featured one!') + '</b>' : ''}<div class="bar"><i style="width:${s.pity / PITY * 100}%"></i></div></div>`;
         const ballCard = ([id, b]) => {
           const tk = TICKETS[b.ticket];
@@ -594,7 +592,6 @@ const UI = (() => {
             <button class="btn small primary" data-act="pull" data-v="${id}" data-n="1" data-cost="1" data-cur="tk:super">x1 ${ico('tkSuper', 12)} 1</button>
             <button class="btn small primary" data-act="pull" data-v="${id}" data-n="10" data-cost="${Core.ticketCost(10)}" data-cur="tk:super">x10 ${ico('tkSuper', 12)} ${Core.ticketCost(10)}</button></div>`;
         }
-        h += `<h3>${L('Taller de polvo estelar', 'Stardust workshop')} <small style="color:var(--dim)">${ico('dust', 14)} ${fmt(s.dust)}</small></h3><p class="hint">${L('Cada copia repetida da polvo. Cámbialo por tickets:', 'Every duplicate gives stardust. Trade it for tickets:')}</p><div class="tkgrid">` + Object.entries(TICKETS).map(([t, k]) => `<button class="btn small" data-act="dusttk" data-v="${t}" data-cost="${TICKET_DUST[t]}" data-cur="dust">${ico(k.icon, 16)} ${fmt(TICKET_DUST[t])} ${ico('dust', 12)}</button>`).join('') + '</div>';
         h += `<p class="hint">${L('Los Pokémon solo se consiguen en el gacha. Los tickets caen de los Pokémon derrotados, de los jefes, las misiones y los logros, o se compran con monedas y gemas. x10 cuesta 9 tickets y garantiza un Pokémon raro o mejor. Las copias repetidas suben estrellas (★ multiplica el daño). 1 de cada 100 es shiny (+50% de daño).', 'Pokémon can only be obtained from the gacha. Tickets drop from defeated Pokémon, bosses, quests and achievements, or are bought with coins and gems. x10 costs 9 tickets and guarantees a rare Pokémon or better. Duplicate copies raise stars (★ multiplies damage). 1 in 100 is shiny (+50% damage).')}</p>`;
         return h;
       },
@@ -656,7 +653,7 @@ const UI = (() => {
         const s = S(), g = Core.medalGain();
         let h = `<div class="league"><h3>${L('Liga Pokémon', 'Pokémon League')}</h3>
           <div>${ico('crown', 48)}</div><div class="big">${fmt(s.medals)}</div><p class="hint">${L(`Medallas de la Liga · +${fmt(s.medals * 3)}% de daño y de monedas para siempre`, `League medals · +${s.medals * 3}% damage and coins forever`)}</p>`;
-        if (g) h += `<p>${L(`Si entras ahora en la Liga ganas <b style="color:var(--yellow)">+${g} medallas</b> y ${g} Puntos de Liga.`, `If you enter the League now you earn <b style="color:var(--yellow)">+${g} medals</b> and ${g} League Points.`)}</p><p class="hint">${L('Vuelves a la etapa 1 y pierdes monedas, niveles y mejoras. Conservas tus Pokémon, estrellas, gemas, polvo y la Pokédex.', 'You go back to stage 1 and lose coins, levels and upgrades. You keep your Pokémon, stars, gems, stardust and the Pokédex.')}</p><button class="btn big primary" data-act="prestige">${L('Entrar en la Liga', 'Enter the League')}</button>`;
+        if (g) h += `<p>${L(`Si entras ahora en la Liga ganas <b style="color:var(--yellow)">+${g} medallas</b> y ${g} Puntos de Liga.`, `If you enter the League now you earn <b style="color:var(--yellow)">+${g} medals</b> and ${g} League Points.`)}</p><p class="hint">${L('Vuelves a la etapa 1 y pierdes monedas, niveles y mejoras. Conservas tus Pokémon, estrellas, gemas y la Pokédex.', 'You go back to stage 1 and lose coins, levels and upgrades. You keep your Pokémon, stars, gems and the Pokédex.')}</p><button class="btn big primary" data-act="prestige">${L('Entrar en la Liga', 'Enter the League')}</button>`;
         else h += `<p class="hint">${L(`Llega a la <b>etapa 60</b> para poder entrar. Cuanto más lejos llegues, más medallas: en la etapa 100 son ${Core.medalFor(100)} y en la 200, ${Core.medalFor(200)}.`, `Reach <b>stage 60</b> to be able to enter. The further you get, the more medals: at stage 100 it is ${Core.medalFor(100)} and at 200, ${Core.medalFor(200)}.`)}</p>`;
         h += ascHtml();
         h += `<h3>${L('Tienda de la Liga', 'League shop')} <small style="color:var(--dim)">${ico('crown', 14)} ${s.mp} ${L('puntos', 'points')}</small></h3><div style="text-align:left">`;
@@ -740,7 +737,6 @@ const UI = (() => {
       case 'buyinc': if (Core.buyInc()) { Audio8.play('levelup'); toast(L('¡Nueva incubadora!', 'New incubator!')); } else Audio8.play('error'); break;
       case 'freepull': doPull('poke', 1, true); break;
       case 'buytk': if (Core.buyTicket(v, +el.dataset.n)) Audio8.play('item'); else Audio8.play('error'); break;
-      case 'dusttk': if (Core.dustTicket(v)) Audio8.play('ticket'); else Audio8.play('error'); break;
       case 'shop': if (Core.buyShop(v)) Audio8.play('levelup'); break;
       case 'dexdd': openDD(el, dexRegions(), dexFilter, val => { dexFilter = val; saveDexUi(); sig = ''; refresh(true); }); return;
       case 'dextype': openDD(el, [['all', L('Todos los tipos', 'All types')]].concat(Object.keys(TYPE_NAMES).map(t => [t, TYPE_ES[t]])), dexType, val => { dexType = val; saveDexUi(); sig = ''; refresh(true); }); return;
@@ -824,11 +820,11 @@ const UI = (() => {
   function bagModal() {
     const s = S(), list = s.inv.slice().sort((a, b) => b.rar - a.rar || a.id.localeCompare(b.id)), fg = Core.fuseGroups();
     openModal(`<h2>${L('Mochila', 'Bag')} · ${list.length} ${L('objetos', 'items')}</h2>
-      <div class="row" style="margin:0 0 8px"><button class="btn small" id="bag-spare">${L('Reciclar comunes sin usar', 'Recycle unused commons')}</button><button class="btn small primary" id="bag-buy" ${s.dust >= ITEM_DUST_COST ? '' : 'disabled'}>${L('Objeto al azar', 'Random item')} ${ico('dust', 12)} ${ITEM_DUST_COST}</button></div>
-      <div class="row" style="margin:0 0 8px"><button class="btn small" id="bag-craft" ${s.dust >= ITEM_CRAFT_COST ? '' : 'disabled'}>${L('Taller: elegir objeto', 'Workshop: pick an item')} ${ico('dust', 12)} ${ITEM_CRAFT_COST}</button></div>
-      ${fg.length ? `<div class="fuselist"><b>${L('Fusión', 'Fusion')}</b> <small>${L('3 objetos iguales sin usar → 1 de la rareza siguiente', '3 identical unused items → 1 of the next rarity')}</small>${fg.map(g => `<button class="btn small ${s.dust >= g.cost ? 'primary' : ''}" data-fuse="${g.id}|${g.rar}|${g.type}" ${s.dust >= g.cost ? '' : 'disabled'}>${ico(HELD[g.id].icon, 16)} ${itemName(g)} ${ITEM_RAR[g.rar].name}→${ITEM_RAR[g.rar + 1].name} · ${ico('dust', 12)} ${g.cost}</button>`).join('')}</div>` : ''}
-      <p class="hint" style="margin:0 0 6px">${L('Polvo estelar', 'Stardust')}: ${ico('dust', 14)} ${fmt(s.dust)} · ${L('Toca un objeto para reciclarlo.', 'Tap an item to recycle it.')}</p>
-      <div class="pickwrap itemlist2" id="bag-list">${list.length ? list.map(it => { const h = holderOf(it.u); return itemCard(it, `<em>${h ? L('Lo lleva ', 'Held by ') + DEX[h.dex].name : '+' + ITEM_RAR[it.rar].dust + L(' polvo', ' stardust')}</em>`); }).join('') : '<p class="hint">' + L('Aún no tienes objetos. Los sueltan los jefes y, con suerte, los Pokémon salvajes.', 'You have no items yet. Bosses drop them and, with luck, wild Pokémon.') + '</p>'}</div>
+      <div class="row" style="margin:0 0 8px"><button class="btn small" id="bag-spare">${L('Reciclar comunes sin usar', 'Recycle unused commons')}</button><button class="btn small primary" id="bag-buy" ${s.coins >= Core.dc(ITEM_DUST_COST) ? '' : 'disabled'}>${L('Objeto al azar', 'Random item')} ${ico('coin', 12)} ${fmt(Core.dc(ITEM_DUST_COST))}</button></div>
+      <div class="row" style="margin:0 0 8px"><button class="btn small" id="bag-craft" ${s.coins >= Core.dc(ITEM_CRAFT_COST) ? '' : 'disabled'}>${L('Taller: elegir objeto', 'Workshop: pick an item')} ${ico('coin', 12)} ${fmt(Core.dc(ITEM_CRAFT_COST))}</button></div>
+      ${fg.length ? `<div class="fuselist"><b>${L('Fusión', 'Fusion')}</b> <small>${L('3 objetos iguales sin usar → 1 de la rareza siguiente', '3 identical unused items → 1 of the next rarity')}</small>${fg.map(g => `<button class="btn small ${s.coins >= g.cost ? 'primary' : ''}" data-fuse="${g.id}|${g.rar}|${g.type}" ${s.coins >= g.cost ? '' : 'disabled'}>${ico(HELD[g.id].icon, 16)} ${itemName(g)} ${ITEM_RAR[g.rar].name}→${ITEM_RAR[g.rar + 1].name} · ${ico('coin', 12)} ${fmt(g.cost)}</button>`).join('')}</div>` : ''}
+      <p class="hint" style="margin:0 0 6px">${L('Toca un objeto para reciclarlo y recuperar monedas.', 'Tap an item to recycle it for coins.')}</p>
+      <div class="pickwrap itemlist2" id="bag-list">${list.length ? list.map(it => { const h = holderOf(it.u); return itemCard(it, `<em>${h ? L('Lo lleva ', 'Held by ') + DEX[h.dex].name : '+' + fmt(Core.srcCoins(ITEM_RAR[it.rar].dust)) + L(' monedas', ' coins')}</em>`); }).join('') : '<p class="hint">' + L('Aún no tienes objetos. Los sueltan los jefes y, con suerte, los Pokémon salvajes.', 'You have no items yet. Bosses drop them and, with luck, wild Pokémon.') + '</p>'}</div>
       <div class="row"><button class="btn" id="bag-x">${L('Cerrar', 'Close')}</button></div>`);
     $('#modal-box').classList.add('wide');
     $('#bag-x').onclick = closeModal;
@@ -837,14 +833,14 @@ const UI = (() => {
       const make = type => { const it = Core.craftItem(id, type); if (it) { Audio8.play('item'); toast(L('Fabricado: ', 'Crafted: ') + itemName(it)); Core.save(); bagModal(); refresh(true); } else Audio8.play('error'); };
       if (id === 'orbe') setTimeout(() => openDD($('#bag-craft'), Object.keys(TYPE_NAMES).map(t => [t, TYPE_NAMES[t]]), null, make), 30); else make();
     });
-    $('#bag-spare').onclick = () => { const r = Core.recycleSpare(); Audio8.play(r.n ? 'ticket' : 'error'); if (r.n) toast(L(`${r.n} objeto${r.n > 1 ? 's reciclados' : ' reciclado'}: +${r.d} polvo`, `Recycled ${r.n} item${r.n > 1 ? 's' : ''}: +${r.d} stardust`)); Core.save(); bagModal(); refresh(true); };
+    $('#bag-spare').onclick = () => { const r = Core.recycleSpare(); Audio8.play(r.n ? 'ticket' : 'error'); if (r.n) toast(L(`${r.n} objeto${r.n > 1 ? 's reciclados' : ' reciclado'}: +${fmt(r.d)} monedas`, `Recycled ${r.n} item${r.n > 1 ? 's' : ''}: +${fmt(r.d)} coins`)); Core.save(); bagModal(); refresh(true); };
     $('#bag-buy').onclick = () => { const it = Core.buyItem(); if (it) { Audio8.play('item'); banner(L('¡', '') + itemName(it) + '!', ITEM_RAR[it.rar].name + ' · ' + itemDesc(it), ITEM_RAR[it.rar].color); Core.save(); bagModal(); refresh(true); } };
     $('#bag-list').onclick = e => {
       const b = e.target.closest('.it'); if (!b) return;
       const it = s.inv.find(i => i.u === +b.dataset.u); if (!it) return;
       const h = holderOf(it.u);
       if (h) { toast(L('Lo lleva ' + DEX[h.dex].name + ': quítaselo primero', DEX[h.dex].name + ' holds it: take it off first')); return; }
-      const d = Core.recycleItem(it.u); Audio8.play('ticket'); toast('+' + d + L(' polvo', ' stardust')); Core.save(); bagModal(); refresh(true);
+      const d = Core.recycleItem(it.u); Audio8.play('ticket'); toast('+' + fmt(d) + L(' monedas', ' coins')); Core.save(); bagModal(); refresh(true);
     };
   }
 
@@ -961,12 +957,12 @@ const UI = (() => {
         const m = S().mons[r.base];
         cards += `<div class="pull r${r.rar} ${r.shiny ? 'shiny' : ''}" style="--rc:${RARITY[r.rar].color};animation-delay:${0.15 + j * (n > 1 ? 0.16 : 0)}s">
           ${r.isNew ? '<span class="new">' + L('¡NUEVO!', 'NEW!') + '</span>' : ''}${r.shiny ? '<span class="shtag">✨ SHINY</span>' : ''}
-          ${n === 1 ? '<canvas class="pv" id="pv" width="128" height="128"></canvas>' : `<img src="${por(r.base, r.shiny)}">`}
+          ${n === 1 ? '<canvas class="pv" id="pv" width="128" height="128"></canvas>' : `<span class="pk-spr">${Sprites.html(r.base, r.shiny, 72, true)}</span>`}
           <b>${DEX[r.base].name}</b><small>${RARITY[r.rar].name}</small>
           <span class="dup nat"><span class="nt">${Core.natOf({ nat: r.nat }).name} · IV ${Math.round(Core.ivPct(m) * 100)}%</span> <span class="gr" style="background:${r.grade[2]}">${r.grade[1]}</span></span>
           ${r.genes ? '<span class="dup" style="color:#ffd6f2">' + L('Cría: genes nuevos de ', 'Offspring: new genes of ') + Math.round((r.genes.iv.d + r.genes.iv.s + r.genes.iv.c) / (3 * IV_MAX) * 100) + '% IV</span>' : ''}
           ${r.ivUp ? `<span class="dup" style="color:#7ff0a0">${n === 1 ? L('¡IVs mejorados!', 'IVs improved!') + ' ' : 'IV ↑ '}${Math.round(r.ivUp.from * 100)}→${Math.round(r.ivUp.to * 100)}%</span>` : ''}
-          ${r.isNew ? '' : `<span class="dup cp">${L('+1 copia', '+1 copy')} <span class="cc">(${m.copies}/${m.stars < 5 ? STAR_COPIES[m.stars] : '★5'})</span> · +${r.dust}<span class="dustic">${ico('dust', 12)}</span></span>`}
+          ${r.isNew ? '' : `<span class="dup cp"><span class="cpt">${L('+1 copia', '+1 copy')} <span class="cc">(${m.copies}/${m.stars < 5 ? STAR_COPIES[m.stars] : '★5'})</span> · </span>+${fmt(r.dust)}<span class="dustic">${ico('coin', 12)}</span></span>`}
           ${r.newShiny && !r.isNew ? '<span class="dup" style="color:#fff3a8">' + L('¡Versión shiny desbloqueada!', 'Shiny form unlocked!') + '</span>' : ''}
           <i class="gl"></i></div>`;
       });
@@ -1096,9 +1092,9 @@ const UI = (() => {
   function genesHtml(m) {
     const s = S(), nt = Core.natOf(m), gr = Core.ivGrade(m);
     const strong = Object.keys(TYPE_NAMES).filter(t => Math.max(...DEX[Core.fdex(m)].types.map(a => Core.typeEff(a, [t]))) >= 2);
-    const ivRows = ['d', 's', 'c'].map(k => `<div class="ivrow"><span>${IV_NAMES[k]}</span><div class="ivbar"><i style="width:${m.iv[k] / IV_MAX * 100}%"></i></div><b>${m.iv[k]}</b>${m.iv[k] < IV_MAX ? `<button class="btn small" data-iv="${k}" ${s.dust >= ivTrainCost(m.iv[k]) ? '' : 'disabled'} title="${L('Entrenar este IV', 'Train this IV')} (+${IV_TRAIN_STEP})">+${IV_TRAIN_STEP} ${ico('dust', 10)}${ivTrainCost(m.iv[k])}</button>` : '<small class="max">' + L('MÁX', 'MAX') + '</small>'}</div>`).join('');
-    return `<div class="genes"><div class="genehead"><span>${L('Naturaleza', 'Nature')} <b>${natTxt(m)}</b></span><span class="dustnum">${ico('dust', 14)} ${fmt(s.dust)}</span></div>
-      <div class="row tight"><button class="btn small" id="m-natre" ${s.dust >= NAT_REROLL_COST ? '' : 'disabled'}>${L('Cambiar al azar', 'Reroll')} ${ico('dust', 10)}${NAT_REROLL_COST}</button><button class="btn small" id="m-natset" ${s.dust >= NAT_CHOOSE_COST ? '' : 'disabled'}>${L('Elegir', 'Choose')} ${ico('dust', 10)}${NAT_CHOOSE_COST}</button></div>
+    const ivRows = ['d', 's', 'c'].map(k => `<div class="ivrow"><span>${IV_NAMES[k]}</span><div class="ivbar"><i style="width:${m.iv[k] / IV_MAX * 100}%"></i></div><b>${m.iv[k]}</b>${m.iv[k] < IV_MAX ? `<button class="btn small" data-iv="${k}" ${s.coins >= Core.dc(ivTrainCost(m.iv[k])) ? '' : 'disabled'} title="${L('Entrenar este IV', 'Train this IV')} (+${IV_TRAIN_STEP})">+${IV_TRAIN_STEP} ${ico('coin', 10)}${fmt(Core.dc(ivTrainCost(m.iv[k])))}</button>` : '<small class="max">' + L('MÁX', 'MAX') + '</small>'}</div>`).join('');
+    return `<div class="genes"><div class="genehead"><span>${L('Naturaleza', 'Nature')} <b>${natTxt(m)}</b></span><span class="dustnum">${ico('coin', 14)} ${fmt(s.coins)}</span></div>
+      <div class="row tight"><button class="btn small" id="m-natre" ${s.coins >= Core.dc(NAT_REROLL_COST) ? '' : 'disabled'}>${L('Cambiar al azar', 'Reroll')} ${ico('coin', 10)}${fmt(Core.dc(NAT_REROLL_COST))}</button><button class="btn small" id="m-natset" ${s.coins >= Core.dc(NAT_CHOOSE_COST) ? '' : 'disabled'}>${L('Elegir', 'Choose')} ${ico('coin', 10)}${fmt(Core.dc(NAT_CHOOSE_COST))}</button></div>
       <div class="genehead"><span>IVs</span><span class="gr" style="background:${gr[2]}">${Math.round(Core.ivPct(m) * 100)}% · ${gr[1]}</span></div>${ivRows}
       <div class="foehint">${DEX[Core.fdex(m)].name} ${L('es fuerte contra', 'is strong against')} ${strong.length ? strong.map(tchip).join('') : '—'}</div></div>`;
   }
@@ -1215,7 +1211,7 @@ const UI = (() => {
       [['←', '→'], L('Etapa anterior / siguiente', 'Previous / next stage')],
       [['B'], L('Retar al jefe / Avanzar etapa', 'Challenge the boss / Next stage')],
       [['X'], L('Cambiar el multiplicador de compra (×1, ×10, ×25, Máx)', 'Change the buy multiplier (×1, ×10, ×25, Max)')],
-      [['M'], L('Mapa del mundo', 'World map')], [['P'], L('Perfil', 'Profile')], [['O'], L('Ajustes', 'Settings')], [['H'], L('¿Qué hago ahora?', 'What should I do now?')],
+      [['M'], L('Mapa del mundo', 'World map')], [['P'], L('Perfil', 'Profile')], [['O'], L('Ajustes', 'Settings')],
       [['Intro', 'Espacio'], L('En las animaciones de gacha y evolución: continuar', 'In gacha and evolution animations: continue')],
       [['Esc'], L('Cerrar la ventana abierta', 'Close the open window')], [['?', 'K'], L('Esta lista de atajos', 'This list of shortcuts')],
     ];
@@ -1373,22 +1369,11 @@ const UI = (() => {
     if (Core.eggsReady()) news.push(L(`Tienes <b>${Core.eggsReady()}</b> huevo${Core.eggsReady() > 1 ? 's' : ''} listo${Core.eggsReady() > 1 ? 's' : ''} para eclosionar en la pestaña Gacha.`, `You have <b>${Core.eggsReady()}</b> egg${Core.eggsReady() > 1 ? 's' : ''} ready to hatch in the Gacha tab.`));
     if (news.length) parts.push(`<div class="wsec"><b>${L('Hoy', 'Today')}</b><ul class="wlist">${news.map(n => `<li>${n}</li>`).join('')}</ul></div>`);
     if (o.daily && !s.daily.claimed) parts.push(`<div class="wsec"><b>${L('Recompensa diaria', 'Daily reward')}</b><p>${L(`Día <b>${s.daily.streak}</b> de racha`, `Day <b>${s.daily.streak}</b> streak`)}</p><p style="font-size:26px;color:#9fe8ff;margin:2px 0">${ico('gem', 24)} ${Core.dailyReward()}</p><small>${L('Vuelve mañana: la recompensa crece hasta el día 7.', 'Come back tomorrow: the reward grows until day 7.')}</small></div>`);
-    const adv = Core.advice().filter(a => a.p > 1 || a.tab !== 'quests').slice(0, 3);
-    if (adv.length && o.advice) parts.push(`<div class="wsec"><b>${L('Qué hacer ahora', 'What to do now')}</b><div class="advlist">${adv.map(a => `<div class="adv"><span>${ico(a.icon, 24)}</span><p>${a.text}</p><button class="btn small" data-go="${a.tab}">${L('Ir', 'Go')}</button></div>`).join('')}</div></div>`);
     openModal(`<div class="welc">${parts.join('')}</div><div class="row"><button class="btn big primary" id="w-ok">${o.daily && !s.daily.claimed ? L('Recoger', 'Claim') : L('Seguir', 'Continue')}</button></div>`);
     $$('[data-go]').forEach(b => b.onclick = () => { const g = Core.claimDaily(); if (g) Audio8.play('ticket'); Core.save(); closeModal(); setTab(b.dataset.go); });
     $('#w-ok').onclick = () => { const g = Core.claimDaily(); if (g) Audio8.play('ticket'); Core.save(); closeModal(); refresh(true); if (o.done) o.done(); };
   }
   // ---------------- consejos y perfil ----------------
-  function adviceModal() {
-    const list = Core.advice();
-    openModal(`<h2>${ico('star', 32)} ${L('¿Qué hago ahora?', 'What should I do now?')}</h2>
-      <p class="hint">${L('Lo más útil que puedes hacer ahora mismo, por orden de importancia.', 'The most useful things you can do right now, in order of importance.')}</p>
-      <div class="advlist">${list.map((a, i) => `<div class="adv"><span>${ico(a.icon, 28)}</span><p>${a.text}</p><button class="btn small primary" data-go="${a.tab}" data-i="${i}">${L('Ir', 'Go')}</button></div>`).join('')}</div>
-      <div class="row"><button class="btn" id="adv-x">${L('Cerrar', 'Close')}</button></div>`);
-    $('#adv-x').onclick = closeModal;
-    $$('[data-go]').forEach(b => b.onclick = () => { closeModal(); setTab(b.dataset.go); });
-  }
   let pfFrom = 'settings';
   function profileModal(from) {
     if (from) pfFrom = from;
@@ -1591,8 +1576,6 @@ const UI = (() => {
     $('#i-gem').innerHTML = ico('gem', 24);
     $('#btn-settings').innerHTML = ico('gear', 24);
     $('#btn-support').href = KOFI_URL; $('#btn-support').innerHTML = ico('cup', 22) + '<span>' + L('Apoyar', 'Support') + '</span>'; A11Y.label($('#btn-support'), L('Apoyar el proyecto en Ko-fi', 'Support the project on Ko-fi'));
-    $('#btn-advice').innerHTML = ico('star', 24); A11Y.label($('#btn-advice'), L('¿Qué hago ahora?', 'What should I do now?'));
-    $('#btn-advice').onclick = adviceModal;
     $('#btn-settings').onclick = settings;
     $('#btn-profile').onclick = () => { Audio8.play('click'); profileModal('game'); };
     $('#btn-keys').onclick = () => { Audio8.play('click'); keysModal(); };
@@ -1604,7 +1587,6 @@ const UI = (() => {
     $('#btn-boss').onclick = () => { Core.fightBoss(); };
     $('#btn-map').innerHTML = ico('boot', 24);
     $('#btn-map').onclick = () => { mapReg = -1; mapModal(); };
-    $('#i-dust').innerHTML = ico('dust', 24);
     $('#i-tk').innerHTML = ico('tkPoke', 24);
     $('#btn-tk').onclick = () => { Audio8.play('click'); setTab('gacha'); };
     applySettings();

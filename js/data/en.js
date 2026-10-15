@@ -30,7 +30,6 @@ const EN_UPGRADES = {
   type: ['Type Affinity', n => 'Super effective hits deal +' + n * 4 + '% more damage'],
   boss: ['Boss Hunter', n => '+' + n * 4 + '% damage against bosses'],
   autotap: ['Auto Tap', n => n ? n * 0.5 + ' taps per second without tapping' : 'Automatic taps'],
-  alch: ['Alchemy', n => '+' + n * 10 + '% stardust'],
   bosstime: ['Stopwatch', n => '+' + n * 3 + ' s to beat bosses'],
 };
 const EN_SKILLS = { rage: ['Rage', 'x3 team damage for 15 s.'], gold: ['Gold Rush', 'x3 coins for 20 s.'], lure: ['Ticket Rain', 'x6 chance of dropping tickets for 15 s.'] };
@@ -44,7 +43,6 @@ const EN_SHOP = {
   shiny: ['Eternal Shine', n => 'Shinies x' + (1 + n * 0.2).toFixed(1) + ' more common'],
   gems: ['Gem Finder', n => '+' + n * 10 + '% gems from bosses and quests'],
   skill: ['Skill Master', n => 'Skills: -' + n * 4 + '% cooldown and +' + n * 2 + ' s duration'],
-  dust: ['Alchemist', n => '+' + n * 15 + '% stardust'],
   tapd: ['Iron Fist', n => '+' + n * 10 + '% tap damage'],
   critb: ['Eagle Eye', n => '+' + n + '% critical chance'],
   egg: ['Incubation Heat', n => 'Eggs need ' + n * 5 + '% fewer victories'],
@@ -83,7 +81,7 @@ const EN_HELD = {
 };
 const EN_NATURES = ['Hardy', 'Lonely', 'Adamant', 'Naughty', 'Brave', 'Bold', 'Docile', 'Impish', 'Lax', 'Relaxed', 'Modest', 'Mild', 'Bashful', 'Rash', 'Quiet', 'Calm', 'Gentle', 'Careful', 'Quirky', 'Sassy', 'Timid', 'Hasty', 'Jolly', 'Naive', 'Serious'];
 const EN_EGGS = [['Common Egg', 'Like a Poké Ball: mostly common or uncommon.'], ['Rare Egg', 'Never a common. IVs of at least 8.'], ['Epic Egg', 'Rare or better, IVs of at least 16.'], ['Legendary Egg', 'Epic or legendary, IVs of at least 24.']];
-const EN_EVENT_BONUS = { shiny: ['Shiny Week', 'Shinies are twice as common'], eggs: ['Breeding Week', 'Eggs advance twice as fast'], coins: ['Golden Week', '+50% coins'], dust: ['Stardust Week', 'Double stardust'], tickets: ['Ticket Week', '+50% dropped tickets'] };
+const EN_EVENT_BONUS = { shiny: ['Shiny Week', 'Shinies are twice as common'], eggs: ['Breeding Week', 'Eggs advance twice as fast'], coins: ['Golden Week', '+50% coins'], tickets: ['Ticket Week', '+50% dropped tickets'] };
 const EN_EVENT_TASKS = { k1: (n, t) => 'Defeat ' + n + ' ' + t + '-type Pokémon', k2: (n, t) => 'Defeat ' + n + ' ' + t + '-type Pokémon', k3: (n, t) => 'Defeat ' + n + ' ' + t + '-type Pokémon' };
 const EN_RULES = { noitems: ['No items', 'Equipped items do not work'], nosyn: ['No synergies', 'Team synergies are disabled'], only: ['Only type', 'Pokémon of other types deal half damage'], nocrit: ['No crits', 'No critical hits'], fast: ['Time trial', 'Half the time, but 45% less HP'], armor: ['Armor', '+60% HP and +40% time'] };
 

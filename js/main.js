@@ -45,7 +45,7 @@
     if (it.rar >= 2) UI.banner(L('¡', '') + HELD[it.id].name + (it.id === 'orbe' ? L(' de ', ' · ') + TYPE_NAMES[it.type] : '') + '!', r.name + L(' · equípalo desde la pestaña Equipo', ' · equip it from the Team tab'), r.color);
   });
   Core.on('egg', d => {
-    if (d.full) { UI.toast(L('Huevos al máximo: ' + EGGS[d.t].name + ' convertido en ' + d.dust + ' de polvo', 'Eggs full: ' + EGGS[d.t].name + ' turned into ' + d.dust + ' stardust')); return; }
+    if (d.full) { UI.toast(L('Huevos al máximo: ' + EGGS[d.t].name + ' convertido en ' + Core.fmt(d.coins) + ' monedas', 'Eggs full: ' + EGGS[d.t].name + ' turned into ' + Core.fmt(d.coins) + ' coins')); return; }
     Audio8.play('item');
     if (Core.S.started && d.t >= 1) UI.banner(L('¡Has encontrado un ' + EGGS[d.t].name + '!', 'You found a ' + EGGS[d.t].name + '!'), L('Eclosiona en una incubadora de la pestaña Gacha', 'Hatch it in an incubator in the Gacha tab'), EGGS[d.t].color);
     else if (Core.S.started) UI.toast(Icons.html('egg' + d.t, 18) + ' ' + L('¡Has encontrado un ' + EGGS[d.t].name + '!', 'You found a ' + EGGS[d.t].name + '!'));
@@ -139,7 +139,7 @@
     const rc = off ? Core.recap() : null;
     const hasNews = off || Core.eggsReady() || (daily && !Core.S.daily.claimed) || (rc && rc.rows.length);
     if (!hasNews) { if (!Core.S.tutDone) setTimeout(() => UI.tutStart(), 700); return; }
-    UI.welcomeModal({ off, rc, newDay, daily, advice: !!off, done: () => { if (!Core.S.tutDone) setTimeout(() => UI.tutStart(), 500); } });
+    UI.welcomeModal({ off, rc, newDay, daily, done: () => { if (!Core.S.tutDone) setTimeout(() => UI.tutStart(), 500); } });
   }
 
   // ---- guardado ----
@@ -186,7 +186,6 @@
       case 'KeyM': click('#btn-map'); return;
       case 'KeyP': click('#btn-profile'); return;
       case 'KeyO': click('#btn-settings'); return;
-      case 'KeyH': click('#btn-advice'); return;
       case 'KeyX': { const o = [1, 10, 25, 'max'], s = Core.S; s.buyMul = o[(Math.max(0, o.indexOf(s.buyMul)) + 1) % o.length]; Audio8.play('click'); UI.refresh(true); e.preventDefault(); return; }
     }
   });

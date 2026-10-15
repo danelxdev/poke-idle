@@ -880,14 +880,12 @@ html.a-cb .rdy { color: #ffbf5a; }
 .supportbtn { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 6px; flex: none; padding: 3px 12px 3px 8px; border-radius: 20px; background: linear-gradient(180deg, #4cc7f7, #1f93c9); color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; box-shadow: 0 2px 0 #0f5f86, inset 0 0 0 2px #9be5ff; }
 .supportbtn:hover { background: linear-gradient(180deg, #62d2fb, #2aa3dc); }
 .supportbtn::before { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 30%; background: linear-gradient(90deg, transparent, #ffffff88, transparent); animation: shine 4.5s ease-in-out infinite; }
-.supportbtn::after { content: '♥'; position: absolute; top: -2px; right: 3px; color: #ff5a7a; font-size: 12px; text-shadow: 0 1px 0 #7a0f2a; animation: beat 1.8s ease-in-out infinite; }
 .supportbtn span { white-space: nowrap; }
 .kofi.hero { position: relative; overflow: hidden; margin-top: 8px; font-size: 18px; padding: 10px 22px; border-radius: 28px; background: linear-gradient(180deg, #4cc7f7, #1f93c9); box-shadow: 0 4px 0 #0f5f86, inset 0 0 0 2px #9be5ff, 0 0 18px #29abe055; }
 .kofi.hero::before { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 25%; background: linear-gradient(90deg, transparent, #ffffff88, transparent); animation: shine 4.5s ease-in-out infinite; }
-.kofi.hero .kheart { font-style: normal; color: #ff5a7a; font-size: 20px; text-shadow: 0 1px 0 #7a0f2a; animation: beat 1.8s ease-in-out infinite; }
 .t-auth + .kofi.hero { align-self: center; }
 @media (max-width: 860px) { .supportbtn { padding: 3px 7px 3px 5px; } .supportbtn span { display: none; } }
-html.a-rm .supportbtn::before, html.a-rm .supportbtn::after, html.a-rm .kofi.hero::before, html.a-rm .kofi.hero .kheart { animation: none !important; }
+html.a-rm .supportbtn::before, html.a-rm .kofi.hero::before, html.a-rm .kofi.hero .kheart { animation: none !important; }
 .autherr { color: #ff9a9a !important; max-width: 340px; }
 
 /* v21: aviso de partida abierta en otra pestaña */
@@ -1087,3 +1085,18 @@ html.a-rm .soundhint { animation: none; }
 html.a-rm .newdot { animation: none; }
 .newslist { text-align: left; margin: 8px 0 14px; padding-left: 20px; font-size: 15px; color: #c9d4ff; line-height: 1.5; }
 .newslist li { margin-bottom: 6px; }
+
+/* destacados: el legendario en amarillo (el épico sigue en morado) */
+.feat.leg { background: linear-gradient(135deg, #5c4500, #1b2250 62%); box-shadow: inset 0 0 0 2px #ffd23f; }
+.feat.leg .tagx { background: #ffd23f; color: #3a2a00; }
+.feat.leg .spb { background: radial-gradient(circle at 50% 35%, #7a5d00, #1c1a10 80%); box-shadow: inset 0 0 0 2px #ffd23f; }
+.feat.leg small { color: #ffe9a0; }
+/* resultados del gacha x10: el Pokémon, sin marco de carta */
+.pk-spr { display: flex; align-items: center; justify-content: center; height: 76px; }
+.pulls:not(.one) .pull { background: radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--rc) 22%, #0b1638), #0b1638 72%); }
+@media (max-width: 860px) { .pk-spr { height: 54px; } .pk-spr .spr { transform: scale(.72); } }
+/* idioma y novedades con margen respecto al borde */
+.langsw { top: max(10px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); }
+.pull .dup.cp { white-space: normal; }
+.pull .dup .dustic { vertical-align: -2px; }
+@media (max-width: 860px) { .pulls:not(.one) .pull .dup .cpt { display: none; } }

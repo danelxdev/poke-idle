@@ -102,6 +102,7 @@ const Core = (() => {
     }
     for (const k of Object.keys(d.seen)) if (!/^\d+$/.test(k) || !DEX[k]) delete d.seen[k];
     if (!Array.isArray(d.inv)) d.inv = [];
+    for (const it of d.inv) if (isObj(it) && it.id === 'polvo') it.id = 'moneda';       // el Polvo Brillo desaparece: pasa a ser una Moneda de la misma rareza
     d.inv = d.inv.filter(it => isObj(it) && HELD[it.id] && ITEM_RAR[it.rar] && Number.isFinite(+it.u));
     { const ids = new Set(d.inv.map(it => it.u)); for (const m of Object.values(d.mons)) if (m.item && !ids.has(m.item)) m.item = null; }
     if (!d.settings.a11y || typeof d.settings.a11y !== 'object') d.settings.a11y = Object.assign({}, f.settings.a11y);
@@ -167,6 +168,8 @@ const Core = (() => {
     if (d.started && !Object.keys(d.ui.biomes).length) { const top = Math.min(ROUTES.length - 1, Math.floor((Math.max(d.stats.maxStage, d.maxStage) - 1) / 10)); for (let i = 0; i <= top; i++) d.ui.biomes[ROUTES[i].biome] = 1; }
     invDirty = true;
     S = d;
+    if (S.dust > 0) { gainDust(S.dust); }                       // el polvo estelar que tuvieras se convierte en monedas
+    S.dust = 0;
     stale = false;
     chal = null;
     refreshEvent();
@@ -233,6 +236,14 @@ const Core = (() => {
   // las monedas por vida bajan con la etapa; pasada la etapa cdS bajan más despacio para que el tramo largo no se estanque
   const coinDecay = s => Math.pow(K.cd, Math.min(s, K.cdS)) * Math.pow(K.cd2, Math.max(0, s - K.cdS));
   const killCoins = s => Math.ceil(((hpBase(s) + K.hpL * s) * K.coinR * coinDecay(s) + K.cf + s * K.cs) * coinMult() * (isBoss(s) ? 6 : 1));
+  // el polvo estelar se retiró: sus fuentes dan monedas y sus gastos cuestan monedas.
+  // Una «unidad» (lo que antes era 1 de polvo) = 3 derrotas del tramo actual, así que siempre está a la escala de tu partida
+  const coinsPerDust = () => { let st = Math.max(1, S.maxStage - 1); if (isBoss(st)) st--; return Math.max(1, killCoins(Math.max(1, st))) * 3; };
+  const dc = n => Math.max(1, Math.round(n * coinsPerDust()));
+  // las fuentes (repetidos, huevos de sobra, reciclar, recompensas) pagan menos que lo que cuestan los gastos: así el gacha no infla la economía
+  const SRC_RATE = 0.15 / 3;
+  const srcCoins = n => Math.max(1, Math.round(n * coinsPerDust() * SRC_RATE));
+  const gainDust = n => { const c = srcCoins(n); S.coins += c; S.stats.coinsTotal += c; return c; };
   const dexCount = () => Object.keys(S.seen).length;                                   // especies obtenidas (dan +1% de daño cada una)
   const isReg = d => !!(S.seen[d] || S.foes[d]);
   const regCount = () => { const u = new Set(Object.keys(S.seen)); for (const k of Object.keys(S.foes)) if (DEX[k]) u.add(k); return u.size; };      // registradas: obtenidas o vistas en combate
@@ -620,7 +631,7 @@ const Core = (() => {
     const it = invLookup(u); if (!it) return 0;
     for (const o of Object.values(S.mons)) if (o.item === u) o.item = null;
     S.inv = S.inv.filter(i => i.u !== u); invDirty = true;
-    const d = ITEM_RAR[it.rar].dust; S.dust += d; S.stats.dust += d; return d;
+    return gainDust(ITEM_RAR[it.rar].dust);
   }
   function recycleSpare() { // reciclar todos los comunes que nadie lleva
     const worn = new Set(Object.values(S.mons).map(m => m.item)); let n = 0, d = 0;
@@ -628,8 +639,8 @@ const Core = (() => {
     return { n, d };
   }
   function buyItem() {
-    if (S.dust < ITEM_DUST_COST) return null;
-    S.dust -= ITEM_DUST_COST; return dropItem([60, 32, 8]);
+    const c = dc(ITEM_DUST_COST); if (S.coins < c) return null;
+    S.coins -= c; return dropItem([60, 32, 8]);
   }
   function giveTickets(t) { for (const k of Object.keys(t)) S.tk[k] = (S.tk[k] || 0) + t[k]; emit('tickets', t); }
 
@@ -674,8 +685,7 @@ const Core = (() => {
       m.copies++;
       const cand = bred ? null : rollIv(floor);             // cada copia repetida tira unos IVs nuevos y te quedas con los mejores
       if (cand && cand.d + cand.s + cand.c > ivSum(m)) { ivUp = { from: ivPct(m), to: (cand.d + cand.s + cand.c) / (3 * IV_MAX) }; m.iv = cand; S.stats.ivUps++; }
-      dust = Math.round(DUST_GAIN[rar] * (1 + 0.1 * S.up.alch + 0.15 * S.shop.dust) * (shiny ? 2 : 1) * (evBonus('dust') ? 2 : 1) * (1 + teamItemSum('dust') + tact().drop));
-      S.dust += dust; S.stats.dust += dust;
+      dust = gainDust(Math.round(DUST_GAIN[rar] * (shiny ? 2 : 1)));                 // repetido: monedas
       if (shiny && !m.shinyOwned) { m.shinyOwned = true; m.shiny = true; newShiny = true; }
     }
     if (shiny) S.stats.shinies++;
@@ -803,7 +813,7 @@ const Core = (() => {
   function giveReward(r) {
     if (!r) return;
     if (r.gems) S.gems += r.gems;
-    if (r.dust) { S.dust += r.dust; S.stats.dust += r.dust; }
+    if (r.dust) r.coins = gainDust(r.dust);
     if (r.shards) S.shards += r.shards;
     if (r.tk) giveTickets(r.tk);
     if (r.egg !== undefined) giveEgg(r.egg);
@@ -911,22 +921,22 @@ const Core = (() => {
   function fuseGroups() {
     const worn = wornSet(), g = {};
     for (const it of S.inv) if (!worn.has(it.u) && it.rar < 3) (g[it.id + ':' + it.rar + ':' + (it.type || '')] = g[it.id + ':' + it.rar + ':' + (it.type || '')] || []).push(it);
-    return Object.values(g).filter(a => a.length >= 3).map(a => ({ id: a[0].id, rar: a[0].rar, type: a[0].type || '', n: a.length, cost: ITEM_FUSE_COST[a[0].rar] }));
+    return Object.values(g).filter(a => a.length >= 3).map(a => ({ id: a[0].id, rar: a[0].rar, type: a[0].type || '', n: a.length, cost: dc(ITEM_FUSE_COST[a[0].rar]) }));
   }
   function fuseItem(id, rar, type) {
-    const cost = ITEM_FUSE_COST[rar]; if (!HELD[id] || !(rar >= 1 && rar < 3) || S.dust < cost) return null;
+    const cost = dc(ITEM_FUSE_COST[rar] || 0); if (!HELD[id] || !(rar >= 1 && rar < 3) || S.coins < cost) return null;
     const worn = wornSet(), pool = S.inv.filter(it => it.id === id && it.rar === rar && (it.type || '') === (type || '') && !worn.has(it.u));
     if (pool.length < 3) return null;
     const rm = new Set(pool.slice(0, 3).map(i => i.u));
-    S.inv = S.inv.filter(i => !rm.has(i.u)); S.dust -= cost; S.stats.fusions++;
+    S.inv = S.inv.filter(i => !rm.has(i.u)); S.coins -= cost; S.stats.fusions++;
     const it = { u: S.uid++, id, rar: rar + 1 }; if (id === 'orbe') it.type = type || 'normal';
     S.inv.push(it); invDirty = true; S.stats.itemsFound++;
     emit('item', it);
     return it;
   }
   function craftItem(id, type) {
-    if (!HELD[id] || S.dust < ITEM_CRAFT_COST) return null;
-    S.dust -= ITEM_CRAFT_COST;
+    const cc = dc(ITEM_CRAFT_COST); if (!HELD[id] || S.coins < cc) return null;
+    S.coins -= cc;
     const it = { u: S.uid++, id, rar: 1 }; if (id === 'orbe') it.type = TYPE_NAMES[type] ? type : 'normal';
     S.inv.push(it); invDirty = true; S.stats.itemsFound++;
     emit('item', it);
@@ -1050,7 +1060,7 @@ const Core = (() => {
   const eggReady = e => e.p >= eggNeed(e);
   const eggsReady = () => S.eggs.filter(eggReady).length;
   function giveEgg(t) {
-    if (S.eggs.length >= EGG_CAP) { const d = EGGS[t].dust; S.dust += d; S.stats.dust += d; emit('egg', { t, full: true, dust: d }); return null; }
+    if (S.eggs.length >= EGG_CAP) { const d = gainDust(EGGS[t].dust); emit('egg', { t, full: true, coins: d }); return null; }
     const e = { t, p: 0 };
     S.eggs.push(e); S.stats.eggsFound++;
     emit('egg', { t, egg: e });
@@ -1084,8 +1094,8 @@ const Core = (() => {
   }
   // ---- guardería ----
   const breedRar = (a, b) => Math.max(RAR[S.mons[a].dex], RAR[S.mons[b].dex]);
-  const breedCost = (a, b) => BREED_COST[breedRar(a, b)];
-  function breedOk(a, b) { return !!(a && b && a !== b && S.mons[a] && S.mons[b] && S.eggs.length < EGG_CAP && S.dust >= breedCost(a, b)); }
+  const breedCost = (a, b) => dc(BREED_COST[breedRar(a, b)]);
+  function breedOk(a, b) { return !!(a && b && a !== b && S.mons[a] && S.mons[b] && S.eggs.length < EGG_CAP && S.coins >= breedCost(a, b)); }
   // IVs esperados de la cría (porcentaje medio)
   function breedExpect(a, b) {
     const A = S.mons[a].iv, B = S.mons[b].iv;
@@ -1098,7 +1108,7 @@ const Core = (() => {
       const hi = Math.max(A.iv[k], B.iv[k]), lo = Math.min(A.iv[k], B.iv[k]);
       iv[k] = Math.min(IV_MAX, (rnd() < BREED_HI ? hi : lo) + Math.floor(rnd() * (BREED_BONUS + 1)));
     }
-    S.dust -= breedCost(a, b);
+    S.coins -= breedCost(a, b);
     const e = giveEgg(BREED_EGG[breedRar(a, b)]);
     if (!e) return null;
     e.bred = { base: +a, iv, nat: natFrom === 'b' ? B.nat : A.nat, shiny: !!(A.shinyOwned || B.shinyOwned) };
@@ -1120,22 +1130,22 @@ const Core = (() => {
   function trainIv(key, ax) {
     const m = S.mons[key];
     if (!m || m.iv[ax] >= IV_MAX) return false;
-    const c = ivTrainCost(m.iv[ax]);
-    if (S.dust < c) return false;
-    S.dust -= c; m.iv[ax] = Math.min(IV_MAX, m.iv[ax] + IV_TRAIN_STEP);
+    const c = dc(ivTrainCost(m.iv[ax]));
+    if (S.coins < c) return false;
+    S.coins -= c; m.iv[ax] = Math.min(IV_MAX, m.iv[ax] + IV_TRAIN_STEP);
     return true;
   }
   function rerollNat(key) {
     const m = S.mons[key];
-    if (!m || S.dust < NAT_REROLL_COST) return false;
-    S.dust -= NAT_REROLL_COST;
+    const rc = dc(NAT_REROLL_COST); if (!m || S.coins < rc) return false;
+    S.coins -= rc;
     let n; do { n = Math.floor(rnd() * NATURES.length); } while (n === m.nat);
     m.nat = n; return true;
   }
   function setNat(key, id) {
     const m = S.mons[key];
-    if (!m || !NATURES[id] || id === m.nat || S.dust < NAT_CHOOSE_COST) return false;
-    S.dust -= NAT_CHOOSE_COST; m.nat = id; return true;
+    const nc = dc(NAT_CHOOSE_COST); if (!m || !NATURES[id] || id === m.nat || S.coins < nc) return false;
+    S.coins -= nc; m.nat = id; return true;
   }
 
   // ---------------- gacha ----------------
@@ -1155,12 +1165,6 @@ const Core = (() => {
     const cur = TICKETS[t].cur, cost = ticketPrice(t) * ticketCost(n);
     if (S[cur] < cost) return false;
     S[cur] -= cost; giveTickets({ [t]: n });
-    return true;
-  }
-  function dustTicket(t) {
-    const c = TICKET_DUST[t];
-    if (S.dust < c) return false;
-    S.dust -= c; S.stats.dustBuys++; giveTickets({ [t]: 1 });
     return true;
   }
   function rollRarity(rates) {
@@ -1351,11 +1355,11 @@ const Core = (() => {
     K, hpTab, DEX, CHILDREN, RAR, POOLG, BASES, bst, baseOf, stageOf, fmt, on, emit, F,
     get S() { return S; }, load, save, freezeSave, eventWeek: () => weekIdx(), wipe, fresh, setRng(f) { rnd = f; },
     route, routeIdx, routeData, regionOf, regionOfRoute, loopOf, isBoss, bossTier, bossTime, enemyHp, killCoins, coinMult, globalDmg, monDmg, monRate, eff,
-    previewUp, regCount, isReg, ownerCheck, isStale: () => stale, claim,
+    coinsPerDust, dc, srcCoins, previewUp, regCount, isReg, ownerCheck, isStale: () => stale, claim,
     levelCost, levelCostN, maxAffordable, upCost, shopCost, pokeBallPrice, critChance, critMult, catchChance, teamDps, tapDmg, medalGain, medalFor, dexCount, badgeCount,
     genUnlocked, unlockedGens, skillOn, skillReady, useSkill, goldenChance, gemMult,
     tick, tap, advance, goStage, fightBoss, bossEase, bossReady, levelUp, starUp, setTeam, buySlot, buyUp, buyShop, addMon,
-    featured, featuredEpic, featuredLegend, ballAvailable, ticketCost, ticketPrice, buyTicket, dustTicket, giveTickets, pull, freePull, freePullReady, toggleShiny, moveOf, tierOf, unsetTeam, setPaused, itemOf, itemVal, itemDmg, equip, unequip, recycleItem, recycleSpare, buyItem, synergies, synMult, teamItemSum,
+    featured, featuredEpic, featuredLegend, ballAvailable, ticketCost, ticketPrice, buyTicket, giveTickets, pull, freePull, freePullReady, toggleShiny, moveOf, tierOf, unsetTeam, setPaused, itemOf, itemVal, itemDmg, equip, unequip, recycleItem, recycleSpare, buyItem, synergies, synMult, teamItemSum,
     checkDaily, dailyReward, claimDaily, questText, questProg, claimQuest, achStat, claimAch, pendingRewards, legendsOwned,
     prestige, offline, start,
     sample, megaOf, fdex, megaForms, megaCost, megaCan, megaUnlock, megaSet, MEGA_BY_BASE,
