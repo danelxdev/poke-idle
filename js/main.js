@@ -172,7 +172,7 @@
   { const kick = () => { Audio8.resume(); for (const ev of ['pointerdown', 'keydown', 'touchend']) document.removeEventListener(ev, kick, true); };
     for (const ev of ['pointerdown', 'keydown', 'touchend']) document.addEventListener(ev, kick, true); }
   Cloud.on(() => UI.authChanged());
-  Cloud.init().then(() => UI.authChanged());
+  Cloud.init().then(() => { UI.authChanged(); try { if (sessionStorage.getItem('pokeidle.pulled')) { sessionStorage.removeItem('pokeidle.pulled'); UI.toast(L('Partida cargada desde tu cuenta', 'Game loaded from your account')); } } catch (e) { /* nada */ } });
   $('#btn-start').onclick = () => {
     Audio8.resume();
     Audio8.play('select');

@@ -17,6 +17,7 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
 - **Rival, entrenadores y Pokédex completa**: el rival Nico te desafía dos veces por región (20 duelos con historia), aparecen entrenadores con varios Pokémon seguidos y cada Pokémon tiene una ficha con estadísticas, debilidades, evolución y dónde aparece.
 - **Guía «¿Qué hago ahora?»**, **auras** en los enemigos, **perfil con títulos y avatar**, favoritos en la Pokédex y objetos exclusivos de final de partida.
 - **Cuenta con Google o como invitado**, partida en la nube, perfil público y **rankings** (Supabase; ver `supabase/README.md`). Opcional: sin configurar, el juego funciona como siempre.
+- **Perfil visible y editable**: el icono de la cabecera (y la tarjeta de la pantalla de inicio) muestra a tu Pokémon con su animación; al pulsarlo editas nombre, avatar, marco, fondo y título. Con la sesión iniciada **manda siempre la partida de la nube** (la local se guarda como copia).
 - **Consejos de novedades** (cada función se explica una sola vez, cuando se hace útil), **cosméticos** (marcos de retrato y fondos de arena) y un **resumen al volver** completo.
 - **Final de partida sin techo**: **Ascensión** (una segunda Liga con Rango, Esencia y multiplicadores permanentes que se acumulan) y **Duelos Maestros** de Nico, una escalera infinita cada vez más dura.
 - **Objetos, combos y tácticas**: 17 objetos con efectos distintos, fusión y taller, combos de objetos y 5 tácticas de equipo.

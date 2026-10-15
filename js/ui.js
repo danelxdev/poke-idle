@@ -18,6 +18,32 @@ const UI = (() => {
 
   // ---------------- pantallas iniciales ----------------
   const REG_COL = ['#ff5f6d', '#ffd23f', '#5fe08a', '#4fb4ff', '#c47bff', '#ff8ad8', '#ff9a3d', '#9fe0ff', '#ff7a5a'];
+  // el Pokémon del avatar (el del perfil o, si no hay, el primero del equipo) y los datos del entrenador
+  function profInfo() {
+    const s = S(), pr = s.profile, m0 = s.team[0] ? s.mons[s.team[0]] : null;
+    const av = pr.avatar && DEX[pr.avatar] ? pr.avatar : (m0 ? Core.fdex(m0) : 25), own = s.mons[String(Core.baseOf(av))];
+    const name = (Cloud.user && Cloud.profile && Cloud.profile.nickname) || pr.name || L('Entrenador', 'Trainer');
+    return { av, shiny: !!(own && own.shiny), name, title: (TITLES.find(t => t.id === pr.title) || TITLES[0]).name };
+  }
+  const esc = x => String(x).replace(/[<>&"']/g, '');
+  const avatarHtml = (size, px) => { const p = profInfo(); return `<span class="pavatar ${size}">${Sprites.html(p.av, p.shiny, px, true)}</span>`; };
+  let chipKey = '';
+  function paintProf(force) {
+    const el = $('#btn-profile'); if (!el || !S().started) return;
+    const p = profInfo(), k = [p.av, p.shiny, p.name, p.title, I18N.lang].join('|');
+    if (!force && k === chipKey) return; chipKey = k;
+    el.innerHTML = `${avatarHtml('sm', 34)}<span class="pc-t"><b>${esc(p.name)}</b><small>${p.title}</small></span><span class="pc-edit" aria-hidden="true">✎</span>`;
+    el.setAttribute('aria-label', L('Perfil: ', 'Profile: ') + p.name + L('. Pulsa para editarlo', '. Press to edit it')); el.title = L('Editar perfil', 'Edit profile');
+  }
+  function paintCont() {
+    const s = S(), el = $('#t-cont'); if (!el || !s.started) return;
+    const n = Object.keys(s.mons).length, hrs = Math.floor(s.stats.time / 3600), mins = Math.floor(s.stats.time / 60) % 60, p = profInfo();
+    el.innerHTML = `<button class="ct-prof" id="ct-prof" aria-label="${L('Editar perfil', 'Edit profile')}">${avatarHtml('md', 56)}<span class="cp-t"><b>${esc(p.name)}</b><small>${p.title}</small></span><span class="cp-e">✎ ${L('Editar perfil', 'Edit profile')}</span></button>
+      <div class="ct-team">${s.team.slice(0, 6).map(kk => Sprites.html(Core.fdex(s.mons[kk]), s.mons[kk].shiny, 40, true, 'ctsp')).join('')}</div>
+      <div class="ct-info"><span>${REGIONS[Core.regionOf(s.stage)].name} · ${L('etapa', 'stage')} ${s.stage} <small>(${L('máx.', 'max')} ${s.stats.maxStage})</small></span>
+      <small>${n} Pokémon · Pokédex ${Core.regCount()}/${POKEDEX.length} · ${fmt(s.medals)} ${L('medallas', 'medals')} · ${hrs ? hrs + ' h ' : ''}${mins} min ${L('jugados', 'played')}</small></div>`;
+    $('#ct-prof').onclick = () => profileModal('title');
+  }
   function title() {
     show('scr-title');
     const s = S(), k = $('#kofi-title');
@@ -33,10 +59,7 @@ const UI = (() => {
     $('#t-cont').classList.toggle('hidden', !started);
     $('#t-new').classList.toggle('hidden', !started);
     if (started) {
-      const n = Object.keys(s.mons).length, hrs = Math.floor(s.stats.time / 3600), mins = Math.floor(s.stats.time / 60) % 60;
-      $('#t-cont').innerHTML = `<div class="ct-team">${s.team.slice(0, 6).map(kk => `<img class="px" src="${por(Core.fdex(s.mons[kk]), s.mons[kk].shiny)}" alt="">`).join('')}</div>
-        <div class="ct-info"><b>${s.profile.name ? s.profile.name + ' · ' : ''}${(TITLES.find(t => t.id === s.profile.title) || TITLES[0]).name}</b><span>${REGIONS[Core.regionOf(s.stage)].name} · ${L('etapa', 'stage')} ${s.stage} <small>(${L('máx.', 'max')} ${s.stats.maxStage})</small></span>
-        <small>${n} Pokémon · Pokédex ${Core.regCount()}/${POKEDEX.length} · ${fmt(s.medals)} ${L('medallas', 'medals')} · ${hrs ? hrs + ' h ' : ''}${mins} min ${L('jugados', 'played')}</small></div>`;
+      paintCont();
       $('#t-new').onclick = e => {
         e.preventDefault();
         openModal(`<h2>${L('¿Empezar de nuevo?', 'Start over?')}</h2><p>${L('Se borrará tu partida actual: Pokémon, progreso y objetos.', 'Your current game will be erased: Pokémon, progress and items.')}</p><div class="row"><button class="btn" id="n-no">${L('Cancelar', 'Cancel')}</button><button class="btn danger" id="n-yes">${L('Sí, borrar todo', 'Yes, erase everything')}</button></div>`);
@@ -46,8 +69,8 @@ const UI = (() => {
     // Pokémon destacado
     const fl = Core.featuredLegend(), fe = Core.featuredEpic();
     $('#t-featured').innerHTML = `<h3>${L('Destacados de la semana', 'Featured this week')}</h3><div class="t-feat">
-      <div class="tf big" style="--rc:${RARITY[5].color}"><img class="px" src="${por(fl)}" alt=""><b>${DEX[fl].name}</b><small>${RARITY[5].name}</small>${typeTags(fl)}</div>
-      <div class="tf" style="--rc:${RARITY[4].color}"><img class="px" src="${por(fe)}" alt=""><b>${DEX[fe].name}</b><small>${RARITY[4].name}</small>${typeTags(fe)}</div></div>
+      <div class="tf big" style="--rc:${RARITY[5].color}"><span class="tf-spr">${Sprites.html(fl, false, 84, true)}</span><b>${DEX[fl].name}</b><small>${RARITY[5].name}</small>${typeTags(fl)}</div>
+      <div class="tf" style="--rc:${RARITY[4].color}"><span class="tf-spr">${Sprites.html(fe, false, 72, true)}</span><b>${DEX[fe].name}</b><small>${RARITY[4].name}</small>${typeTags(fe)}</div></div>
       <p class="hint">${L('Más probabilidad en la Bola Destacada.', 'Higher chance in the Featured Ball.')}</p>`;
     // regiones
     $('#t-regions').innerHTML = `<h3>${L('Viaja por 9 regiones', 'Travel across 9 regions')}</h3><div class="t-reg">${REGIONS.filter(r => r.gen).map((r, i) => {
@@ -79,6 +102,7 @@ const UI = (() => {
   let lastCoins = 0, cpsAvg = 0, cpsT = 0, cpsAcc = 0;
   function hud(dt) {
     const s = S();
+    paintProf();
     $('#coins').textContent = fmt(s.coins);
     $('#gems').textContent = fmt(s.gems);
     $('#dust').textContent = fmt(s.dust);
@@ -348,6 +372,8 @@ const UI = (() => {
   const dexStates = () => [['all', L('Todos', 'All')], ['seen', L('Registrados', 'Registered')], ['missing', L('Sin registrar', 'Not registered')], ['owned', L('Los tengo', 'Owned')], ['shiny', L('Con shiny', 'With shiny')], ['forms', L('Formas regionales', 'Regional forms')], ['favs', L('Favoritos', 'Favorites')]];
   const dexSorts = () => [['num', L('Número', 'Number')], ['name', L('Nombre', 'Name')], ['rar', L('Rareza', 'Rarity')], ['lvl', L('Nivel', 'Level')], ['bst', L('Estadísticas', 'Stats')]];
   const dexNum = p => String(p.of || p.dex).padStart(4, '0');
+  const DEX_CHUNK = 72;
+  let dexList = [], dexShown = DEX_CHUNK, dexFsig = '';
   function dexGrid() {
     const s = S(), q = dexQ.trim().toLowerCase().replace(/^#/, '');
     let list = POKEDEX.filter(p => {
@@ -368,17 +394,30 @@ const UI = (() => {
     if (dexSort === 'name') list.sort((a, b) => (!!s.seen[b.dex] - !!s.seen[a.dex]) || a.name.localeCompare(b.name));
     else list.sort((a, b) => key[dexSort](a) - key[dexSort](b));
     if (!list.length) return `<p class="hint" style="grid-column:1/-1;text-align:center">${L('Ningún Pokémon coincide con los filtros.', 'No Pokémon match the filters.')}</p>`;
-    return list.map(p => {
-      const base = String(Core.baseOf(p.dex)), own = s.mons[base], seen = s.seen[p.dex], cur = own && own.dex === p.dex, locked = !Core.genUnlocked(p.gen);
-      const canStar = cur && own.stars < 5 && own.copies >= STAR_COPIES[own.stars];
-      return `<button class="${seen ? '' : 'unk'} ${cur && s.team.includes(base) ? 'inteam' : ''}" style="--rc:${cur ? RARITY[Core.RAR[p.dex]].color : seen ? '#2a3f8a' : '#1d2a5a'}" data-act="dexinfo" data-v="${p.dex}" aria-label="${seen ? p.name : (p.dex < 10000 ? '#' + p.dex : L('Forma sin registrar', 'Unregistered form'))}">
-        ${cur ? `<span class="lv">${own.lvl}</span>` : ''}${cur && own.shinyOwned ? '<span class="sh">✨</span>' : ''}${s.favs[p.dex] ? '<span class="fv">★</span>' : ''}${seen ? `<img src="${por(p.dex, cur && own.shiny)}" loading="lazy" alt="">` : `<span class="q">${locked ? '🔒' : '?'}</span>`}<span class="n">${seen ? (canStar ? '⬆ ' : '') + p.name : (p.dex < 10000 ? '#' + p.dex : '#???')}</span></button>`;
-    }).join('');
+    dexList = list;
+    const fs = [dexFilter, dexType, dexState, dexSort, dexQ].join('|');
+    if (fs !== dexFsig) { dexFsig = fs; dexShown = DEX_CHUNK; }
+    return list.slice(0, dexShown).map(dexCell).join('') + dexMore();
+  }
+  const dexMore = () => dexList.length > dexShown ? `<p class="hint dxmore" style="grid-column:1/-1;text-align:center">${L('Sigue bajando para ver más', 'Keep scrolling to see more')} (${dexShown}/${dexList.length})</p>` : '';
+  function dexCell(p) {
+    const s = S(), base = String(Core.baseOf(p.dex)), own = s.mons[base], seen = s.seen[p.dex], cur = own && own.dex === p.dex, locked = !Core.genUnlocked(p.gen);
+    const canStar = cur && own.stars < 5 && own.copies >= STAR_COPIES[own.stars];
+    return `<button class="${seen ? '' : 'unk'} ${cur && s.team.includes(base) ? 'inteam' : ''}" style="--rc:${cur ? RARITY[Core.RAR[p.dex]].color : seen ? '#2a3f8a' : '#1d2a5a'}" data-act="dexinfo" data-v="${p.dex}" aria-label="${seen ? p.name : (p.dex < 10000 ? '#' + p.dex : L('Forma sin registrar', 'Unregistered form'))}">
+      ${cur ? `<span class="lv">${own.lvl}</span>` : ''}${cur && own.shinyOwned ? '<span class="sh">✨</span>' : ''}${s.favs[p.dex] ? '<span class="fv">★</span>' : ''}${seen ? `<span class="cell-spr">${Sprites.html(p.dex, cur && own.shiny, 46, false)}</span>` : `<span class="q">${locked ? '🔒' : '?'}</span>`}<span class="n">${seen ? (canStar ? '⬆ ' : '') + p.name : (p.dex < 10000 ? '#' + p.dex : '#???')}</span></button>`;
+  }
+  // la Pokédex se pinta por trozos: más rápida en móvil (antes se creaban de golpe más de 1000 botones)
+  function dexScroll() {
+    if (tab !== 'dex' || dexShown >= dexList.length) return;
+    const tb = $('#tab-body'), g = $('#dexgrid'); if (!g || tb.scrollTop + tb.clientHeight < tb.scrollHeight - 700) return;
+    const from = dexShown; dexShown = Math.min(dexList.length, dexShown + DEX_CHUNK);
+    const m = g.querySelector('.dxmore'); if (m) m.remove();
+    g.insertAdjacentHTML('beforeend', dexList.slice(from, dexShown).map(dexCell).join('') + dexMore());
   }
   const STAT_NAMES = () => [['hp', 'HP', 'HP'], ['atk', 'Ataque', 'Attack'], ['def', 'Defensa', 'Defense'], ['spa', 'At. Esp.', 'Sp. Atk'], ['spd', 'Def. Esp.', 'Sp. Def'], ['spe', 'Velocidad', 'Speed']];
   function evoTree(d, depth) {
     const s = S(), seen = s.seen[d], p = DEX[d], kids = Core.CHILDREN[d] || [];
-    const node = `<button class="evn ${seen ? '' : 'unk'}" data-act="dexinfo" data-v="${d}" aria-label="${seen ? p.name : '???'}">${seen ? `<img src="${por(d)}" alt="">` : '<span class="q">?</span>'}<small>${seen ? p.name : '???'}</small></button>`;
+    const node = `<button class="evn ${seen ? '' : 'unk'}" data-act="dexinfo" data-v="${d}" aria-label="${seen ? p.name : '???'}">${seen ? Sprites.html(d, false, 40, false) : '<span class="q">?</span>'}<small>${seen ? p.name : '???'}</small></button>`;
     if (!kids.length) return `<div class="evt">${node}</div>`;
     return `<div class="evt">${node}<div class="eva">→<small>${L('Nv.', 'Lv.')} ${EVO_LVL[Math.min(depth, EVO_LVL.length - 1)]}</small></div><div class="evk">${kids.map(k => evoTree(k, depth + 1)).join('')}</div></div>`;
   }
@@ -386,7 +425,7 @@ const UI = (() => {
     const s = S(), p = DEX[dex]; if (!p) return;
     const base = String(Core.baseOf(dex)), own = s.mons[base], seen = !!s.seen[dex], cur = own && own.dex === dex, rar = Core.RAR[dex], reg = REGIONS[p.gen - 1];
     const num = p.dex < 10000 ? '#' + String(p.dex).padStart(4, '0') : L('Forma regional', 'Regional form');
-    let h = `<div class="dxm"><div class="dxhead"><img class="dxpor ${seen ? '' : 'sil'}" src="${por(dex, cur && own.shiny)}" alt=""><div><small>${num}</small><h2>${seen ? p.name : '???'} ${seen ? `<button class="favbtn ${s.favs[dex] ? 'on' : ''}" id="dx-fav" aria-pressed="${!!s.favs[dex]}" aria-label="${L('Favorito', 'Favorite')}">★</button>` : ''}</h2>${seen ? typeTags(dex) : ''}${seen ? `<span class="rartag" style="color:${RARITY[rar].color}">${RARITY[rar].name}</span>` : ''}<small>${reg ? reg.name : ''} · ${L('Generación', 'Generation')} ${p.gen}</small></div></div>`;
+    let h = `<div class="dxm"><div class="dxhead"><span class="dxpor sprbox ${seen ? '' : 'sil'}" aria-hidden="true">${Sprites.html(dex, cur && own.shiny, 88, true)}</span><div><small>${num}</small><h2>${seen ? p.name : '???'} ${seen ? `<button class="favbtn ${s.favs[dex] ? 'on' : ''}" id="dx-fav" aria-pressed="${!!s.favs[dex]}" aria-label="${L('Favorito', 'Favorite')}">★</button>` : ''}</h2>${seen ? typeTags(dex) : ''}${seen ? `<span class="rartag" style="color:${RARITY[rar].color}">${RARITY[rar].name}</span>` : ''}<small>${reg ? reg.name : ''} · ${L('Generación', 'Generation')} ${p.gen}</small></div></div>`;
     if (!seen) {
       h += `<p class="hint">${L('Aún no has registrado este Pokémon. Consíguelo en el gacha para ver su ficha completa.', 'You have not registered this Pokémon yet. Get it from the gacha to see its full entry.')}</p>${Core.genUnlocked(p.gen) ? '' : `<p class="hint">🔒 ${L('Llega a ' + reg.name + ' (etapa ' + (reg.first * 10 + 1) + ') para encontrarlo.', 'Reach ' + reg.name + ' (stage ' + (reg.first * 10 + 1) + ') to find it.')}</p>`}`;
     } else {
@@ -523,7 +562,7 @@ const UI = (() => {
       },
     },
     dex: {
-      sig: () => { const s = S(); return JSON.stringify([Object.keys(s.mons).length, Object.keys(s.seen).length, s.team, dexFilter, dexType, dexState, dexSort, Core.unlockedGens(), Object.keys(s.foes).length, Object.keys(s.favs).length, Object.values(s.mons).map(m => m.dex + ':' + m.stars + ':' + m.lvl + ':' + (m.shiny ? 1 : 0) + (m.shinyOwned ? 1 : 0) + ':' + (m.copies >= STAR_COPIES[m.stars] ? 1 : 0))]); },
+      sig: () => { const s = S(); let h = 7; for (const m of Object.values(s.mons)) h = (Math.imul(h, 31) + m.dex * 7 + m.stars * 131 + m.lvl * 17 + (m.shiny ? 1 : 0) + (m.shinyOwned ? 2 : 0) + (m.copies >= STAR_COPIES[m.stars] ? 4 : 0)) | 0; return [h, Object.keys(s.seen).length, s.team.join(','), dexFilter, dexType, dexState, dexSort, Core.unlockedGens(), Object.keys(s.foes).length, Object.keys(s.favs).length].join('|'); },
       html() {
         const s = S(), n = Core.regCount(), dn = Core.dexCount(), all = POKEDEX.length;
         const owned = POKEDEX.filter(p => { const o = s.mons[String(Core.baseOf(p.dex))]; return o && o.dex === p.dex; }).length;
@@ -1038,7 +1077,7 @@ const UI = (() => {
       <div class="seg wrap">${REGIONS.map((r, i) => `<button data-reg="${i}" class="${i === mapReg ? 'on' : ''}" ${(LP * ROUTES.length + r.first) * 10 + 1 > s.maxStage ? 'disabled' : ''}>${r.name}</button>`).join('')}</div><div class="maplist">`;
     for (let ri = reg.first; ri < end; ri++) {
       const r = ROUTES[ri], base = (LP * ROUTES.length + ri) * 10 + 1, open = base <= s.maxStage, done = s.bossFirst[base + 9];
-      h += `<button class="maprow ${ri === cur ? 'cur' : ''}" data-go="${Math.min(base + 8, s.maxStage)}" ${open ? '' : 'disabled'}><b>${r.name}</b><small>${open ? L('Etapas ', 'Stages ') + base + '–' + (base + 9) : L('Bloqueada', 'Locked')}</small><small class="rt">${L('Tipos', 'Types')}: ${r.types.map(tchip).join('')} · ${L('Usa', 'Use')}: ${Core.strongTypes(base).map(o => tchip(o.t)).join('') || '—'}</small><span class="mb"><img src="${por(r.boss.dex)}" class="px">${done ? '✓ ' : ''}${r.boss.who}</span></button>`;
+      h += `<button class="maprow ${ri === cur ? 'cur' : ''}" data-go="${Math.min(base + 8, s.maxStage)}" ${open ? '' : 'disabled'}><b>${r.name}</b><small>${open ? L('Etapas ', 'Stages ') + base + '–' + (base + 9) : L('Bloqueada', 'Locked')}</small><small class="rt">${L('Tipos', 'Types')}: ${r.types.map(tchip).join('')} · ${L('Usa', 'Use')}: ${Core.strongTypes(base).map(o => tchip(o.t)).join('') || '—'}</small><span class="mb">${Sprites.html(r.boss.dex, false, 60, true)}${done ? '✓ ' : ''}${r.boss.who}</span></button>`;
     }
     openModal(h + '</div><div class="row"><button class="btn" id="map-x">' + L('Cerrar', 'Close') + '</button></div>');
     $('#map-x').onclick = closeModal;
@@ -1217,7 +1256,7 @@ const UI = (() => {
     try {
       const { rows, me } = await Cloud.board(want);
       if (rkBoard !== want || !$('#rk-body')) return;
-      $('#rk-body').innerHTML = rows.length ? rows.map(r => `<div class="rkrow ${r.is_me ? 'me' : ''}"><span class="rkn">#${r.rank}</span><img src="${por(DEX[r.avatar] ? r.avatar : 25)}" alt=""><div class="rki"><b>${String(r.nickname).replace(/[<>&"]/g, '')}</b><small>${((TITLES.find(t => t.id === r.title) || {}).name || '')}${sub(want, r) ? ' · ' + sub(want, r) : ''}</small></div><span class="rkv">${fmt(r.value)}<small>${unit[want]}</small></span>${Cloud.user && !r.is_me ? `<button class="rkflag" data-rp="${r.user_id}" aria-label="${L('Denunciar', 'Report')}" title="${L('Denunciar', 'Report')}">⚑</button>` : ''}</div>`).join('') : `<p class="hint">${L('Todavía no hay nadie en este ranking. ¡Sé el primero!', 'Nobody is in this ranking yet. Be the first!')}</p>`;
+      $('#rk-body').innerHTML = rows.length ? rows.map(r => `<div class="rkrow ${r.is_me ? 'me' : ''}"><span class="rkn">#${r.rank}</span><span class="rk-av">${Sprites.html(DEX[r.avatar] ? r.avatar : 25, false, 40, false)}</span><div class="rki"><b>${String(r.nickname).replace(/[<>&"]/g, '')}</b><small>${((TITLES.find(t => t.id === r.title) || {}).name || '')}${sub(want, r) ? ' · ' + sub(want, r) : ''}</small></div><span class="rkv">${fmt(r.value)}<small>${unit[want]}</small></span>${Cloud.user && !r.is_me ? `<button class="rkflag" data-rp="${r.user_id}" aria-label="${L('Denunciar', 'Report')}" title="${L('Denunciar', 'Report')}">⚑</button>` : ''}</div>`).join('') : `<p class="hint">${L('Todavía no hay nadie en este ranking. ¡Sé el primero!', 'Nobody is in this ranking yet. Be the first!')}</p>`;
       if (me) $('#rk-me').innerHTML = `<b>${L('Tu puesto', 'Your rank')}: #${me.rank}</b> <small>${L('de', 'of')} ${me.total} · ${fmt(me.value)} ${unit[want]}</small>`;
       $$('[data-rp]').forEach(b => b.onclick = () => {
         openModal(`<h2>${L('Denunciar jugador', 'Report player')}</h2><p class="hint">${L('¿Por qué lo denuncias?', 'Why are you reporting this player?')}</p><div class="seg wrap">${[[L('Nombre inapropiado', 'Inappropriate name')], [L('Sospecho de trampas', 'I suspect cheating')], [L('Otro motivo', 'Other')]].map(([t]) => `<button data-why="${t}">${t}</button>`).join('')}</div><div class="row"><button class="btn" id="rp-x">${L('Cancelar', 'Cancel')}</button></div>`);
@@ -1289,13 +1328,15 @@ const UI = (() => {
     $('#adv-x').onclick = closeModal;
     $$('[data-go]').forEach(b => b.onclick = () => { closeModal(); setTab(b.dataset.go); });
   }
-  function profileModal() {
+  let pfFrom = 'settings';
+  function profileModal(from) {
+    if (from) pfFrom = from;
     const s = S(), pr = s.profile, open = Core.titlesOpen().length;
     const owned = Object.values(s.mons).sort((a, b) => Core.bst(Core.fdex(b)) - Core.bst(Core.fdex(a)) || b.lvl - a.lvl).slice(0, 48);
     const av = pr.avatar && DEX[pr.avatar] ? pr.avatar : (s.team[0] ? Core.fdex(s.mons[s.team[0]]) : 25);
     openModal(`<h2>${L('Perfil', 'Profile')}</h2>
-      <div class="profhead"><img class="dxpor" src="${por(av)}" alt=""><div>${Cloud.user && Cloud.profile ? `<div class="nickrow"><input class="search" id="pf-name" maxlength="16" placeholder="${L('Nombre público', 'Public name')}" value="${Cloud.profile.nickname.replace(/"/g, '')}" aria-label="${L('Nombre público', 'Public name')}"><button class="btn small primary" id="pf-nick">${L('Guardar', 'Save')}</button></div><em id="pf-nickmsg" class="nickmsg"></em>` : `<input class="search" id="pf-name" maxlength="14" placeholder="${L('Tu nombre', 'Your name')}" value="${pr.name.replace(/"/g, '')}" aria-label="${L('Tu nombre', 'Your name')}">`}<small>${(TITLES.find(t => t.id === pr.title) || TITLES[0]).name}</small></div></div>
-      <h4>${L('Avatar', 'Avatar')}</h4><div class="avgrid">${owned.map(m => `<button data-av="${Core.fdex(m)}" class="${pr.avatar === Core.fdex(m) ? 'on' : ''}" aria-label="${DEX[Core.fdex(m)].name}"><img src="${por(Core.fdex(m), m.shiny)}" alt=""></button>`).join('')}</div>
+      <div class="profhead">${avatarHtml('lg', 100)}<div>${Cloud.user && Cloud.profile ? `<div class="nickrow"><input class="search" id="pf-name" maxlength="16" placeholder="${L('Nombre público', 'Public name')}" value="${Cloud.profile.nickname.replace(/"/g, '')}" aria-label="${L('Nombre público', 'Public name')}"><button class="btn small primary" id="pf-nick">${L('Guardar', 'Save')}</button></div><em id="pf-nickmsg" class="nickmsg"></em>` : `<input class="search" id="pf-name" maxlength="14" placeholder="${L('Tu nombre', 'Your name')}" value="${pr.name.replace(/"/g, '')}" aria-label="${L('Tu nombre', 'Your name')}">`}<small>${(TITLES.find(t => t.id === pr.title) || TITLES[0]).name}</small></div></div>
+      <h4>${L('Avatar', 'Avatar')}</h4><div class="avgrid">${owned.map(m => `<button data-av="${Core.fdex(m)}" class="${pr.avatar === Core.fdex(m) ? 'on' : ''}" aria-label="${DEX[Core.fdex(m)].name}">${Sprites.html(Core.fdex(m), m.shiny, 42, false)}</button>`).join('')}</div>
       <h4>${L('Marco del retrato', 'Portrait frame')} <small style="color:var(--dim)">${Core.framesOpen().length}/${FRAMES.length}</small></h4><div class="frgrid">${FRAMES.map(f => { const ok = Core.frameOpen(f); return `<button class="frprev ${s.cosm.frame === f.id ? 'on' : ''}" data-fr="${f.id}" data-frame-pick="${f.id}" ${ok ? '' : 'disabled'} aria-label="${f.name}" title="${ok ? f.name : f.hint}"><img src="${ok ? por(av) : por(av)}" alt="" style="${ok ? '' : 'filter:brightness(0) opacity(.5)'}"><small>${ok ? f.name : '???'}</small></button>`; }).join('')}</div>
       <h4>${L('Fondo de la arena', 'Arena background')} <small style="color:var(--dim)">${Core.biomesSeen().length}/${Tiles.THEMES.length}</small></h4><div class="bggrid"><button class="ttl ${s.cosm.bg === 'auto' ? 'on' : ''}" data-bg="auto"><b>${L('Automático', 'Automatic')}</b><small>${L('El de cada ruta', 'The one of each route')}</small></button>${Core.biomesSeen().map(i => `<button class="ttl ${String(s.cosm.bg) === String(i) ? 'on' : ''}" data-bg="${i}"><b><i class="sw" style="background:${Tiles.THEMES[i].floor}"></i>${biomeName(i)}</b></button>`).join('')}</div><p class="hint" style="margin:2px 0">${L('Los fondos se desbloquean al pasar por rutas con ese paisaje.', 'Backgrounds unlock when you travel through routes with that scenery.')}</p>
       <h4>${L('Título', 'Title')} <small style="color:var(--dim)">${open}/${TITLES.length}</small></h4><div class="titlist">${TITLES.map(t => { const ok = Core.titleOpen(t); return `<button class="ttl ${pr.title === t.id ? 'on' : ''}" data-ttl="${t.id}" ${ok ? '' : 'disabled'}><b>${ok ? t.name : '???'}</b><small>${ok ? '' : t.hint}</small></button>`; }).join('')}</div>
@@ -1314,7 +1355,7 @@ const UI = (() => {
     $$('[data-frame-pick]').forEach(b => b.onclick = () => { if (Core.setFrame(b.dataset.framePick)) { document.documentElement.dataset.frame = S().cosm.frame; Core.save(); Cloud.pushProfile(); Audio8.play('select'); profileModal(); } });
     $$('[data-bg]').forEach(b => b.onclick = () => { if (Core.setBg(b.dataset.bg)) { Core.save(); Audio8.play('swap'); profileModal(); } });
     $$('[data-ttl]').forEach(b => b.onclick = () => { if (Core.setTitle(b.dataset.ttl)) { Core.save(); Cloud.pushProfile(); Audio8.play('select'); profileModal(); } });
-    $('#pf-x').onclick = () => { Core.save(); settings(); };
+    $('#pf-x').onclick = () => { Core.save(); paintProf(true); paintCont(); if (pfFrom === 'settings') settings(); else closeModal(); };
   }
   // ---------------- Ascensión ----------------
   function ascHtml() {
@@ -1353,8 +1394,8 @@ const UI = (() => {
       <div class="sset"><h4>${L('Idioma', 'Language')}</h4><div class="seg"><button data-lang="es" class="${I18N.lang === 'es' ? 'on' : ''}">Español</button><button data-lang="en" class="${I18N.lang === 'en' ? 'on' : ''}">English</button></div></div>
       ${Cloud.enabled() ? `<div class="sset"><h4>${L('Cuenta', 'Account')}</h4><div id="acc-box"></div></div>` : ''}
       <div class="sset"><h4>${L('Sonido', 'Sound')}</h4>${slider('master', L('Volumen general', 'Master volume'), 'gear')}${slider('music', L('Música', 'Music'), 'sound')}${slider('sfx', L('Efectos', 'Effects'), 'ticket')}${slider('combat', L('Sonidos de combate', 'Combat sounds'), 'fist')}
-        <div class="setrow col"><span class="sl"><b>${L('Estilo de la música', 'Music style')}</b><small>${L('Cambia los instrumentos de todas las pistas', 'Changes the instruments of every track')}</small></span><div class="seg a11y" role="group">${[['warm', L('Cálido', 'Warm')], ['retro', L('Retro 8 bits', 'Retro 8-bit')], ['dream', L('Ensueño', 'Dreamy')]].map(([v, l]) => `<button data-sk="mstyle" data-sv="${v}" class="${st.mstyle === v ? 'on' : ''}" aria-pressed="${st.mstyle === v}">${l}</button>`).join('')}</div></div>
-        <div class="setrow col"><span class="sl"><b>${L('Qué suena', 'What plays')}</b><small>${st.mmode === 'pin' ? L('Siempre la misma pista (elígela en la sala de música)', 'Always the same track (choose it in the music room)') : st.mmode === 'shuffle' ? L('Cambia de pista cada dos vueltas; los jefes y duelos mantienen la suya', 'Switches track every two loops; bosses and duels keep theirs') : L('Una pista por región, y una propia para jefes, duelos, Torre y eventos', 'One track per region, plus their own for bosses, duels, the Tower and events')}</small></span><div class="seg a11y" role="group">${[['region', L('Por región', 'By region')], ['shuffle', L('Aleatorio', 'Shuffle')], ['pin', L('Pista fija', 'Pinned track')]].map(([v, l]) => `<button data-sk="mmode" data-sv="${v}" class="${st.mmode === v ? 'on' : ''}" aria-pressed="${st.mmode === v}">${l}</button>`).join('')}</div></div>
+        <div class="setrow col"><span class="sl"><b>${L('Estilo de la música', 'Music style')}</b><small>${L('Cambia los instrumentos de todas las pistas', 'Changes the instruments of every track')}</small></span><div class="seg a11y" role="group">${[['warm', L('Cálido', 'Warm')], ['retro', L('Retro 8 bits', 'Retro 8-bit')], ['dream', L('Ensueño', 'Dreamy')]].map(([v, l]) => `<button data-setk="mstyle" data-sv="${v}" class="${st.mstyle === v ? 'on' : ''}" aria-pressed="${st.mstyle === v}">${l}</button>`).join('')}</div></div>
+        <div class="setrow col"><span class="sl"><b>${L('Qué suena', 'What plays')}</b><small>${st.mmode === 'pin' ? L('Siempre la misma pista (elígela en la sala de música)', 'Always the same track (choose it in the music room)') : st.mmode === 'shuffle' ? L('Cambia de pista cada dos vueltas; los jefes y duelos mantienen la suya', 'Switches track every two loops; bosses and duels keep theirs') : L('Una pista por región, y una propia para jefes, duelos, Torre y eventos', 'One track per region, plus their own for bosses, duels, the Tower and events')}</small></span><div class="seg a11y" role="group">${[['region', L('Por región', 'By region')], ['shuffle', L('Aleatorio', 'Shuffle')], ['pin', L('Pista fija', 'Pinned track')]].map(([v, l]) => `<button data-setk="mmode" data-sv="${v}" class="${st.mmode === v ? 'on' : ''}" aria-pressed="${st.mmode === v}">${l}</button>`).join('')}</div></div>
         ${tog('bgmute', L('Silenciar en segundo plano', 'Mute in the background'), L('Pausa la música cuando cambias de pestaña del navegador', 'Pauses the music when you switch browser tabs'))}
         ${tog('captions', L('Subtítulos de sonidos', 'Sound captions'), L('Muestra un aviso en pantalla con los sonidos importantes (jefes, premios, derrotas…)', 'Shows an on-screen caption for important sounds (bosses, rewards, defeats…)'))}
         <div class="row" style="margin:6px 0 0"><button class="btn primary" id="s-music">${ico('sound', 16)} ${L('Sala de música', 'Music room')} · ${Core.tracksUnlocked()}/${MUSIC_LIST.length}</button></div></div>
@@ -1378,10 +1419,10 @@ const UI = (() => {
       <p class="fine">${L('Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Escenarios e iconos adaptados de pokesurvivor (MIT) · Pokémon © Nintendo/Creatures/GAME FREAK', 'Sprites: PMD SpriteCollab (CC BY-NC 4.0) · Scenes and icons adapted from pokesurvivor (MIT) · Pokémon © Nintendo/Creatures/GAME FREAK')}</p></div>`);
     $$('[data-ak]').forEach(b => b.onclick = () => { a11y[b.dataset.ak] = b.dataset.ak === 'text' ? +b.dataset.av : b.dataset.av; Core.save(); A11Y.apply(a11y); Audio8.play('click'); settings(); });
     $$('[data-a11y]').forEach(b => b.onclick = () => { a11y[b.dataset.a11y] = !a11y[b.dataset.a11y]; Core.save(); A11Y.apply(a11y); Audio8.play('click'); settings(); refresh(true); });
-    $$('[data-sk]').forEach(b => b.onclick = () => { st[b.dataset.sk] = b.dataset.sv; Core.save(); Audio8.play('click'); if (b.dataset.sk === 'mstyle') Audio8.restyle(); else Audio8.remode(); settings(); });
+    $$('[data-setk]').forEach(b => b.onclick = () => { st[b.dataset.setk] = b.dataset.sv; Core.save(); Audio8.play('click'); if (b.dataset.setk === 'mstyle') Audio8.restyle(); else Audio8.remode(); settings(); });
     $('#s-music').onclick = musicModal;
     accBind();
-    $('#s-prof').onclick = profileModal;
+    $('#s-prof').onclick = () => profileModal('settings');
     $('#s-tips').onclick = tipsModal;
     $$('[data-lang]').forEach(b => b.onclick = () => { S().settings.lang = b.dataset.lang; Core.save(); location.reload(); });
     $$('.slider').forEach(sl => {
@@ -1476,6 +1517,7 @@ const UI = (() => {
     $('#tab-body').addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && !el.disabled) act(el); });
     loadDexUi();
     $('#tab-body').addEventListener('input', e => { if (e.target.id === 'dex-q') { dexQ = e.target.value; const g = $('#dexgrid'); if (g) g.innerHTML = dexGrid(); } });
+    $('#tab-body').addEventListener('scroll', dexScroll, { passive: true });
     $$('#tabs button').forEach(b => b.onclick = () => { Audio8.play('click'); setTab(b.dataset.tab); });
     $$('[data-ico]').forEach(s => s.innerHTML = ico(s.dataset.ico, 24));
     $$('#tabs button').forEach(b => { b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', b.classList.contains('on')); });
@@ -1489,6 +1531,7 @@ const UI = (() => {
     $('#btn-advice').innerHTML = ico('star', 24); A11Y.label($('#btn-advice'), L('¿Qué hago ahora?', 'What should I do now?'));
     $('#btn-advice').onclick = adviceModal;
     $('#btn-settings').onclick = settings;
+    $('#btn-profile').onclick = () => { Audio8.play('click'); profileModal('game'); };
     $('#modal').onclick = e => { if (e.target.id === 'modal') closeModal(); };
     $('#st-prev').onclick = () => { Core.goStage(S().stage - 1); S().auto = false; };
     $('#st-next').onclick = () => { Core.goStage(S().stage + 1); };
@@ -1504,5 +1547,5 @@ const UI = (() => {
     $$('#skills .skill').forEach(b => b.onclick = e => { e.stopPropagation(); if (Core.useSkill(b.dataset.sk)) { Audio8.play(b.dataset.sk === 'rage' ? 'charge' : 'ticket'); banner(SKILLS[b.dataset.sk].name + '!', SKILLS[b.dataset.sk].desc, '#ff8040'); } });
   }
 
-  return { show, title, starter, hud, refresh, setTab, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, rewText, rivalTalk, cue, tipsTick, welcomeModal, nameModal, authChanged, authPanel, rankingModal, tutStart, autoFill, monModal, mapModal };
+  return { show, title, starter, hud, refresh, setTab, profileModal, paintProf, bind, banner, toast, openModal, closeModal, drawMonCv, drawPv, evolveAnim, rewText, rivalTalk, cue, tipsTick, welcomeModal, nameModal, authChanged, authPanel, rankingModal, tutStart, autoFill, monModal, mapModal };
 })();

@@ -167,7 +167,7 @@ const Cloud = (() => {
       if (data.reason === 'conflict') conflict = data; else setStatus('error', data.reason || 'error');
     } catch (e) { setStatus('error', String(e && e.message || e)); }
     finally { st.busy = false; }
-    if (conflict) await conflictDialog(conflict);
+    if (conflict) { try { await pullAndApply(); } catch (e) { setStatus('error', String(e && e.message || e)); } }       // la nube manda: otro dispositivo guardó antes
     return false;
   }
   async function reconcile() {
@@ -177,7 +177,7 @@ const Cloud = (() => {
     if (!row) { if (s.started) await push(); return; }
     if (!s.started) { await pullAndApply(); return; }
     if (s.cloud && s.cloud.uid === st.user.id && s.cloud.rev === row.rev) { st.lastPush = Date.now(); st.lastTime = s.stats.time; return; }       // ya está al día
-    await conflictDialog(row);
+    await pullAndApply();                                                    // con sesión iniciada manda siempre la partida de la nube (la local queda como copia .bak)
   }
   async function pullAndApply() {
     const { data, error } = await st.client.from('saves').select('data,format,rev').maybeSingle();
@@ -190,22 +190,9 @@ const Cloud = (() => {
     d.cloud = { uid: st.user.id, rev: data.rev }; d.last = Date.now();
     Core.freezeSave(true);
     localStorage.setItem(KEY, JSON.stringify(d));
+    try { sessionStorage.setItem('pokeidle.pulled', '1'); } catch (e) { /* sin sessionStorage */ }
     location.reload();
     return true;
-  }
-  function conflictDialog(remote) {
-    return new Promise(done => {
-      const s = S(), fmtT = secs => { const h = Math.floor(secs / 3600), m = Math.floor(secs / 60) % 60; return (h ? h + ' h ' : '') + m + ' min'; };
-      const col = (title, o, rec) => `<div class="cfcol ${rec ? 'rec' : ''}"><b>${title}</b>${rec ? `<em>${L('Recomendada', 'Recommended')}</em>` : ''}<span>${L('Etapa máx.', 'Max stage')} <b>${o.max_stage}</b></span><span>${L('Medallas', 'Medals')} <b>${o.medals}</b></span><span>${L('Rango', 'Rank')} <b>${o.asc_rank}</b></span><span>Pokédex <b>${o.dex_count}</b></span><span>${L('Jugado', 'Played')} <b>${fmtT(o.play_time)}</b></span>${o.device ? `<small>${o.device}</small>` : ''}</div>`;
-      const loc = meta(), recCloud = remote.play_time > loc.play_time;
-      UI.openModal(`<h2>${L('Tu partida en la nube es distinta', 'Your cloud game is different')}</h2><p class="hint">${L('Hay una partida guardada en tu cuenta y otra en este dispositivo. Elige cuál quieres conservar; la otra se reemplaza (se guarda una copia de seguridad).', 'There is a game saved in your account and another on this device. Choose which one to keep; the other is replaced (a backup is kept).')}</p>
-        <div class="cfgrid">${col(L('En la nube', 'In the cloud'), remote, recCloud)}${col(L('En este dispositivo', 'On this device'), loc, !recCloud)}</div>
-        <div class="row"><button class="btn" id="cf-later">${L('Decidir luego', 'Decide later')}</button><button class="btn ${recCloud ? 'primary' : ''}" id="cf-cloud">${L('Usar la nube', 'Use the cloud')}</button><button class="btn ${recCloud ? '' : 'primary'}" id="cf-local">${L('Usar este dispositivo', 'Use this device')}</button></div>`);
-      const q = id => document.querySelector(id);
-      q('#cf-later').onclick = () => { st.paused = true; UI.closeModal(); setStatus('paused'); done(); };
-      q('#cf-cloud').onclick = async () => { UI.closeModal(); setStatus('syncing'); try { await pullAndApply(); } catch (e) { setStatus('error', String(e.message || e)); } done(); };
-      q('#cf-local').onclick = async () => { UI.closeModal(); st.busy = false; st.paused = false; await push(true); done(); };
-    });
   }
   async function syncNow() { if (!st.user) return false; st.paused = false; try { const ok = await push(); if (ok) await submitScore(true); return ok; } catch (e) { return false; } }
 

@@ -95,5 +95,17 @@ const Sprites = (() => {
     return `width:${Math.round(m.w * k)}px;height:${px}px;background:url('${path(dex, shiny, (p.anim.idle ? 'idle' : 'walk') + '.png')}') 0 0 / ${Math.round(m.w * m.d.length * k)}px ${px * 8}px no-repeat;image-rendering:pixelated`;
   }
 
-  return { DEX, sheet, preload, draw, frameAt, animLen, rowFor, portrait, idleStyle, FOOT };
+  // El propio Pokémon como elemento HTML: la hoja de animación recorrida con CSS (mirando al frente).
+  // animated=false → solo el primer fotograma (barato: para listas largas como la Pokédex).
+  function html(dex, shiny, px, animated, cls) {
+    const p = DEX[dex];
+    if (!p || !p.anim) return '';
+    const a = p.anim.idle ? 'idle' : 'walk', m = p.anim[a] || p.anim.walk;
+    if (!m) return '';
+    const k = px / m.h, w = Math.round(m.w * k), n = m.d.length, dur = (m.d.reduce((x, y) => x + y, 0) / 60).toFixed(2);
+    const img = path(dex, shiny, (p.anim.idle ? 'idle' : 'walk') + '.png');
+    return `<i class="spr ${animated && n > 1 ? 'play' : ''} ${cls || ''}" role="img" style="width:${w}px;height:${px}px;background-image:url('${img}');background-size:${w * n}px ${px * 8}px;--sw:${w * n}px;--n:${n};--dur:${dur}s"></i>`;
+  }
+
+  return { DEX, sheet, preload, draw, frameAt, animLen, rowFor, portrait, idleStyle, html, FOOT };
 })();

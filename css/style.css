@@ -801,14 +801,14 @@ html.a-cb .rdy { color: #ffbf5a; }
 .favbtn.on { color: var(--yellow); }
 
 /* v18: marcos de retrato y fondos */
-:root[data-frame="gold"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="gold"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ffd23f, 0 0 0 4px #7a4a00, 0 0 12px #ffd23f99; }
-:root[data-frame="leaf"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="leaf"] img { border-radius: 6px; box-shadow: 0 0 0 2px #5fe08a, 0 0 0 4px #1d5a30, 0 0 8px #5fe08a88; }
-:root[data-frame="electric"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="electric"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ffe14d, 0 0 0 4px #4a3a00, 0 0 12px #ffe14dcc; }
-:root[data-frame="rainbow"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="rainbow"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ff5a5a, 0 0 0 4px #ffd23f, 0 0 0 6px #5fe08a, 0 0 0 8px #4aa8ff; }
-:root[data-frame="ice"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="ice"] img { border-radius: 6px; box-shadow: 0 0 0 2px #bff2ff, 0 0 0 4px #2a6aa8, 0 0 14px #8fe3ffcc; }
-:root[data-frame="flame"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="flame"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ffb22e, 0 0 0 4px #b3200a, 0 0 14px #ff6a1fcc; }
-:root[data-frame="starry"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="starry"] img { border-radius: 6px; box-shadow: 0 0 0 2px #e0c8ff, 0 0 0 4px #5a3aa8, 0 0 14px #c47bffcc; }
-:root[data-frame="crown"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor), .frprev[data-fr="crown"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ffd23f, 0 0 0 4px #8a2ae0, 0 0 0 6px #ffd23f, 0 0 16px #ffd23fcc; }
+:root[data-frame="gold"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor, .pavatar), .frprev[data-fr="gold"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ffd23f, 0 0 0 4px #7a4a00, 0 0 12px #ffd23f99; }
+:root[data-frame="leaf"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor, .pavatar), .frprev[data-fr="leaf"] img { border-radius: 6px; box-shadow: 0 0 0 2px #5fe08a, 0 0 0 4px #1d5a30, 0 0 8px #5fe08a88; }
+:root[data-frame="electric"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor, .pavatar), .frprev[data-fr="electric"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ffe14d, 0 0 0 4px #4a3a00, 0 0 12px #ffe14dcc; }
+:root[data-frame="rainbow"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor, .pavatar), .frprev[data-fr="rainbow"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ff5a5a, 0 0 0 4px #ffd23f, 0 0 0 6px #5fe08a, 0 0 0 8px #4aa8ff; }
+:root[data-frame="ice"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor, .pavatar), .frprev[data-fr="ice"] img { border-radius: 6px; box-shadow: 0 0 0 2px #bff2ff, 0 0 0 4px #2a6aa8, 0 0 14px #8fe3ffcc; }
+:root[data-frame="flame"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor, .pavatar), .frprev[data-fr="flame"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ffb22e, 0 0 0 4px #b3200a, 0 0 14px #ff6a1fcc; }
+:root[data-frame="starry"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor, .pavatar), .frprev[data-fr="starry"] img { border-radius: 6px; box-shadow: 0 0 0 2px #e0c8ff, 0 0 0 4px #5a3aa8, 0 0 14px #c47bffcc; }
+:root[data-frame="crown"] :is(.card .por, .dxpor, .rvav, .ct-team img, .profhead .dxpor, .pavatar), .frprev[data-fr="crown"] img { border-radius: 6px; box-shadow: 0 0 0 2px #ffd23f, 0 0 0 4px #8a2ae0, 0 0 0 6px #ffd23f, 0 0 16px #ffd23fcc; }
 .frgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px 8px; padding: 6px 4px 4px; }
 .frprev { background: none; border: 0; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .frprev img { width: 44px; height: 44px; image-rendering: pixelated; background: #0b1638; border-radius: 6px; }
@@ -965,3 +965,41 @@ html.a-rm .supportbtn::before, html.a-rm .supportbtn::after, html.a-rm .kofi.her
 /* perfil: el campo del nombre se encoge en vez de ensanchar la ventana */
 .profhead > div, .nickrow { min-width: 0; max-width: 100%; }
 .nickrow .search, .profhead .search { min-width: 0; flex: 1 1 auto; width: 100%; }
+
+/* ---- v23: Pokémon animados (hoja de PMD recorrida con CSS) y perfil visible ---- */
+.spr { display: inline-block; flex: none; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; vertical-align: middle; }
+.spr.play { animation: sprplay var(--dur, .8s) steps(var(--n, 1)) infinite; }
+@keyframes sprplay { to { background-position-x: calc(var(--sw) * -1); } }
+.pavatar { display: inline-flex; align-items: center; justify-content: center; flex: none; background: radial-gradient(circle at 50% 35%, #1d2f6a, #0b1638 75%); border-radius: 10px; box-shadow: inset 0 0 0 2px var(--line); overflow: hidden; }
+.pavatar.sm { width: 38px; height: 38px; border-radius: 9px; } .pavatar.md { width: 64px; height: 64px; } .pavatar.lg { width: 104px; height: 104px; }
+.profchip { display: flex; align-items: center; gap: 7px; background: #050c24; border: 0; border-radius: 22px; padding: 2px 12px 2px 2px; box-shadow: inset 0 0 0 2px var(--line); min-width: 0; flex: 0 1 auto; }
+.profchip:hover, .profchip:focus-visible { box-shadow: inset 0 0 0 2px var(--yellow); }
+.profchip .pavatar { border-radius: 50%; }
+.profchip .pc-t { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; min-width: 0; max-width: 130px; }
+.profchip .pc-t b { font-size: 14px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profchip .pc-t small { font-size: 11px; color: var(--yellow); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profchip .pc-edit { font-size: 12px; color: var(--dim); }
+@media (max-width: 860px) { .profchip { padding: 2px; } .profchip .pc-t, .profchip .pc-edit { display: none; } }
+.ct-prof { display: flex; align-items: center; gap: 10px; background: #0b1638; border: 0; border-radius: 12px; padding: 6px 12px 6px 6px; box-shadow: inset 0 0 0 2px var(--line); width: 100%; text-align: left; }
+.ct-prof:hover, .ct-prof:focus-visible { box-shadow: inset 0 0 0 2px var(--yellow); }
+.ct-prof .pavatar { border-radius: 50%; }
+.ct-prof .cp-t { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.ct-prof .cp-t b { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ct-prof .cp-t small { color: var(--yellow); font-size: 12px; }
+.ct-prof .cp-e { font-size: 12px; color: var(--dim); white-space: nowrap; }
+.sprbox { display: inline-flex; align-items: center; justify-content: center; }
+.dexgrid .cell-spr { display: flex; align-items: center; justify-content: center; height: 52px; }
+.dxpor.sprbox { width: 96px; height: 96px; }
+
+.tf-spr { display: flex; align-items: center; justify-content: center; height: 88px; animation: hop 1.6s ease-in-out infinite; }
+.ct-team .ctsp { margin-left: -6px; }
+.ct-team .ctsp:first-child { margin-left: 0; }
+.ct-prof + .ct-team { margin-top: 6px; }
+@media (max-width: 380px) {
+  .top { gap: 3px; padding: 4px; }
+  .cur { padding: 2px 5px 2px 2px; gap: 2px; }
+  .cur b { font-size: 13px; }
+  .icobtn, .supportbtn, #btn-advice { width: 34px; height: 34px; min-width: 34px; min-height: 34px; }
+  .pavatar.lg { width: 92px; height: 92px; }
+}
+.rk-av { display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; background: #0b1638; border-radius: 8px; flex: none; }
