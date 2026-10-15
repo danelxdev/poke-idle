@@ -76,6 +76,9 @@ const UI = (() => {
   function title() {
     show('scr-title');
     const s = S(), k = $('#kofi-title');
+    { const f = $('#t-fs'), io = $('#t-ios');
+      if (f) { f.classList.toggle('hidden', !PWA.fsSupported()); f.textContent = '⛶ ' + (PWA.fsActive() ? L('Salir de pantalla completa', 'Exit full screen') : L('Pantalla completa', 'Full screen')); f.onclick = async e => { e.preventDefault(); await PWA.fsToggle(); setTimeout(() => { f.textContent = '⛶ ' + (PWA.fsActive() ? L('Salir de pantalla completa', 'Exit full screen') : L('Pantalla completa', 'Full screen')); }, 200); }; }
+      if (io) { io.classList.toggle('hidden', !(PWA.isIOS() && !PWA.standalone())); io.textContent = '📲 ' + L('Instalar en iPhone (sin barras)', 'Install on iPhone (no bars)'); io.onclick = e => { e.preventDefault(); iosHelpModal(); }; } }
     const so = $('#t-social'); if (so) so.innerHTML = '<small>' + L('Hecho por Danel · síguelo:', 'Made by Danel · follow:') + '</small>' + socialHtml();
     if (k) { k.href = KOFI_URL; k.innerHTML = ico('cup', 24) + '<span>' + L('Apoyar el proyecto en Ko-fi', 'Support the project on Ko-fi') + '</span>'; }
     TitleFX.start($('#title-bg'));
@@ -1437,6 +1440,21 @@ const UI = (() => {
     $('#p-yes').onclick = () => { const n = Core.prestige(); closeModal(); Audio8.play('win'); banner(L('¡Bienvenido a la Liga!', 'Welcome to the League!'), '+' + n + L(' medallas · tu nuevo viaje empieza ahora', ' medals · your new journey starts now'), '#ffd23f'); Core.save(); Cloud.soon(); refresh(true); };
   }
 
+  // pantalla completa / instalar para quitar las barras del navegador
+  function iosHelpModal() {
+    openModal(`<h2>${L('Jugar sin barras en iPhone', 'Play without bars on iPhone')}</h2><ol class="iosl"><li>${L('Abre esta página en <b>Safari</b>.', 'Open this page in <b>Safari</b>.')}</li><li>${L('Pulsa el botón <b>Compartir</b> (el cuadrado con la flecha hacia arriba).', 'Tap the <b>Share</b> button (the square with the up arrow).')}</li><li>${L('Elige <b>Añadir a pantalla de inicio</b> y confirma.', 'Choose <b>Add to Home Screen</b> and confirm.')}</li><li>${L('Abre PokéIdle desde el icono nuevo: se ve a pantalla completa, sin las barras de Safari.', 'Open PokéIdle from the new icon: it runs full screen, without Safari’s bars.')}</li></ol><p class="hint">${L('Safari en el iPhone no permite ocultar sus barras desde una página web; instalarla es la única forma.', 'Safari on iPhone does not let a web page hide its bars; installing it is the only way.')}</p><div class="row"><button class="btn primary" id="ios-x">${L('Entendido', 'Got it')}</button></div>`);
+    $('#ios-x').onclick = closeModal;
+  }
+  function fsBlock() {
+    if (PWA.standalone()) return `<p class="hint" style="margin:0">${L('Ya juegas sin barras del navegador: estás en la app instalada.', 'You already play without browser bars: you are in the installed app.')}</p>`;
+    const st = S().settings;
+    let h = `<p class="hint" style="margin:0 0 6px">${L('Para jugar sin las barras de arriba y de abajo del navegador: instala la app (Añadir a pantalla de inicio) o usa la pantalla completa.', 'To play without the browser bars at the top and bottom: install the app (Add to Home Screen) or use full screen.')}</p><div class="row tight" style="margin:0">`;
+    if (PWA.fsSupported()) h += `<button class="btn primary" id="s-fs">⛶ ${PWA.fsActive() ? L('Salir de pantalla completa', 'Exit full screen') : L('Pantalla completa', 'Full screen')}</button>`;
+    if (PWA.isIOS()) h += `<button class="btn" id="s-ios">📲 ${L('Cómo instalarla en iPhone', 'How to install on iPhone')}</button>`;
+    h += '</div>';
+    if (PWA.fsSupported()) h += `<div class="setrow" style="margin-top:8px"><span class="sl"><b>${L('Pantalla completa al jugar', 'Full screen on play')}</b><small>${L('Al pulsar Jugar o Continuar', 'When you press Play or Continue')}</small></span><button class="tog ${st.autoFs ? 'on' : ''}" id="s-autofs" role="switch" aria-checked="${!!st.autoFs}" aria-label="${L('Pantalla completa al jugar', 'Full screen on play')}"><i></i></button></div>`;
+    return h;
+  }
   function settings() {
     const st = S().settings, a11y = st.a11y;
     const a11yTog = (k, label, sub) => `<div class="setrow"><span class="sl"><b>${label}</b><small>${sub}</small></span><button class="tog ${a11y[k] ? 'on' : ''}" data-a11y="${k}" role="switch" aria-checked="${!!a11y[k]}" aria-label="${label}"><i></i></button></div>`;
@@ -1462,6 +1480,7 @@ const UI = (() => {
         ${a11yTog('cb', L('Paleta para daltonismo', 'Color-blind palette'), L('Rarezas y avisos con colores distinguibles (azul/naranja en lugar de rojo/verde)', 'Distinguishable rarity and alert colors (blue/orange instead of red/green)'))}
         <p class="hint" style="margin:6px 0 0">${L('Atajos: 1–7 cambian de pestaña, Esc cierra ventanas y Tab recorre los botones.', 'Shortcuts: 1–7 switch tabs, Esc closes windows and Tab moves between buttons.')}</p></div>
       <div class="sset"><h4>${L('Teclado', 'Keyboard')}</h4><div class="row" style="margin:0"><button class="btn" id="s-keys">⌨ ${L('Atajos de teclado', 'Keyboard shortcuts')}</button></div></div>
+      <div class="sset"><h4>${L('Pantalla', 'Screen')}</h4>${fsBlock()}</div>
       <div class="sset"><h4>${L('Aplicación', 'App')}</h4>${PWA.standalone() ? '<p class="hint" style="margin:0 0 6px">' + L('Estás usando la app instalada.', 'You are using the installed app.') + '</p>' : PWA.canInstall() ? '<div class="row" style="margin:0 0 6px"><button class="btn primary" id="s-inst">' + L('Instalar la app', 'Install the app') + '</button></div>' : '<p class="hint" style="margin:0 0 6px">' + L('Puedes instalarla desde el menú del navegador («Instalar app»). En iPhone: Compartir → Añadir a pantalla de inicio.', 'You can install it from the browser menu (“Install app”). On iPhone: Share → Add to Home Screen.') + '</p>'}
         <div class="setrow"><span class="sl"><b>${L('Avisos', 'Notifications')}</b><small id="ntf-sub"></small></span><button class="tog" id="s-notif"><i></i></button></div></div>
       <div class="sset"><h4>${L('Estadísticas', 'Statistics')}</h4><div class="row" style="margin:0"><button class="btn" id="s-stats">${L('Ver estadísticas y gráficas', 'View statistics and charts')}</button></div></div>
@@ -1506,6 +1525,9 @@ const UI = (() => {
     if ($('#s-inst')) $('#s-inst').onclick = async () => { await PWA.install(); settings(); };
     $('#s-stats').onclick = () => statsModal(false);
     $('#s-keys').onclick = keysModal;
+    if ($('#s-fs')) $('#s-fs').onclick = async () => { await PWA.fsToggle(); setTimeout(settings, 150); };
+    if ($('#s-ios')) $('#s-ios').onclick = iosHelpModal;
+    if ($('#s-autofs')) $('#s-autofs').onclick = () => { const st2 = S().settings; st2.autoFs = !st2.autoFs; Core.save(); Audio8.play('click'); settings(); };
     $('#s-ok').onclick = () => { Core.save(); closeModal(); };
     $('#s-tut').onclick = () => { closeModal(); setTab('team'); tutStart(true); };
     $('#s-exp').onclick = () => {

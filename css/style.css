@@ -1101,3 +1101,5 @@ html.a-rm .newdot { animation: none; }
 .pull .dup .dustic { vertical-align: -2px; }
 @media (max-width: 860px) { .pulls:not(.one) .pull .dup .cpt { display: none; } }
 .mcps { display: none; } @media (max-width: 860px) { .mcps { display: inline; } }
+.iosl { text-align: left; padding-left: 22px; line-height: 1.6; font-size: 15px; color: #c9d4ff; }
+#t-fs, #t-ios { cursor: pointer; }

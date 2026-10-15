@@ -5,6 +5,17 @@ const PWA = (() => {
   let deferred = null, timers = [];
   const standalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
   const canInstall = () => !!deferred;
+  const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  // pantalla completa desde el navegador (no existe en iPhone: allí solo quita las barras instalar la app)
+  const fsRoot = () => document.documentElement;
+  const fsSupported = () => !standalone() && !!(fsRoot().requestFullscreen || fsRoot().webkitRequestFullscreen);
+  const fsActive = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+  async function fsEnter() {
+    if (!fsSupported() || fsActive()) return false;
+    try { await (fsRoot().requestFullscreen ? fsRoot().requestFullscreen({ navigationUI: 'hide' }) : fsRoot().webkitRequestFullscreen()); return true; } catch (e) { return false; }
+  }
+  async function fsExit() { try { await (document.exitFullscreen ? document.exitFullscreen() : document.webkitExitFullscreen()); } catch (e) { /* nada */ } }
+  const fsToggle = () => (fsActive() ? fsExit() : fsEnter());
   const notifSupported = () => 'Notification' in window;
   const perm = () => (notifSupported() ? Notification.permission : 'unsupported');
   const notifOn = () => perm() === 'granted' && !!(Core.S && Core.S.settings.notify);
@@ -48,5 +59,5 @@ const PWA = (() => {
   }
   function clear() { timers.forEach(clearTimeout); timers = []; }
 
-  return { init, install, canInstall, standalone, enableNotify, notifSupported, perm, notifOn, schedule, clear, show };
+  return { init, install, canInstall, standalone, isIOS, fsSupported, fsActive, fsEnter, fsExit, fsToggle, enableNotify, notifSupported, perm, notifOn, schedule, clear, show };
 })();

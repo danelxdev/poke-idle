@@ -223,6 +223,7 @@
   Cloud.init().then(() => { UI.authChanged(); try { if (sessionStorage.getItem('pokeidle.pulled')) { sessionStorage.removeItem('pokeidle.pulled'); UI.toast(L('Partida cargada desde tu cuenta', 'Game loaded from your account')); } } catch (e) { /* nada */ } });
   $('#btn-start').onclick = () => {
     Audio8.resume();
+    if (Core.S.settings.autoFs) PWA.fsEnter();                // pantalla completa si el jugador lo pidió (necesita este clic)
     Audio8.play('select');
     if (!Core.S.started) Audio8.music('menu');
     if (Core.S.started) enterGame();
