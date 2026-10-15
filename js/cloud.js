@@ -119,13 +119,18 @@ const Cloud = (() => {
     }
     Core.save();
   }
+  // el Pokémon del avatar tal como lo ves tú: el elegido o, si no hay, el primero del equipo (antes se mandaba 0 y el ranking ponía un Pikachu)
+  function avatarNow() {
+    const P = S().profile; if (P.avatar && Core.DEX[P.avatar]) return P.avatar;
+    const k = S().team[0], m = k && S().mons[k]; return m ? Core.fdex(m) : 25;
+  }
   let ptimer = 0;
   function pushProfile(now) {
     if (!st.user) return Promise.resolve(false);
     clearTimeout(ptimer);
     const run = async () => {
       const P = S().profile, show = st.profile ? st.profile.show_in_rankings : true;
-      const { error } = await st.client.rpc('update_profile', { p_avatar: P.avatar || 0, p_title: P.title, p_frame: S().cosm.frame, p_show: show, p_lang: I18N.lang });
+      const { error } = await st.client.rpc('update_profile', { p_avatar: (st.lastAv = avatarNow()), p_title: P.title, p_frame: S().cosm.frame, p_show: show, p_lang: I18N.lang });
       return !error;
     };
     if (now) return run();
@@ -216,6 +221,7 @@ const Cloud = (() => {
     if (!st.user || !S().started || st.profile && st.profile.banned) return false;
     if (!force && Date.now() - st.lastScore < SCORE_EVERY * 1000) return false;
     st.lastScore = Date.now();
+    if (st.profile && st.lastAv !== avatarNow()) pushProfile(true);          // el avatar por defecto cambia con el equipo o al evolucionar
     const s = S(), wk = Core.eventWeek(), curWeek = s.event && s.event.week === Core.eventWeek();
     const tiers = s.event ? s.event.tiers.filter(Boolean).length : 0;
     const { error } = await st.client.rpc('submit_score', { p: { max_stage: s.stats.maxStage, asc_rank: s.asc.rank, essence: s.asc.ess, tower_best: s.tower.best, master_level: s.rival.master, dex_count: Core.dexCount(), rivals: Core.rivalWins(), medals: s.medals, play_time: Math.floor(s.stats.time), week_id: wk, event_kills: curWeek ? s.event.kills : 0, event_tiers: curWeek ? tiers : 0 } });

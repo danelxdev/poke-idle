@@ -196,7 +196,7 @@ const Core = (() => {
 
   // ---------------- fórmulas ----------------
   // hpB/hpG = vida del enemigo (base y crecimiento por etapa) · coinR = monedas por vida · lvlG = crecimiento del coste de nivel
-  const K = { hpD: 0.055, hpD0: 100, hpD1: 300, hpS: 80, hpM: 1.8, hp0: 50, bw: 0.08, bwMin: 0.35, ready: 0.95, retryMax: 600, gate: 0.6, hpB: 100, hpG: 1.17, hpL: 6, coinR: 0.0012, cd: 0.994, cdS: 150, cd2: 0.997, cf: 0.5, cs: 0.12, lvlG: 1.15, lvlS: 100, lvlG2: 1.13, dG: 1.075 };
+  const K = { hpD: 0.055, hpD0: 100, hpD1: 300, hpS: 80, hpM: 1.8, hp0: 50, bw: 0.08, bwMin: 0.35, ready: 0.95, retryMax: 600, gate: 0.6, hpB: 100, hpG: 1.17, hpL: 6, coinR: 0.0012, cd: 0.994, cdS: 150, cd2: 0.997, cf: 0.5, cs: 0.12, lvlG: 1.15, lvlS: 100, lvlG2: 1.13, dG: 1.075, eE0: 0.28, eS: 220, eP: 1.2, cE: 2.5, cES: 45 };
   const route = s => Math.floor((s - 1) / 10);
   const routeIdx = s => route(s) % ROUTES.length;
   const routeData = s => ROUTES[routeIdx(s)];
@@ -215,7 +215,9 @@ const Core = (() => {
     for (let i = hpTab.length; i <= s; i++) { const k = i - 1, g = K.hpG - K.hpD * Math.max(0, Math.min(1, (k - K.hpD0) / K.hpD1)); hpTab[i] = hpTab[i - 1] * g; }
     return K.hpB * hpTab[s];
   }
-  const enemyHp = s => Math.round((hpBase(s) + K.hpL * s) * hpCurve(s)) * (isBoss(s) ? bossTier(s).hp * bossEase(s) : 1) * rankHp();
+  // arranque suave: en las primeras etapas los enemigos son más débiles (eE0 = factor en la etapa 0) y suben hasta la normalidad en la etapa eS
+  const earlyEase = s => (s >= K.eS ? 1 : K.eE0 + (1 - K.eE0) * Math.pow(s / K.eS, K.eP));
+  const enemyHp = s => Math.round((hpBase(s) + K.hpL * s) * hpCurve(s) * earlyEase(s)) * (isBoss(s) ? bossTier(s).hp * bossEase(s) : 1) * rankHp();
   // poder del equipo contra el jefe de la etapa s (1 = lo derrota justo a tiempo)
   const bossReady = s => { const r = routeData(s); return teamDps(DEX[r.boss.dex].types) * (1 + 0.04 * S.up.boss) * bossTime(s) / enemyHp(s); };
   const skillOn = id => S.skOn[id] > S.stats.time;
@@ -235,7 +237,7 @@ const Core = (() => {
   const coinMult = () => (1 + 0.15 * S.up.coin) * medalMult() * (1 + 0.06 * S.shop.coins) * (skillOn('gold') ? 3 : 1) * (1 + teamItemSum('coins') + synergies().coins + teamNat('coin')) * (evBonus('coins') ? 1.5 : 1) * (1 + tact().coin) * ascCoin();
   // las monedas por vida bajan con la etapa; pasada la etapa cdS bajan más despacio para que el tramo largo no se estanque
   const coinDecay = s => Math.pow(K.cd, Math.min(s, K.cdS)) * Math.pow(K.cd2, Math.max(0, s - K.cdS));
-  const killCoins = s => Math.ceil(((hpBase(s) + K.hpL * s) * K.coinR * coinDecay(s) + K.cf + s * K.cs) * coinMult() * (isBoss(s) ? 6 : 1));
+  const killCoins = s => Math.ceil(((hpBase(s) + K.hpL * s) * K.coinR * coinDecay(s) + K.cf + s * K.cs) * (1 + K.cE * Math.exp(-s / K.cES)) * coinMult() * (isBoss(s) ? 6 : 1));
   // el polvo estelar se retiró: sus fuentes dan monedas y sus gastos cuestan monedas.
   // Una «unidad» (lo que antes era 1 de polvo) = 3 derrotas del tramo actual, así que siempre está a la escala de tu partida
   const coinsPerDust = () => { let st = Math.max(1, S.maxStage - 1); if (isBoss(st)) st--; return Math.max(1, killCoins(Math.max(1, st))) * 3; };
@@ -409,10 +411,10 @@ const Core = (() => {
   const bossBonus = (e, m) => (e && e.boss ? (1 + 0.04 * S.up.boss) * (1 + (m ? itemBoss(m) + natVal(m, 'boss') : 0)) * (1 + synergies().boss) * (1 + tact().boss) : 1 + tact().wild);
   const tapDmg = () => (1 + 3 * S.up.tap + teamDps() * (0.15 + 0.02 * S.up.tap)) * (1 + 0.1 * S.shop.tapd) * (1 + teamItemSum('tap'));
   // vista previa del efecto de la siguiente mejora (toque, monedas, daño del equipo) para que se vea cuánto sube de verdad
-  function previewUp(id) {
+  function previewUp(id, k) {
     if (!['tap', 'coin', 'train'].includes(id) || S.up[id] >= UPGRADES[id].max) return null;
     const f = id === 'tap' ? tapDmg : id === 'coin' ? () => killCoins(Math.max(1, S.stage - (isBoss(S.stage) ? 1 : 0))) : () => teamDps();
-    const o = S.up[id], a = f(); S.up[id] = o + 1;
+    const o = S.up[id], a = f(); S.up[id] = Math.min(UPGRADES[id].max, o + (k || 1));
     let b; try { b = f(); } finally { S.up[id] = o; }
     return { a, b };
   }
@@ -751,6 +753,23 @@ const Core = (() => {
     if (S.coins < c) return false;
     S.coins -= c; S.slots++;
     return true;
+  }
+  // comprar varios niveles de una mejora de golpe: n = 1, 10, 25 o 'max' (todos los que alcance el dinero)
+  function upPlan(id, n) {
+    const u = UPGRADES[id], lvl = S.up[id], limit = n === 'max' ? 1000 : Math.max(1, +n || 1);
+    let k = 0, c = 0, left = S.coins;
+    while (k < limit && lvl + k < u.max) {
+      const cc = Math.ceil(u.base * Math.pow(u.mul, lvl + k));
+      if (n === 'max' && cc > left) break;
+      c += cc; left -= cc; k++;
+    }
+    return { n: k, c };
+  }
+  function buyUpN(id, n) {
+    const p = upPlan(id, n);
+    if (!p.n || S.coins < p.c) return 0;
+    S.coins -= p.c; S.up[id] += p.n;
+    return p.n;
   }
   function buyUp(id) {
     const u = UPGRADES[id];
@@ -1355,7 +1374,7 @@ const Core = (() => {
     K, hpTab, DEX, CHILDREN, RAR, POOLG, BASES, bst, baseOf, stageOf, fmt, on, emit, F,
     get S() { return S; }, load, save, freezeSave, eventWeek: () => weekIdx(), wipe, fresh, setRng(f) { rnd = f; },
     route, routeIdx, routeData, regionOf, regionOfRoute, loopOf, isBoss, bossTier, bossTime, enemyHp, killCoins, coinMult, globalDmg, monDmg, monRate, eff,
-    coinsPerDust, dc, srcCoins, previewUp, regCount, isReg, ownerCheck, isStale: () => stale, claim,
+    upPlan, buyUpN, coinsPerDust, dc, srcCoins, previewUp, regCount, isReg, ownerCheck, isStale: () => stale, claim,
     levelCost, levelCostN, maxAffordable, upCost, shopCost, pokeBallPrice, critChance, critMult, catchChance, teamDps, tapDmg, medalGain, medalFor, dexCount, badgeCount,
     genUnlocked, unlockedGens, skillOn, skillReady, useSkill, goldenChance, gemMult,
     tick, tap, advance, goStage, fightBoss, bossEase, bossReady, levelUp, starUp, setTeam, buySlot, buyUp, buyShop, addMon,

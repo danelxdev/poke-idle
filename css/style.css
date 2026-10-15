@@ -1100,3 +1100,4 @@ html.a-rm .newdot { animation: none; }
 .pull .dup.cp { white-space: normal; }
 .pull .dup .dustic { vertical-align: -2px; }
 @media (max-width: 860px) { .pulls:not(.one) .pull .dup .cpt { display: none; } }
+.mcps { display: none; } @media (max-width: 860px) { .mcps { display: inline; } }

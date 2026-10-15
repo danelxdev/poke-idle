@@ -123,17 +123,23 @@ const UI = (() => {
   }
 
   // ---------------- cabecera y arena ----------------
-  let lastCoins = 0, cpsAvg = 0, cpsT = 0, cpsAcc = 0;
+  // monedas por segundo: lo ganado (total acumulado, sin contar lo gastado) en los últimos 20 s reales
+  let cpsBuf = [], cpsLast = 0, cpsTxt = '';
   function hud(dt) {
     const s = S();
     paintProf();
     $('#coins').textContent = fmt(s.coins);
     $('#gems').textContent = fmt(s.gems);
     $('#tks').textContent = fmt(Object.values(s.tk).reduce((a, b) => a + b, 0));
-    cpsT += dt;
-    if (s.coins > lastCoins) cpsAcc += s.coins - lastCoins;
-    lastCoins = s.coins;
-    if (cpsT >= 2) { cpsAvg = cpsAvg ? cpsAvg * 0.6 + cpsAcc / cpsT * 0.4 : cpsAcc / cpsT; cpsT = 0; cpsAcc = 0; $('#cps').textContent = cpsAvg ? fmt(cpsAvg) + '/s' : ''; }
+    { const now = performance.now();
+      if (now - cpsLast >= 500) {
+        cpsLast = now; const tot = s.stats.coinsTotal;
+        if (cpsBuf.length && tot < cpsBuf[cpsBuf.length - 1][1]) cpsBuf = [];                    // partida nueva / importada
+        cpsBuf.push([now, tot]); while (cpsBuf.length > 2 && now - cpsBuf[0][0] > 20000) cpsBuf.shift();
+        const a = cpsBuf[0], el = (now - a[0]) / 1000;
+        const t = el >= 4 ? (() => { const v = (tot - a[1]) / el; return v > 0 ? (v < 10 ? v.toFixed(1) : fmt(v)) + '/s' : ''; })() : '';
+        if (t !== cpsTxt) { cpsTxt = t; $('#cps').textContent = t; }
+      } }
     const r = Core.routeData(s.stage), lp = Core.loopOf(s.stage);
     $('#route-name').textContent = r.name + (lp ? ' +' + lp : '');
     $('#stage-label').textContent = REGIONS[Core.regionOf(s.stage)].name + ' · ' + L('Etapa ', 'Stage ') + s.stage + (s.maxStage > s.stage ? ' / ' + s.maxStage : '') + (s.asc.rank ? ' · ' + L('Rango ', 'Rank ') + s.asc.rank : '');
@@ -178,7 +184,7 @@ const UI = (() => {
       const sm = b.querySelector('small'); if (sm.textContent !== tx) sm.textContent = tx;
     }
     const waitBoss = !s.auto && s.kills >= 10 && !boss && Core.isBoss(s.stage + 1), rd = waitBoss ? Math.min(1, Core.bossReady(s.stage + 1)) : 0;
-    $('#dps').innerHTML = L('Daño/s', 'Damage/s') + ' <b>' + fmt(e ? Core.teamDps(e.types) : Core.teamDps()) + '</b> · ' + L('Toque', 'Tap') + ' <b>' + fmt(Core.tapDmg()) + '</b>' + (waitBoss ? ` · ${L('Poder vs jefe', 'Power vs boss')} <b style="color:${rd >= 0.95 ? '#7ff0a0' : '#ffd23f'}">${Math.round(rd * 100)}%</b>` : '');
+    $('#dps').innerHTML = L('Daño/s', 'Damage/s') + ' <b>' + fmt(e ? Core.teamDps(e.types) : Core.teamDps()) + '</b> · ' + L('Toque', 'Tap') + ' <b>' + fmt(Core.tapDmg()) + '</b>' + (cpsTxt ? '<span class="mcps"> · ' + L('Monedas', 'Coins') + ' <b>' + cpsTxt + '</b></span>' : '') + (waitBoss ? ` · ${L('Poder vs jefe', 'Power vs boss')} <b style="color:${rd >= 0.95 ? '#7ff0a0' : '#ffd23f'}">${Math.round(rd * 100)}%</b>` : '');
     $('#quest-dot').classList.toggle('hidden', !Core.pendingRewards() && s.daily.claimed);
     $('#gacha-dot').classList.toggle('hidden', !Core.eggsReady());
     const rvNext = Core.rivalNext(), rvOpen = rvNext && Core.rivalOpen(rvNext);
@@ -546,17 +552,17 @@ const UI = (() => {
       },
     },
     up: {
-      sig: () => JSON.stringify([S().up, S().stage, Math.round(Math.log2(Core.teamDps() + 1) * 4)]),
+      sig: () => JSON.stringify([S().up, S().stage, Math.round(Math.log2(Core.teamDps() + 1) * 4), S().buyMul, S().buyMul === 'max' ? Object.keys(UPGRADES).map(id => Core.upPlan(id, 'max').n).join() : '']),
       html() {
         const s = S();
-        let h = '<h3>' + L('Mejoras', 'Upgrades') + '</h3><p class="hint">' + L('Se pierden al entrar en la Liga, pero las medallas lo compensan con creces.', 'They are lost when you enter the League, but medals more than make up for it.') + '</p>';
+        let h = '<h3>' + L('Mejoras', 'Upgrades') + '</h3><div class="seg upmul" role="group" aria-label="' + L('Cantidad por compra', 'Amount per purchase') + '">' + [1, 10, 25, 'max'].map(v => `<button data-act="mul" data-v="${v}" class="${s.buyMul === v ? 'on' : ''}" aria-pressed="${s.buyMul === v}">${v === 'max' ? L('Máx', 'Max') : 'x' + v}</button>`).join('') + '</div><p class="hint">' + L('Se pierden al entrar en la Liga, pero las medallas lo compensan con creces.', 'They are lost when you enter the League, but medals more than make up for it.') + '</p>';
         for (const [id, u] of Object.entries(UPGRADES)) {
           const n = s.up[id], maxed = n >= u.max;
-          const uv = UPV[id], pv = Core.previewUp(id), arrow = (a, b) => `<span class="upvals"><em class="now">${a}</em><i aria-hidden="true">→</i><em class="nxt">${b}</em></span>`;
+          const uv = UPV[id], pl = maxed ? { n: 0, c: 0 } : Core.upPlan(id, s.buyMul), kk = Math.max(1, pl.n), pv = Core.previewUp(id, kk), arrow = (a, b) => `<span class="upvals"><em class="now">${a}</em><i aria-hidden="true">→</i><em class="nxt">${b}</em></span>`;
           h += `<div class="card upc"><span class="ico">${ico(u.icon, 36)}</span><div class="info"><b>${u.name} <small style="display:inline">${L('Nv.', 'Lv.')} ${n}</small></b>
-            <div class="upline"><span class="uplbl">${L(uv[0], uv[1])}</span>${maxed ? `<span class="upvals"><em class="now">${uv[2](n)}</em></span>` : arrow(uv[2](n), uv[2](n + 1))}</div>
+            <div class="upline"><span class="uplbl">${L(uv[0], uv[1])}</span>${maxed ? `<span class="upvals"><em class="now">${uv[2](n)}</em></span>` : arrow(uv[2](n), uv[2](n + kk))}</div>
             ${pv && !maxed ? `<div class="upline sub"><span class="uplbl">${{ tap: L('Tu toque', 'Your tap'), coin: L('Por derrota', 'Per kill'), train: L('Daño/s equipo', 'Team dmg/s') }[id]}</span>${arrow(fmt(pv.a), fmt(pv.b))}</div>` : ''}</div>
-            ${maxed ? '<button class="btn small" disabled>' + L('Máx.', 'Max') + '</button>' : costBtn(Core.upCost(id), L('Mejorar', 'Upgrade'), 'up', `data-v="${id}"`)}</div>`;
+            ${maxed ? '<button class="btn small" disabled>' + L('Máx.', 'Max') + '</button>' : (() => { const cost = pl.n ? pl.c : Core.upCost(id); return costBtn(cost, L('Mejorar', 'Upgrade') + (pl.n > 1 ? ' +' + pl.n : ''), 'up', `data-v="${id}"`); })()}</div>`;
         }
         return h;
       },
@@ -700,7 +706,7 @@ const UI = (() => {
         break;
       }
       case 'slot': if (Core.buySlot()) { Audio8.play('item'); banner(L('¡Nuevo hueco en el equipo!', 'New team slot!'), L('Elige qué Pokémon combate en él', 'Choose which Pokémon fights in it'), '#7ff0a0'); autoFill(); } break;
-      case 'up': if (Core.buyUp(v)) Audio8.play('levelup'); break;
+      case 'up': if (Core.buyUpN(v, S().buyMul)) Audio8.play('levelup'); break;
       case 'tab': setTab(v); return;
       case 'pick': pickModal(+v); return;
       case 'item': itemModal(v); return;
@@ -1313,7 +1319,7 @@ const UI = (() => {
     try {
       const { rows, me } = await Cloud.board(want);
       if (rkBoard !== want || !$('#rk-body')) return;
-      $('#rk-body').innerHTML = rows.length ? rows.map(r => `<div class="rkrow ${r.is_me ? 'me' : ''}"><span class="rkn">#${r.rank}</span><span class="pavatar sm rk-av" data-pf="${String(r.frame || 'classic').replace(/[^a-z]/g, '')}">${Sprites.html(DEX[r.avatar] ? r.avatar : 25, false, 34, true)}</span><div class="rki"><b>${String(r.nickname).replace(/[<>&"]/g, '')}</b><small>${((TITLES.find(t => t.id === r.title) || {}).name || '')}${sub(want, r) ? ' · ' + sub(want, r) : ''}</small></div><span class="rkv">${fmt(r.value)}<small>${unit[want]}</small></span>${Cloud.user && !r.is_me ? `<button class="rkflag" data-rp="${r.user_id}" aria-label="${L('Denunciar', 'Report')}" title="${L('Denunciar', 'Report')}">⚑</button>` : ''}</div>`).join('') : `<p class="hint">${L('Todavía no hay nadie en este ranking. ¡Sé el primero!', 'Nobody is in this ranking yet. Be the first!')}</p>`;
+      $('#rk-body').innerHTML = rows.length ? rows.map(r => `<div class="rkrow ${r.is_me ? 'me' : ''}"><span class="rkn">#${r.rank}</span><span class="pavatar sm rk-av" data-pf="${String(r.frame || 'classic').replace(/[^a-z]/g, '')}">${Sprites.html(Sprites.DEX[r.avatar] ? r.avatar : 25, false, 34, true)}</span><div class="rki"><b>${String(r.nickname).replace(/[<>&"]/g, '')}</b><small>${((TITLES.find(t => t.id === r.title) || {}).name || '')}${sub(want, r) ? ' · ' + sub(want, r) : ''}</small></div><span class="rkv">${fmt(r.value)}<small>${unit[want]}</small></span>${Cloud.user && !r.is_me ? `<button class="rkflag" data-rp="${r.user_id}" aria-label="${L('Denunciar', 'Report')}" title="${L('Denunciar', 'Report')}">⚑</button>` : ''}</div>`).join('') : `<p class="hint">${L('Todavía no hay nadie en este ranking. ¡Sé el primero!', 'Nobody is in this ranking yet. Be the first!')}</p>`;
       if (me) $('#rk-me').innerHTML = `<b>${L('Tu puesto', 'Your rank')}: #${me.rank}</b> <small>${L('de', 'of')} ${me.total} · ${fmt(me.value)} ${unit[want]}</small>`;
       $$('[data-rp]').forEach(b => b.onclick = () => {
         openModal(`<h2>${L('Denunciar jugador', 'Report player')}</h2><p class="hint">${L('¿Por qué lo denuncias?', 'Why are you reporting this player?')}</p><div class="seg wrap">${[[L('Nombre inapropiado', 'Inappropriate name')], [L('Sospecho de trampas', 'I suspect cheating')], [L('Otro motivo', 'Other')]].map(([t]) => `<button data-why="${t}">${t}</button>`).join('')}</div><div class="row"><button class="btn" id="rp-x">${L('Cancelar', 'Cancel')}</button></div>`);
