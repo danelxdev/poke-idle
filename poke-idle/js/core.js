@@ -50,13 +50,13 @@ const Core = (() => {
   function fresh() {
     return {
       v: 1, started: false, coins: 0, gems: 50, dust: 0, tk: { poke: 5, super: 1, ultra: 0, master: 0 }, stage: 1, maxStage: 1, kills: 0, auto: true,
-      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, shards: 0, hist: [], presets: [1, 2, 3, 4].map(i => ({ name: 'Equipo ' + i, team: [] })), event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 }, rival: { won: {}, rem: {}, told: {} }, tactic: 'bal', foes: {},
+      team: [], slots: 1, mons: {}, seen: {}, eggs: [], inc: 1, shards: 0, hist: [], presets: [1, 2, 3, 4].map(i => ({ name: 'Equipo ' + i, team: [] })), event: { week: -1, kills: 0, pulls: 0, tiers: [0, 0, 0, 0], claimed: {}, free: 0 }, tower: { best: 0 }, rival: { won: {}, rem: {}, told: {}, master: 0 }, asc: { rank: 0, ess: 0 }, tactic: 'bal', foes: {},
       up: { tap: 0, train: 0, coin: 0, crit: 0, critdmg: 0, speed: 0, catch: 0, golden: 0, bosstime: 0, type: 0, boss: 0, autotap: 0, alch: 0 },
       shop: { dmg: 0, coins: 0, lvl: 0, slots: 0, offline: 0, catch: 0, shiny: 0, gems: 0, skill: 0, dust: 0, tapd: 0, critb: 0, disc: 0, bt: 0, egg: 0 },
       medals: 0, mp: 0, badges: {}, bossFirst: {},
       sk: { rage: 0, gold: 0, lure: 0 },        // instante (tiempo jugado) en el que está lista cada habilidad
       skOn: { rage: 0, gold: 0, lure: 0 },      // instante en el que termina cada habilidad
-      stats: { maxDps: 0, bestHit: 0, megas: 0, kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, eventTiers: 0, bred: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, trainers: 0, rivals: 0, fusions: 0, freePulls: 0, streak: 0, itemsFound: 0 },
+      stats: { maxDps: 0, bestHit: 0, megas: 0, kills: 0, taps: 0, pulls: 0, levels: 0, bosses: 0, catches: 0, evolutions: 0, shinies: 0, prestiges: 0, coinsTotal: 0, time: 0, hatched: 0, eggsFound: 0, ivUps: 0, eventTiers: 0, bred: 0, maxStage: 1, maxStars: 0, stages: 0, skills: 0, dust: 0, crits: 0, goldens: 0, dustBuys: 0, trainers: 0, rivals: 0, fusions: 0, ascends: 0, freePulls: 0, streak: 0, itemsFound: 0 },
       bossFails: {}, retryT: 0, pity: 0, pityE: 0, bannerLost: 0, freeDay: '', autoAcc: 0, inv: [], uid: 1, tutDone: false, last: Date.now(),
       daily: { day: '', streak: 0, claimed: true, quests: [] }, weekly: { week: -1, quests: [] }, ach: {},
       buyMul: 1, settings: { music: 0.35, sfx: 0.6, master: 1, combat: 0.8, mstyle: 'warm', mmode: 'region', mpin: 'r0', bgmute: true, captions: false, nums: true, shake: true, bigNums: true, autoBoss: true, notify: false, lang: null, a11y: { motion: 'auto', text: 1, nf: false, hc: false, cb: false } },
@@ -95,10 +95,13 @@ const Core = (() => {
     d.presets = [0, 1, 2, 3].map(i => { const p = d.presets[i] || {}; return { name: typeof p.name === 'string' && p.name ? p.name.slice(0, 16) : 'Equipo ' + (i + 1), team: Array.isArray(p.team) ? p.team.map(String).filter(k => d.mons[k]) : [] }; });
     if (!d.event || typeof d.event !== 'object') d.event = f.event;
     if (!d.tower || typeof d.tower.best !== 'number') d.tower = { best: 0 };
-    if (!d.rival || typeof d.rival !== 'object') d.rival = { won: {}, rem: {}, told: {} };
+    if (!d.rival || typeof d.rival !== 'object') d.rival = { won: {}, rem: {}, told: {}, master: 0 };
     if (!d.rival.won || typeof d.rival.won !== 'object') d.rival.won = {};
     if (!d.rival.rem || typeof d.rival.rem !== 'object') d.rival.rem = {};
     if (!d.rival.told || typeof d.rival.told !== 'object') d.rival.told = {};
+    if (!(d.rival.master >= 0)) d.rival.master = 0;
+    if (!d.asc || typeof d.asc !== 'object') d.asc = { rank: 0, ess: 0 };
+    d.asc.rank = Math.max(0, Math.floor(+d.asc.rank || 0)); d.asc.ess = Math.max(0, Math.floor(+d.asc.ess || 0));
     d.rival.won = Object.fromEntries(Object.keys(d.rival.won).filter(k => RIVAL_ENC.some(e => e.id === k)).map(k => [k, 1]));
     if (!TACTICS[d.tactic]) d.tactic = 'bal';
     if (!d.foes || typeof d.foes !== 'object' || Array.isArray(d.foes)) d.foes = {};
@@ -145,7 +148,7 @@ const Core = (() => {
     for (let i = hpTab.length; i <= s; i++) { const k = i - 1, g = K.hpG - K.hpD * Math.max(0, Math.min(1, (k - K.hpD0) / K.hpD1)); hpTab[i] = hpTab[i - 1] * g; }
     return K.hpB * hpTab[s];
   }
-  const enemyHp = s => Math.round((hpBase(s) + K.hpL * s) * hpCurve(s)) * (isBoss(s) ? bossTier(s).hp * bossEase(s) : 1);
+  const enemyHp = s => Math.round((hpBase(s) + K.hpL * s) * hpCurve(s)) * (isBoss(s) ? bossTier(s).hp * bossEase(s) : 1) * rankHp();
   // poder del equipo contra el jefe de la etapa s (1 = lo derrota justo a tiempo)
   const bossReady = s => { const r = routeData(s); return teamDps(DEX[r.boss.dex].types) * (1 + 0.04 * S.up.boss) * bossTime(s) / enemyHp(s); };
   const skillOn = id => S.skOn[id] > S.stats.time;
@@ -155,14 +158,21 @@ const Core = (() => {
   const tacticOpen = () => S.stats.maxStage >= TACTIC_UNLOCK;
   function setTactic(id) { if (!TACTICS[id] || !tacticOpen()) return false; S.tactic = id; return true; }
   const rivalWins = () => Object.keys(S.rival.won).length;
-  const coinMult = () => (1 + 0.15 * S.up.coin) * medalMult() * (1 + 0.06 * S.shop.coins) * (skillOn('gold') ? 3 : 1) * (1 + teamItemSum('coins') + synergies().coins + teamNat('coin')) * (evBonus('coins') ? 1.5 : 1) * (1 + tact().coin);
+  // ascensión: el rango endurece a los enemigos y la Esencia da multiplicadores permanentes
+  const rankHp = () => Math.pow(ASC.hpRank, S.asc.rank);
+  const ascDmg = () => Math.pow(ASC.dmgEss, S.asc.ess);
+  const ascCoin = () => Math.pow(ASC.coinEss, S.asc.ess);
+  const ascOpen = () => S.stats.maxStage >= ASC.min;
+  const ascReady = () => S.maxStage >= ASC.min;
+  const essGain = () => ascGain(S.maxStage);
+  const coinMult = () => (1 + 0.15 * S.up.coin) * medalMult() * (1 + 0.06 * S.shop.coins) * (skillOn('gold') ? 3 : 1) * (1 + teamItemSum('coins') + synergies().coins + teamNat('coin')) * (evBonus('coins') ? 1.5 : 1) * (1 + tact().coin) * ascCoin();
   // las monedas por vida bajan con la etapa; pasada la etapa cdS bajan más despacio para que el tramo largo no se estanque
   const coinDecay = s => Math.pow(K.cd, Math.min(s, K.cdS)) * Math.pow(K.cd2, Math.max(0, s - K.cdS));
   const killCoins = s => Math.ceil(((hpBase(s) + K.hpL * s) * K.coinR * coinDecay(s) + K.cf + s * K.cs) * coinMult() * (isBoss(s) ? 6 : 1));
   const dexCount = () => Object.keys(S.seen).length;
   const badgeCount = () => Object.keys(S.badges).length;
   const gemMult = () => 1 + 0.1 * S.shop.gems;
-  const globalDmg = () => (1 + 0.1 * S.up.train) * (1 + TOWER_BONUS * S.tower.best) * medalMult() * (1 + 0.06 * S.shop.dmg) * (1 + 0.01 * dexCount()) * (1 + 0.03 * badgeCount()) * (1 + RIVAL_BONUS * rivalWins()) * (skillOn('rage') ? 3 : 1);
+  const globalDmg = () => (1 + 0.1 * S.up.train) * (1 + TOWER_BONUS * S.tower.best) * medalMult() * (1 + 0.06 * S.shop.dmg) * (1 + 0.01 * dexCount()) * (1 + 0.03 * badgeCount()) * (1 + RIVAL_BONUS * rivalWins()) * (1 + MASTER.bonus * S.rival.master) * ascDmg() * (skillOn('rage') ? 3 : 1);
   const lvlMult = l => Math.pow(K.dG, l - 1) * Math.pow(2, Math.floor(l / 25));
   const power = d => Math.pow(bst(d) / 100, 2);
   // ---------------- objetos equipables ----------------
@@ -708,6 +718,7 @@ const Core = (() => {
     if (r.tk) giveTickets(r.tk);
     if (r.egg !== undefined) giveEgg(r.egg);
     if (r.item) dropItem(r.item);
+    if (r.ess) S.asc.ess += r.ess;
   }
   function towerReward(f) {
     const r = { gems: 3 + Math.floor(f / 2), dust: 5 + 2 * f };
@@ -732,6 +743,12 @@ const Core = (() => {
       if (first) { S.tower.best = c.floor; rew = towerReward(c.floor); giveReward(rew); }
       emit('chalWin', { kind: 'tower', floor: c.floor, first, rew });
       chal = towerSpec(c.floor + 1);                    // la Torre sigue hasta que caigas
+    } else if (c.kind === 'rival' && c.master) {
+      const first = c.master > S.rival.master;
+      let rew = null;
+      if (first) { S.rival.master = c.master; S.stats.rivalMaster = c.master; rew = masterReward(c.master); giveReward(rew); }
+      emit('chalWin', { kind: 'rival', id: 'master', master: c.master, enc: c.enc, first, rew });
+      endChal({ won: true });
     } else if (c.kind === 'rival') {
       const e = c.enc, first = !S.rival.won[c.id];
       let rew = null;
@@ -758,7 +775,17 @@ const Core = (() => {
   }
   // ---------------- el rival: Nico ----------------
   const rivalCache = {};
+  const masterCache = {};
+  function masterTeam(t) {
+    const types = RIVAL_TYPES[(t - 1) % RIVAL_TYPES.length], used = new Set(), out = [], k = Math.floor((t - 1) / RIVAL_TYPES.length);
+    for (const ty of types) {
+      const c = POKEDEX.filter(p => !p.leg && p.types.includes(ty) && !used.has(p.dex)).sort((a, b) => bst(b.dex) - bst(a.dex) || a.dex - b.dex);
+      const pick = c[k % Math.min(6, c.length)]; used.add(pick.dex); out.push(pick.dex);
+    }
+    return out;
+  }
   function rivalTeam(e) {
+    if (e.master) return masterCache[e.master] || (masterCache[e.master] = masterTeam(e.master));
     if (rivalCache[e.id]) return rivalCache[e.id];
     const g = REGIONS[e.region].gen, used = new Set(), out = [];
     for (const t of e.types) {
@@ -772,7 +799,15 @@ const Core = (() => {
   }
   const rivalOpen = e => S.stats.maxStage >= e.stage;
   const rivalNext = () => RIVAL_ENC.find(e => !S.rival.won[e.id]) || null;
+  const masterOpen = () => rivalWins() >= RIVAL_ENC.length;
+  function masterSpec(t) {
+    const e = masterEnc(t), team = rivalTeam(e), base = enemyHp(Math.max(100, S.stats.maxStage)) * e.hp;
+    return { kind: 'rival', id: 'master', master: t, enc: e, dex: team[0], party: team.map((d, i) => ({ dex: d, hp: base * RIVAL_SPLIT[i] })), pi: 0, hp: base, time: chalTime(e.time), rule: null, type: e.types[0], boss: true, tier: 5,
+      label: RIVAL_NAME + ' · ' + _L('Maestro ', 'Master ') + t };
+  }
+  function startMaster() { return masterOpen() && towerUnlocked() && startChal(masterSpec(S.rival.master + 1)); }
   function rivalSpec(id) {
+    if (id === 'master') return masterSpec(S.rival.master + 1);
     const e = RIVAL_ENC.find(x => x.id === id); if (!e) return null;
     const base = enemyHp(e.stage) * e.hp, team = rivalTeam(e);
     return { kind: 'rival', id, enc: e, dex: team[0], party: team.map((d, i) => ({ dex: d, hp: base * RIVAL_SPLIT[i] })), pi: 0, hp: base, time: chalTime(e.time), rule: null, type: e.types[0], boss: true, tier: 2 + e.meet,
@@ -1050,6 +1085,8 @@ const Core = (() => {
     if (st === 'bestiary') return Object.keys(S.foes).length;
     if (st === 'tracks') return tracksUnlocked();
     if (st === 'rivals') return rivalWins();
+    if (st === 'essence') return S.asc.ess;
+    if (st === 'rivalMaster') return S.rival.master;
     if (st === 'ivGood') return Object.values(S.mons).filter(m => ivPct(m) >= 0.9).length;
     if (st === 'ivPerfect') return Object.values(S.mons).filter(m => m.iv.d === IV_MAX && m.iv.s === IV_MAX && m.iv.c === IV_MAX).length;
     if (st === 'stars5') return Object.values(S.mons).filter(m => m.stars >= 5).length;
@@ -1085,6 +1122,14 @@ const Core = (() => {
   }
 
   // ---------------- tiempo fuera ----------------
+  function ascend() {
+    if (!ascReady()) return null;
+    const ess = essGain(), medals = prestige();
+    if (!medals) return null;
+    S.asc.rank++; S.asc.ess += ess; S.stats.ascends++;
+    emit('ascend', { ess, medals, rank: S.asc.rank });
+    return { ess, medals };
+  }
   const offlineCapSecs = () => (8 + 2 * S.shop.offline) * 3600;
   function offlineKps() {
     if (!S.team.length) return 0;
@@ -1136,6 +1181,7 @@ const Core = (() => {
     eggNeed, eggReady, eggsReady, giveEgg, hatch, moveEgg, buyEgg, incCost, buyInc,
     typeEff, routeFoes, matchupAvg, bestTeam, strongTypes, setTeamList, savePreset, loadPreset, renamePreset,
     offlineCapSecs, nextEggEta, refreshEvent, eventDaysLeft, eventFeat, eventPool, evBonus, towerUnlocked, towerSpec, eventSpec, chalReady, towerStarts, towerReward, startTower, startEvent, abortChal, claimEventTask, eventFreePull,
+    rankHp, ascDmg, ascCoin, ascOpen, ascReady, essGain, ascend, masterOpen, masterSpec, startMaster,
     tact, tacticOpen, setTactic, rivalWins, itemCombos, rivalTeam, rivalOpen, rivalNext, rivalSpec, startRival, fuseGroups, fuseItem, craftItem,
     musicUnlocked, tracksUnlocked, musicIds, foeKills, appearsIn, wildPool,
     get ev() { return curEv; }, get chal() { return chal; }, inChal: () => !!chal,

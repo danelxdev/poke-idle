@@ -15,6 +15,7 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
 - **Huevos, naturalezas, IVs y tipos eficaces**: incubadora con 4 tipos de huevo, 25 naturalezas, IVs entrenables con polvo estelar y ayudas visuales de eficacia en combate (ver más abajo).
 - **Eventos semanales y Torre de batalla**: un tipo protagonista cada semana con jefe, misiones y bola propia, y una torre infinita con pisos de reglas especiales.
 - **Rival, entrenadores y Pokédex completa**: el rival Nico te desafía dos veces por región (20 duelos con historia), aparecen entrenadores con varios Pokémon seguidos y cada Pokémon tiene una ficha con estadísticas, debilidades, evolución y dónde aparece.
+- **Final de partida sin techo**: **Ascensión** (una segunda Liga con Rango, Esencia y multiplicadores permanentes que se acumulan) y **Duelos Maestros** de Nico, una escalera infinita cada vez más dura.
 - **Objetos, combos y tácticas**: 17 objetos con efectos distintos, fusión y taller, combos de objetos y 5 tácticas de equipo.
 - **Sonido y música**: volúmenes por categoría, 3 estilos de música, 20 pistas desbloqueables en una sala de música y subtítulos de sonidos.
 - **Progresión lenta y constante**: cada etapa cuesta más que la anterior y los jefes son muros reales con límite de tiempo. Para avanzar mejoras a tu equipo, abres huecos, mejoras la banda y, sobre todo, repites el viaje en la **Liga**.
@@ -155,6 +156,17 @@ El botón **Equipos** de la pestaña Equipo guarda hasta 4 equipos con nombre y 
 - Cada duelo son **3 Pokémon seguidos con un solo cronómetro**; su equipo de cada región usa tipos distintos, así que importan los tipos de tu equipo. Se muestra el **Poder** del equipo (≥100 % = lo vences a tiempo).
 - La primera victoria da gemas, polvo y tickets (en los segundos duelos, además, fragmentos Mega, un huevo y un objeto) y **+1 % de daño permanente**. Después puedes pedir una **revancha** al día por duelo (polvo y gemas).
 - **Entrenadores**: de vez en cuando, en vez de un salvaje, aparece un entrenador con 2 Pokémon seguidos (3 desde la etapa 60). Al derrotar al último das un extra de monedas y, con suerte, gemas, tickets u objetos. Se ven en la tarjeta del enemigo (por ejemplo «Pescador Pablo 2/3»).
+
+## Ascensión y Duelos Maestros (final de partida)
+
+Las medallas de la Liga suman de forma lineal (+3 % cada una), así que a partir de la etapa ~650 cada vuelta aporta cada vez menos. La Ascensión añade un multiplicador que crece sin techo, y la dificultad sube con ella.
+
+- **Ascender** (se desbloquea al llegar a la etapa 500 y se hace desde la pestaña Liga): es una Liga normal (mismas medallas y mismo reinicio) que además sube tu **Rango** en 1 y te da **Esencia** = ((etapa − 400) / 50)^1,35 redondeada (en la etapa 500 son 2, en la 650 son 8, en la 800 son 16 y en la 1000 son 28).
+- **Cada Esencia** da **×1,05 de daño y ×1,03 de monedas para siempre**, y se acumula multiplicando. No se gasta ni se pierde.
+- **Cada Rango** hace que todos los enemigos y retos tengan **×1,25 de vida**: la dificultad nunca deja de subir, pero la Esencia crece más rápido que ella. El Rango se ve en la etapa (por ejemplo «Rango 3»).
+- **Duelos Maestros**: al ganar los 20 duelos de Nico se abre una escalera sin fin. Cada nivel es un duelo de 3 Pokémon seguidos con el mejor de cada tipo, con ×15 de la vida de un jefe de tu mejor etapa (×1,16 más por nivel). Cada nivel superado da gemas, polvo, fragmentos Mega, un huevo legendario, un objeto y un ticket, **+0,5 % de daño permanente**, y cada 5 niveles un ticket Maestro y **1 de Esencia**.
+- Logros nuevos: Ascensión, Esencia y Maestro de Nico.
+- **Ritmo medido** (jugador activo 2 h al día): sin Ascensión el avance se frena hacia la etapa ~700 y apenas se mueve en semanas. Ascendiendo cada vez que la Esencia ganada es al menos el 30 % de la que ya tienes, se llega a la etapa ~590 el día 14, ~750 el día 18 y ~830 el día 21, y el avance sigue a unas 20–25 etapas al día (más despacio cuanto mayor es el Rango). No hay techo: pasada la etapa 1400 las rutas se repiten con enemigos más fuertes.
 
 ## Pokédex
 

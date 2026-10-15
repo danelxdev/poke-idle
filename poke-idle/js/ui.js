@@ -62,6 +62,7 @@ const UI = (() => {
       ['crown', L('Eventos y Torre', 'Events and Tower'), L('Un evento nuevo cada semana y una torre infinita con guardianes.', 'A new event every week and an endless tower with guardians.')],
     ].map(([i, t, d], n) => `<div class="tcard" style="animation-delay:${0.3 + n * 0.1}s">${ico(i, 36)}<b>${t}</b><small>${d}</small></div>`).join('');
     $('#t-news').innerHTML = `<h3>${L('Novedades', "What's new")}</h3><ul>
+      <li>${L('Ascensión y Duelos Maestros: un final de partida sin techo.', 'Ascension and Master Duels: an endgame with no ceiling.')}</li>
       <li>${L('Nico, tu rival: 20 duelos con historia, y entrenadores por las rutas.', 'Nico, your rival: 20 story duels, and trainers along the routes.')}</li>
       <li>${L('Pokédex con ficha, buscador y bestiario.', 'Pokédex with entries, search and a bestiary.')}</li>
       <li>${L('17 objetos, combos y tácticas de equipo.', '17 items, combos and team tactics.')}</li>
@@ -88,7 +89,7 @@ const UI = (() => {
     if (cpsT >= 2) { cpsAvg = cpsAvg ? cpsAvg * 0.6 + cpsAcc / cpsT * 0.4 : cpsAcc / cpsT; cpsT = 0; cpsAcc = 0; $('#cps').textContent = cpsAvg ? fmt(cpsAvg) + '/s' : ''; }
     const r = Core.routeData(s.stage), lp = Core.loopOf(s.stage);
     $('#route-name').textContent = r.name + (lp ? ' +' + lp : '');
-    $('#stage-label').textContent = REGIONS[Core.regionOf(s.stage)].name + ' · ' + L('Etapa ', 'Stage ') + s.stage + (s.maxStage > s.stage ? ' / ' + s.maxStage : '');
+    $('#stage-label').textContent = REGIONS[Core.regionOf(s.stage)].name + ' · ' + L('Etapa ', 'Stage ') + s.stage + (s.maxStage > s.stage ? ' / ' + s.maxStage : '') + (s.asc.rank ? ' · ' + L('Rango ', 'Rank ') + s.asc.rank : '');
     const boss = Core.isBoss(s.stage);
     const pips = $('#pips');
     const pk = boss ? 'boss' : String(s.kills);
@@ -155,7 +156,7 @@ const UI = (() => {
       if (c.className !== cl) c.className = cl;
     }
     for (const el of $$('#tab-body [data-rdy]')) {
-      const [k, v] = el.dataset.rdy.split(':'), r = Core.chalReady(k === 't' ? Core.towerSpec(+v) : k === 'r' ? Core.rivalSpec(v) : Core.eventSpec(+v)), t = L('Poder ', 'Power ') + (r >= 10 ? '×' + Math.floor(r) : Math.round(r * 100) + '%'), cl = 'rdy' + (r >= 1 ? ' ok' : r >= 0.7 ? ' mid' : '');
+      const [k, v] = el.dataset.rdy.split(':'), r = Core.chalReady(k === 't' ? Core.towerSpec(+v) : k === 'r' ? Core.rivalSpec(v) : Core.eventSpec(+v)), t = L('Poder ', 'Power ') + (r >= 10 ? '×' + fmt(Math.floor(r)) : Math.round(r * 100) + '%'), cl = 'rdy' + (r >= 1 ? ' ok' : r >= 0.7 ? ' mid' : '');
       if (el.textContent !== t) el.textContent = t;
       if (el.className !== cl) el.className = cl;
     }
@@ -173,7 +174,7 @@ const UI = (() => {
 
   const natTxt = m => { const n = Core.natOf(m); return n.up ? `${n.name} <em class="nu">▲${NAT_SHORT[n.up]}</em> <em class="nd">▼${NAT_SHORT[n.down]}</em>` : n.name + L(' (neutra)', ' (neutral)'); };
   let towerStart = 0;
-  const rewText = r => !r ? '' : [r.gems && '+' + r.gems + L(' gemas', ' gems'), r.shards && '+' + r.shards + L(' fragmentos Mega', ' Mega shards'), r.dust && '+' + r.dust + L(' polvo', ' stardust'), ...Object.entries(r.tk || {}).map(([t, n]) => n + '× ' + TICKETS[t].name), r.egg !== undefined && EGGS[r.egg].name, r.item && L('un objeto', 'an item')].filter(Boolean).join(' · ');
+  const rewText = r => !r ? '' : [r.ess && '+' + r.ess + L(' Esencia', ' Essence'), r.gems && '+' + r.gems + L(' gemas', ' gems'), r.shards && '+' + r.shards + L(' fragmentos Mega', ' Mega shards'), r.dust && '+' + r.dust + L(' polvo', ' stardust'), ...Object.entries(r.tk || {}).map(([t, n]) => n + '× ' + TICKETS[t].name), r.egg !== undefined && EGGS[r.egg].name, r.item && L('un objeto', 'an item')].filter(Boolean).join(' · ');
   const ruleTxt = r => r ? `<div class="rulebox"><b>${r.name}${r.only ? ' ' + TYPE_ES[r.only] : ''}</b>: ${r.desc}</div>` : '';
   function chalHtml() {
     const s = S();
@@ -216,6 +217,13 @@ const UI = (() => {
         <div class="floorline">${L('3 Pokémon seguidos con un solo cronómetro', '3 Pokémon in a row on a single timer')} · <span data-rdy="r:${next.id}" class="rdy"></span></div>
         <div class="floorline">${L('Recompensa', 'Reward')}: ${rewText(rivalReward(next))}</div>
         <div class="row"><button class="btn big primary" data-act="rival" data-v="${next.id}" ${open && !busy ? '' : 'disabled'}>${L('Aceptar el duelo', 'Accept the duel')}</button></div></div>`;
+    } else if (Core.masterOpen()) {
+      const t = s.rival.master + 1, e = masterEnc(t), team = Core.rivalTeam(e);
+      h += `<div class="rivalcard open master"><div class="rvhead"><img src="${por(team[team.length - 1])}" alt=""><div><b>${RIVAL_NAME} · ${L('Duelo Maestro', 'Master Duel')} ${t}</b><small>${L('La escalera no se acaba: cada nivel es más duro', 'The ladder never ends: every level is tougher')}</small></div></div>
+        <div class="rvteam">${team.map(d => `<div class="rvm"><img src="${por(d)}" alt="${DEX[d].name}"><small>${DEX[d].name}</small>${typeTags(d)}</div>`).join('')}</div>
+        <div class="floorline">${L('Vida', 'HP')} ×${Math.round(e.hp * 10) / 10} ${L('de un jefe', 'of a boss')} · <span data-rdy="r:master" class="rdy"></span></div>
+        <div class="floorline">${L('Recompensa', 'Reward')}: ${rewText(masterReward(t))}</div>
+        <div class="row"><button class="btn big primary" data-act="master" ${busy}>${L('Aceptar el duelo', 'Accept the duel')}</button></div></div>`;
     } else h += `<p class="hint">${L('Has ganado todos los duelos contra Nico. ¡Eres el mejor rival que Nico podía pedir!', 'You won every duel against Nico. You are the best rival Nico could ask for!')}</p>`;
     if (won) {
       h += `<div class="row" style="margin:4px 0"><button class="btn small" data-act="rivalall">${rivalAll ? L('Ocultar duelos ganados', 'Hide won duels') : L('Ver duelos ganados', 'Show won duels')}</button></div>`;
@@ -228,13 +236,13 @@ const UI = (() => {
   }
   function rivalTalk(e, which, d) {
     const team = Core.rivalTeam(e), won = which === 'post' && d;
-    openModal(`<div class="rvtalk"><img class="rvav" src="${por(team[team.length - 1])}" alt=""><div class="rvsay"><b>${RIVAL_NAME} · ${REGIONS[e.region].name} ${e.meet ? 'II' : 'I'}</b>${which === 'story' ? `<p>“${e.pre}”</p><p>“${e.post}”</p>` : `<p>“${which === 'pre' ? e.pre : e.post}”</p>`}</div></div>
+    openModal(`<div class="rvtalk"><img class="rvav" src="${por(team[team.length - 1])}" alt=""><div class="rvsay"><b>${RIVAL_NAME} · ${e.master ? L('Duelo Maestro ', 'Master Duel ') + e.master : REGIONS[e.region].name + ' ' + (e.meet ? 'II' : 'I')}</b>${which === 'story' ? `<p>“${e.pre}”</p><p>“${e.post}”</p>` : `<p>“${which === 'pre' ? e.pre : e.post}”</p>`}</div></div>
       ${won ? `<p class="hint" style="text-align:center">${d.first ? L('¡Primera victoria! ', 'First win! ') : L('Revancha: ', 'Rematch: ')}${d.rew ? rewText(d.rew) : L('Ya recogiste la recompensa de hoy', 'You already claimed today’s reward')}</p>` : ''}
       <div class="row">${which === 'story' ? `<button class="btn primary" id="rv-x">${L('Cerrar', 'Close')}</button>` : which === 'pre' ? `<button class="btn" id="rv-x">${L('Ahora no', 'Not now')}</button><button class="btn primary" id="rv-go">${L('¡Vamos!', 'Let’s go!')}</button>` : `<button class="btn primary" id="rv-ok">${L('Seguir', 'Continue')}</button>`}</div>`);
     if (which === 'story') $('#rv-x').onclick = closeModal;
     else if (which === 'pre') {
       $('#rv-x').onclick = closeModal;
-      $('#rv-go').onclick = () => { closeModal(); if (Core.startRival(e.id)) Audio8.play('select'); else Audio8.play('error'); };
+      $('#rv-go').onclick = () => { closeModal(); if (e.master ? Core.startMaster() : Core.startRival(e.id)) Audio8.play('select'); else Audio8.play('error'); };
     } else { $('#rv-ok').onclick = () => { Core.save(); closeModal(); refresh(true); }; Core.save(); }
   }
   function presetModal() {
@@ -560,13 +568,14 @@ const UI = (() => {
       },
     },
     league: {
-      sig: () => { const s = S(); return JSON.stringify([s.medals, s.mp, s.shop, Core.medalGain(), s.maxStage, s.stats.prestiges, Core.badgeCount()]); },
+      sig: () => { const s = S(); return JSON.stringify([s.medals, s.mp, s.shop, Core.medalGain(), s.maxStage, s.stats.prestiges, Core.badgeCount(), s.asc, s.stats.maxStage >= ASC.min]); },
       html() {
         const s = S(), g = Core.medalGain();
         let h = `<div class="league"><h3>${L('Liga Pokémon', 'Pokémon League')}</h3>
           <div>${ico('crown', 48)}</div><div class="big">${s.medals}</div><p class="hint">${L(`Medallas de la Liga · +${s.medals * 3}% de daño y de monedas para siempre`, `League medals · +${s.medals * 3}% damage and coins forever`)}</p>`;
         if (g) h += `<p>${L(`Si entras ahora en la Liga ganas <b style="color:var(--yellow)">+${g} medallas</b> y ${g} Puntos de Liga.`, `If you enter the League now you earn <b style="color:var(--yellow)">+${g} medals</b> and ${g} League Points.`)}</p><p class="hint">${L('Vuelves a la etapa 1 y pierdes monedas, niveles y mejoras. Conservas tus Pokémon, estrellas, gemas, polvo y la Pokédex.', 'You go back to stage 1 and lose coins, levels and upgrades. You keep your Pokémon, stars, gems, stardust and the Pokédex.')}</p><button class="btn big primary" data-act="prestige">${L('Entrar en la Liga', 'Enter the League')}</button>`;
         else h += `<p class="hint">${L(`Llega a la <b>etapa 60</b> para poder entrar. Cuanto más lejos llegues, más medallas: en la etapa 100 son ${Core.medalFor(100)} y en la 200, ${Core.medalFor(200)}.`, `Reach <b>stage 60</b> to be able to enter. The further you get, the more medals: at stage 100 it is ${Core.medalFor(100)} and at 200, ${Core.medalFor(200)}.`)}</p>`;
+        h += ascHtml();
         h += `<h3>${L('Tienda de la Liga', 'League shop')} <small style="color:var(--dim)">${ico('crown', 14)} ${s.mp} ${L('puntos', 'points')}</small></h3><div style="text-align:left">`;
         for (const [id, u] of Object.entries(LEAGUE_SHOP)) {
           const n = s.shop[id], maxed = n >= u.max;
@@ -629,6 +638,7 @@ const UI = (() => {
       case 'rival': { const e = RIVAL_ENC.find(x => x.id === v); if (e) { if (S().rival.won[v]) { if (Core.startRival(v)) Audio8.play('select'); else Audio8.play('error'); } else rivalTalk(e, 'pre'); } return; }
       case 'rivaltalk': { const e = RIVAL_ENC.find(x => x.id === v); if (e) rivalTalk(e, 'story'); return; }
       case 'rivalall': rivalAll = !rivalAll; break;
+      case 'master': { const t = s.rival.master + 1, e = masterEnc(t); if (Core.masterOpen()) rivalTalk(e, 'pre'); return; }
       case 'evboss': if (Core.startEvent(+v)) Audio8.play('select'); else Audio8.play('error'); break;
       case 'evtask': { const t = EVENT_TASKS[+v]; if (Core.claimEventTask(+v)) { Audio8.play('ticket'); toast(L('¡Recompensa! ', 'Reward! ') + rewText(t.rew)); } break; }
       case 'evfree': { const r = Core.eventFreePull(); if (r) { Core.save(); playReveal(r, BALLS.event.icon, TICKETS.super.icon, BALLS.event.name); return; } break; }
@@ -660,6 +670,7 @@ const UI = (() => {
       case 'ach': { const g = Core.claimAch(v); if (g) { Audio8.play('rare'); toast(ico('trophy', 18) + ' +' + g + L(' gemas y tickets', ' gems and tickets')); } break; }
       case 'achall': achShowAll = !achShowAll; break;
       case 'prestige': prestigeModal(); return;
+      case 'ascend': ascendModal(); return;
       case 'stats': statsModal(false); return;
     }
     Core.save();
@@ -764,7 +775,7 @@ const UI = (() => {
     { sel: '#skills', text: L('Tres habilidades activas: Furia (más daño), Fiebre del Oro (más monedas) y Lluvia de Tickets. Úsalas cuando estén listas.', 'Three active skills: Rage (more damage), Gold Rush (more coins) and Ticket Rain. Use them when ready.'), next: 1 },
     { sel: '#tabs [data-tab="chal"]', text: L('En Retos está Nico, tu rival (duelos con historia), un evento cada semana con un tipo protagonista (bonus de daño, jefe, misiones y una bola propia) y la Torre de batalla, un duelo tras otro con reglas especiales.', 'Challenges has Nico, your rival (story duels), a weekly event with a featured type (damage bonus, boss, quests and its own ball) and the Battle Tower, one duel after another with special rules.'), next: 1 },
     { sel: '#tabs [data-tab="quests"]', text: L('Las misiones diarias y semanales, los logros y la recompensa diaria te dan gemas y tickets. ¡Entra cada día!', 'Daily and weekly quests, achievements and the daily reward give you gems and tickets. Come back every day!'), next: 1 },
-    { sel: '#tabs [data-tab="league"]', text: L('Al llegar a la etapa 60 podrás entrar en la Liga: reinicias el viaje a cambio de bonus permanentes y una tienda de mejoras.', 'At stage 60 you can enter the League: you restart the journey in exchange for permanent bonuses and an upgrade shop.'), next: 1 },
+    { sel: '#tabs [data-tab="league"]', text: L('Al llegar a la etapa 60 podrás entrar en la Liga: reinicias el viaje a cambio de bonus permanentes y una tienda de mejoras. Más adelante, desde la etapa 500, podrás ascender para tener multiplicadores que no dejan de crecer.', 'At stage 60 you can enter the League: you restart the journey in exchange for permanent bonuses and an upgrade shop. Later, from stage 500, you can ascend for multipliers that never stop growing.'), next: 1 },
     { text: L('¡Listo! Ahora te toca a ti: llega lo más lejos que puedas, colecciona los ' + POKEDEX.length + ' Pokémon y completa la Pokédex. Puedes repetir este tutorial desde Ajustes.', 'All set! Now it is your turn: get as far as you can, collect all ' + POKEDEX.length + ' Pokémon and complete the Pokédex. You can repeat this tutorial from Settings.'), next: 1, last: 1 },
   ];
   let tutI = -1, tutRaf = 0, tutEl = null;
@@ -1105,6 +1116,25 @@ const UI = (() => {
     });
   }
 
+  // ---------------- Ascensión ----------------
+  function ascHtml() {
+    const s = S(), a = s.asc;
+    if (!Core.ascOpen() && !a.rank) return `<h3>${L('Ascensión', 'Ascension')}</h3><p class="hint">${L(`Llega a la <b>etapa ${ASC.min}</b> para desbloquear la Ascensión: una Liga que además sube tu Rango y te da Esencia, con multiplicadores permanentes sin techo.`, `Reach <b>stage ${ASC.min}</b> to unlock Ascension: a League run that also raises your Rank and gives you Essence, with permanent uncapped multipliers.`)}</p>`;
+    const ready = Core.ascReady(), g = Core.essGain();
+    let h = `<h3>${L('Ascensión', 'Ascension')} <small style="color:var(--dim)">${L('Rango', 'Rank')} ${a.rank}</small></h3><div class="asc">
+      <div class="ascnums"><div><b>${a.ess}</b><small>${L('Esencia', 'Essence')}</small></div><div><b>×${fmt(Core.ascDmg())}</b><small>${L('daño', 'damage')}</small></div><div><b>×${fmt(Core.ascCoin())}</b><small>${L('monedas', 'coins')}</small></div><div><b>×${fmt(Core.rankHp())}</b><small>${L('vida enemiga', 'enemy HP')}</small></div></div>`;
+    if (ready) h += `<p>${L(`Si asciendes ahora ganas <b style="color:var(--yellow)">+${g} Esencia</b> (×${(Math.pow(ASC.dmgEss, g)).toFixed(2)} de daño y ×${(Math.pow(ASC.coinEss, g)).toFixed(2)} de monedas) además de las medallas de la Liga. El Rango sube a ${a.rank + 1} y los enemigos tendrán ×${ASC.hpRank} más vida.`, `If you ascend now you earn <b style="color:var(--yellow)">+${g} Essence</b> (×${(Math.pow(ASC.dmgEss, g)).toFixed(2)} damage and ×${(Math.pow(ASC.coinEss, g)).toFixed(2)} coins) on top of the League medals. Your Rank goes up to ${a.rank + 1} and enemies get ×${ASC.hpRank} more HP.`)}</p><button class="btn big primary" data-act="ascend">${L('Ascender', 'Ascend')}</button>`;
+    else h += `<p class="hint">${L(`Para ascender tienes que llegar a la etapa ${ASC.min} en esta vuelta (vas por la ${s.maxStage}). Cuanto más lejos llegues, más Esencia: en la 650 son ${ascGain(650)}, en la 800 ${ascGain(800)} y en la 1000 ${ascGain(1000)}.`, `To ascend you must reach stage ${ASC.min} in this run (you are at ${s.maxStage}). The further you go, the more Essence: at 650 it is ${ascGain(650)}, at 800 ${ascGain(800)} and at 1000 ${ascGain(1000)}.`)}</p>`;
+    return h + `<p class="hint">${L(`Cada Esencia da ×${String(ASC.dmgEss).replace('.', ',')} de daño y ×${String(ASC.coinEss).replace('.', ',')} de monedas para siempre y se acumula multiplicando. Ascender reinicia como la Liga; conservas medallas, tienda de la Liga, Pokémon, Pokédex, Torre y Esencia. Cada Rango hace a los enemigos ×${String(ASC.hpRank).replace('.', ',')} más duros: la dificultad nunca deja de subir.`, `Each Essence gives ×${ASC.dmgEss} damage and ×${ASC.coinEss} coins forever and stacks multiplicatively. Ascending restarts like the League; you keep medals, the League shop, Pokémon, the Pokédex, the Tower and Essence. Every Rank makes enemies ×${ASC.hpRank} tougher: the difficulty never stops rising.`)}</p></div>`;
+  }
+  function ascendModal() {
+    const g = Core.essGain(), m = Core.medalGain();
+    openModal(`<h2>${L('¿Ascender?', 'Ascend?')}</h2><p>${L(`Ganarás <b style="color:var(--yellow)">+${g} Esencia</b> y <b style="color:var(--yellow)">+${m} medallas</b>. Tu Rango pasará a ${S().asc.rank + 1}.`, `You will earn <b style="color:var(--yellow)">+${g} Essence</b> and <b style="color:var(--yellow)">+${m} medals</b>. Your Rank will become ${S().asc.rank + 1}.`)}</p>
+      <p class="hint">${L('Vuelves a la etapa 1 como en la Liga. Los enemigos serán más duros, pero tus multiplicadores crecen para siempre.', 'You go back to stage 1 as in the League. Enemies will be tougher, but your multipliers keep growing forever.')}</p>
+      <div class="row"><button class="btn" id="p-no">${L('Todavía no', 'Not yet')}</button><button class="btn primary" id="p-yes">${L('¡Ascender!', 'Ascend!')}</button></div>`);
+    $('#p-no').onclick = closeModal;
+    $('#p-yes').onclick = () => { const r = Core.ascend(); closeModal(); if (r) { Audio8.play('legend'); banner(L('¡Ascensión! Rango ', 'Ascension! Rank ') + S().asc.rank, '+' + r.ess + L(' Esencia · +', ' Essence · +') + r.medals + L(' medallas', ' medals'), '#ffd23f'); } Core.save(); refresh(true); };
+  }
   function prestigeModal() {
     const g = Core.medalGain();
     openModal(`<h2>${L('¿Entrar en la Liga?', 'Enter the League?')}</h2><p>${L(`Ganarás <b style="color:var(--yellow)">+${g} medallas</b> (+${g * 3}% de daño y monedas para siempre) y ${g} Puntos de Liga para la tienda.`, `You will earn <b style="color:var(--yellow)">+${g} medals</b> (+${g * 3}% damage and coins forever) and ${g} League Points for the shop.`)}</p>

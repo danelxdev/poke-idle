@@ -128,3 +128,32 @@ for (const [stat, name, icon, tiers, tpl] of [
 ]) {
   tiers.forEach(([goal, reward], i) => ACHIEVEMENTS.push({ id: stat + goal, stat, goal, reward, icon, name: name + (tiers.length > 1 ? ' ' + ['I', 'II', 'III', 'IV', 'V'][i] : ''), desc: tpl(abbr(goal)) }));
 }
+
+// ---------------- Ascensión y Duelos Maestros (contenido de final de partida) ----------------
+// Ascender hace una Liga y además sube el Rango: los enemigos aguantan x1,25 por rango, pero cada Esencia
+// da x1,05 de daño y x1,03 de monedas para siempre (se acumulan multiplicando, sin techo).
+const ASC = { min: 500, hpRank: 1.25, dmgEss: 1.05, coinEss: 1.03, gainBase: 400, gainDiv: 50, gainExp: 1.35 };
+const ascGain = ms => (ms < ASC.min ? 0 : Math.floor(Math.pow((ms - ASC.gainBase) / ASC.gainDiv, ASC.gainExp)));
+// Duelos Maestros: cuando ganas los 20 duelos de Nico sigue una escalera sin fin
+const MASTER = { hp: 15, g: 1.16, time: 50, bonus: 0.005 };
+const MASTER_TALK = [
+  ['Ya no queda nadie más fuerte que tú... salvo un rival que no se rinde. ¡Otra vez!', 'There is no one stronger than you left... except a rival who never gives up. Again!', 'Increíble. Cada derrota me hace más fuerte.', 'Incredible. Every defeat makes me stronger.'],
+  ['He entrenado en cada región para este momento. ¡No me voy a contener!', 'I trained in every region for this moment. I am not holding back!', 'Aún me falta un poco... pero estoy cerca.', 'I am still a bit short... but I am close.'],
+  ['Mi equipo y yo hemos cambiado la estrategia por completo. ¡Prepárate!', 'My team and I changed our strategy completely. Get ready!', 'Tu forma de combatir siempre me sorprende.', 'The way you battle always surprises me.'],
+  ['Dicen que el que no se rinde acaba ganando. ¡Hoy voy a comprobarlo!', 'They say whoever never gives up ends up winning. Today I will find out!', 'Hoy no ha podido ser. Mañana, quién sabe.', 'Not today. Tomorrow, who knows.'],
+  ['No me importa cuántas veces pierda: quiero ser el mejor, y para eso tengo que ganarte.', 'I do not care how many times I lose: I want to be the best, and for that I have to beat you.', 'Otra lección. Gracias por no ponérmelo fácil.', 'Another lesson. Thanks for not making it easy.'],
+  ['Esta vez he traído lo mejor de cada tipo. ¡A ver cómo respondes!', 'This time I brought the best of every type. Let us see how you respond!', 'Qué batalla... me he divertido muchísimo.', 'What a battle... I had a great time.'],
+];
+const masterEnc = t => ({ id: 'master', master: t, region: 9, meet: 1, types: RIVAL_TYPES[(t - 1) % RIVAL_TYPES.length], pre: L(MASTER_TALK[(t - 1) % 6][0], MASTER_TALK[(t - 1) % 6][1]), post: L(MASTER_TALK[(t - 1) % 6][2], MASTER_TALK[(t - 1) % 6][3]), hp: MASTER.hp * Math.pow(MASTER.g, t - 1), time: MASTER.time });
+const masterReward = t => {
+  const r = { gems: 150 + 25 * t, dust: 100 + 20 * t, shards: 2, egg: 3, item: [0, 35, 65], tk: t % 5 === 0 ? { master: 1 } : { ultra: 1 } };
+  if (t % 5 === 0) r.ess = 1;
+  return r;
+};
+for (const [stat, name, icon, tiers, tpl] of [
+  ['ascends', L('Ascensión', 'Ascension'), 'crown', [[1, 150], [3, 300], [10, 700], [25, 1500]], n => L('Asciende ' + n + ' veces', 'Ascend ' + n + ' times')],
+  ['essence', L('Esencia', 'Essence'), 'star', [[10, 100], [50, 300], [200, 800], [1000, 2000]], n => L('Reúne ' + n + ' de Esencia', 'Gather ' + n + ' Essence')],
+  ['rivalMaster', L('Maestro de Nico', 'Nico’s master'), 'trophy', [[1, 100], [5, 250], [10, 500], [25, 1200], [50, 3000]], n => L('Supera el nivel ' + n + ' de los Duelos Maestros', 'Clear Master Duel level ' + n)],
+]) {
+  tiers.forEach(([goal, reward], i) => ACHIEVEMENTS.push({ id: stat + goal, stat, goal, reward, icon, name: name + ' ' + ['I', 'II', 'III', 'IV', 'V'][i], desc: tpl(abbr(goal)) }));
+}
