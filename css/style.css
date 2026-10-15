@@ -924,3 +924,44 @@ html.a-rm .supportbtn::before, html.a-rm .supportbtn::after, html.a-rm .kofi.her
 .slider:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; border-radius: 6px; }
 @media (max-width: 860px) { .enemy-box { top: 23%; } }
 @media (min-width: 1500px) { .layout { grid-template-columns: 1fr clamp(440px, 27vw, 640px); } .tab-body { font-size: 1.08em; } }
+
+/* ---- v22: móvil con barras del navegador: unidades de altura dinámica (dvh) y zonas seguras ---- */
+@supports (height: 100dvh) {
+  .center-panel { max-height: 94dvh; }
+  .modal-box { max-height: calc(94dvh / var(--tz, 1)); }
+  .arena { max-width: calc((100dvh - 90px) * 5 / 3); }
+  .modal-box .maplist { max-height: 62dvh; }
+  .dd-pop { max-height: 50dvh; }
+  .pickwrap { max-height: 50dvh; }
+  .statbody { max-height: 62dvh; }
+  .tblwrap { max-height: 46dvh; }
+  .trklist { max-height: 52dvh; }
+  .avgrid { max-height: 26dvh; }
+  .titlist { max-height: 30dvh; }
+  .bggrid { max-height: 24dvh; }
+  .welc { max-height: 66dvh; }
+  .rk-body { max-height: 46dvh; }
+}
+/* notch y barra de inicio de iOS/Android (viewport-fit=cover) */
+.screen { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+.modal { padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+.toast { bottom: calc(18px + env(safe-area-inset-bottom)); }
+/* el selector de volumen: el tirador (que sobresale) ya no ensancha la ventana */
+.slider .trk { margin: 0 9px; }
+/* pantallas cortas (móvil con barras visibles, o apaisado): título más compacto para que Jugar, Google y Ko-fi se vean sin desplazar */
+@media (max-height: 640px) {
+  #t-badges, #scr-title .tag { display: none; }
+  .logo-ball img { width: 44px; height: 44px; }
+  #scr-title .logo { font-size: clamp(38px, 11vw, 64px); }
+  .starter-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .starter { padding: 8px 4px; }
+  .starter img { width: 56px; height: 56px; }
+  .starter b { font-size: 15px; }
+  .starter .type, .starter small { display: none; }
+}
+@media (max-width: 400px) { .starter-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; } .starter img { width: 56px; height: 56px; } .starter b { font-size: 14px; } }
+/* la ventana de ajustes no se hace más ancha que el modal en móviles estrechos (88vw > ancho útil) */
+.set { min-width: min(480px, calc(100vw - 64px)); }
+/* perfil: el campo del nombre se encoge en vez de ensanchar la ventana */
+.profhead > div, .nickrow { min-width: 0; max-width: 100%; }
+.nickrow .search, .profhead .search { min-width: 0; flex: 1 1 auto; width: 100%; }
