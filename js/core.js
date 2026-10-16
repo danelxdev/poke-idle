@@ -1380,7 +1380,7 @@ const Core = (() => {
     get S() { return S; }, load, save, freezeSave, eventWeek: () => weekIdx(), wipe, fresh, setRng(f) { rnd = f; },
     route, routeIdx, routeData, regionOf, regionOfRoute, loopOf, isBoss, bossTier, bossTime, enemyHp, killCoins, coinMult, globalDmg, monDmg, monRate, eff,
     upPlan, buyUpN, coinsPerDust, dc, srcCoins, previewUp, regCount, isReg, ownerCheck, isStale: () => stale, claim,
-    levelCost, levelCostN, maxAffordable, upCost, shopCost, pokeBallPrice, critChance, critMult, catchChance, teamDps, tapDmg, medalGain, medalFor, leagueRec, dexCount, badgeCount,
+    levelCost, levelCostN, maxAffordable, upCost, shopCost, pokeBallPrice, critChance, critMult, catchChance, teamDps, tapDmg, medalGain, medalFor, leagueRec, shinyRate, dexCount, badgeCount,
     genUnlocked, unlockedGens, skillOn, skillReady, useSkill, goldenChance, gemMult,
     tick, tap, advance, goStage, fightBoss, bossEase, bossReady, levelUp, starUp, setTeam, buySlot, buyUp, buyShop, addMon,
     featured, featuredEpic, featuredLegend, ballAvailable, ticketCost, ticketPrice, buyTicket, giveTickets, pull, freePull, freePullReady, toggleShiny, moveOf, tierOf, unsetTeam, setPaused, itemOf, itemVal, itemDmg, equip, unequip, recycleItem, recycleSpare, buyItem, synergies, synMult, teamItemSum,

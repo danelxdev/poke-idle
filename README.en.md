@@ -1,19 +1,32 @@
 # PokéIdle
 
+<p align="center">
+  <a href="https://pokeidlegame.com"><img src="promo/PokeIdle_promo_1920x1080.png" alt="PokéIdle: train, evolve and collect every Pokémon" width="100%"></a>
+</p>
+
+<p align="center">
+  <a href="https://pokeidlegame.com"><b>▶ Play free at pokeidlegame.com</b></a> · <a href="README.md">Español</a>
+</p>
+
+<p align="center">
+  <a href="promo/PokeIdle_trailer_720p.mp4"><img src="promo/PokeIdle_preview.gif" alt="PokéIdle trailer" width="280"></a><br>
+  <sub><a href="promo/PokeIdle_trailer_720p.mp4">Watch the full trailer (34 s, with sound)</a></sub>
+</p>
+
 A browser idle game for Pokémon fans, with a ticket-based gacha. It is a non-profit fan project made with plain HTML, CSS and JavaScript (no dependencies). Open `index.html` through any web server (or play the hosted version) — it is also installable as an offline app (PWA). The game is available in **English and Spanish** (the in-game language switch is on the title screen and in Settings). The full technical documentation is in [`README.md`](README.md) (Spanish).
 
 ## Features
 
-- **971 Pokémon from 9 regions** with animated sprites and shiny forms, **134 routes** and **134 bosses** (gym leaders, Elite Four, champions, legendaries, final bosses).
+- **1,027 Pokémon from 9 regions** (971 species plus 56 regional forms) with animated sprites and shiny forms, **134 routes** and **134 bosses** (gym leaders, Elite Four, champions, legendaries, final bosses).
 - **Automatic combat**: your team fights on its own; tap enemies, use active skills, level up, evolve and learn stronger moves.
 - **Ticket gacha**: Poké, Great, Ultra, Master, regional, and featured balls, with rarities, pity, shinies and duplicate stars.
 - **Eggs and breeding**: four egg types hatched with victories (also offline), natures (25), IVs, and a Nursery where parents pass IVs and nature to the offspring.
 - **Type effectiveness** made visible: enemy types, ▲/▼ tags on every card, route recommendations and a “Best team” button.
-- **Weekly events** (a featured type each week with a damage bonus, boss in 4 difficulties, quests and its own ball) and the infinite **Battle Tower** with guardian rules.
+- **Weekly events** (a featured type each week with a damage bonus, boss in 4 difficulties and quests) and the infinite **Battle Tower** with guardian rules.
 - **Rival and trainers**: Nico challenges you twice in every region (20 duels with a short story, three Pokémon in a row on one timer, permanent +1% damage for each first win and a daily rematch), and trainers show up mid-route with several Pokémon in a row.
 - **Complete Pokédex**: an entry for every Pokémon (base stats, weaknesses and resistances, full evolution line, regional and Mega forms, moves, where it appears, times defeated and your own Pokémon), search, filters by region, type and status, sorting, completion by region and a bestiary.
 - **Google account or guest play**, cloud save, a public profile and **rankings** (Supabase; see `supabase/README.md`). Optional: without configuration the game works as before. You choose your public name the first time you sign in, with a live check that it is free (needs `nickname_available` from `supabase/schema.sql`: run it again, it is idempotent).
-- **Keyboard shortcuts** (desktop): Space/F attacks, Q/W/E skills, 1–7 tabs, ←/→ stage, B boss, M map, P profile, O settings, H advice, X multiplier, `?` for the full list. In gacha and evolution animations, Space/Enter continues.
+- **Keyboard shortcuts** (desktop): Space/F attacks, Q/W/E skills, 1–7 tabs, ←/→ stage, B boss, M map, P profile, O settings, X multiplier, `?` for the full list. In gacha and evolution animations, Space/Enter continues.
 - **Visible, editable profile**: the header icon (and the title-screen card) shows your Pokémon with its animation; press it to edit name, avatar, frame, background and title. When signed in, **the cloud game always wins** (the local one is kept as a backup).
 - **Feature tips** (each new feature explained once, when it becomes useful), **cosmetics** (portrait frames and arena backgrounds) and a complete **welcome-back summary**.
 - **“What should I do now?” guide**, enemy **auras**, a **profile with titles and avatar**, Pokédex favorites and exclusive endgame items.

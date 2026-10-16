@@ -580,6 +580,7 @@ const UI = (() => {
         if (Core.freePullReady()) h += `<div class="feat free"><span>${ico('tkPoke', 48)}</span><div><b>${L('¡Tirada diaria gratis!', 'Free daily pull!')}</b><small>${L('Una Poké Ball gratis cada día, sin ticket', 'A free Poké Ball every day, no ticket needed')}</small></div><button class="btn primary" data-act="freepull">${L('Abrir', 'Open')}</button></div>`;
         const feat = (d, tag, cls) => `<div class="feat ${cls || ''}"><span class="tagx">${tag}</span>${spb(d, 66)}<div><b>${DEX[d].name}</b><small>${RARITY[Core.RAR[d]].name}</small><br>${typeTags(d)}</div></div>`;
         h += `<h3>${L('Destacados de la Bola Destacada', 'Featured Ball highlights')}</h3>` + feat(fl, L('LEGENDARIO · SEMANA', 'LEGENDARY · WEEK'), 'leg') + feat(fe, L('ÉPICO · 3 DÍAS', 'EPIC · 3 DAYS'), 'epic');
+        h += `<p class="hint shinyodds">✨ ${L('Cada Pokémon del gacha puede salir <b>shiny</b>', 'Every gacha Pokémon can be <b>shiny</b>')}: ${+(Core.shinyRate() * 100).toFixed(2)}% · ${L('en huevos', 'in eggs')} ${+(Core.shinyRate() * EGG_SHINY * 100).toFixed(2)}%</p>`;
         h += `<div class="pity">${L('Épico garantizado en', 'Epic guaranteed in')} <b>${Math.max(0, PITY_EPIC - s.pityE)}</b> ${L('tiradas', 'pulls')} · ${L('Legendario en', 'Legendary in')} <b>${Math.max(0, PITY - s.pity)}</b> ${L('(con tickets Super, Ultra o Maestro)', '(with Great, Ultra or Master tickets)')}${s.bannerLost ? '<br><b style="color:#ffd23f">' + L('¡El próximo legendario de la Bola Destacada será el destacado!', 'The next legendary from the Featured Ball will be the featured one!') + '</b>' : ''}<div class="bar"><i style="width:${s.pity / PITY * 100}%"></i></div></div>`;
         const ballCard = ([id, b]) => {
           const tk = TICKETS[b.ticket];
@@ -789,7 +790,7 @@ const UI = (() => {
     if (!list.length) return '<p class="hint">' + L('No hay ningún Pokémon con ese nombre.', 'No Pokémon with that name.') + '</p>';
     return '<div class="pickgrid">' + list.map(({ k, m, dps }) => {
       const at = s.team.indexOf(k);
-      return `<button class="pk ${at === pickSlot ? 'cur' : ''}" data-k="${k}" style="--rc:${RARITY[Core.RAR[m.dex]].color}"><img src="${por(Core.fdex(m), m.shiny)}" loading="lazy">
+      return `<button class="pk ${at === pickSlot ? 'cur' : ''}" data-k="${k}" style="--rc:${RARITY[Core.RAR[m.dex]].color}"><span class="pk-mon">${Sprites.html(Core.fdex(m), m.shiny, 56, false)}</span>
         <b>${m.shiny ? '✨' : ''}${DEX[Core.fdex(m)].name}</b><small>${L('Nv.', 'Lv.')} ${m.lvl} · ${starsHtml(m.stars)}</small><small>${fmt(dps)}/s</small>${at >= 0 ? `<span class="slot">${at + 1}</span>` : ''}</button>`;
     }).join('') + '</div>';
   }
@@ -1320,6 +1321,7 @@ const UI = (() => {
     const unit = { stage: L('etapa', 'stage'), rank: L('Rango', 'Rank'), tower: L('piso', 'floor'), master: L('nivel', 'level'), dex: 'Pokémon', medals: L('medallas', 'medals'), weekly: L('derrotas', 'defeats') };
     const sub = (id, r) => (id === 'stage' && r.extra > 0 ? L('Rango ', 'Rank ') + r.extra : id === 'rank' ? L('Esencia ', 'Essence ') + fmt(r.extra || 0) : id === 'weekly' && r.extra > 0 ? r.extra + L(' jefes del evento', ' event bosses') : '');
     try {
+      if (!b && Cloud.user) { try { await Cloud.submitScore(true); } catch (e) { /* sin red: se ve el ranking igual */ } }     // al abrir, primero se suben tus marcas actuales
       const { rows, me } = await Cloud.board(want);
       if (rkBoard !== want || !$('#rk-body')) return;
       $('#rk-body').innerHTML = rows.length ? rows.map(r => `<div class="rkrow ${r.is_me ? 'me' : ''}"><span class="rkn">#${r.rank}</span><span class="pavatar sm rk-av" data-pf="${String(r.frame || 'classic').replace(/[^a-z]/g, '')}">${Sprites.html(Sprites.DEX[r.avatar] ? r.avatar : 25, false, 34, true)}</span><div class="rki"><b>${String(r.nickname).replace(/[<>&"]/g, '')}</b><small>${((TITLES.find(t => t.id === r.title) || {}).name || '')}${sub(want, r) ? ' · ' + sub(want, r) : ''}</small></div><span class="rkv">${fmt(r.value)}<small>${unit[want]}</small></span>${Cloud.user && !r.is_me ? `<button class="rkflag" data-rp="${r.user_id}" aria-label="${L('Denunciar', 'Report')}" title="${L('Denunciar', 'Report')}">⚑</button>` : ''}</div>`).join('') : `<p class="hint">${L('Todavía no hay nadie en este ranking. ¡Sé el primero!', 'Nobody is in this ranking yet. Be the first!')}</p>`;
@@ -1582,7 +1584,7 @@ const UI = (() => {
     b.style.setProperty('--bc', color || 'var(--yellow)');
     b.classList.remove('hidden');
     b.style.animation = 'none'; void b.offsetWidth; b.style.animation = '';
-    clearTimeout(bannerT); bannerT = setTimeout(() => b.classList.add('hidden'), 2600);
+    clearTimeout(bannerT); bannerT = setTimeout(() => b.classList.add('hidden'), 2800);       // lo que dura la animación de entrada y salida
   }
   let toastT = null;
   const CUES = { boss: ['¡Jefe!', 'Boss!'], duel: ['¡Duelo!', 'Duel!'], legend: ['¡Legendario!', 'Legendary!'], rare: ['¡Raro!', 'Rare!'], item: ['Objeto', 'Item'], ticket: ['Tickets', 'Tickets'], levelup: ['Nivel', 'Level up'], evolve: ['Evolución', 'Evolution'], death: ['Derrota', 'Defeat'], win: ['Victoria', 'Victory'], trainer: ['Entrenador', 'Trainer'], unlock: ['Desbloqueado', 'Unlocked'], pop: ['Gacha', 'Gacha'] };

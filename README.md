@@ -1,5 +1,18 @@
 # PokéIdle
 
+<p align="center">
+  <a href="https://pokeidlegame.com"><img src="promo/PokeIdle_promo_1920x1080.png" alt="PokéIdle: entrena, evoluciona y colecciona a todos los Pokémon" width="100%"></a>
+</p>
+
+<p align="center">
+  <a href="https://pokeidlegame.com"><b>▶ Jugar gratis en pokeidlegame.com</b></a> · <a href="README.en.md">English</a>
+</p>
+
+<p align="center">
+  <a href="promo/PokeIdle_trailer_720p.mp4"><img src="promo/PokeIdle_preview.gif" alt="Tráiler de PokéIdle" width="280"></a><br>
+  <sub><a href="promo/PokeIdle_trailer_720p.mp4">Ver el tráiler completo (34 s, con sonido)</a></sub>
+</p>
+
 Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. Es un proyecto de fan sin ánimo de lucro, hecho con HTML, CSS y JavaScript sin dependencias. Para jugar, abre `index.html`.
 
 ## Qué incluye
@@ -13,11 +26,11 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
   - **Legendarios:** 9, de Mewtwo a Koraidon.
   - **Jefes finales:** 8, como Rojo, Rayquaza, Giratina, Eternatus, Calyrex y Arceus.
 - **Huevos, naturalezas, IVs y tipos eficaces**: incubadora con 4 tipos de huevo, 25 naturalezas, IVs entrenables con monedas y ayudas visuales de eficacia en combate (ver más abajo).
-- **Eventos semanales y Torre de batalla**: un tipo protagonista cada semana con jefe, misiones y bola propia, y una torre infinita con pisos de reglas especiales.
+- **Eventos semanales y Torre de batalla**: un tipo protagonista cada semana con jefe y misiones, y una torre infinita con pisos de reglas especiales.
 - **Rival, entrenadores y Pokédex completa**: el rival Nico te desafía dos veces por región (20 duelos con historia), aparecen entrenadores con varios Pokémon seguidos y cada Pokémon tiene una ficha con estadísticas, debilidades, evolución y dónde aparece.
-- **Guía «¿Qué hago ahora?»**, **auras** en los enemigos, **perfil con títulos y avatar**, favoritos en la Pokédex y objetos exclusivos de final de partida.
+- **Auras** en los enemigos, **perfil con títulos y avatar**, favoritos en la Pokédex y objetos exclusivos de final de partida.
 - **Cuenta con Google o como invitado**, partida en la nube, perfil público y **rankings** (Supabase; ver `supabase/README.md`). Opcional: sin configurar, el juego funciona como siempre.
-- **Atajos de teclado** (escritorio): Espacio/F ataca, Q/W/E habilidades, 1–7 pestañas, ←/→ etapa, B jefe, M mapa, P perfil, O ajustes, H consejo, X multiplicador, `?` lista completa. En las animaciones de gacha y evolución, Espacio/Intro continúa.
+- **Atajos de teclado** (escritorio): Espacio/F ataca, Q/W/E habilidades, 1–7 pestañas, ←/→ etapa, B jefe, M mapa, P perfil, O ajustes, X multiplicador, `?` lista completa. En las animaciones de gacha y evolución, Espacio/Intro continúa.
 - **Perfil visible y editable**: el icono de la cabecera (y la tarjeta de la pantalla de inicio) muestra a tu Pokémon con su animación; al pulsarlo editas nombre, avatar, marco, fondo y título. Con la sesión iniciada **manda siempre la partida de la nube** (la local se guarda como copia).
 - **Consejos de novedades** (cada función se explica una sola vez, cuando se hace útil), **cosméticos** (marcos de retrato y fondos de arena) y un **resumen al volver** completo.
 - **Final de partida sin techo**: **Ascensión** (una segunda Liga con Rango, Esencia y multiplicadores permanentes que se acumulan) y **Duelos Maestros** de Nico, una escalera infinita cada vez más dura.
@@ -28,7 +41,7 @@ Juego incremental (idle) de Pokémon para navegador, con gacha de Poké Balls. E
 ## Cómo se juega
 
 - Tu equipo de hasta **6 Pokémon combate solo**. Tócalos a ellos para hacer daño extra. Un Pokémon con ventaja de tipo hace x2.
-- Las **monedas** sirven para subir de nivel a tus Pokémon (evolucionan en los niveles 20 y 45), abrir huecos de equipo y comprar 13 mejoras (daño, monedas, críticos, afinidad de tipo, daño contra jefes, toque automático, polvo estelar…).
+- Las **monedas** sirven para subir de nivel a tus Pokémon (evolucionan en los niveles 20 y 45), abrir huecos de equipo y comprar 13 mejoras (daño, monedas, críticos, afinidad de tipo, daño contra jefes, toque automático, Pokémon dorados…).
 - **3 habilidades activas** con enfriamiento: Furia (x3 de daño), Fiebre del Oro (x3 de monedas) y Señuelo (x6 de capturas).
 - **Mapa del mundo** para elegir en qué ruta farmear.
 - Los Pokémon **dorados** dan gemas y, a veces, un ticket Super.
@@ -73,7 +86,7 @@ El juego está en **español** y en **inglés**. Se elige según el idioma del n
 | Épico | 3 500 | raro o mejor, mayoría épico | 16 |
 | Legendario | 8 000 | épico o legendario (34 %) | 24 |
 
-Caen de los Pokémon derrotados (0,08 % por victoria, ×10 si es dorado), de la primera victoria contra cada jefe, de la racha de 7 días y de las misiones semanales; también se compran con gemas. Tienes una incubadora gratis (más caras: 150, 600 y 2 400 gemas) y hasta 10 huevos guardados (si está lleno, el huevo se convierte en polvo). La tienda de la Liga tiene «Calor de Incubación» (−5 % de victorias por nivel). Los Pokémon de huevo tienen un 50 % más de probabilidad de ser shiny. Las partidas anteriores reciben un huevo común de regalo.
+Caen de los Pokémon derrotados (0,08 % por victoria, ×10 si es dorado), de la primera victoria contra cada jefe, de la racha de 7 días y de las misiones semanales; también se compran con gemas. Tienes una incubadora gratis (más caras: 150, 600 y 2 400 gemas) y hasta 10 huevos guardados (si está lleno, el huevo se convierte en monedas). La tienda de la Liga tiene «Calor de Incubación» (−5 % de victorias por nivel). Los Pokémon de huevo tienen un 50 % más de probabilidad de ser shiny. Las partidas anteriores reciben un huevo común de regalo.
 
 **Naturalezas (25).** Como en los juegos: una sube un eje y baja otro (las 5 neutras no cambian nada). Ejes: Ataque→Daño (+10 % / −5 %), Velocidad (+8 % / −4 %), At. Esp.→Crítico (+3 % / −1,5 % de probabilidad), Defensa→Botín (+4 % / −2 % de monedas por Pokémon del equipo) y Def. Esp.→Jefes (+10 % / −5 % de daño a jefes).
 
@@ -91,7 +104,7 @@ Se desbloquea al llegar a la etapa 10. Los retos sustituyen al combate normal (u
 - **Jefe del evento** (uno de los Pokémon más fuertes de ese tipo) en 4 dificultades. Vida = vida de un Pokémon salvaje en tu etapa máxima × 3 / 7 / 16 / 40, con 45 / 50 / 55 / 60 s. La primera victoria de cada semana da gemas, tickets y huevos (hasta 160 gemas, 2 Ultra, 1 Maestro y un huevo épico). Cada botón muestra tu «Poder» (≥100 % = lo vences a tiempo).
 - **Misiones del evento**: derrotar 150 y 600 Pokémon del tipo de la semana y abrir 10 Bolas del Evento.
 
-**Torre de batalla.** Pisos infinitos, cada uno contra un Pokémon de un tipo distinto. Piso *f*: vida = salvaje en tu etapa máxima × 2,5 × 1,07^(f−1) en 40 s. Sigues subiendo hasta que caes. Cada 5 pisos hay un guardián (×1,5 de vida) con una regla: sin objetos, sin sinergias, solo del tipo del piso (los demás hacen la mitad), sin críticos, contrarreloj (mitad de tiempo, −45 % de vida) o armadura (+60 % de vida, +40 % de tiempo). Las recompensas (gemas, polvo, tickets cada 5 pisos y huevos cada 10) se dan solo la primera vez que superas cada piso. Puedes empezar desde cualquier guardián superado. El récord da **+0,3 % de daño permanente por piso**.
+**Torre de batalla.** Pisos infinitos, cada uno contra un Pokémon de un tipo distinto. Piso *f*: vida = salvaje en tu etapa máxima × 2,5 × 1,07^(f−1) en 40 s. Sigues subiendo hasta que caes. Cada 5 pisos hay un guardián (×1,5 de vida) con una regla: sin objetos, sin sinergias, solo del tipo del piso (los demás hacen la mitad), sin críticos, contrarreloj (mitad de tiempo, −45 % de vida) o armadura (+60 % de vida, +40 % de tiempo). Las recompensas (gemas, monedas, tickets cada 5 pisos y huevos cada 10) se dan solo la primera vez que superas cada piso. Puedes empezar desde cualquier guardián superado. El récord da **+0,3 % de daño permanente por piso**.
 
 Con la simulación de equilibrio: en el techo de cada etapa un jugador supera sin problema hasta el piso ~14 y el jefe fácil/normal del evento; los pisos con regla, el jefe difícil y el extremo exigen preparar el equipo (tipos, objetos y mejoras).
 
@@ -102,7 +115,7 @@ En la pestaña Gacha, bajo la incubadora: eliges un Pokémon **principal** (da l
 - **IVs de la cría**: cada IV hereda el mejor de los dos padres con un 70 % (el peor con un 30 %) más un bonus aleatorio de 0 a 2. Repetir generaciones tiende a los IVs perfectos.
 - **Naturaleza**: eliges si hereda la del principal o la de la pareja.
 - **Shiny**: si alguno de los dos tiene la versión shiny, la probabilidad se duplica (y el huevo ya da +50 %).
-- Al eclosionar suma una copia y polvo como cualquier repetido, y una ventana compara tus genes con los de la cría para que elijas con cuáles te quedas.
+- Al eclosionar suma una copia y monedas como cualquier repetido, y una ventana compara tus genes con los de la cría para que elijas con cuáles te quedas.
 
 ## App instalable (PWA) y avisos
 
@@ -147,9 +160,9 @@ El botón **Equipos** de la pestaña Equipo guarda hasta 4 equipos con nombre y 
 - **Objetos equipables**: cada Pokémon lleva uno. Hay **17 tipos** en 3 rarezas (Común x1, Raro x1,6 y Épico x2,5):
   - Ataque: Cinta Elección (+20 % daño), Vidasfera (+35 % daño, −10 % velocidad), Pañuelo Elección (+10 % velocidad), Gafas Zoom (+6 % crítico), Orbe de tipo, **Cinta Experto** (+25 % en golpes súper eficaces), **Garra Remate** (+50 % a enemigos con menos del 30 % de vida) y **Banda Doble** (12 % de atacar dos veces).
   - Jefes: Banda Focus (+30 % a jefes), **Concha Impulso** (+60 % en los primeros 10 s de un jefe) y **Reloj de Arena** (+1 s contra jefes y retos, de todo el equipo).
-  - Economía (afectan a todo el equipo): Moneda Amuleto (+8 % monedas), Cascabel Fortuna (+10 % tickets), Guante de Entrenador (+10 % toque), **Huevo Suerte** (+15 % eclosión), **Colmillo Gema** (+10 % gemas de jefes) y **Polvo Brillo** (+12 % polvo).
+  - Economía (afectan a todo el equipo): Moneda Amuleto (+8 % monedas), Cascabel Fortuna (+10 % tickets), Guante de Entrenador (+10 % toque), **Huevo Suerte** (+15 % eclosión), **Colmillo Gema** (+10 % gemas de jefes).
 - Los sueltan los jefes (cuanto más difícil, mejor rareza), los duelos del rival y, con poca probabilidad, los Pokémon salvajes y los entrenadores.
-- **Mochila**: reciclar por polvo, comprar uno al azar (150 de polvo), **Taller** (elige el objeto común que quieras por 600) y **Fusión**: 3 objetos iguales sin usar → 1 de la rareza siguiente (40 de polvo de Común a Raro, 160 de Raro a Épico).
+- **Mochila**: reciclar por monedas, comprar uno al azar, **Taller** (elige el objeto común que quieras) y **Fusión**: 3 objetos iguales sin usar → 1 de la rareza siguiente. Los precios en monedas se ajustan a tu etapa.
 - **Combos de objetos**: con 3 objetos distintos del mismo grupo en el equipo hay bonus. **Arsenal** (7 objetos de ataque): +10 % de daño con 3 y +20 % con 5. **Equipo de caza** (Banda Focus, Concha Impulso, Reloj de Arena, Cinta Experto, Garra Remate): +20 % de daño contra jefes con 3 y +35 % con 4. **Granja** (Moneda, Cascabel, Huevo Suerte, Colmillo, Polvo, Guante): +12 % monedas con 3 y +30 % con 5.
 - **Sinergias de equipo**: Afinidad de tipo (2 a 6 Pokémon del mismo tipo), Diversidad, Élite legendaria, Brillo compartido (shinies) y Equipo veterano (todos con ★3 o más).
 
@@ -157,7 +170,7 @@ El botón **Equipos** de la pestaña Equipo guarda hasta 4 equipos con nombre y 
 
 - **Nico, el rival**: te desafía **dos veces en cada región** (a mitad de camino y justo antes del campeón), 20 duelos en total con diálogos que cuentan una pequeña historia. Se abren al alcanzar su etapa y se aceptan desde la pestaña Retos.
 - Cada duelo son **3 Pokémon seguidos con un solo cronómetro**; su equipo de cada región usa tipos distintos, así que importan los tipos de tu equipo. Se muestra el **Poder** del equipo (≥100 % = lo vences a tiempo).
-- La primera victoria da gemas, polvo y tickets (en los segundos duelos, además, fragmentos Mega, un huevo y un objeto) y **+1 % de daño permanente**. Después puedes pedir una **revancha** al día por duelo (polvo y gemas).
+- La primera victoria da gemas, monedas y tickets (en los segundos duelos, además, fragmentos Mega, un huevo y un objeto) y **+1 % de daño permanente**. Después puedes pedir una **revancha** al día por duelo (monedas y gemas).
 - **Entrenadores**: de vez en cuando, en vez de un salvaje, aparece un entrenador con 2 Pokémon seguidos (3 desde la etapa 60). Al derrotar al último das un extra de monedas y, con suerte, gemas, tickets u objetos. Se ven en la tarjeta del enemigo (por ejemplo «Pescador Pablo 2/3»).
 
 ## Cuenta, nube y rankings (opcional)
@@ -180,7 +193,6 @@ Se activa rellenando `js/cloud-config.js` (guía completa en `supabase/README.md
 
 ## Guía, auras y perfil
 
-- **¿Qué hago ahora?** (botón de la estrella, arriba a la derecha): una lista corta, por orden de importancia, de lo más útil en este momento: recompensas por recoger, huevos listos, tirada gratis, huecos libres, si tu equipo está listo para el jefe (y qué hacer si no), el duelo de Nico, la Torre, objetos que fusionar o equipar, Megas desbloqueables y, sobre todo, **cuándo conviene entrar en la Liga o ascender**. Cada consejo tiene un botón «Ir» que te lleva a la pestaña.
 - **Auras**: a partir de la etapa 150, algunos enemigos salvajes (del 8 % al 35 % según la etapa) llevan una aura y dan **+50 % de monedas**: **férrea** (−20 % de daño recibido), **vital** (recupera 2 % de vida por segundo) o **de protección** (los Pokémon de un tipo concreto hacen −50 %). Se ven junto al nombre del enemigo (✦). Los jefes no tienen aura. Premian un equipo con tipos variados.
 - **Perfil** (Ajustes): nombre, avatar (uno de tus Pokémon) y **título**. Hay 29 títulos que se desbloquean jugando: etapas y campeones de cada región, Pokédex, shinies, crianza, Torre, bestiario, entrenadores, Liga, Megas, Nico, Ascensión, música… El nombre y el título salen en la pantalla de inicio.
 - **Favoritos** en la Pokédex (la estrella de la ficha) y un filtro «Favoritos». Los filtros y el orden de la Pokédex se **recuerdan** entre sesiones.
@@ -194,7 +206,7 @@ Las medallas de la Liga suman de forma lineal (+3 % cada una), así que a partir
 - **Ascender** (se desbloquea al llegar a la etapa 500 y se hace desde la pestaña Liga): es una Liga normal (mismas medallas y mismo reinicio) que además sube tu **Rango** en 1 y te da **Esencia** = ((etapa − 400) / 50)^1,35 redondeada (en la etapa 500 son 2, en la 650 son 8, en la 800 son 16 y en la 1000 son 28).
 - **Cada Esencia** da **×1,05 de daño y ×1,03 de monedas para siempre**, y se acumula multiplicando. No se gasta ni se pierde.
 - **Cada Rango** hace que todos los enemigos y retos tengan **×1,25 de vida**: la dificultad nunca deja de subir, pero la Esencia crece más rápido que ella. El Rango se ve en la etapa (por ejemplo «Rango 3»).
-- **Duelos Maestros**: al ganar los 20 duelos de Nico se abre una escalera sin fin. Cada nivel es un duelo de 3 Pokémon seguidos con el mejor de cada tipo, con ×15 de la vida de un jefe de tu mejor etapa (×1,16 más por nivel). Cada nivel superado da gemas, polvo, fragmentos Mega, un huevo legendario, un objeto y un ticket, **+0,5 % de daño permanente**, y cada 5 niveles un ticket Maestro y **1 de Esencia**.
+- **Duelos Maestros**: al ganar los 20 duelos de Nico se abre una escalera sin fin. Cada nivel es un duelo de 3 Pokémon seguidos con el mejor de cada tipo, con ×15 de la vida de un jefe de tu mejor etapa (×1,16 más por nivel). Cada nivel superado da gemas, monedas, fragmentos Mega, un huevo legendario, un objeto y un ticket, **+0,5 % de daño permanente**, y cada 5 niveles un ticket Maestro y **1 de Esencia**.
 - Logros nuevos: Ascensión, Esencia y Maestro de Nico.
 - **Ritmo medido** (jugador activo 2 h al día): sin Ascensión el avance se frena hacia la etapa ~700 y apenas se mueve en semanas. Ascendiendo cada vez que la Esencia ganada es al menos el 30 % de la que ya tienes, se llega a la etapa ~590 el día 14, ~750 el día 18 y ~830 el día 21, y el avance sigue a unas 20–25 etapas al día (más despacio cuanto mayor es el Rango). No hay techo: pasada la etapa 1340 las rutas se repiten con enemigos más fuertes.
 
@@ -234,7 +246,7 @@ Si te gusta, puedes invitarme a un café en [Ko-fi](https://ko-fi.com/danelalons
 
 ## Liga Pokémon (prestigio)
 
-A partir de la etapa 60 puedes reiniciar el viaje a cambio de **medallas** (+3% de daño y monedas cada una) y **Puntos de Liga**. Los puntos se gastan en la **Tienda de la Liga**, con 14 mejoras permanentes: daño, monedas, niveles iniciales, huecos de equipo, ganancias offline, capturas, shinies, gemas, habilidades, polvo, daño por toque, críticos, descuento en Poké Balls y tiempo contra jefes.
+A partir de la etapa 60 puedes reiniciar el viaje a cambio de **medallas** (+3% de daño y monedas cada una) y **Puntos de Liga**. Los puntos se gastan en la **Tienda de la Liga**, con 14 mejoras permanentes: daño, monedas, niveles iniciales, huecos de equipo, ganancias offline, capturas, shinies, gemas, habilidades, daño por toque, críticos, descuento en Poké Balls y tiempo contra jefes.
 
 Tu equipo también sigue ganando monedas hasta 8 horas mientras estás fuera, ampliable en la Liga.
 
