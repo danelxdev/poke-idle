@@ -246,7 +246,7 @@ Si te gusta, puedes invitarme a un café en [Ko-fi](https://ko-fi.com/danelalons
 
 ## Liga Pokémon (prestigio)
 
-A partir de la etapa 60 puedes reiniciar el viaje a cambio de **medallas** (+3% de daño y monedas cada una) y **Puntos de Liga**. Los puntos se gastan en la **Tienda de la Liga**, con 14 mejoras permanentes: daño, monedas, niveles iniciales, huecos de equipo, ganancias offline, capturas, shinies, gemas, habilidades, daño por toque, críticos, descuento en Poké Balls y tiempo contra jefes.
+A partir de la etapa 60 puedes reiniciar el viaje a cambio de **medallas** (+2% de daño y monedas cada una) y **Puntos de Liga**. Los puntos se gastan en la **Tienda de la Liga**, con 14 mejoras permanentes: daño, monedas, niveles iniciales, huecos de equipo, ganancias offline, capturas, shinies, gemas, habilidades, daño por toque, críticos, descuento en Poké Balls y tiempo contra jefes.
 
 Tu equipo también sigue ganando monedas hasta 8 horas mientras estás fuera, ampliable en la Liga.
 
@@ -261,7 +261,7 @@ Todas las constantes están en `Core.K` (`js/core.js`) y el ritmo se ha calibrad
 - **Coste de subir de nivel** = 6 · 1,15^(nivel−1) hasta el nivel 100 y 1,13 por nivel a partir de ahí (por rareza x1 a x2,4). **Daño por nivel**: x1,075 y x2 cada 25 niveles. El tramo suave evita que el juego se atasque del todo en las etapas altas.
 - **Huecos de equipo**: 150, 3 K, 100 K, 20 M y 15 B monedas.
 - **Jefes**: vida x6 (líder), x8 (Alto Mando), x11 (campeón), x15 (legendario) o x20 (final), con 30 a 60 s de tiempo.
-- **Medallas de la Liga** = ((etapa−45)/12)^1,4, cada una +3% de daño y monedas.
+- **Medallas de la Liga** = ((etapa−45)/12)^1,4, cada una +2% de daño y monedas.
 
 **Para que no se haga pesado**
 

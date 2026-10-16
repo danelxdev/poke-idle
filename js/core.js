@@ -198,7 +198,7 @@ const Core = (() => {
 
   // ---------------- fórmulas ----------------
   // hpB/hpG = vida del enemigo (base y crecimiento por etapa) · coinR = monedas por vida · lvlG = crecimiento del coste de nivel
-  const K = { hpD: 0.055, hpD0: 100, hpD1: 300, hpS: 80, hpM: 1.8, hp0: 50, bw: 0.08, bwMin: 0.35, ready: 0.95, retryMax: 600, gate: 0.6, hpB: 100, hpG: 1.17, hpL: 6, coinR: 0.0012, cd: 0.994, cdS: 150, cd2: 0.997, cf: 0.5, cs: 0.12, lvlG: 1.15, lvlS: 100, lvlG2: 1.13, dG: 1.075, eE0: 0.68, eS: 220, eP: 1.2, cE: 0.7, cES: 45 };
+  const K = { hpD: 0.055, hpD0: 100, hpD1: 300, hpS: 80, hpM: 2.05, hp0: 50, bw: 0.08, bwMin: 0.35, ready: 0.95, retryMax: 600, gate: 0.6, hpB: 100, hpG: 1.17, hpL: 6, coinR: 0.0012, cd: 0.994, cdS: 150, cd2: 0.997, cf: 0.5, cs: 0.12, lvlG: 1.15, lvlS: 100, lvlG2: 1.13, dG: 1.075, eE0: 0.68, eS: 220, eP: 1.2, cE: 0.7, cES: 45, md: 0.02, mE: 1.4 };
   const route = s => Math.floor((s - 1) / 10);
   const routeIdx = s => route(s) % ROUTES.length;
   const routeData = s => ROUTES[routeIdx(s)];
@@ -223,7 +223,7 @@ const Core = (() => {
   // poder del equipo contra el jefe de la etapa s (1 = lo derrota justo a tiempo)
   const bossReady = s => { const r = routeData(s); return teamDps(DEX[r.boss.dex].types) * (1 + 0.04 * S.up.boss) * bossTime(s) / enemyHp(s); };
   const skillOn = id => S.skOn[id] > S.stats.time;
-  const medalMult = () => 1 + 0.03 * S.medals;
+  const medalMult = () => 1 + K.md * S.medals;
   // táctica de equipo (se desbloquea en la etapa TACTIC_UNLOCK); la equilibrada no cambia nada
   const tact = () => TACTICS.bal;                       // las tácticas de equipo se retiraron: siempre la equilibrada (sin efecto)
   const tacticOpen = () => false;
@@ -420,7 +420,7 @@ const Core = (() => {
     let b; try { b = f(); } finally { S.up[id] = o; }
     return { a, b };
   }
-  const medalFor = ms => ms < 60 ? 0 : Math.max(1, Math.floor(Math.pow((ms - 45) / 12, 1.4)));
+  const medalFor = ms => ms < 60 ? 0 : Math.max(1, Math.floor(Math.pow((ms - 45) / 12, K.mE)));
   const medalGain = () => medalFor(S.maxStage);
   // cuándo compensa entrar en la Liga: reiniciar por 1-3 medallas cuesta más de lo que da (simulación: hasta 2 h
   // de juego perdidas los primeros días); a partir de ~12 medallas, o del 60 % de las que ya tienes, sale a cuenta
