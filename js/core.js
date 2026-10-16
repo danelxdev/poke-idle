@@ -196,7 +196,7 @@ const Core = (() => {
 
   // ---------------- fórmulas ----------------
   // hpB/hpG = vida del enemigo (base y crecimiento por etapa) · coinR = monedas por vida · lvlG = crecimiento del coste de nivel
-  const K = { hpD: 0.055, hpD0: 100, hpD1: 300, hpS: 80, hpM: 1.8, hp0: 50, bw: 0.08, bwMin: 0.35, ready: 0.95, retryMax: 600, gate: 0.6, hpB: 100, hpG: 1.17, hpL: 6, coinR: 0.0012, cd: 0.994, cdS: 150, cd2: 0.997, cf: 0.5, cs: 0.12, lvlG: 1.15, lvlS: 100, lvlG2: 1.13, dG: 1.075, eE0: 0.28, eS: 220, eP: 1.2, cE: 2.5, cES: 45 };
+  const K = { hpD: 0.055, hpD0: 100, hpD1: 300, hpS: 80, hpM: 1.8, hp0: 50, bw: 0.08, bwMin: 0.35, ready: 0.95, retryMax: 600, gate: 0.6, hpB: 100, hpG: 1.17, hpL: 6, coinR: 0.0012, cd: 0.994, cdS: 150, cd2: 0.997, cf: 0.5, cs: 0.12, lvlG: 1.15, lvlS: 100, lvlG2: 1.13, dG: 1.075, eE0: 0.68, eS: 220, eP: 1.2, cE: 0.7, cES: 45 };
   const route = s => Math.floor((s - 1) / 10);
   const routeIdx = s => route(s) % ROUTES.length;
   const routeData = s => ROUTES[routeIdx(s)];
