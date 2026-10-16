@@ -420,6 +420,9 @@ const Core = (() => {
   }
   const medalFor = ms => ms < 60 ? 0 : Math.max(1, Math.floor(Math.pow((ms - 45) / 12, 1.4)));
   const medalGain = () => medalFor(S.maxStage);
+  // cuándo compensa entrar en la Liga: reiniciar por 1-3 medallas cuesta más de lo que da (simulación: hasta 2 h
+  // de juego perdidas los primeros días); a partir de ~12 medallas, o del 60 % de las que ya tienes, sale a cuenta
+  const leagueRec = () => Math.max(12, Math.ceil(S.medals * 0.6));
   const genUnlocked = g => g <= 1 || S.stats.maxStage > REGIONS[g - 1].first * 10;
   const unlockedGens = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(genUnlocked);
 
@@ -1375,7 +1378,7 @@ const Core = (() => {
     get S() { return S; }, load, save, freezeSave, eventWeek: () => weekIdx(), wipe, fresh, setRng(f) { rnd = f; },
     route, routeIdx, routeData, regionOf, regionOfRoute, loopOf, isBoss, bossTier, bossTime, enemyHp, killCoins, coinMult, globalDmg, monDmg, monRate, eff,
     upPlan, buyUpN, coinsPerDust, dc, srcCoins, previewUp, regCount, isReg, ownerCheck, isStale: () => stale, claim,
-    levelCost, levelCostN, maxAffordable, upCost, shopCost, pokeBallPrice, critChance, critMult, catchChance, teamDps, tapDmg, medalGain, medalFor, dexCount, badgeCount,
+    levelCost, levelCostN, maxAffordable, upCost, shopCost, pokeBallPrice, critChance, critMult, catchChance, teamDps, tapDmg, medalGain, medalFor, leagueRec, dexCount, badgeCount,
     genUnlocked, unlockedGens, skillOn, skillReady, useSkill, goldenChance, gemMult,
     tick, tap, advance, goStage, fightBoss, bossEase, bossReady, levelUp, starUp, setTeam, buySlot, buyUp, buyShop, addMon,
     featured, featuredEpic, featuredLegend, ballAvailable, ticketCost, ticketPrice, buyTicket, giveTickets, pull, freePull, freePullReady, toggleShiny, moveOf, tierOf, unsetTeam, setPaused, itemOf, itemVal, itemDmg, equip, unequip, recycleItem, recycleSpare, buyItem, synergies, synMult, teamItemSum,

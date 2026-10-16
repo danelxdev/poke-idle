@@ -662,7 +662,7 @@ const UI = (() => {
         const s = S(), g = Core.medalGain();
         let h = `<div class="league"><h3>${L('Liga Pokémon', 'Pokémon League')}</h3>
           <div>${ico('crown', 48)}</div><div class="big">${fmt(s.medals)}</div><p class="hint">${L(`Medallas de la Liga · +${fmt(s.medals * 3)}% de daño y de monedas para siempre`, `League medals · +${s.medals * 3}% damage and coins forever`)}</p>`;
-        if (g) h += `<p>${L(`Si entras ahora en la Liga ganas <b style="color:var(--yellow)">+${g} medallas</b> y ${g} Puntos de Liga.`, `If you enter the League now you earn <b style="color:var(--yellow)">+${g} medals</b> and ${g} League Points.`)}</p><p class="hint">${L('Vuelves a la etapa 1 y pierdes monedas, niveles y mejoras. Conservas tus Pokémon, estrellas, gemas y la Pokédex.', 'You go back to stage 1 and lose coins, levels and upgrades. You keep your Pokémon, stars, gems and the Pokédex.')}</p><button class="btn big primary" data-act="prestige">${L('Entrar en la Liga', 'Enter the League')}</button>`;
+        if (g) h += `<p>${L(`Si entras ahora en la Liga ganas <b style="color:var(--yellow)">+${g} medallas</b> y ${g} Puntos de Liga.`, `If you enter the League now you earn <b style="color:var(--yellow)">+${g} medals</b> and ${g} League Points.`)}</p>${leagueTip(g)}<p class="hint">${L('Vuelves a la etapa 1 y pierdes monedas, niveles y mejoras. Conservas tus Pokémon, estrellas, gemas y la Pokédex.', 'You go back to stage 1 and lose coins, levels and upgrades. You keep your Pokémon, stars, gems and the Pokédex.')}</p><button class="btn big primary" data-act="prestige">${L('Entrar en la Liga', 'Enter the League')}</button>`;
         else h += `<p class="hint">${L(`Llega a la <b>etapa 60</b> para poder entrar. Cuanto más lejos llegues, más medallas: en la etapa 100 son ${Core.medalFor(100)} y en la 200, ${Core.medalFor(200)}.`, `Reach <b>stage 60</b> to be able to enter. The further you get, the more medals: at stage 100 it is ${Core.medalFor(100)} and at 200, ${Core.medalFor(200)}.`)}</p>`;
         h += ascHtml();
         h += `<h3>${L('Tienda de la Liga', 'League shop')} <small style="color:var(--dim)">${ico('crown', 14)} ${s.mp} ${L('puntos', 'points')}</small></h3><div style="text-align:left">`;
@@ -1431,10 +1431,16 @@ const UI = (() => {
     $('#p-no').onclick = closeModal;
     $('#p-yes').onclick = () => { const r = Core.ascend(); closeModal(); if (r) { Audio8.play('legend'); banner(L('¡Ascensión! Rango ', 'Ascension! Rank ') + S().asc.rank, '+' + r.ess + L(' Esencia · +', ' Essence · +') + r.medals + L(' medallas', ' medals'), '#ffd23f'); } Core.save(); refresh(true); };
   }
+  // consejo de cuándo entrar en la Liga (verde si compensa, naranja si aún sale mejor seguir avanzando)
+  function leagueTip(g) {
+    const r = Core.leagueRec();
+    return g >= r ? `<p class="hint" style="color:#7ff0a0">${L('¡Buen momento para entrar!', 'Good time to enter!')}</p>`
+      : `<p class="hint" style="color:#ffb060">${L(`Recomendado a partir de <b>+${r} medallas</b>: con tan pocas, volver a subir te costará más de lo que ganas. Sigue avanzando un poco más.`, `Recommended from <b>+${r} medals</b>: with so few, climbing back costs more than you gain. Keep going a bit further.`)}</p>`;
+  }
   function prestigeModal() {
     const g = Core.medalGain();
     openModal(`<h2>${L('¿Entrar en la Liga?', 'Enter the League?')}</h2><p>${L(`Ganarás <b style="color:var(--yellow)">+${g} medallas</b> (+${g * 3}% de daño y monedas para siempre) y ${g} Puntos de Liga para la tienda.`, `You will earn <b style="color:var(--yellow)">+${g} medals</b> (+${g * 3}% damage and coins forever) and ${g} League Points for the shop.`)}</p>
-      <p class="hint">${L('Vuelves a la etapa 1. Pierdes monedas, niveles, mejoras y algunos huecos. Conservas Pokémon, estrellas, gemas y Pokédex.', 'You go back to stage 1. You lose coins, levels, upgrades and some slots. You keep Pokémon, stars, gems and the Pokédex.')}</p>
+      ${leagueTip(g)}<p class="hint">${L('Vuelves a la etapa 1. Pierdes monedas, niveles, mejoras y algunos huecos. Conservas Pokémon, estrellas, gemas y Pokédex.', 'You go back to stage 1. You lose coins, levels, upgrades and some slots. You keep Pokémon, stars, gems and the Pokédex.')}</p>
       <div class="row"><button class="btn" id="p-no">${L('Todavía no', 'Not yet')}</button><button class="btn primary" id="p-yes">${L('¡Adelante!', 'Go ahead!')}</button></div>`);
     $('#p-no').onclick = closeModal;
     $('#p-yes').onclick = () => { const n = Core.prestige(); closeModal(); Audio8.play('win'); banner(L('¡Bienvenido a la Liga!', 'Welcome to the League!'), '+' + n + L(' medallas · tu nuevo viaje empieza ahora', ' medals · your new journey starts now'), '#ffd23f'); Core.save(); Cloud.soon(); refresh(true); };
