@@ -26,4 +26,4 @@ A browser idle game for Pokémon fans, with a ticket-based gacha. It is a non-pr
 
 ## Credits
 
-Sprites: [PMD SpriteCollab](https://github.com/PMDCollab/SpriteCollab) (CC BY-NC 4.0, see `CREDITS.md`). Scenes and icons adapted from pokesurvivor (MIT, see `LICENSE-POKESURVIVOR.txt`). Pokémon © Nintendo / Creatures / GAME FREAK. Not affiliated with or endorsed by them.
+Sprites: [PMD SpriteCollab](https://github.com/PMDCollab/SpriteCollab) (CC BY-NC 4.0, see `CREDITS.md`). Scenes and icons adapted from pokesurvivor (MIT, see `LICENSE-POKESURVIVOR.txt`). Pokémon © Nintendo / Creatures / GAME FREAK. Unofficial fan game, not affiliated with or endorsed by Nintendo, The Pokémon Company, Creatures or GAME FREAK.

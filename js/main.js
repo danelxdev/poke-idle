@@ -14,6 +14,12 @@
     tab: i => UI.setTab(['team', 'up', 'gacha', 'dex', 'chal', 'quests', 'league'][i]),
   });
   PWA.init();
+  // la partida guardada no se pudo leer: se avisa y se ofrece descargar la copia (nunca se borra en silencio)
+  if (Core.loadFailed) setTimeout(() => {
+    UI.openModal(`<h2>${L('No se pudo cargar tu partida', 'Your save could not be loaded')}</h2><p class="hint">${L('Hemos empezado una partida nueva y guardado una copia de la anterior. Descárgala y escríbenos para intentar recuperarla.', 'We started a new game and kept a copy of the old one. Download it and contact us so we can try to recover it.')}</p><div class="row"><button class="btn primary" id="lf-dl">${L('Descargar copia', 'Download copy')}</button><button class="btn" id="lf-ok">${L('Entendido', 'OK')}</button></div>`);
+    $('#lf-ok').onclick = () => UI.closeModal();
+    $('#lf-dl').onclick = () => { let raw = ''; try { raw = localStorage.getItem('pokeidle.save.v1.corrupt') || ''; } catch (e) { /* sin acceso */ } const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([raw], { type: 'text/plain' })); a.download = 'pokeidle-copia.txt'; a.click(); };
+  }, 600);
   Arena.init($('#cv'), () => {
     const c = $('.cur.coins');
     c.classList.remove('pulse'); void c.offsetWidth; c.classList.add('pulse');
@@ -143,14 +149,20 @@
   }
 
   // ---- guardado ----
-  setInterval(() => { if (!hidden && Core.S.started) Core.save(); }, 5000);
+  // si al volver hay una ventana abierta, el resumen espera (y no se guarda, para no perder el tiempo fuera)
+  let pendingWelcome = false, backAt = 0;
+  const canWelcome = () => $('#scr-game').classList.contains('active') && $('#modal').classList.contains('hidden');
+  setInterval(() => {
+    if (pendingWelcome) { if (!hidden && canWelcome() && !Core.isStale()) { pendingWelcome = false; Core.S.last += Date.now() - backAt; welcome(); } return; }       // el rato ya jugado no cuenta como tiempo fuera
+    if (!hidden && Core.S.started) Core.save();
+  }, 5000);
   let hiddenAt = 0;
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { hidden = true; hiddenAt = Date.now(); Cloud.flush(); Audio8.setHidden(true); if (Core.S.started) Core.save(); PWA.schedule(); }
     else {
       hidden = false; Audio8.setHidden(false); PWA.clear(); last = performance.now();
       // el resumen solo sale tras una ausencia de verdad (≥ 1 min) y nunca encima de otra ventana
-      if (Core.S.started && !Core.isStale() && Date.now() - hiddenAt >= 60000 && $('#scr-game').classList.contains('active') && $('#modal').classList.contains('hidden')) welcome();
+      if (Core.S.started && !Core.isStale() && Date.now() - hiddenAt >= 60000) { if (canWelcome()) welcome(); else { pendingWelcome = true; backAt = Date.now(); } }
     }
   });
   // ---- atajos de teclado (alternativa al ratón en el ordenador) ----

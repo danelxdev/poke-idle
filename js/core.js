@@ -67,6 +67,7 @@ const Core = (() => {
     };
   }
   const TAB = Math.random().toString(36).slice(2), OWN = 'pokeidle.owner';
+  let loadFailed = false;
   const isObj = x => !!x && typeof x === 'object' && !Array.isArray(x);
   const clampN = (x, def, lo, hi) => Number.isFinite(+x) ? Math.min(hi, Math.max(lo, +x)) : def;
   const cleanName = (x, n) => typeof x === 'string' ? x.replace(/[<>&"'`\\]/g, '').slice(0, n) : '';
@@ -75,6 +76,7 @@ const Core = (() => {
     let raw = null;
     try { raw = localStorage.getItem(KEY); } catch (e) { raw = null; }
     try { return loadFrom(raw); } catch (e) {
+      loadFailed = true;
       try { if (raw) localStorage.setItem(KEY + '.corrupt', raw); } catch (e2) { /* sin espacio */ }
       if (typeof console !== 'undefined') console.error('[PokéIdle] partida dañada; copia en ' + KEY + '.corrupt', e);
       return loadFrom(null);
@@ -82,7 +84,7 @@ const Core = (() => {
   }
   function loadFrom(raw) {
     let d = null;
-    try { d = JSON.parse(raw); } catch (e) { d = null; if (raw) { try { localStorage.setItem(KEY + '.corrupt', raw); } catch (e2) { /* sin espacio */ } } }
+    try { d = JSON.parse(raw); } catch (e) { d = null; if (raw) { loadFailed = true; try { localStorage.setItem(KEY + '.corrupt', raw); } catch (e2) { /* sin espacio */ } } }
     const f = fresh();
     const legacy = !!(d && typeof d === 'object' && d.started && d.tutDone === undefined);
     const giftEgg = !!(d && typeof d === 'object' && d.started && d.eggs === undefined);
@@ -1394,7 +1396,7 @@ const Core = (() => {
     frameOpen, framesOpen, setFrame, biomesSeen, setBg, biomeOverride, nextTip, seenTip, resetTips, snap, recap,
     titleOpen, titlesOpen, setTitle, setAvatar, setName, toggleFav, advice,
     musicUnlocked, tracksUnlocked, musicIds, foeKills, appearsIn, wildPool,
-    get ev() { return curEv; }, get chal() { return chal; }, inChal: () => !!chal,
+    get loadFailed() { return loadFailed; }, get ev() { return curEv; }, get chal() { return chal; }, inChal: () => !!chal,
   };
 })();
 if (typeof module !== 'undefined') module.exports = Core;

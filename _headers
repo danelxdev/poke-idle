@@ -1,10 +1,16 @@
-# Cabeceras para Cloudflare Pages (se ignora en otros alojamientos)
+# Cabeceras para Cloudflare (Workers con recursos estáticos; se ignora en otros alojamientos)
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
+  X-Frame-Options: SAMEORIGIN
+  Strict-Transport-Security: max-age=31536000
+/
+  Cache-Control: no-cache
 /index.html
   Cache-Control: no-cache
+/CREDITS.md
+  Content-Type: text/plain; charset=utf-8
 /sw.js
   Cache-Control: no-cache
 /js/*

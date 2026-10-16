@@ -285,4 +285,4 @@ El juego es una web estática: basta con publicar la raíz del repositorio (sin 
 - Sprites y retratos: [PMD SpriteCollab](https://github.com/PMDCollab/SpriteCollab), licencia **CC BY-NC 4.0**. Los artistas aparecen en `CREDITS.md`. `tools/fetch_pokemon.py` descarga sprites y datos (por ejemplo `python3 tools/fetch_pokemon.py 1 1025`).
 - Datos: [PokéAPI](https://pokeapi.co/).
 - El motor de escenarios (`js/art/tiles.js`), los efectos (`js/art/vfx.js`) y los iconos (`js/art/icons.js`) están adaptados de [pokesurvivor](https://github.com/JPTER78/pokesurvivor) (MIT, ver `LICENSE-POKESURVIVOR.txt`).
-- Pokémon © Nintendo / Creatures / GAME FREAK. Este proyecto no está afiliado a ellos.
+- Pokémon © Nintendo / Creatures / GAME FREAK. Fan game no oficial: no está afiliado ni respaldado por Nintendo, The Pokémon Company, Creatures ni GAME FREAK.

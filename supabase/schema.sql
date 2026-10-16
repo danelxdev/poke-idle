@@ -304,6 +304,10 @@ begin
     values (uid, cur.data, cur.format, cur.rev, cur.max_stage, cur.medals, cur.play_time);
     delete from public.save_backups where user_id = uid and id not in (select id from public.save_backups where user_id = uid order by created_at desc, id desc limit 3);
   end if;
+  -- al elegir otra partida (p.ej. la de invitado) su tiempo y etapa pasan a ser la base de las comprobaciones de los rankings
+  if p_force then
+    update public.scores set play_time = greatest(play_time, v_time), max_stage = greatest(max_stage, v_stage), last_submit = now() - interval '1 minute' where user_id = uid;
+  end if;
   update public.saves set data = p_data, format = p_format, rev = cur.rev + 1, max_stage = v_stage, medals = v_medals, asc_rank = v_rank, essence = v_ess,
     dex_count = v_dex, play_time = v_time, device = left(p_device, 60), updated_at = now()
   where user_id = uid returning rev into newrev;

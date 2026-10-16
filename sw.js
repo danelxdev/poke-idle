@@ -1,11 +1,12 @@
 // Service worker de PokéIdle: la app funciona sin conexión.
+// - La página se guarda como «./» (en el servidor /index.html redirige a /: una respuesta redirigida no sirve sin conexión).
 // - Código, estilos y datos: red primero (las novedades llegan al instante) y copia guardada si no hay red.
 // - Sprites de Pokémon (assets/pokemon): caché primero, se guardan al verlos (hasta MAX_SPRITES).
 'use strict';
-const VERSION = 'pokeidle-v1';
+const VERSION = 'pokeidle-v2';
 const SPRITES = 'pokeidle-sprites-v1';
 const MAX_SPRITES = 1500;
-const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'css/style.css',
+const SHELL = ['./', 'manifest.webmanifest', 'css/style.css',
   'js/data/pokedex.js', 'js/data/forms.js', 'js/data/moves.js', 'js/data/idle.js', 'js/i18n.js', 'js/data/en.js', 'js/data/extra.js', 'js/art/tiles.js', 'js/art/vfx.js', 'js/art/icons.js',
   'js/data/bbox.js', 'js/sprites.js', 'js/core.js', 'js/pwa.js', 'js/cloud-config.js', 'js/cloud.js', 'js/a11y.js', 'js/audio.js', 'js/arena.js', 'js/title.js', 'js/ui.js', 'js/main.js',
   'assets/pwa/icon-192.png', 'assets/pwa/icon-512.png', 'assets/pwa/apple-touch-icon.png'];
@@ -35,12 +36,12 @@ self.addEventListener('fetch', e => {
     return;
   }
   e.respondWith(fetch(req).then(res => {
-    if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); return res; }
+    if (res.ok && !res.redirected) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); return res; }
     if (res.status >= 500) return caches.match(req, { ignoreSearch: true }).then(r => r || res);       // si el servidor falla, mejor la copia guardada
     return res;
-  }).catch(() => caches.match(req, { ignoreSearch: true }).then(r => r || (req.mode === 'navigate' ? caches.match('index.html') : Response.error()))));
+  }).catch(() => caches.match(req, { ignoreSearch: true }).then(r => r || (req.mode === 'navigate' ? caches.match('./') : Response.error()))));
 });
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => cs.length ? cs[0].focus() : self.clients.openWindow('./index.html')));
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => cs.length ? cs[0].focus() : self.clients.openWindow('./')));
 });

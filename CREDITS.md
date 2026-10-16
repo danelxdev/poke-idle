@@ -10,7 +10,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 
 - #001 Bulbasaur: CHUNSOFT, ShyStarryRain
 - #002 Ivysaur: CHUNSOFT, Emmuffin, SilverDeoxys563
-- #003 Venusaur: <@!276175146304405514>, CHUNSOFT, Emboarger, G〜, SilverDeoxys563
+- #003 Venusaur: artista Discord 276175146304405514, CHUNSOFT, Emboarger, G〜, SilverDeoxys563
 - #004 Charmander: CHUNSOFT, Moo, Morei, ShyStarryRain, baronessfaron
 - #005 Charmeleon: 0palite, CHUNSOFT, Emmuffin, Grimlin, ShyStarryRain, bwappi
 - #006 Charizard: 0palite, Adrian, CHUNSOFT, Emboarger, Emmuffin, Morei, SilverDeoxys563, SuperFabbioGuy
@@ -22,7 +22,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #012 Butterfree: Anonymous, CHUNSOFT, Emmuffin
 - #013 Weedle: CHUNSOFT, Novie, ShyStarryRain
 - #014 Kakuna: CHUNSOFT, Caitemis, SilverDeoxys563, bwappi
-- #015 Beedrill: <@!299261889169588246>, CHUNSOFT, Fable, SilverDeoxys563, Tacocoa
+- #015 Beedrill: artista Discord 299261889169588246, CHUNSOFT, Fable, SilverDeoxys563, Tacocoa
 - #016 Pidgey: CHUNSOFT, JFain, Noo, SilverDeoxys563, Tacocoa
 - #017 Pidgeotto: CHUNSOFT, Moo, Tainted#3886, bwappi
 - #018 Pidgeot: CHUNSOFT, FalafelPorpoise, SilverDeoxys563, Tacocoa, bwappi
@@ -59,9 +59,9 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #049 Venomoth: Anonymous, CHUNSOFT, Mooncaller, skygummi
 - #050 Diglett: CHUNSOFT, El_Pangoro_Parse, FlowerSnek, Gust, JustAGunk, Morei, Tacocoa
 - #051 Dugtrio: CHUNSOFT, El_Pangoro_Parse, Gust, Tacocoa
-- #052 Meowth: <@!299261889169588246>, CHUNSOFT, El_Pangoro_Parse, Morei, PhillipsYoung, RaoKurai
+- #052 Meowth: artista Discord 299261889169588246, CHUNSOFT, El_Pangoro_Parse, Morei, PhillipsYoung, RaoKurai
 - #053 Persian: CHUNSOFT, El_Pangoro_Parse, Emmuffin, RaoKurai, baronessfaron
-- #054 Psyduck: <@!195280695009083392>, CHUNSOFT, Felis-Licht, Morei, ShyStarryRain, silverfox88
+- #054 Psyduck: artista Discord 195280695009083392, CHUNSOFT, Felis-Licht, Morei, ShyStarryRain, silverfox88
 - #055 Golduck: Anonymous, CHUNSOFT, Caitemis, El_Pangoro_Parse, JFain
 - #056 Mankey: CHUNSOFT, El_Pangoro_Parse, Moo, Morei, baronessfaron
 - #057 Primeape: CHUNSOFT, G〜, Moo
@@ -76,7 +76,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #066 Machop: CHUNSOFT, Emboarger, Felis-Licht, Morei
 - #067 Machoke: CHUNSOFT, JFain, Moo, Tacocoa
 - #068 Machamp: CHUNSOFT, Prismatic, Tacocoa
-- #069 Bellsprout: <@!436940337865293834>, Audino, CHUNSOFT, Morei, Tacocoa, baronessfaron
+- #069 Bellsprout: artista Discord 436940337865293834, Audino, CHUNSOFT, Morei, Tacocoa, baronessfaron
 - #070 Weepinbell: Anonymous, CHUNSOFT, G〜
 - #071 Victreebel: CHUNSOFT, Caitemis, Emmuffin
 - #072 Tentacool: CHUNSOFT, Caitemis, G〜, Tacocoa, brookriver
@@ -86,7 +86,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #076 Golem: CHUNSOFT, El_Pangoro_Parse, Emmuffin, Tacocoa, baronessfaron
 - #077 Ponyta: CHUNSOFT, Emmuffin, JFain, Tacocoa, baronessfaron
 - #078 Rapidash: CHUNSOFT, El_Pangoro_Parse, G〜, Noo, baronessfaron, deltaflare
-- #079 Slowpoke: <@!136619914512433152>, CHUNSOFT, Morei, ShyStarryRain, Tacocoa
+- #079 Slowpoke: artista Discord 136619914512433152, CHUNSOFT, Morei, ShyStarryRain, Tacocoa
 - #080 Slowbro: CHUNSOFT, Caitemis, JustAGunk, Morei, Tacocoa
 - #081 Magnemite: CHUNSOFT, El_Pangoro_Parse, Emboarger, Fearless-Quit, RaoKurai
 - #082 Magneton: CHUNSOFT, El_Pangoro_Parse, Morei, SirViolet, Tacocoa
@@ -105,7 +105,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #095 Onix: CHUNSOFT, El_Pangoro_Parse, Moo, baronessfaron
 - #096 Drowzee: CHUNSOFT, El_Pangoro_Parse, G〜, JustAGunk, drawsstuff
 - #097 Hypno: CHUNSOFT, Caitemis, Lovi, Morei
-- #098 Krabby: <@!967585139485999154>, CHUNSOFT, G〜, Tacocoa
+- #098 Krabby: artista Discord 967585139485999154, CHUNSOFT, G〜, Tacocoa
 - #099 Kingler: CHUNSOFT, Tacocoa, baronessfaron
 - #100 Voltorb: CHUNSOFT, Emboarger, Emmuffin, JFain, Noo, Tacocoa
 - #1000 Gholdengo: Deeshura, Emmuffin, G〜, baronessfaron
@@ -156,7 +156,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #129 Magikarp: CHUNSOFT, JemDragons, Noo, Scizivire, Tacocoa
 - #130 Gyarados: CHUNSOFT, Emmuffin, G〜, Magu, Noo, baronessfaron
 - #131 Lapras: CHUNSOFT, C_Pariah, Deeshura, RaoKurai, silverfox88
-- #132 Ditto: <@!787048769883602956>, CHUNSOFT, ShyStarryRain
+- #132 Ditto: artista Discord 787048769883602956, CHUNSOFT, ShyStarryRain
 - #133 Eevee: CHUNSOFT, Morei, baronessfaron
 - #134 Vaporeon: CHUNSOFT, Emboarger, Emmuffin, Morei, Tacocoa, baronessfaron
 - #135 Jolteon: CHUNSOFT, Lovi, Morei, ShyStarryRain, baronessfaron, dmDash
@@ -195,7 +195,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #168 Ariados: CHUNSOFT, G〜, Prismatic
 - #169 Crobat: <ElGian>, CHUNSOFT, Chi, Emmuffin
 - #170 Chinchou: Anonymous, CHUNSOFT, JFain, Noo, Prismatic
-- #171 Lanturn: <@!571847167489343507>, Anonymous, CHUNSOFT, JFain, Prismatic
+- #171 Lanturn: artista Discord 571847167489343507, Anonymous, CHUNSOFT, JFain, Prismatic
 - #172 Pichu: CHUNSOFT, C_Pariah, Lovi, Spikey-Valentine
 - #173 Cleffa: Anonymous, CHUNSOFT, Deleca7755, JFain, baronessfaron
 - #174 Igglybuff: Anonymous, CHUNSOFT, Gust
@@ -204,12 +204,12 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #177 Natu: CHUNSOFT, El_Pangoro_Parse, Hanbei, JFain, Lovi, Morei
 - #178 Xatu: CHUNSOFT, Lovi, Morei, Top_Kec
 - #179 Mareep: Anonymous, CHUNSOFT, Emmuffin, Felis-Licht, Morei, silverfox88
-- #180 Flaaffy: <@!436940337865293834>, Anonymous, CHUNSOFT, Emmuffin, Morei
+- #180 Flaaffy: artista Discord 436940337865293834, Anonymous, CHUNSOFT, Emmuffin, Morei
 - #181 Ampharos: Anonymous, CHUNSOFT, Emmuffin, Noo, Soulja
 - #182 Bellossom: CHUNSOFT, Morei, Tacocoa, gromchurch
 - #183 Marill: CHUNSOFT, Fearless-Quit, JFain, Jarleypeño, Morei, Tacocoa
 - #184 Azumarill: CHUNSOFT, Emmuffin, Lovi, Noo, ShyStarryRain
-- #185 Sudowoodo: <@!589906152708505648>, CHUNSOFT, Morei, Noo, Prismatic
+- #185 Sudowoodo: artista Discord 589906152708505648, CHUNSOFT, Morei, Noo, Prismatic
 - #186 Politoed: CHUNSOFT, Caitemis, Emmuffin, Tacocoa
 - #187 Hoppip: CHUNSOFT, JFain, Morei, Prismatic, Reppamon, bwappi
 - #188 Skiploom: Anonymous, CHUNSOFT, Emmuffin, Morei
@@ -246,14 +246,14 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #219 Magcargo: CHUNSOFT, JFain, Lovi, Morei, Prismatic
 - #220 Swinub: CHUNSOFT, Caitemis, JFain, Morei, Tacocoa
 - #221 Piloswine: CHUNSOFT, Emmuffin, Scizivire
-- #222 Corsola: <@!195280695009083392>, CHUNSOFT, Emmuffin, Fearless-Quit, Morei, Noo, Tacocoa
+- #222 Corsola: artista Discord 195280695009083392, CHUNSOFT, Emmuffin, Fearless-Quit, Morei, Noo, Tacocoa
 - #223 Remoraid: Avery, CHUNSOFT, Caitemis, JFain, Morei
 - #224 Octillery: CHUNSOFT, Emmuffin, Morei, Top_Kec
 - #225 Delibird: CHUNSOFT, C_Pariah, FlowerSnek, G〜, Lovi, Morei
 - #226 Mantine: CHUNSOFT, Emmuffin, Prismatic
 - #227 Skarmory: Anonymous, CHUNSOFT, Morei, Noo
 - #228 Houndour: Anonymous, CHUNSOFT, Gust, JFain, Morei, ShyStarryRain
-- #229 Houndoom: <@!967585139485999154>, CHUNSOFT, Emmuffin, Morei
+- #229 Houndoom: artista Discord 967585139485999154, CHUNSOFT, Emmuffin, Morei
 - #230 Kingdra: CHUNSOFT, Chi, Emmuffin, Tacocoa
 - #231 Phanpy: CHUNSOFT, Prismatic, ShyStarryRain
 - #232 Donphan: CHUNSOFT, Emboarger, Emmuffin, G〜, Lovi
@@ -297,7 +297,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #270 Lotad: CHUNSOFT, G〜, Morei, smartini
 - #271 Lombre: CHUNSOFT, Gust, Morei, baronessfaron
 - #272 Ludicolo: CHUNSOFT, Morei
-- #273 Seedot: <@!589906152708505648>, CHUNSOFT, Caitemis, Moo, Morei
+- #273 Seedot: artista Discord 589906152708505648, CHUNSOFT, Caitemis, Moo, Morei
 - #274 Nuzleaf: CHUNSOFT, Emmuffin, JFain
 - #275 Shiftry: CHUNSOFT, Gust, Moo, Morei, Tainted#3886
 - #276 Taillow: CHUNSOFT, Morei, Top_Kec
@@ -328,7 +328,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #301 Delcatty: Anonymous, CHUNSOFT, Ginnie, Noo, baronessfaron
 - #302 Sableye: CHUNSOFT, Morei, PhillipsYoung
 - #303 Mawile: CHUNSOFT, Emmuffin, baronessfaron
-- #304 Aron: <@!299261889169588246>, <@!589906152708505648>, CHUNSOFT, Emboarger, Morei, Reppamon
+- #304 Aron: artista Discord 299261889169588246, artista Discord 589906152708505648, CHUNSOFT, Emboarger, Morei, Reppamon
 - #305 Lairon: CHUNSOFT, Emmuffin, Magu, Morei, baronessfaron
 - #306 Aggron: CHUNSOFT, Emmuffin, Morei, baronessfaron
 - #307 Meditite: Anonymous, CHUNSOFT
@@ -373,7 +373,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #346 Cradily: Anonymous, CHUNSOFT, JFain, Prismatic, baronessfaron
 - #347 Anorith: CHUNSOFT, Frostdrop1, Moo, Noo
 - #348 Armaldo: CHUNSOFT, Morei, Noo
-- #349 Feebas: <@!828520880299966525>, CHUNSOFT, Chi, Morei
+- #349 Feebas: artista Discord 828520880299966525, CHUNSOFT, Chi, Morei
 - #350 Milotic: CHUNSOFT, Chi, Emmuffin
 - #351 Castform: CHUNSOFT, JFain, ShyStarryRain, bwappi
 - #352 Kecleon: CHUNSOFT, El_Pangoro_Parse, G〜, Top_Kec
@@ -398,7 +398,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #371 Bagon: CHUNSOFT, C_Pariah, JFain, Morei, Pokejavi.
 - #372 Shelgon: CHUNSOFT, Tacocoa
 - #373 Salamence: CHUNSOFT, Emmuffin
-- #374 Beldum: <@!589906152708505648>, Audino, CHUNSOFT, Moo, Morei, ShyStarryRain
+- #374 Beldum: artista Discord 589906152708505648, Audino, CHUNSOFT, Moo, Morei, ShyStarryRain
 - #375 Metang: <ElGian>, Audino, CHUNSOFT, JFain, Moo
 - #376 Metagross: Audino, CHUNSOFT, Emmuffin, Moo, Noo
 - #377 Regirock: CHUNSOFT, CamusZekeSirius, Chi
@@ -410,7 +410,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #383 Groudon: Audino, CHUNSOFT, Top_Kec, lokatts
 - #384 Rayquaza: Audino, CHUNSOFT, CamusZekeSirius, Top_Kec, lokatts
 - #385 Jirachi: CHUNSOFT, Chi, Emmuffin, Grimlin, Noo
-- #386 Deoxys: <@!523152081805115403>, CHUNSOFT, Chi, Morei, Noo, Sonikku_A
+- #386 Deoxys: artista Discord 523152081805115403, CHUNSOFT, Chi, Morei, Noo, Sonikku_A
 - #387 Turtwig: CHUNSOFT, Chi
 - #388 Grotle: Anonymous, CHUNSOFT, Caitemis, Chi, Emboarger, Morei
 - #389 Torterra: Anonymous, CHUNSOFT, JFain, Morei
@@ -430,8 +430,8 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #403 Shinx: CHUNSOFT, Reppamon
 - #404 Luxio: CHUNSOFT, C_Pariah, Caitemis, Reppamon
 - #405 Luxray: CHUNSOFT, Emmuffin, G〜, Reppamon, Soulja
-- #406 Budew: <@!237814999634935808>, CHUNSOFT, Deeshura, Morei, RaoKurai, Uni
-- #407 Roserade: <@!195280695009083392>, CHUNSOFT, Emmuffin, G〜, JFain, RaoKurai, ShyStarryRain, baronessfaron
+- #406 Budew: artista Discord 237814999634935808, CHUNSOFT, Deeshura, Morei, RaoKurai, Uni
+- #407 Roserade: artista Discord 195280695009083392, CHUNSOFT, Emmuffin, G〜, JFain, RaoKurai, ShyStarryRain, baronessfaron
 - #408 Cranidos: CHUNSOFT, JFain, Lovi, ShyStarryRain
 - #409 Rampardos: CHUNSOFT, G〜, Lovi, NikolaP, Noo
 - #410 Shieldon: A_Lettuce, Anonymous, CHUNSOFT, Tacocoa
@@ -444,14 +444,14 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #417 Pachirisu: CHUNSOFT, JFain, Lovi, Prismatic, baronessfaron, bwappi
 - #418 Buizel: CHUNSOFT, C_Pariah, Lovi, Morei, Reimu\_needs\_$$$
 - #419 Floatzel: CHUNSOFT, Caitemis, Lovi
-- #420 Cherubi: <@!173876028593274880>, CHUNSOFT, Lovi, baronessfaron
+- #420 Cherubi: artista Discord 173876028593274880, CHUNSOFT, Lovi, baronessfaron
 - #421 Cherrim: Anonymous, CHUNSOFT, Emmuffin, Lovi, baronessfaron
 - #422 Shellos: CHUNSOFT, Lovi, chikorene
 - #423 Gastrodon: CHUNSOFT, Emmuffin, Lovi
 - #424 Ambipom: CHUNSOFT, JFain, Lovi, Noo, Scizivire
 - #425 Drifloon: CHUNSOFT, Deleca7755, Fearless-Quit, Prismatic, Scizivire
 - #426 Drifblim: CHUNSOFT, NOLASMOR, Prismatic, Scizivire
-- #427 Buneary: <@!589906152708505648>, CHUNSOFT, Gust, JFain, Lovi, ShyStarryRain
+- #427 Buneary: artista Discord 589906152708505648, CHUNSOFT, Gust, JFain, Lovi, ShyStarryRain
 - #428 Lopunny: CHUNSOFT, JFain, Lovi, Morei
 - #429 Mismagius: CHUNSOFT, Emmuffin, Lovi, baronessfaron
 - #430 Honchkrow: CHUNSOFT, Caitemis, Scizivire, baronessfaron
@@ -492,10 +492,10 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #465 Tangrowth: CHUNSOFT, Emmuffin, Tacocoa
 - #466 Electivire: CHUNSOFT, Emboarger, JustAGunk, Prismatic, Scizivire
 - #467 Magmortar: CHUNSOFT, G〜, Lovi
-- #468 Togekiss: <@!436940337865293834>, CHUNSOFT, Noo, RaoKurai
+- #468 Togekiss: artista Discord 436940337865293834, CHUNSOFT, Noo, RaoKurai
 - #469 Yanmega: CHUNSOFT, Reppamon, Top_Kec
-- #470 Leafeon: <@!195280695009083392>, CHUNSOFT, Emmuffin, baronessfaron
-- #471 Glaceon: <@!195280695009083392>, CHUNSOFT, JFain, PhillipsYoung, baronessfaron
+- #470 Leafeon: artista Discord 195280695009083392, CHUNSOFT, Emmuffin, baronessfaron
+- #471 Glaceon: artista Discord 195280695009083392, CHUNSOFT, JFain, PhillipsYoung, baronessfaron
 - #472 Gliscor: CHUNSOFT, Emmuffin, G〜
 - #473 Mamoswine: CHUNSOFT, Emmuffin, G〜
 - #474 Porygon-Z: CHUNSOFT, Caitemis, Fable, G〜, Prismatic
@@ -537,7 +537,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #510 Liepard: Caitemis, Emmuffin, LightBlueBlaze, ShyStarryRain, baronessfaron
 - #511 Pansage: Pokejavi., Top_Kec, baronessfaron
 - #512 Simisage: Emmuffin, G〜, baronessfaron
-- #513 Pansear: <@!315528859921678336>, AllPatchedUp, Emmuffin, baronessfaron
+- #513 Pansear: artista Discord 315528859921678336, AllPatchedUp, Emmuffin, baronessfaron
 - #515 Panpour: Emmuffin, Pokejavi., baronessfaron
 - #517 Munna: Caitemis, ShyStarryRain, baronessfaron, chime, mucrush
 - #518 Musharna: Caitemis, ShyStarryRain, baronessfaron
@@ -657,7 +657,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #644 Zekrom: CamusZekeSirius, Top_Kec, baronessfaron
 - #645 Landorus: G〜, Top_Kec
 - #646 Kyurem: Emmuffin, Noo
-- #647 Keldeo: <@!557599571170033664>, Dasawkem, Fingernails, Ichor, Morei, baronessfaron
+- #647 Keldeo: artista Discord 557599571170033664, Dasawkem, Fingernails, Ichor, Morei, baronessfaron
 - #648 Meloetta: Ariakyu, Deleca7755, Morei, SkeleSpider, baronessfaron
 - #649 Genesect: Emboarger, chime
 - #650 Chespin: Emmuffin, G〜, Noo, Waffluffe, ◥θ┴θ◤
@@ -708,7 +708,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #697 Tyrantrum: Jhony-Rex, NeroIntruder, Soulja, Xrit63, baronessfaron
 - #698 Amaura: Emmuffin
 - #699 Aurorus: Emmuffin
-- #700 Sylveon: <@!727245570191786085>, Emmuffin, Mond, NeonCityRain, baronessfaron
+- #700 Sylveon: artista Discord 727245570191786085, Emmuffin, Mond, NeonCityRain, baronessfaron
 - #701 Hawlucha: Emmuffin, Soulja
 - #702 Dedenne: Emmuffin, Inv3rse, Top_Kec, baronessfaron, rhys
 - #703 Carbink: Caitemis, Emmuffin, Luca, ShyStarryRain, baronessfaron
@@ -716,7 +716,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #705 Sliggoo: Caitemis, Emmuffin, NeroIntruder, baronessfaron
 - #706 Goodra: Emmuffin, baronessfaron, ◥θ┴θ◤
 - #707 Klefki: Caitemis, Emmuffin, baronessfaron, ◥θ┴θ◤
-- #708 Phantump: <@!218959749276893184>, Caitemis, Emmuffin, ShyStarryRain, baronessfaron
+- #708 Phantump: artista Discord 218959749276893184, Caitemis, Emmuffin, ShyStarryRain, baronessfaron
 - #709 Trevenant: Chesyon, baronessfaron, ◥θ┴θ◤
 - #710 Pumpkaboo: Emboarger, G〜, baronessfaron, ◥θ┴θ◤
 - #711 Gourgeist: Emmuffin, JFain, Soulja, baronessfaron
@@ -738,7 +738,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #727 Incineroar: Caitemis, G〜, JustAGunk, ShyStarryRain, avalancheman, baronessfaron, mixy:3
 - #728 Popplio: Emmuffin, Fable, JFain, Waffluffe, ◥θ┴θ◤
 - #729 Brionne: Emboarger, ShyStarryRain, Top_Kec, baronessfaron, ◥θ┴θ◤
-- #730 Primarina: <@!225139021079117824>, JFain, baronessfaron, ◥θ┴θ◤
+- #730 Primarina: artista Discord 225139021079117824, JFain, baronessfaron, ◥θ┴θ◤
 - #731 Pikipek: Aviivix, Dasawkem, Emmuffin, FlowerSnek, Morei, NOLASMOR
 - #734 Yungoos: Emmuffin, baronessfaron
 - #736 Grubbin: Emmuffin, JFain, ShyStarryRain, Soulja
@@ -955,7 +955,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #968 Orthworm: DavKriz, Emmuffin, Soulja, TawnySoup, baronessfaron
 - #969 Glimmet: Deeshura, G〜
 - #970 Glimmora: G〜
-- #971 Greavard: <@!727245570191786085>, Emmuffin, baronessfaron, pi3.14
+- #971 Greavard: artista Discord 727245570191786085, Emmuffin, baronessfaron, pi3.14
 - #972 Houndstone: Emmuffin, baronessfaron
 - #974 Cetoddle: DeltaL, Emmuffin, pi3.14
 - #975 Cetitan: DeltaL, Emmuffin, Pokejavi., Soulja, pi3.14
@@ -1026,18 +1026,18 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #10112 Alolan Grimer: Emboarger, Morei, NeroIntruder
 - #10113 Alolan Muk: Morei, NeroIntruder
 - #10114 Alolan Exeggutor: Emmuffin, ShyStarryRain, baronessfaron
-- #10115 Alolan Marowak: <@!196428059988066304>, Emmuffin
+- #10115 Alolan Marowak: artista Discord 196428059988066304, Emmuffin
 - #10161 Galarian Meowth: Caitemis, G〜, Morei, Smingle, baronessfaron
 - #10162 Galarian Ponyta: EzerArt, Jhony-Rex, baronessfaron, ◥θ┴θ◤
 - #10163 Galarian Rapidash: EzerArt, Jhony-Rex, baronessfaron, deltaflare, lokatts
-- #10164 Galarian Slowpoke: <@!413387711152390145>, Emmuffin, FissionCube
+- #10164 Galarian Slowpoke: artista Discord 413387711152390145, Emmuffin, FissionCube
 - #10165 Galarian Slowbro: Emmuffin, EzerArt, Morei, Pink_no_tori, baronessfaron
 - #10166 Galarian Farfetch’d: JFain, Morei, Noo
 - #10167 Galarian Weezing: Emmuffin, Jhony-Rex, baronessfaron
 - #10168 Galarian Mr. Mime: Emmuffin, TawnySoup, baronessfaron
 - #10169 Galarian Articuno: Caitemis, Emmuffin, baronessfaron, chime
 - #10170 Galarian Zapdos: Caitemis, Jhony-Rex, Morei, chime
-- #10171 Galarian Moltres: <@!228201428177387523>, CamusZekeSirius, EzerArt, Jhony-Rex, Morei, bwappi, chime
+- #10171 Galarian Moltres: artista Discord 228201428177387523, CamusZekeSirius, EzerArt, Jhony-Rex, Morei, bwappi, chime
 - #10172 Galarian Slowking: Emmuffin, Soulja, baronessfaron
 - #10173 Galarian Corsola: Emmuffin, JFain, Morei
 - #10174 Galarian Zigzagoon: DasK, Emmuffin, Miju, Morei, Uni
@@ -1048,7 +1048,7 @@ Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. Proyecto de fans sin án
 - #10229 Hisuian Growlithe: Emmuffin, ShyStarryRain, baronessfaron
 - #10230 Hisuian Arcanine: Emboarger, Emmuffin, Mond, baronessfaron
 - #10231 Hisuian Voltorb: Axcel, Emboarger, Emmuffin
-- #10232 Hisuian Electrode: <@!413387711152390145>, Gelius, ShyStarryRain, electronvolt, rhys, teddg
+- #10232 Hisuian Electrode: artista Discord 413387711152390145, Gelius, ShyStarryRain, electronvolt, rhys, teddg
 - #10233 Hisuian Typhlosion: Caitemis, Deeshura, Emmuffin
 - #10234 Hisuian Qwilfish: Emboarger, Fresco, JFain
 - #10235 Hisuian Sneasel: Emmuffin, ShyStarryRain, TawnySoup
