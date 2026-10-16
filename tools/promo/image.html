@@ -6,7 +6,6 @@
   #land { position: absolute; left: 0; top: 0; }
   .phone { border-radius: 64px; padding: 15px; }
   .phone .scr { border-radius: 50px; }
-  .phone .notch { top: 26px; width: 112px; height: 30px; margin-left: -56px; }
   .badge { position: absolute; display: flex; align-items: center; gap: 16px; padding: 14px 26px 16px 18px; font-weight: 700; white-space: nowrap; }
   .badge img { width: calc(var(--bf, 38px) * 1.5); height: calc(var(--bf, 38px) * 1.5); }
   .badge b { display: block; font-size: var(--bf, 38px); line-height: 1; }
@@ -28,6 +27,7 @@
 <script src="js/data/bbox.js"></script>
 <script src="js/sprites.js"></script>
 <script src="tools/promo/scenery.js"></script>
+<script src="tools/promo/phone.js"></script>
 <script>
 'use strict';
 const Q = new URLSearchParams(location.search), CLIPS = Q.get('clips'), F = Q.get('f') || 'ig';
@@ -42,8 +42,9 @@ const front = $('#front'), fctx = front.getContext('2d'); front.width = AW; fron
 const LINE = F === 'wide' ? [1, 4, 7, 25, 133, 150, 384, 6, 9, 3, 448, 94] : [1, 4, 25, 133, 7, 150, 6, 448];
 const scene = Scenery.make(AW, AH, GY, { seed: 3, walkers: [], until: -20, lineup: LINE });
 const ico = n => Icons.url(n);
-const shot = (clip, f) => `${CLIPS}/${clip}/${String(f).padStart(4, '0')}.jpg`;
-const phone = (x, y, w, rot, clip, f, z) => `<div class="phone" style="left:${x}px;top:${y}px;width:${w}px;transform:rotate(${rot}deg);z-index:${z || 1}"><div class="notch"></div><div class="scr"><img src="${shot(clip, f)}"></div></div>`;
+const shot = (clip, f) => `${Q.get('stills') || CLIPS}/${clip}/${String(f).padStart(4, '0')}.jpg`;   // capturas a tamaño de app de iPhone (393×764 pt)
+const SB = { boss: '#09122f', gacha1: '#0e142b' };   // color de lo que hay detrás de la barra de estado en cada captura
+const phone = (x, y, w, rot, clip, f, z) => `<div class="phone" style="left:${x}px;top:${y}px;width:${w}px;transform:rotate(${rot}deg);z-index:${z || 1}">${Phone.inner(`<img src="${shot(clip, f)}">`, SB[clip])}</div>`;
 const badge = (x, y, icon, b, s, rot) => `<div class="badge panel" style="left:${x}px;top:${y}px;transform:rotate(${rot || 0}deg);z-index:5"><img src="${ico(icon)}"><div><b>${b}</b><small>${s}</small></div></div>`;
 const logo = (x, y, size, align) => `<div class="abs" style="left:${x}px;top:${y}px;width:${align === 'c' ? W : 900}px;text-align:${align === 'c' ? 'center' : 'left'};margin-left:${align === 'c' ? -x : 0}px"><img src="${ico('ball')}" style="width:${size * 0.62}px;height:${size * 0.62}px;vertical-align:${size * 0.06}px;margin-right:${size * 0.12}px"><h1 class="logo" style="display:inline-block;font-size:${size}px">Poké<span>Idle</span></h1></div>`;
 
@@ -53,15 +54,15 @@ if (F === 'ig') {
   html += `<div class="abs tagl" style="left:0;width:${W}px;top:214px;text-align:center;font-size:46px">Entrena, evoluciona y <span style="color:var(--yellow)">colecciona</span></div>`;
   html += `<div class="glow" style="left:230px;top:300px;width:620px;height:620px"></div>`;
   html += phone(200, 318, 330, -7, 'boss', 100, 2) + phone(552, 304, 330, 6, 'gacha1', 150, 3);
-  html += `<div style="--bf:34px">` + badge(26, 360, 'book', '1027 Pokémon', 'De Kanto a Paldea', -3) + badge(690, 300, 'ball3', 'Gacha', '¡Legendarios!', 4) +
-    badge(22, 760, 'crown', 'Jefes y Liga', 'Líderes y Alto Mando', 2) + badge(712, 838, 'egg0', 'Huevos', 'y shinies', -4) + `</div>`;
+  html += `<div style="--bf:34px">` + badge(22, 640, 'book', '1027 Pokémon', 'De Kanto a Paldea', -3) + badge(716, 790, 'ball3', 'Gacha', '¡Legendarios!', 4) +
+    badge(18, 860, 'crown', 'Jefes y Liga', 'Líderes y Alto Mando', 2) + `</div>`;
   cta = `<div class="abs" style="left:0;width:${W}px;top:1252px;text-align:center;z-index:6"><span class="btnp" style="font-size:52px">¡Juega gratis!</span> <span class="url" style="font-size:52px;margin-left:16px">pokeidle<span>game</span>.com</span></div>`;
 } else if (F === 'sq') {
   html += logo(0, 36, 120, 'c');
   html += `<div class="abs tagl" style="left:0;width:${W}px;top:190px;text-align:center;font-size:42px">El juego <span style="color:var(--yellow)">idle</span> de Pokémon</div>`;
   html += `<div class="glow" style="left:250px;top:240px;width:580px;height:580px"></div>`;
   html += phone(232, 270, 290, -7, 'boss', 100, 2) + phone(548, 258, 290, 6, 'gacha1', 150, 3);
-  html += `<div style="--bf:32px">` + badge(24, 330, 'book', '1027 Pokémon', 'Todas las regiones', -3) + badge(736, 690, 'ball3', 'Gacha', '¡Legendarios!', 4) + `</div>`;
+  html += `<div style="--bf:32px">` + badge(20, 560, 'book', '1027 Pokémon', 'Todas las regiones', -3) + badge(740, 676, 'ball3', 'Gacha', '¡Legendarios!', 4) + `</div>`;
   cta = `<div class="abs" style="left:0;width:${W}px;top:985px;text-align:center;z-index:6"><span class="btnp" style="font-size:44px">¡Juega gratis!</span> <span class="url" style="font-size:44px;margin-left:14px">pokeidle<span>game</span>.com</span></div>`;
 } else {
   html += logo(90, 90, 150, 'l');
@@ -73,7 +74,7 @@ if (F === 'ig') {
   html += `<div class="glow" style="left:1060px;top:-60px;width:820px;height:820px"></div>`;
   html += phone(1110, 70, 330, -6, 'boss', 100, 2) + phone(1450, 50, 330, 6, 'gacha1', 150, 3);
 }
-$('#ui').innerHTML = html; $('#ui2').innerHTML = cta;
+$('#ui').innerHTML = html; $('#ui2').innerHTML = cta; Phone.fit();
 
 window.ready = async () => {
   await document.fonts.ready;

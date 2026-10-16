@@ -12,5 +12,7 @@ node audio.js music.wav music r4 36 && node audio.js sfx.wav sfx "$(node cues.js
 ffmpeg -i video_mudo.mp4 -i music.wav -i sfx.wav -filter_complex \
   "[1]atrim=0:34,volume=1.6,afade=t=out:st=32.2:d=1.8[m];[2]atrim=0:34[s];[m][s]amix=inputs=2:normalize=0,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]" \
   -map 0:v -map "[a]" -c:v copy -c:a aac -b:a 192k -movflags +faststart PokeIdle_promo_1080x1920.mp4
-PAGE=image.html W=1080 H=1350 QS='&f=ig' node render.js $C stills salida 0     # también f=sq (1080×1080) y f=wide (1920×1080)
+# imágenes: capturas a tamaño real de la app en iPhone (393×764 pt, sin barra de estado ni indicador de inicio)
+PVW=393 PVH=764 MAXF=151 node clips.js /ruta/a/fotos boss && PVW=393 PVH=764 MAXF=151 node clips.js /ruta/a/fotos gacha
+PAGE=image.html W=1080 H=1350 QS='&f=ig&stills=file:///ruta/a/fotos' node render.js $C stills salida 0     # también f=sq (1080×1080) y f=wide (1920×1080)
 ```

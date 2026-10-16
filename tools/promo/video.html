@@ -39,7 +39,7 @@
   <!-- B · combate automático -->
   <div class="scene" id="sB">
     <div class="hdr" style="top:120px"><span class="pill" id="bPill">COMBATE AUTOMÁTICO</span><div class="h1" id="bTitle"><span class="word">Tu</span> <span class="word">equipo</span><br><span class="word"><em>lucha</em></span> <span class="word"><em>solo</em></span></div></div>
-    <div class="phone" id="bPhone" style="left:178px;top:560px;width:724px"><div class="notch"></div><div class="scr"><img id="bImg"></div></div>
+    <div class="phone" id="bPhone" style="left:178px;top:560px;width:724px"><span data-phone="bImg" data-sb=""></span></div>
     <div class="callout panel" id="bC1" style="left:36px;top:1080px"><img data-ico="friends"><div>6 Pokémon<small>a la vez en combate</small></div></div>
     <div class="callout panel" id="bC2" style="right:36px;top:1340px"><img data-ico="fist"><div>¡Toca para<small>hacer daño extra!</small></div></div>
     <div class="callout panel" id="bC3" style="left:60px;top:1600px"><img data-ico="coin"><div>Gana incluso<small>sin jugar (offline)</small></div></div>
@@ -56,14 +56,14 @@
   <div class="scene" id="sD">
     <div class="hdr" style="top:120px" id="dHdr"><span class="pill pink" id="dPill">GACHA</span><div class="h1" id="dTitle">¿Qué <em>Pokémon</em><br>te saldrá?</div></div>
     <div class="hdr" style="top:150px" id="dLeg"><div class="legend">¡LEGENDARIO!</div><div class="h1" style="font-size:64px;margin-top:10px">Mewtwo se une a tu equipo</div></div>
-    <div class="phone" id="dPhone" style="left:178px;top:560px;width:724px"><div class="notch"></div><div class="scr"><img id="dImg"></div></div>
+    <div class="phone" id="dPhone" style="left:178px;top:560px;width:724px"><span data-phone="dImg" data-sb="#0e142b"></span></div>
     <div id="dSparks"></div>
   </div>
 
   <!-- E · Pokédex -->
   <div class="scene" id="sE">
     <div class="hdr" style="top:110px"><div class="big-n" id="eN">0</div><div class="h1" style="font-size:96px;margin-top:20px">POKÉMON</div><div class="dim" style="font-size:40px;margin-top:22px;font-weight:700">Shinies, megas y formas regionales</div></div>
-    <div class="phone" id="ePhone" style="left:220px;top:700px;width:640px"><div class="notch"></div><div class="scr"><img id="eImg"></div></div>
+    <div class="phone" id="ePhone" style="left:220px;top:700px;width:640px"><span data-phone="eImg" data-sb=""></span></div>
     <div id="eMons"></div>
   </div>
 
@@ -76,7 +76,7 @@
   <!-- G · evolución -->
   <div class="scene" id="sG">
     <div class="hdr" style="top:120px"><span class="pill green" id="gPill">EVOLUCIÓN</span><div class="h1" id="gTitle">Haz <em>crecer</em><br>a tu equipo</div></div>
-    <div class="phone" id="gPhone" style="left:178px;top:560px;width:724px"><div class="notch"></div><div class="scr"><img id="gImg"></div></div>
+    <div class="phone" id="gPhone" style="left:178px;top:560px;width:724px"><span data-phone="gImg" data-sb=""></span></div>
   </div>
 
   <!-- H · cierre -->
@@ -101,6 +101,7 @@
 <script src="js/data/bbox.js"></script>
 <script src="js/sprites.js"></script>
 <script src="tools/promo/scenery.js"></script>
+<script src="tools/promo/phone.js"></script>
 <script>
 'use strict';
 const Q = new URLSearchParams(location.search), CLIPS = Q.get('clips');
@@ -116,6 +117,8 @@ const SC = { A: [0, 4], B: [4, 8], C: [8, 12.5], D: [12.5, 17.5], E: [17.5, 21.5
 const CUTS = [4, 8, 12.5, 17.5, 21.5, 25.5, 29.5];
 const DUR = 34;
 
+for (const el of document.querySelectorAll('[data-phone]')) el.outerHTML = Phone.inner(`<img id="${el.dataset.phone}">`, el.dataset.sb);
+Phone.fit();
 for (const el of document.querySelectorAll('[data-ico]')) el.src = Icons.url(el.dataset.ico);
 $('#aBall').src = Icons.url('ball'); $('#hBall').src = Icons.url('ball');
 

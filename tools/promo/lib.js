@@ -7,7 +7,7 @@ const FPS = 30;
 
 async function open(opts = {}) {
   const b = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required', '--disable-gpu-vsync'] });
-  const w = opts.w || 390, h = opts.h || 844, mob = opts.mobile !== false;
+  const w = opts.w || +process.env.PVW || 390, h = opts.h || +process.env.PVH || 844, mob = opts.mobile !== false;
   const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: opts.dpr || 2, hasTouch: mob, isMobile: mob, locale: opts.locale || 'es-ES' });
   await ctx.clock.install({ time: new Date('2026-10-12T18:00:00Z') });
   await ctx.clock.pauseAt(new Date('2026-10-12T18:00:01Z'));   // el tiempo solo avanza cuando lo pedimos
@@ -36,6 +36,7 @@ async function startGame(pg, starter) {
 }
 // graba n fotogramas a 30 fps; hook(i) se ejecuta antes de cada uno
 async function rec(pg, dir, n, hook, opts = {}) {
+  if (process.env.MAXF) n = Math.min(n, +process.env.MAXF);   // para sacar solo las primeras (fotos fijas)
   require('fs').mkdirSync(dir, { recursive: true });
   let acc = 0;
   for (let i = 0; i < n; i++) {

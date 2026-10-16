@@ -26,9 +26,16 @@ img, canvas, .px { image-rendering: pixelated; image-rendering: crisp-edges; }
 
 /* móvil con la captura real del juego */
 .phone { position: absolute; border-radius: 86px; background: #070d24; padding: 20px; box-shadow: 0 0 0 5px #2a3f8a, 0 0 0 14px #0a1430, 0 0 0 18px #24398a, 0 40px 90px rgba(0, 0, 0, .65), 0 0 160px rgba(74, 168, 255, .28); }
-.phone .scr { display: block; border-radius: 66px; overflow: hidden; position: relative; background: #0a1430; }
-.phone .scr img { display: block; width: 100%; height: auto; }
-.phone .notch { position: absolute; left: 50%; top: 34px; width: 150px; height: 40px; margin-left: -75px; border-radius: 22px; background: #02050f; z-index: 2; }
+.phone .scr { display: block; border-radius: 66px; overflow: hidden; position: relative; background: var(--sb, #0a1430); aspect-ratio: 393 / 852; }
+/* pantalla de iPhone a escala real: 1em = 1 punto de iOS (font-size = ancho de pantalla / 393, lo pone el JS).
+   Barra de estado de 54 pt con la Dynamic Island (126×37 pt a 11 pt del borde) y el juego debajo, como en la app instalada */
+.phone .scr img { position: absolute; left: 0; top: 54em; display: block; width: 100%; height: auto; }
+.phone .sbar { position: absolute; left: 0; right: 0; top: 0; height: 54em; background: var(--sb, #0a1430); z-index: 2; color: #fff; }
+.phone .sbar .tm { position: absolute; left: 0; width: 7.8em; top: 1.06em; text-align: center; font: 600 17em/1 -apple-system, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; letter-spacing: -.01em; }
+.phone .sbar .ic { position: absolute; right: 26em; top: 21em; display: flex; gap: 6em; align-items: center; }
+.phone .sbar .ic svg { display: block; fill: #fff; }
+.phone .island { position: absolute; left: 50%; top: 11em; width: 126em; height: 37em; margin-left: -63em; border-radius: 19em; background: #000; z-index: 3; }
+.phone .home { position: absolute; left: 50%; bottom: 8em; width: 134em; height: 5em; margin-left: -67em; border-radius: 3em; background: rgba(255, 255, 255, .85); z-index: 3; }
 
 .callout { position: absolute; display: flex; align-items: center; gap: 22px; padding: 22px 34px 24px 26px; font-weight: 700; font-size: 46px; white-space: nowrap; }
 .callout img { width: 72px; height: 72px; }
